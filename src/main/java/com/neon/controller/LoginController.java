@@ -1,19 +1,43 @@
 package com.neon.controller;
 
+import com.neon.dao.UsersDao;
 import com.neon.pojo.Users;
 import com.neon.service.LoginService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/login")
 public class LoginController {
     @Autowired
     LoginService loginService;
+    @Autowired
+    UsersDao usersDao;
     @GetMapping("/first")
     @ResponseBody
-    public int first(@RequestParam String userName, @RequestParam String password){
-        return loginService.login(userName,password);
+    public Map<String, Object> first(@RequestParam String userName, @RequestParam String password){
+        Map<String, Object> result = new HashMap<>();
+        int loginResult = loginService.login(userName, password);
+        result.put("status", loginResult);
+        if (loginResult == 1) {
+            List<Users> users = usersDao.findByUserName(userName);
+            if (!users.isEmpty()) {
+                Users user = users.get(0);
+                // 只返回必要的用户信息
+                Map<String, Object> userInfo = new HashMap<>();
+                userInfo.put("userName", user.getUserName());
+                userInfo.put("role", user.getRole() != null && !user.getRole().isEmpty() ? user.getRole() : "0");
+                userInfo.put("nickname", user.getNickname());
+                userInfo.put("phone", user.getPhone());
+                userInfo.put("email", user.getEmail());
+                userInfo.put("gender", user.getGender());
+                result.put("user", userInfo);
+            }
+        }
+        return result;
     }
 
     @PostMapping("/registered")

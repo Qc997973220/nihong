@@ -139,62 +139,70 @@
     </style>
 </head>
 <body>
-    <nav class="navbar">
-        <div class="container">
-            <div class="logo"><i class="fas fa-cube" style="margin-right: 8px;"></i>NEON霓虹之都</div>
-            <a href="/" class="back-link"><i class="fas fa-arrow-left"></i> 返回首页</a>
-        </div>
-    </nav>
-
+<nav class="navbar">
     <div class="container">
-        <div class="profile-card">
-            <div class="profile-header">
-                <div class="avatar-large" id="avatarLarge">U</div>
-                <div class="profile-title">
-                    <h1 id="usernameDisplay"></h1>
-                    <p>普通会员 · 欢迎回来</p>
-                </div>
-            </div>
-
-            <div class="info-grid">
-                <div class="info-item">
-                    <div class="info-label"><i class="far fa-envelope"></i> 邮箱</div>
-                    <div class="info-value" id="userEmail">未设置</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label"><i class="fas fa-phone-alt"></i> 手机</div>
-                    <div class="info-value" id="userPhone">未绑定</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label"><i class="fas fa-calendar-alt"></i> 注册时间</div>
-                    <div class="info-value" id="registerTime">2026-02-25</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label"><i class="fas fa-tag"></i> 积分</div>
-                    <div class="info-value" id="userPoints">1280</div>
-                </div>
-            </div>
-
-            <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> 退出登录</button>
-        </div>
+        <div class="logo"><i class="fas fa-cube" style="margin-right: 8px;"></i>NEON霓虹之都</div>
+        <a href="/" class="back-link"><i class="fas fa-arrow-left"></i> 返回首页</a>
     </div>
+</nav>
 
-    <script>
-        // 从 localStorage 获取用户名
-        const username = localStorage.getItem('username');
-        if (!username) {
-            // 如果没登录，直接跳回首页
-            window.location.href = '/';
-        } else {
+<div class="container">
+    <div class="profile-card">
+        <div class="profile-header">
+            <div class="avatar-large" id="avatarLarge">U</div>
+            <div class="profile-title">
+                <h1 id="usernameDisplay"></h1>
+                <p>普通会员 · 欢迎回来</p>
+            </div>
+        </div>
+
+        <div class="info-grid">
+            <div class="info-item">
+                <div class="info-label"><i class="far fa-envelope"></i> 邮箱</div>
+                <div class="info-value" id="userEmail">未设置</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label"><i class="fas fa-phone-alt"></i> 手机</div>
+                <div class="info-value" id="userPhone">未绑定</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label"><i class="fas fa-calendar-alt"></i> 注册时间</div>
+                <div class="info-value" id="registerTime">2026-02-25</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label"><i class="fas fa-tag"></i> 积分</div>
+                <div class="info-value" id="userPoints">1280</div>
+            </div>
+        </div>
+
+        <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> 退出登录</button>
+    </div>
+</div>
+
+<script>
+    // 从 localStorage 获取用户信息
+    let username = null;
+    const userInfo = localStorage.getItem('userInfo');
+    if (!userInfo) {
+        // 如果没登录，直接跳回首页
+        window.location.href = '/';
+    } else {
+        try {
+            const parsedUserInfo = JSON.parse(userInfo);
+            username = parsedUserInfo.username;
             document.getElementById('usernameDisplay').innerText = username;
             document.getElementById('avatarLarge').innerText = username.charAt(0).toUpperCase();
-        }
-
-        // 退出登录
-        document.getElementById('logoutBtn').addEventListener('click', function() {
-            localStorage.removeItem('username');
+        } catch (e) {
+            console.error('解析用户信息失败:', e);
             window.location.href = '/';
-        });
-    </script>
+        }
+    }
+
+    // 退出登录
+    document.getElementById('logoutBtn').addEventListener('click', function() {
+        localStorage.removeItem('userInfo');
+        window.location.href = '/';
+    });
+</script>
 </body>
 </html>

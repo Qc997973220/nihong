@@ -32,6 +32,10 @@ public class LoginService {
         }
         if (users.getActivationCode().equals("666668")){
             users.setId(UUID.randomUUID().toString());
+            // 设置默认角色为0（普通用户）
+            if (users.getRole() == null || users.getRole().isEmpty()) {
+                users.setRole("0");
+            }
             usersDao.save(users);
             return 1;
         }else {

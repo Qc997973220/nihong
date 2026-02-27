@@ -14,7 +14,7 @@ public class Users {
     @Id
     String id;                  // 用户ID
     String userName;
-    String Password;
+    String password;
     String nickname;
     String activationCode; //激活码
     String role;                // 用户权限
