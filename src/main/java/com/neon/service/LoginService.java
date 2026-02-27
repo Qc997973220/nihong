@@ -17,7 +17,8 @@ public class LoginService {
         if (users.get(0).getPassword().equals(password)){
             Users usersUpdate = users.get(0);
             usersUpdate.setToken(UUID.randomUUID().toString());
-            usersDao.save(users.get(0));
+            usersUpdate.setLastLoginTime(java.time.LocalDateTime.now());
+            usersDao.save(usersUpdate);
             return 1;
         }else {
             return 0;

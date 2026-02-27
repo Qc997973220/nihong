@@ -30,4 +30,7 @@ public class Users {
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     LocalDateTime operatingTime;// 操作时间
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    LocalDateTime lastLoginTime;// 最近登录时间
 }
