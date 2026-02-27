@@ -27,8 +27,6 @@
         <url/>
     </scm>
     <properties>
-        <project.version>${version}</project.version>
-        <project.name>${name}</project.name>
         <io.vavr.version>0.10.3</io.vavr.version>
     </properties>
     <dependencies>
@@ -83,11 +81,6 @@
             <artifactId>spring-boot-starter-websocket</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>com.github.xingshuangs</groupId>
             <artifactId>iot-communication</artifactId>
             <version>1.4.0</version>
@@ -95,7 +88,7 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.15.3</version> <!-- 最新版即可 -->
+            <version>2.15.3</version>
         </dependency>
 
 
