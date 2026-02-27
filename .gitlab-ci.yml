@@ -1,7 +1,0 @@
-include:
-  - project: 'basic/gitlab-ci-template'
-    ref: main
-    file: '/java/maven/spring/gitlab-ci-jvm-version.yml'
-variables:
-  DOCKER_SERVE: 222.71.182.250:5000
-  IMAGENAME: industry/glue
