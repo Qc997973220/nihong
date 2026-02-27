@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户资料</title>
+    <!-- Font Awesome 6 免费版 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Google Fonts：Inter + Orbitron -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: "Inter", system-ui, -apple-system, sans-serif;
+            background: #0b0e14;
+            color: #eef3fc;
+            line-height: 1.5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow-x: hidden;
+        }
+        #bgCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+            z-index: 0;
+            pointer-events: none;
+        }
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image:
+                    linear-gradient(rgba(120, 180, 255, 0.03) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(120, 180, 255, 0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 24px;
+            width: 100%;
+            flex: 1;
+            position: relative;
+            z-index: 10;
+        }
+        /* 导航栏 */
+        .navbar {
+            background: rgba(10, 17, 28, 0.6);
+            backdrop-filter: blur(20px) saturate(200%);
+            border-bottom: 1px solid rgba(90, 160, 255, 0.2);
+            padding: 14px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .navbar .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+            padding: 0 24px;
+            max-width: 1300px;
+        }
+        .logo {
+            font-size: 1.6rem;
+            font-weight: 450;
+            background: linear-gradient(135deg, #e0efff, #b2d9ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.3px;
+            filter: drop-shadow(0 0 8px #3f8eff);
+            white-space: nowrap;
+        }
+        .back-link {
+            color: #5ba5ff;
+            text-decoration: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.2s, text-shadow 0.2s;
+        }
+        .back-link:hover {
+            color: white;
+            text-shadow: 0 0 8px #4d9eff;
+        }
+        /* 个人资料卡片 */
+        .profile-card {
+            background: rgba(20, 30, 50, 0.5);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 40px;
+            border: 1px solid rgba(90, 160, 255, 0.2);
+            margin-top: 40px;
+        }
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+        .avatar-container {
+            position: relative;
+        }
+        .avatar {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid rgba(90, 160, 255, 0.3);
+            box-shadow: 0 0 20px rgba(90, 160, 255, 0.3);
+        }
+        .avatar-placeholder {
+            width: 150px;
+            height: 150px;
+            background: linear-gradient(145deg, #1e4f9e, #6d3fc9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 3rem;
+            box-shadow: 0 0 20px #3f6eff;
+        }
+        .user-info h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            color: #ffffff;
+            font-weight: 600;
+            text-shadow: 0 0 10px rgba(95, 158, 255, 0.5);
+        }
+        .user-info p {
+            margin: 5px 0;
+            color: #90b0d1;
+            font-size: 1.1rem;
+        }
+        .upload-btn {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 10px 20px;
+            background: rgba(91, 165, 255, 0.2);
+            border: 1px solid rgba(91, 165, 255, 0.5);
+            border-radius: 60px;
+            color: #5ba5ff;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .upload-btn:hover {
+            background: rgba(91, 165, 255, 0.3);
+            border-color: #5ba5ff;
+            box-shadow: 0 0 15px rgba(91, 165, 255, 0.5);
+        }
+        .file-input {
+            display: none;
+        }
+        .info-section {
+            margin-bottom: 30px;
+        }
+        .info-section h2 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(90, 160, 255, 0.2);
+            padding-bottom: 10px;
+            color: #b8dcff;
+        }
+        .info-item {
+            display: flex;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+        .info-label {
+            width: 120px;
+            font-weight: 600;
+            color: #90b0d1;
+        }
+        .info-value {
+            flex: 1;
+            color: #eef3fc;
+            font-size: 1.1rem;
+        }
+        .action-buttons {
+            margin-top: 40px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 60px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 550;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-primary {
+            background: linear-gradient(105deg, #1f4f9e, #2d6fc4);
+            color: white;
+            box-shadow: 0 5px 15px -5px #0a2a5a, 0 0 0 1px #5b9eff inset;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .btn-primary:hover {
+            background: linear-gradient(105deg, #2a5fb0, #3f82da);
+            box-shadow: 0 0 30px #0077ff;
+            transform: scale(1.02);
+        }
+        .btn-secondary {
+            background: rgba(120, 120, 120, 0.3);
+            color: #b0b0b0;
+            border: 1px solid rgba(120, 120, 120, 0.5);
+        }
+        .btn-secondary:hover {
+            background: rgba(150, 150, 150, 0.4);
+            color: white;
+            border-color: #999;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="bgCanvas"></canvas>
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">霓虹资源站</div>
+            <a href="/" class="back-link">
+                <i class="fas fa-arrow-left"></i>
+                返回首页
+            </a>
+        </div>
+    </nav>
+    <div class="container">
+        <div class="profile-card">
+            <div class="profile-header">
+                <div class="avatar-container">
+                    <div id="avatarPlaceholder" class="avatar-placeholder" style="display: none;"></div>
+                    <img id="avatar" class="avatar" style="display: none;" alt="用户头像">
+                </div>
+                <div class="user-info">
+                    <h1 id="nickname">用户名</h1>
+                    <p id="userName">@username</p>
+                    <div id="avatarUploadSection" style="margin-top: 15px; display: none;">
+                        <input type="file" id="fileInput" class="file-input" accept="image/*">
+                        <label for="fileInput" class="upload-btn">
+                            <i class="fas fa-camera"></i>
+                            更换头像
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-section">
+                <h2>基本信息</h2>
+                <div class="info-item">
+                    <div class="info-label">用户名：</div>
+                    <div class="info-value" id="infoUserName"></div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">昵称：</div>
+                    <div class="info-value" id="infoNickname"></div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">性别：</div>
+                    <div class="info-value" id="infoGender"></div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">邮箱：</div>
+                    <div class="info-value" id="infoEmail"></div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">电话：</div>
+                    <div class="info-value" id="infoPhone"></div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">最近登录：</div>
+                    <div class="info-value" id="infoLastLogin"></div>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn btn-primary" id="addFriendBtn">
+                    <i class="fas fa-user-plus"></i>
+                    添加好友
+                </button>
+                <button class="btn btn-secondary" id="sendMessageBtn">
+                    <i class="fas fa-comment"></i>
+                    发送私信
+                </button>
+                <button class="btn btn-secondary" onclick="window.history.back()">
+                    <i class="fas fa-arrow-left"></i>
+                    返回
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 获取主机名
+        function getHost() {
+            return window.location.hostname || '127.0.0.1';
+        }
+
+        // 获取URL参数
+        function getUrlParam(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+
+        // 加载用户信息
+        async function loadUserInfo() {
+            const userName = getUrlParam('userName');
+            if (!userName) {
+                alert('用户不存在');
+                return;
+            }
+
+            try {
+                // 这里应该从后端获取用户信息
+                // 暂时使用模拟数据
+                const response = await fetch(`http://${getHost()}:8060/api/user?userName=${encodeURIComponent(userName)}`);
+                const data = await response.json();
+                
+                if (data.status) {
+                    const user = data.user;
+                    if (user.avatar) {
+                        document.getElementById('avatar').src = user.avatar;
+                        document.getElementById('avatar').style.display = 'block';
+                        document.getElementById('avatarPlaceholder').style.display = 'none';
+                    } else {
+                        document.getElementById('avatarPlaceholder').textContent = user.userName.charAt(0).toUpperCase();
+                        document.getElementById('avatarPlaceholder').style.display = 'flex';
+                        document.getElementById('avatar').style.display = 'none';
+                    }
+                    document.getElementById('nickname').textContent = user.nickname || user.userName;
+                    document.getElementById('userName').textContent = '@' + user.userName;
+                    document.getElementById('infoUserName').textContent = user.userName;
+                    document.getElementById('infoNickname').textContent = user.nickname || user.userName;
+                    document.getElementById('infoGender').textContent = user.gender || '未知';
+                    document.getElementById('infoEmail').textContent = user.email || '未设置';
+                    document.getElementById('infoPhone').textContent = user.phone || '未设置';
+                    document.getElementById('infoLastLogin').textContent = user.lastLoginTime || '未知';
+                    
+                    // 检查是否是当前登录用户
+                    const savedUserInfo = localStorage.getItem('userInfo');
+                    if (savedUserInfo) {
+                        try {
+                            const currentUser = JSON.parse(savedUserInfo);
+                            if (currentUser.username === userName) {
+                                // 显示更换头像按钮
+                                document.getElementById('avatarUploadSection').style.display = 'block';
+                            }
+                        } catch (e) {
+                            console.error('解析用户信息失败:', e);
+                        }
+                    }
+                } else {
+                    alert('用户不存在');
+                }
+            } catch (error) {
+                console.error('加载用户信息失败:', error);
+                alert('加载用户信息失败');
+            }
+        }
+
+        // 上传头像
+        document.getElementById('fileInput').addEventListener('change', async function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('userName', getUrlParam('userName'));
+
+            try {
+                const response = await fetch('/upload/avatar', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                
+                if (data.status) {
+                    document.getElementById('avatar').src = data.avatarUrl;
+                    document.getElementById('avatar').style.display = 'block';
+                    document.getElementById('avatarPlaceholder').style.display = 'none';
+                    alert('头像上传成功');
+                } else {
+                    alert('头像上传失败: ' + data.message);
+                }
+            } catch (error) {
+                console.error('上传头像失败:', error);
+                alert('上传头像失败，请检查网络连接');
+            }
+        });
+
+        // 加载用户信息
+        loadUserInfo();
+
+        // 添加好友按钮点击事件
+        document.getElementById('addFriendBtn').addEventListener('click', function() {
+            const userName = getUrlParam('userName');
+            alert('添加好友功能开发中');
+        });
+
+        // 发送私信按钮点击事件
+        document.getElementById('sendMessageBtn').addEventListener('click', function() {
+            const userName = getUrlParam('userName');
+            alert('发送私信功能开发中');
+        });
+
+        // 背景动画
+        window.onload = function() {
+            const canvas = document.getElementById('bgCanvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const particles = [];
+            const particleCount = 50;
+
+            for (let i = 0; i < particleCount; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    size: Math.random() * 2 + 1,
+                    speedX: Math.random() * 0.5 - 0.25,
+                    speedY: Math.random() * 0.5 - 0.25
+                });
+            }
+
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                for (let i = 0; i < particles.length; i++) {
+                    const p = particles[i];
+
+                    ctx.fillStyle = 'rgba(91, 165, 255, 0.5)';
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    p.x += p.speedX;
+                    p.y += p.speedY;
+
+                    if (p.x > canvas.width) p.x = 0;
+                    if (p.x < 0) p.x = canvas.width;
+                    if (p.y > canvas.height) p.y = 0;
+                    if (p.y < 0) p.y = canvas.height;
+                }
+
+                requestAnimationFrame(animate);
+            }
+
+            animate();
+
+            window.addEventListener('resize', function() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        };
+    </script>
+</body>
+</html>

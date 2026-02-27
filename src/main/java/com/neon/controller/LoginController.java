@@ -35,6 +35,7 @@ public class LoginController {
                 userInfo.put("email", user.getEmail());
                 userInfo.put("gender", user.getGender());
                 userInfo.put("token", user.getToken());
+                userInfo.put("avatar", user.getAvatar());
                 userInfo.put("lastLoginTime", user.getLastLoginTime());
                 result.put("user", userInfo);
             }

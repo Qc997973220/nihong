@@ -1,11 +1,14 @@
 package com.neon.controller;
 
+import com.neon.dao.UsersDao;
 import com.neon.pojo.Comment;
 import com.neon.pojo.Resource;
+import com.neon.pojo.Users;
 import com.neon.service.ResourceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +19,9 @@ import java.util.Map;
 public class ResourceController {
     @Autowired
     private ResourceService resourceService;
+    
+    @Autowired
+    private UsersDao usersDao;
 
     // 获取资源列表（只返回卡片所需字段，也可直接返回完整Resource，前端自行提取）
     @GetMapping("/list")
@@ -33,9 +39,58 @@ public class ResourceController {
             return null;
         }
         List<Comment> comments = resourceService.getCommentsByResourceId(id);
+        
+        // 为每个评论添加用户头像信息
+        List<Map<String, Object>> commentsWithAvatar = new ArrayList<>();
+        for (Comment comment : comments) {
+            Map<String, Object> commentMap = new HashMap<>();
+            commentMap.put("id", comment.getId());
+            commentMap.put("resourceId", comment.getResourceId());
+            commentMap.put("author", comment.getAuthor());
+            commentMap.put("content", comment.getContent());
+            commentMap.put("createdAt", comment.getCreatedAt());
+            commentMap.put("likes", comment.getLikes());
+            commentMap.put("dislikes", comment.getDislikes());
+            commentMap.put("parentId", comment.getParentId());
+            
+            // 获取用户头像
+            List<Users> users = usersDao.findByUserName(comment.getAuthor());
+            if (!users.isEmpty()) {
+                commentMap.put("avatar", users.get(0).getAvatar());
+            } else {
+                commentMap.put("avatar", null);
+            }
+            
+            // 处理回复
+            List<Map<String, Object>> repliesWithAvatar = new ArrayList<>();
+            for (Comment reply : comment.getReplies()) {
+                Map<String, Object> replyMap = new HashMap<>();
+                replyMap.put("id", reply.getId());
+                replyMap.put("resourceId", reply.getResourceId());
+                replyMap.put("author", reply.getAuthor());
+                replyMap.put("content", reply.getContent());
+                replyMap.put("createdAt", reply.getCreatedAt());
+                replyMap.put("likes", reply.getLikes());
+                replyMap.put("dislikes", reply.getDislikes());
+                replyMap.put("parentId", reply.getParentId());
+                
+                // 获取回复用户的头像
+                List<Users> replyUsers = usersDao.findByUserName(reply.getAuthor());
+                if (!replyUsers.isEmpty()) {
+                    replyMap.put("avatar", replyUsers.get(0).getAvatar());
+                } else {
+                    replyMap.put("avatar", null);
+                }
+                
+                repliesWithAvatar.add(replyMap);
+            }
+            commentMap.put("replies", repliesWithAvatar);
+            commentsWithAvatar.add(commentMap);
+        }
+        
         Map<String, Object> result = new HashMap<>();
         result.put("resource", resource);
-        result.put("comments", comments);
+        result.put("comments", commentsWithAvatar);
         return result;
     }
 

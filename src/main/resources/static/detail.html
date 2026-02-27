@@ -679,8 +679,17 @@
 
             return `
                     <div class="comment-item ${isReply ? 'reply-item' : ''}" data-comment-id="${c.id}">
-                        <div class="comment-header">
-                            <span class="comment-author">${escapeHtml(commentAuthor)}</span>
+                        <div class="comment-header" style="display: flex; align-items: center; gap: 10px;">
+                            <a href="profile.html?userName=${encodeURIComponent(commentAuthor)}" style="display: flex; align-items: center; gap: 10px; text-decoration: none;">
+                                ${c.avatar ? `
+                                <img src="${c.avatar}" alt="${escapeHtml(commentAuthor)}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(90, 160, 255, 0.3);">
+                                ` : `
+                                <div style="width: 32px; height: 32px; background: linear-gradient(145deg, #1e4f9e, #6d3fc9); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 500; font-size: 1rem; box-shadow: 0 0 15px #3f6eff;">
+                                    ${commentAuthor.charAt(0).toUpperCase()}
+                                </div>
+                                `}
+                                <span class="comment-author" style="color: #b8dcff; font-weight: 600;">${escapeHtml(commentAuthor)}</span>
+                            </a>
                             <span class="comment-time">${commentDate}</span>
                         </div>
                         <div class="comment-content">${escapeHtml(commentContent)}</div>

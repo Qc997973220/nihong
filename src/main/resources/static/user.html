@@ -149,7 +149,14 @@
 <div class="container">
     <div class="profile-card">
         <div class="profile-header">
-            <div class="avatar-large" id="avatarLarge">U</div>
+            <div style="position: relative;">
+                <div class="avatar-large" id="avatarLarge">U</div>
+                <img id="avatarImage" style="display: none; width: 80px; height: 80px; border-radius: 50%; object-fit: cover; position: absolute; top: 0; left: 0;">
+                <input type="file" id="fileInput" accept="image/*" style="display: none;">
+                <button id="uploadAvatarBtn" style="position: absolute; bottom: 0; right: 0; background: #2563eb; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; font-size: 12px; display: flex; align-items: center; justify-content: center;">
+                    <i class="fas fa-camera"></i>
+                </button>
+            </div>
             <div class="profile-title">
                 <h1 id="usernameDisplay"></h1>
                 <p>普通会员 · 欢迎回来</p>
@@ -182,21 +189,69 @@
 <script>
     // 从 localStorage 获取用户信息
     let username = null;
+    let userData = null;
     const userInfo = localStorage.getItem('userInfo');
     if (!userInfo) {
         // 如果没登录，直接跳回首页
         window.location.href = '/';
     } else {
         try {
-            const parsedUserInfo = JSON.parse(userInfo);
-            username = parsedUserInfo.username;
+            userData = JSON.parse(userInfo);
+            username = userData.username;
             document.getElementById('usernameDisplay').innerText = username;
             document.getElementById('avatarLarge').innerText = username.charAt(0).toUpperCase();
+            
+            // 检查用户是否有头像
+            if (userData.avatar) {
+                document.getElementById('avatarImage').src = userData.avatar;
+                document.getElementById('avatarImage').style.display = 'block';
+                document.getElementById('avatarLarge').style.display = 'none';
+            }
         } catch (e) {
             console.error('解析用户信息失败:', e);
             window.location.href = '/';
         }
     }
+
+    // 上传头像
+    document.getElementById('uploadAvatarBtn').addEventListener('click', function() {
+        document.getElementById('fileInput').click();
+    });
+
+    document.getElementById('fileInput').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('userName', username);
+
+        fetch('/upload/avatar', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status) {
+                // 更新头像显示
+                document.getElementById('avatarImage').src = data.avatarUrl;
+                document.getElementById('avatarImage').style.display = 'block';
+                document.getElementById('avatarLarge').style.display = 'none';
+                
+                // 更新localStorage中的用户信息
+                userData.avatar = data.avatarUrl;
+                localStorage.setItem('userInfo', JSON.stringify(userData));
+                
+                alert('头像上传成功');
+            } else {
+                alert('头像上传失败: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('上传失败:', error);
+            alert('头像上传失败，请检查网络连接');
+        });
+    });
 
     // 退出登录
     document.getElementById('logoutBtn').addEventListener('click', function() {

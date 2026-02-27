@@ -22,6 +22,7 @@ public class Users {
     String email;               // 邮箱
     String gender;              //性别
     String token;              //令牌
+    String avatar;             //头像
     @ElementCollection
     List<String> roleIds;  //角色id列表
 

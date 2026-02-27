@@ -1392,7 +1392,7 @@
             };
 
             // 发送POST请求
-            fetch(`http://${getHost()}:8060/resources/publish`, {
+            fetch(`/resources/publish`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -1421,7 +1421,7 @@
 
         // 加载资源列表
         function loadResources() {
-            fetch(`http://${getHost()}:8060/resources/list`)
+            fetch(`/resources/list`)
                 .then(response => response.json())
                 .then(resources => {
                     const resourceGrid = document.getElementById('resourceGrid');
@@ -1695,7 +1695,8 @@
                 // 存储用户信息到localStorage
                 const userInfo = {
                     username: userName,
-                    role: result.user.role !== undefined && result.user.role !== null ? result.user.role : '0'
+                    role: result.user.role !== undefined && result.user.role !== null ? result.user.role : '0',
+                    avatar: result.user.avatar
                 };
                 localStorage.setItem('userInfo', JSON.stringify(userInfo));
 
@@ -1703,11 +1704,16 @@
                 currentUser = {
                     ...currentUser,
                     username: userName,
-                    role: result.user.role !== undefined && result.user.role !== null ? result.user.role : '0'
+                    role: result.user.role !== undefined && result.user.role !== null ? result.user.role : '0',
+                    avatar: result.user.avatar
                 };
 
                 document.getElementById('displayUsername').innerText = userName;
-                document.getElementById('userAvatar').innerText = userName.charAt(0).toUpperCase();
+                if (result.user.avatar) {
+                    document.getElementById('userAvatar').innerHTML = `<img src="${result.user.avatar}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+                } else {
+                    document.getElementById('userAvatar').innerText = userName.charAt(0).toUpperCase();
+                }
 
                 hideLogin();
 
@@ -1890,7 +1896,11 @@
             try {
                 const userInfo = JSON.parse(savedUserInfo);
                 document.getElementById('displayUsername').innerText = userInfo.username;
-                document.getElementById('userAvatar').innerText = userInfo.username.charAt(0).toUpperCase();
+                if (userInfo.avatar) {
+                    document.getElementById('userAvatar').innerHTML = `<img src="${userInfo.avatar}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+                } else {
+                    document.getElementById('userAvatar').innerText = userInfo.username.charAt(0).toUpperCase();
+                }
             } catch (e) {
                 console.error('解析用户信息失败:', e);
                 document.getElementById('displayUsername').innerText = '未登录';
