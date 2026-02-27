@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>资源详情 · NEON霓虹之都</title>
+    <!-- Font Awesome 6 免费版 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Google Fonts：Inter + Orbitron -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+    <style>
+        /* ========== 全局样式（基于 index.html 调整） ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Inter", system-ui, -apple-system, sans-serif;
+            background: #0b0e14;
+            color: #eef3fc;
+            line-height: 1.5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column; /* 关键修正：改为列方向 */
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        #bgCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: 
+                linear-gradient(rgba(120, 180, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(120, 180, 255, 0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 0 24px;
+            width: 100%;
+        }
+
+        /* 导航栏 */
+        .navbar {
+            background: rgba(10, 17, 28, 0.6);
+            backdrop-filter: blur(20px) saturate(200%);
+            border-bottom: 1px solid rgba(90, 160, 255, 0.2);
+            padding: 14px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .navbar .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .logo {
+            font-size: 1.6rem;
+            font-weight: 450;
+            background: linear-gradient(135deg, #e0efff, #b2d9ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.3px;
+            filter: drop-shadow(0 0 8px #3f8eff);
+            white-space: nowrap;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #c5dcff;
+            font-weight: 430;
+            font-size: 1rem;
+            transition: color 0.2s, text-shadow 0.2s;
+            position: relative;
+            white-space: nowrap;
+        }
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -6px; left: 0;
+            width: 0; height: 2px;
+            background: #5ba5ff;
+            box-shadow: 0 0 15px #0077ff;
+            transition: width 0.2s ease;
+        }
+        .nav-links a:hover {
+            color: white;
+            text-shadow: 0 0 8px #4d9eff;
+        }
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            background: rgba(20, 40, 70, 0.4);
+            backdrop-filter: blur(10px);
+            padding: 6px 20px 6px 12px;
+            border-radius: 60px;
+            border: 1px solid rgba(0, 180, 255, 0.25);
+            transition: 0.2s;
+            white-space: nowrap;
+        }
+        .user-info:hover {
+            background: rgba(30, 60, 110, 0.6);
+            border-color: #4da6ff;
+            box-shadow: 0 0 25px #1e88e5;
+        }
+        .user-avatar {
+            width: 36px; height: 36px;
+            background: linear-gradient(145deg, #1e4f9e, #6d3fc9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 500;
+            font-size: 1rem;
+            box-shadow: 0 0 15px #3f6eff;
+        }
+        .user-name {
+            font-weight: 480;
+            color: #edf5ff;
+        }
+
+        /* 页脚 */
+        .footer {
+            background: rgba(8, 15, 26, 0.7);
+            backdrop-filter: blur(12px);
+            padding: 24px 0;
+            border-top: 1px solid #1e4f8f;
+            text-align: center;
+            color: #90b0d1;
+            font-weight: 350;
+            margin-top: auto; /* 推到底部 */
+        }
+
+        /* ========== 详情页专用样式 ========== */
+        .detail-container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+            width: 100%;
+            flex: 1; /* 占满剩余空间 */
+        }
+        .article-title {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        .article-meta {
+            color: #90b0d1;
+            margin-bottom: 30px;
+            font-size: 0.95rem;
+        }
+        .article-content {
+            background: rgba(20, 30, 50, 0.5);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 30px;
+            border: 1px solid rgba(90, 160, 255, 0.2);
+            line-height: 1.8;
+            font-size: 1.1rem;
+            margin-bottom: 40px;
+        }
+        .comment-section {
+            background: rgba(15, 25, 40, 0.5);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 30px;
+            border: 1px solid rgba(90, 160, 255, 0.2);
+        }
+        .comment-item {
+            border-bottom: 1px solid #2a4f80;
+            padding: 15px 0;
+        }
+        .comment-item:last-child {
+            border-bottom: none;
+        }
+        .comment-author {
+            font-weight: 600;
+            color: #b8dcff;
+        }
+        .comment-time {
+            color: #90b0d1;
+            font-size: 0.85rem;
+            margin-left: 10px;
+        }
+        .comment-content {
+            margin-top: 8px;
+        }
+
+        /* 新增：评论输入区域样式 */
+        .comment-input-area {
+            margin-bottom: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        #commentContent {
+            background: rgba(8, 18, 32, 0.6);
+            border: 1.5px solid rgba(90, 160, 255, 0.25);
+            border-radius: 20px;
+            padding: 12px 18px;
+            color: #e0f0ff;
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+            outline: none;
+            resize: vertical;
+            min-height: 80px;
+        }
+        #commentContent:focus {
+            border-color: #3f9eff;
+            background: rgba(10, 25, 45, 0.8);
+            box-shadow: 0 0 20px #1e88e5;
+        }
+        #submitCommentBtn {
+            background: linear-gradient(105deg, #1f4f9e, #2d6fc4);
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 60px;
+            font-weight: 550;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.2s;
+            align-self: flex-end;
+            box-shadow: 0 5px 15px -5px #0a2a5a, 0 0 0 1px #5b9eff inset;
+        }
+        #submitCommentBtn:hover {
+            background: linear-gradient(105deg, #2a5fb0, #3f82da);
+            box-shadow: 0 0 30px #0077ff;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="bgCanvas"></canvas>
+
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo"><i class="fa-solid fa-cube"></i> NEON 霓虹之都</div>
+            <div class="nav-links">
+                <a href="index.html">首页</a><a href="#">资源</a><a href="#">关于</a>
+            </div>
+            <div class="user-info" id="userInfo">
+                <div class="user-avatar" id="userAvatar">U</div>
+                <span class="user-name" id="displayUsername">加载中...</span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="detail-container">
+        <div id="detailContent">
+            <!-- 动态填充 -->
+            <p style="color:#90b0d1; text-align:center;">加载中...</p>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <p>© 2026 NEON霓虹之都</p>
+        </div>
+    </footer>
+
+    <script>
+        // ========== 工具函数 ==========
+        function getHost() {
+            return window.location.hostname || '127.0.0.1';
+        }
+
+        // ========== 获取 URL 参数 ==========
+        const urlParams = new URLSearchParams(window.location.search);
+        const id = urlParams.get('id');
+        if (!id) {
+            window.location.href = 'index.html';
+        }
+
+        // ========== 用户信息 ==========
+        const savedUsername = localStorage.getItem('username');
+        if (savedUsername) {
+            document.getElementById('displayUsername').innerText = savedUsername;
+            document.getElementById('userAvatar').innerText = savedUsername.charAt(0).toUpperCase();
+        } else {
+            document.getElementById('displayUsername').innerText = '未登录';
+            document.getElementById('userAvatar').innerText = 'U';
+        }
+
+        document.getElementById('userInfo').addEventListener('click', function() {
+            if (savedUsername) {
+                window.location.href = 'user.html'; // 如果有个人中心
+            } else {
+                alert('请先登录');
+                window.location.href = 'index.html';
+            }
+        });
+
+        // ========== 获取详情 ==========
+        async function fetchDetail() {
+            const detailDiv = document.getElementById('detailContent');
+            try {
+                const response = await fetch(`http://${getHost()}:8060/resources/${id}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error ${response.status}`);
+                }
+                const data = await response.json();
+                console.log('后端返回数据:', data);
+                renderDetail(data);
+            } catch (error) {
+                console.error('获取详情失败:', error);
+                detailDiv.innerHTML = '<p style="color:#ff8a8a; text-align:center;">加载失败，请稍后重试</p>';
+            }
+        }
+
+        function renderDetail(data) {
+            console.log('renderDetail 接收到的数据:', data);
+
+            // 提取 resource 和 comments
+            let resource;
+            let comments = [];
+            if (data && data.resource) {
+                resource = data.resource;
+                comments = data.comments || [];
+            } else {
+                resource = data;
+                if (data && data.comments) comments = data.comments;
+            }
+
+            if (!resource) {
+                document.getElementById('detailContent').innerHTML = '<p style="color:#ff8a8a;">数据格式错误：缺少 resource</p>';
+                return;
+            }
+
+            // 安全提取字段
+            const title = resource.title || '无标题';
+            const author = resource.author || '匿名';
+            const category = resource.category || '未分类';
+            const createdAt = resource.createdAt;
+            const content = resource.content || '';
+
+            // 安全格式化日期
+            let createdDate = '未知';
+            if (createdAt) {
+                try {
+                    const date = new Date(createdAt);
+                    if (!isNaN(date.getTime())) {
+                        createdDate = date.toLocaleString('zh-CN');
+                    } else {
+                        createdDate = String(createdAt);
+                    }
+                } catch (e) {
+                    createdDate = String(createdAt);
+                }
+            }
+
+            console.log('渲染字段:', { title, author, category, createdDate, contentLength: content.length });
+
+            // 构建 HTML（包含评论输入框）
+            let html = `
+                <h1 class="article-title">${escapeHtml(title)}</h1>
+                <div class="article-meta">
+                    <span>作者：${escapeHtml(author)}</span> · 
+                    <span>发布于：${createdDate}</span> · 
+                    <span>分类：${escapeHtml(category)}</span>
+                </div>
+                <div class="article-content">
+                    ${content ? escapeHtml(content).replace(/\n/g, '<br>') : '暂无内容'}
+                </div>
+                <div class="comment-section">
+                    <h3 style="margin-bottom:20px;">评论 (${comments.length})</h3>
+                    <!-- 新增评论输入区域 -->
+                    <div class="comment-input-area">
+                        <textarea id="commentContent" placeholder="写下你的评论..."></textarea>
+                        <button id="submitCommentBtn">发表评论</button>
+                    </div>
+                    <div id="commentList">
+                        ${comments.map(c => {
+                            const commentAuthor = c.author || '匿名';
+                            const commentContent = c.content || '';
+                            let commentDate = '未知';
+                            if (c.createdAt) {
+                                try {
+                                    const d = new Date(c.createdAt);
+                                    if (!isNaN(d.getTime())) commentDate = d.toLocaleString('zh-CN');
+                                    else commentDate = String(c.createdAt);
+                                } catch (e) {
+                                    commentDate = String(c.createdAt);
+                                }
+                            }
+                            return `
+                                <div class="comment-item">
+                                    <span class="comment-author">${escapeHtml(commentAuthor)}</span>
+                                    <span class="comment-time">${commentDate}</span>
+                                    <div class="comment-content">${escapeHtml(commentContent)}</div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+            document.getElementById('detailContent').innerHTML = html;
+            console.log('渲染完成');
+
+            // 绑定评论提交事件
+            bindCommentSubmit();
+        }
+
+        function bindCommentSubmit() {
+            const submitBtn = document.getElementById('submitCommentBtn');
+            if (submitBtn) {
+                // 移除之前可能绑定的监听器，避免重复（简单起见，每次重新绑定）
+                submitBtn.replaceWith(submitBtn.cloneNode(true)); // 清除旧事件
+                const newBtn = document.getElementById('submitCommentBtn');
+                newBtn.addEventListener('click', submitComment);
+            }
+        }
+
+        async function submitComment() {
+            // 检查登录
+            if (!savedUsername) {
+                alert('请先登录后再评论');
+                return;
+            }
+
+            const contentInput = document.getElementById('commentContent');
+            const content = contentInput.value.trim();
+            if (!content) {
+                alert('评论内容不能为空');
+                return;
+            }
+
+            // 准备请求数据
+            const commentData = {
+                resourceId: parseInt(id),          // 资源ID
+                author: savedUsername,              // 作者用户名
+                content: content
+            };
+
+            try {
+                const response = await fetch(`http://${getHost()}:8060/comments`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(commentData)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error ${response.status}`);
+                }
+
+                const result = await response.text(); // 假设后端返回成功消息或状态
+                console.log('评论提交成功:', result);
+
+                // 清空输入框
+                contentInput.value = '';
+
+                // 刷新详情以显示新评论
+                await fetchDetail();
+
+            } catch (error) {
+                console.error('提交评论失败:', error);
+                alert('评论失败，大喊3声老崔KNM后重试');
+            }
+        }
+
+        function escapeHtml(unsafe) {
+            if (!unsafe) return unsafe;
+            return unsafe
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        fetchDetail();
+
+        // ========== 背景 canvas ==========
+        const canvas = document.getElementById('bgCanvas');
+        const ctx = canvas.getContext('2d');
+        let mouseX = -1000, mouseY = -1000;
+        let width, height;
+
+        function resizeCanvas() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        const particles = [];
+        for (let i = 0; i < 70; i++) {
+            particles.push({
+                x: Math.random() * width,
+                y: Math.random() * height,
+                vx: (Math.random() - 0.5) * 0.2,
+                vy: (Math.random() - 0.5) * 0.2,
+                size: Math.random() * 2 + 1,
+            });
+        }
+
+        function draw() {
+            if (!ctx) return;
+            ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = '#0b0e14';
+            ctx.fillRect(0, 0, width, height);
+            ctx.shadowColor = '#5f9eff';
+            ctx.shadowBlur = 12;
+            particles.forEach(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+                if (p.x < 0) p.x = width;
+                if (p.x > width) p.x = 0;
+                if (p.y < 0) p.y = height;
+                if (p.y > height) p.y = 0;
+
+                let dist = Math.hypot(mouseX - p.x, mouseY - p.y);
+                let brightness = 0.3;
+                if (dist < 200) brightness = 0.9 - dist / 400;
+                brightness = Math.min(0.8, Math.max(0.2, brightness));
+
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size * brightness * 1.5, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(180, 220, 255, ${brightness})`;
+                ctx.fill();
+            });
+
+            let gradient = ctx.createRadialGradient(mouseX, mouseY, 20, mouseX, mouseY, 400);
+            gradient.addColorStop(0, 'rgba(100, 180, 255, 0.15)');
+            gradient.addColorStop(0.6, 'rgba(40, 100, 200, 0.02)');
+            gradient.addColorStop(1, 'transparent');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, width, height);
+
+            ctx.fillStyle = 'rgba(255,255,255,0.01)';
+            ctx.fillRect(0, 0, width, height);
+
+            requestAnimationFrame(draw);
+        }
+        draw();
+
+        document.addEventListener('mouseleave', () => {
+            mouseX = -1000; mouseY = -1000;
+        });
+    </script>
+</body>
+</html>
