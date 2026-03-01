@@ -1,11 +1,15 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>个人中心 · NEON 霓虹之都</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <!-- Font Awesome 6 免费版 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Google Fonts：Inter + Orbitron -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -13,178 +17,291 @@
             box-sizing: border-box;
         }
         body {
-            font-family: 'Inter', sans-serif;
-            background: #f9fafc;
-            color: #1e293b;
+            font-family: "Inter", system-ui, -apple-system, sans-serif;
+            background: #0b0e14;
+            color: #eef3fc;
             line-height: 1.5;
             min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow-x: hidden;
+        }
+        #bgCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+            z-index: 0;
+            pointer-events: none;
+        }
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image:
+                    linear-gradient(rgba(120, 180, 255, 0.03) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(120, 180, 255, 0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            pointer-events: none;
+            z-index: 1;
         }
         .container {
             max-width: 800px;
             margin: 0 auto;
             padding: 40px 24px;
+            width: 100%;
+            flex: 1;
+            position: relative;
+            z-index: 10;
         }
-        /* 导航栏（简化版） */
+        /* 导航栏 */
         .navbar {
-            background: white;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
-            padding: 16px 0;
+            background: rgba(10, 17, 28, 0.6);
+            backdrop-filter: blur(20px) saturate(200%);
+            border-bottom: 1px solid rgba(90, 160, 255, 0.2);
+            padding: 14px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
         .navbar .container {
             display: flex;
             align-items: center;
             justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
             padding: 0 24px;
-            max-width: 1200px;
+            max-width: 1300px;
         }
         .logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            font-size: 1.6rem;
+            font-weight: 450;
+            background: linear-gradient(135deg, #e0efff, #b2d9ff);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            letter-spacing: -0.5px;
+            letter-spacing: -0.3px;
+            filter: drop-shadow(0 0 8px #3f8eff);
+            white-space: nowrap;
         }
         .back-link {
-            color: #2563eb;
+            color: #5ba5ff;
             text-decoration: none;
             font-weight: 500;
             display: flex;
             align-items: center;
             gap: 6px;
+            transition: color 0.2s, text-shadow 0.2s;
         }
         .back-link:hover {
-            text-decoration: underline;
+            color: white;
+            text-shadow: 0 0 8px #4d9eff;
         }
-        /* 个人中心卡片 */
+        /* 个人资料卡片 */
         .profile-card {
-            background: white;
-            border-radius: 32px;
+            background: rgba(20, 30, 50, 0.5);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
             padding: 40px;
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.15);
-            border: 1px solid #edf2f7;
+            border: 1px solid rgba(90, 160, 255, 0.2);
             margin-top: 40px;
         }
         .profile-header {
             display: flex;
             align-items: center;
-            gap: 24px;
-            margin-bottom: 32px;
+            gap: 30px;
+            margin-bottom: 40px;
             flex-wrap: wrap;
         }
-        .avatar-large {
-            width: 80px;
-            height: 80px;
-            background: #2563eb;
+        .avatar-container {
+            position: relative;
+        }
+        .avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid rgba(90, 160, 255, 0.3);
+            box-shadow: 0 0 20px rgba(90, 160, 255, 0.3);
+        }
+        .avatar-placeholder {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(145deg, #1e4f9e, #6d3fc9);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
             font-weight: 700;
-            font-size: 2rem;
+            font-size: 2.5rem;
+            box-shadow: 0 0 20px #3f6eff;
         }
-        .profile-title h1 {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #1e293b;
-            margin-bottom: 4px;
+        .user-info h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            color: #ffffff;
+            font-weight: 600;
+            text-shadow: 0 0 10px rgba(95, 158, 255, 0.5);
         }
-        .profile-title p {
-            color: #64748b;
+        .user-info p {
+            margin: 5px 0;
+            color: #90b0d1;
+            font-size: 1.1rem;
         }
-        .info-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 24px;
-            margin-top: 32px;
+        .upload-btn {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 10px 20px;
+            background: rgba(91, 165, 255, 0.2);
+            border: 1px solid rgba(91, 165, 255, 0.5);
+            border-radius: 60px;
+            color: #5ba5ff;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .upload-btn:hover {
+            background: rgba(91, 165, 255, 0.3);
+            border-color: #5ba5ff;
+            box-shadow: 0 0 15px rgba(91, 165, 255, 0.5);
+        }
+        .file-input {
+            display: none;
+        }
+        .info-section {
+            margin-bottom: 30px;
+        }
+        .info-section h2 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(90, 160, 255, 0.2);
+            padding-bottom: 10px;
+            color: #b8dcff;
         }
         .info-item {
-            background: #f8fafc;
-            border-radius: 20px;
-            padding: 20px;
-            border: 1px solid #eef2f6;
+            display: flex;
+            margin-bottom: 15px;
+            align-items: center;
         }
         .info-label {
-            color: #64748b;
-            font-size: 0.9rem;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
+            width: 120px;
+            font-weight: 600;
+            color: #90b0d1;
         }
         .info-value {
-            font-size: 1.2rem;
-            font-weight: 600;
-            color: #1e293b;
+            flex: 1;
+            color: #eef3fc;
+            font-size: 1.1rem;
         }
-        .logout-btn {
+        .action-buttons {
             margin-top: 40px;
-            background: #ef4444;
-            color: white;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            padding: 12px 24px;
             border: none;
-            padding: 14px 28px;
             border-radius: 60px;
-            font-weight: 600;
-            font-size: 1rem;
             cursor: pointer;
-            transition: background 0.2s;
-            display: inline-flex;
+            font-size: 1rem;
+            font-weight: 550;
+            transition: all 0.2s;
+            display: flex;
             align-items: center;
             gap: 8px;
         }
-        .logout-btn:hover {
-            background: #dc2626;
+        .btn-primary {
+            background: linear-gradient(105deg, #1f4f9e, #2d6fc4);
+            color: white;
+            box-shadow: 0 5px 15px -5px #0a2a5a, 0 0 0 1px #5b9eff inset;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .btn-primary:hover {
+            background: linear-gradient(105deg, #2a5fb0, #3f82da);
+            box-shadow: 0 0 30px #0077ff;
+            transform: scale(1.02);
+        }
+        .btn-secondary {
+            background: rgba(120, 120, 120, 0.3);
+            color: #b0b0b0;
+            border: 1px solid rgba(120, 120, 120, 0.5);
+        }
+        .btn-secondary:hover {
+            background: rgba(150, 150, 150, 0.4);
+            color: white;
+            border-color: #999;
         }
     </style>
 </head>
 <body>
-<nav class="navbar">
+    <canvas id="bgCanvas"></canvas>
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">霓虹资源站</div>
+            <a href="/" class="back-link">
+                <i class="fas fa-arrow-left"></i>
+                返回首页
+            </a>
+        </div>
+    </nav>
     <div class="container">
-        <div class="logo"><i class="fas fa-cube" style="margin-right: 8px;"></i>NEON霓虹之都</div>
-        <a href="/" class="back-link"><i class="fas fa-arrow-left"></i> 返回首页</a>
-    </div>
-</nav>
+        <div class="profile-card">
+            <div class="profile-header">
+                <div class="user-info">
+                    <div style="display: flex; align-items: center; gap: 16px;">
+                        <div class="avatar-container" style="width: 40px; height: 40px;">
+                            <div id="avatarPlaceholder" class="avatar-placeholder" style="width: 40px; height: 40px; font-size: 1.5rem; display: block;"></div>
+                            <img id="avatar" class="avatar" style="width: 40px; height: 40px; display: none; position: absolute; top: 0; left: 0;" alt="用户头像">
+                            <input type="file" id="fileInput" class="file-input" accept="image/*">
+                            <label for="fileInput" style="position: absolute; top: 0; left: 0; width: 40px; height: 40px; border-radius: 50%; opacity: 0; cursor: pointer; z-index: 10;"></label>
+                        </div>
+                        <h1 id="nickname" style="margin: 0; font-size: 1.8rem;">用户名</h1>
+                    </div>
+                    <p>普通会员 · 欢迎回来</p>
+                </div>
+            </div>
 
-<div class="container">
-    <div class="profile-card">
-        <div class="profile-header">
-            <div style="position: relative;">
-                <div class="avatar-large" id="avatarLarge">U</div>
-                <img id="avatarImage" style="display: none; width: 80px; height: 80px; border-radius: 50%; object-fit: cover; position: absolute; top: 0; left: 0;">
-                <input type="file" id="fileInput" accept="image/*" style="display: none;">
-                <button id="uploadAvatarBtn" style="position: absolute; bottom: 0; right: 0; background: #2563eb; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; font-size: 12px; display: flex; align-items: center; justify-content: center;">
-                    <i class="fas fa-camera"></i>
+            <div class="info-section">
+                <h2>基本信息</h2>
+                <div class="info-item">
+                    <div class="info-label">用户名：</div>
+                    <div class="info-value" id="infoUserName"></div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">昵称：</div>
+                    <div class="info-value" id="infoNickname"></div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">邮箱：</div>
+                    <div class="info-value" id="userEmail">未设置</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">电话：</div>
+                    <div class="info-value" id="userPhone">未绑定</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">注册时间：</div>
+                    <div class="info-value" id="registerTime">2026-02-25</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">积分：</div>
+                    <div class="info-value" id="userPoints">1280</div>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn btn-secondary" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    退出登录
                 </button>
             </div>
-            <div class="profile-title">
-                <h1 id="usernameDisplay"></h1>
-                <p>普通会员 · 欢迎回来</p>
-            </div>
         </div>
-
-        <div class="info-grid">
-            <div class="info-item">
-                <div class="info-label"><i class="far fa-envelope"></i> 邮箱</div>
-                <div class="info-value" id="userEmail">未设置</div>
-            </div>
-            <div class="info-item">
-                <div class="info-label"><i class="fas fa-phone-alt"></i> 手机</div>
-                <div class="info-value" id="userPhone">未绑定</div>
-            </div>
-            <div class="info-item">
-                <div class="info-label"><i class="fas fa-calendar-alt"></i> 注册时间</div>
-                <div class="info-value" id="registerTime">2026-02-25</div>
-            </div>
-            <div class="info-item">
-                <div class="info-label"><i class="fas fa-tag"></i> 积分</div>
-                <div class="info-value" id="userPoints">1280</div>
-            </div>
-        </div>
-
-        <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> 退出登录</button>
     </div>
-</div>
 
 <script>
     // 从 localStorage 获取用户信息
@@ -198,14 +315,16 @@
         try {
             userData = JSON.parse(userInfo);
             username = userData.username;
-            document.getElementById('usernameDisplay').innerText = username;
-            document.getElementById('avatarLarge').innerText = username.charAt(0).toUpperCase();
+            document.getElementById('nickname').innerText = username;
+            document.getElementById('infoUserName').innerText = username;
+            document.getElementById('infoNickname').innerText = username;
+            document.getElementById('avatarPlaceholder').innerText = username.charAt(0).toUpperCase();
             
             // 检查用户是否有头像
             if (userData.avatar) {
-                document.getElementById('avatarImage').src = userData.avatar;
-                document.getElementById('avatarImage').style.display = 'block';
-                document.getElementById('avatarLarge').style.display = 'none';
+                document.getElementById('avatar').src = userData.avatar;
+                document.getElementById('avatar').style.display = 'block';
+                document.getElementById('avatarPlaceholder').style.display = 'none';
             }
         } catch (e) {
             console.error('解析用户信息失败:', e);
@@ -214,10 +333,6 @@
     }
 
     // 上传头像
-    document.getElementById('uploadAvatarBtn').addEventListener('click', function() {
-        document.getElementById('fileInput').click();
-    });
-
     document.getElementById('fileInput').addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (!file) return;
@@ -234,9 +349,9 @@
         .then(data => {
             if (data.status) {
                 // 更新头像显示
-                document.getElementById('avatarImage').src = data.avatarUrl;
-                document.getElementById('avatarImage').style.display = 'block';
-                document.getElementById('avatarLarge').style.display = 'none';
+                document.getElementById('avatar').src = data.avatarUrl;
+                document.getElementById('avatar').style.display = 'block';
+                document.getElementById('avatarPlaceholder').style.display = 'none';
                 
                 // 更新localStorage中的用户信息
                 userData.avatar = data.avatarUrl;

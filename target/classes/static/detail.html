@@ -419,6 +419,19 @@
             <div class="user-avatar" id="userAvatar">U</div>
             <span class="user-name" id="displayUsername">加载中...</span>
         </div>
+        <div class="notification-container" id="notificationContainer">
+            <div class="notification-icon" id="notificationIcon" style="position: relative; cursor: pointer; margin-left: 16px;">
+                <i class="fa-solid fa-bell" style="font-size: 1.2rem; color: #c5dcff;"></i>
+                <span class="notification-badge" id="notificationBadge" style="position: absolute; top: -8px; right: -8px; background: #ff4757; color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; visibility: hidden;">0</span>
+                <div class="notification-dropdown" id="notificationDropdown" style="position: absolute; top: 100%; right: 0; margin-top: 8px; width: 300px; background: rgba(20, 30, 50, 0.95); backdrop-filter: blur(10px); border-radius: 12px; border: 1px solid rgba(90, 160, 255, 0.2); box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3); z-index: 1000; display: none;">
+                    <div class="notification-header" style="padding: 12px 16px; border-bottom: 1px solid rgba(90, 160, 255, 0.2); font-weight: 600; color: #b8dcff;">消息通知</div>
+                    <div class="notification-list" id="notificationList" style="max-height: 300px; overflow-y: auto; padding: 8px 0;"></div>
+                    <div class="notification-footer" style="padding: 12px 16px; border-top: 1px solid rgba(90, 160, 255, 0.2); text-align: right;">
+                        <button class="mark-all-read" id="markAllReadBtn" style="background: rgba(91, 165, 255, 0.2); border: 1px solid rgba(91, 165, 255, 0.5); border-radius: 60px; color: #5ba5ff; padding: 4px 16px; font-size: 0.9rem; cursor: pointer; transition: all 0.2s;">全部标记为已读</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </nav>
 
@@ -524,7 +537,14 @@
             const userInfo = JSON.parse(savedUserInfo);
             savedUsername = userInfo.username;
             document.getElementById('displayUsername').innerText = userInfo.username;
-            document.getElementById('userAvatar').innerText = userInfo.username.charAt(0).toUpperCase();
+            if (userInfo.avatar) {
+                document.getElementById('userAvatar').innerHTML = `<img src="${userInfo.avatar}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+            } else {
+                document.getElementById('userAvatar').innerText = userInfo.username.charAt(0).toUpperCase();
+            }
+            
+            // 获取未读消息数量
+            getUnreadMessageCount(savedUsername);
         } catch (e) {
             console.error('解析用户信息失败:', e);
             document.getElementById('displayUsername').innerText = '未登录';
@@ -534,6 +554,142 @@
         document.getElementById('displayUsername').innerText = '未登录';
         document.getElementById('userAvatar').innerText = 'U';
     }
+    
+    // 获取未读消息数量
+    async function getUnreadMessageCount(username) {
+        try {
+            const response = await fetch(`http://${getHost()}:8060/messages/unread/count/${username}`);
+            if (response.ok) {
+                const result = await response.json();
+                if (result.success) {
+                    const count = result.count || 0;
+                    const badge = document.getElementById('notificationBadge');
+                    if (count > 0) {
+                        badge.innerText = count;
+                        badge.style.visibility = 'visible';
+                    } else {
+                        badge.style.visibility = 'hidden';
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('获取未读消息数量失败:', error);
+        }
+    }
+    
+    // 获取未读消息列表
+    async function getUnreadMessages(username) {
+        try {
+            const response = await fetch(`http://${getHost()}:8060/messages/unread/${username}`);
+            if (response.ok) {
+                const result = await response.json();
+                if (result.success) {
+                    const messages = result.messages || [];
+                    const notificationList = document.getElementById('notificationList');
+                    notificationList.innerHTML = '';
+                    
+                    if (messages.length === 0) {
+                        notificationList.innerHTML = '<div style="padding: 16px; text-align: center; color: #90b0d1;">暂无未读消息</div>';
+                    } else {
+                        messages.forEach(message => {
+                            const messageItem = document.createElement('div');
+                            messageItem.style.padding = '12px 16px';
+                            messageItem.style.borderBottom = '1px solid rgba(90, 160, 255, 0.1)';
+                            messageItem.style.cursor = 'pointer';
+                            messageItem.style.transition = 'background 0.2s';
+                            messageItem.style.position = 'relative';
+                            messageItem.innerHTML = `
+                                <div style="font-size: 0.95rem; color: #eef3fc; margin-bottom: 4px;">${message.content}</div>
+                                <div style="font-size: 0.8rem; color: #90b0d1;">${message.createdAt}</div>
+                                <div style="position: absolute; top: 12px; right: 12px; width: 8px; height: 8px; background: #ff4757; border-radius: 50%;"></div>
+                            `;
+                            
+                            messageItem.addEventListener('click', async () => {
+                                // 先标记消息为已读
+                                await markMessageAsRead(message.id);
+                                
+                                // 从通知列表中移除该消息
+                                messageItem.remove();
+                                
+                                // 检查通知列表是否为空
+                                const notificationList = document.getElementById('notificationList');
+                                if (notificationList.children.length === 0) {
+                                    notificationList.innerHTML = '<div style="padding: 16px; text-align: center; color: #90b0d1;">暂无未读消息</div>';
+                                }
+                                
+                                // 如果是评论回复类型的消息，跳转到相关资源详情页
+                                if (message.type === 'comment_reply' && message.resourceId) {
+                                    window.location.href = `detail.html?id=${message.resourceId}`;
+                                }
+                            });
+                            
+                            notificationList.appendChild(messageItem);
+                        });
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('获取未读消息列表失败:', error);
+        }
+    }
+    
+    // 标记消息为已读
+    async function markMessageAsRead(messageId) {
+        try {
+            const response = await fetch(`http://${getHost()}:8060/messages/read/${messageId}`, {
+                method: 'POST'
+            });
+            if (response.ok) {
+                // 重新获取未读消息数量
+                if (savedUsername) {
+                    getUnreadMessageCount(savedUsername);
+                }
+            }
+        } catch (error) {
+            console.error('标记消息为已读失败:', error);
+        }
+    }
+    
+    // 绑定消息图标点击事件
+    document.getElementById('notificationIcon').addEventListener('click', function() {
+        const dropdown = document.getElementById('notificationDropdown');
+        if (dropdown.style.display === 'none' || dropdown.style.display === '') {
+            dropdown.style.display = 'block';
+            // 获取未读消息列表
+            if (savedUsername) {
+                getUnreadMessages(savedUsername);
+            }
+        } else {
+            dropdown.style.display = 'none';
+        }
+    });
+    
+    // 点击其他地方关闭消息下拉菜单
+    document.addEventListener('click', function(event) {
+        const notificationIcon = document.getElementById('notificationIcon');
+        const dropdown = document.getElementById('notificationDropdown');
+        if (!notificationIcon.contains(event.target) && dropdown.style.display === 'block') {
+            dropdown.style.display = 'none';
+        }
+    });
+    
+    // 绑定全部标记为已读按钮点击事件
+    document.getElementById('markAllReadBtn').addEventListener('click', function() {
+        // 获取所有未读消息并标记为已读
+        if (savedUsername) {
+            getUnreadMessages(savedUsername).then(() => {
+                const messageItems = document.querySelectorAll('#notificationList > div');
+                messageItems.forEach(item => {
+                    if (item.querySelector('div:last-child')) {
+                        item.querySelector('div:last-child').style.display = 'none';
+                        item.style.background = 'rgba(90, 160, 255, 0.1)';
+                    }
+                });
+                // 重新获取未读消息数量
+                getUnreadMessageCount(savedUsername);
+            });
+        }
+    });
 
     document.getElementById('userInfo').addEventListener('click', function() {
         if (savedUsername) {

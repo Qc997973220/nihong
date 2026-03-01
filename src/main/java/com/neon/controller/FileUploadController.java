@@ -41,7 +41,8 @@ public class FileUploadController {
             String fileName = UUID.randomUUID().toString() + suffix;
 
             // 确定文件存储路径
-            String uploadDir = "src/main/resources/static/avatars/";
+            // 使用绝对路径，确保在任何环境下都能正确存储文件
+            String uploadDir = System.getProperty("user.dir") + "/src/main/resources/static/avatars/";
             File dir = new File(uploadDir);
             if (!dir.exists()) {
                 dir.mkdirs();

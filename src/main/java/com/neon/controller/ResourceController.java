@@ -1,13 +1,16 @@
 package com.neon.controller;
 
-import com.neon.dao.UsersDao;
 import com.neon.pojo.Comment;
+import com.neon.pojo.Message;
 import com.neon.pojo.Resource;
 import com.neon.pojo.Users;
 import com.neon.service.ResourceService;
+import com.neon.dao.MessageDao;
+import com.neon.dao.UsersDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -22,6 +25,9 @@ public class ResourceController {
     
     @Autowired
     private UsersDao usersDao;
+    
+    @Autowired
+    private MessageDao messageDao;
 
     // 获取资源列表（只返回卡片所需字段，也可直接返回完整Resource，前端自行提取）
     @GetMapping("/list")
@@ -122,6 +128,23 @@ public class ResourceController {
             result.put("success", true);
             result.put("message", "评论发表成功");
             result.put("comment", savedComment);
+            
+            // 处理评论回复的消息通知
+            if (comment.getParentId() != null && comment.getParentId() > 0) {
+                // 查找父评论
+                Comment parentComment = resourceService.getCommentById(comment.getParentId());
+                if (parentComment != null && parentComment.getAuthor() != null && !parentComment.getAuthor().equals(comment.getAuthor())) {
+                    // 创建消息通知
+                    Message message = new Message();
+                    message.setUserId(parentComment.getAuthor());
+                    message.setContent(comment.getAuthor() + " 回复了你的评论：" + comment.getContent());
+                    message.setType("comment_reply");
+                    message.setRelatedId(comment.getId());
+                    message.setIsRead(false);
+                    message.setCreatedAt(LocalDateTime.now());
+                    messageDao.save(message);
+                }
+            }
         } catch (Exception e) {
             result.put("success", false);
             result.put("message", "评论发表失败：" + e.getMessage());

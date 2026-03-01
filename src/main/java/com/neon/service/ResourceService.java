@@ -106,4 +106,9 @@ public class ResourceService {
     public Long getCommentLikes(Long commentId) {
         return userActionRepository.countLikesByCommentId(commentId);
     }
+    
+    // 根据评论ID查找评论
+    public Comment getCommentById(Long commentId) {
+        return commentRepository.findById(commentId).orElse(null);
+    }
 }
