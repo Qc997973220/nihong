@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +37,16 @@ public class UserProfileController {
                 userInfo.put("gender", user.getGender());
                 userInfo.put("email", user.getEmail());
                 userInfo.put("phone", user.getPhone());
-                userInfo.put("avatar", user.getAvatar());
+                
+                // 将头像转换为Base64编码
+                if (user.getAvatar() != null) {
+                    String base64Avatar = Base64.getEncoder().encodeToString(user.getAvatar());
+                    String avatarUrl = "data:image/jpeg;base64," + base64Avatar;
+                    userInfo.put("avatar", avatarUrl);
+                } else {
+                    userInfo.put("avatar", null);
+                }
+                
                 userInfo.put("lastLoginTime", user.getLastLoginTime());
 
                 result.put("status", true);
@@ -54,7 +64,16 @@ public class UserProfileController {
                     userInfo.put("gender", user.getGender());
                     userInfo.put("email", user.getEmail());
                     userInfo.put("phone", user.getPhone());
-                    userInfo.put("avatar", user.getAvatar());
+                    
+                    // 将头像转换为Base64编码
+                    if (user.getAvatar() != null) {
+                        String base64Avatar = Base64.getEncoder().encodeToString(user.getAvatar());
+                        String avatarUrl = "data:image/jpeg;base64," + base64Avatar;
+                        userInfo.put("avatar", avatarUrl);
+                    } else {
+                        userInfo.put("avatar", null);
+                    }
+                    
                     userInfo.put("lastLoginTime", user.getLastLoginTime());
 
                     result.put("status", true);

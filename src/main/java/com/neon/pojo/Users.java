@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.Column;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -22,7 +23,8 @@ public class Users {
     String email;               // 邮箱
     String gender;              //性别
     String token;              //令牌
-    String avatar;             //头像
+    @Column(columnDefinition = "LONGBLOB")
+    byte[] avatar;             //头像
     @ElementCollection
     List<String> roleIds;  //角色id列表
 
