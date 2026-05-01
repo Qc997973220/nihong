@@ -45,67 +45,76 @@ public class ResourceController {
     @GetMapping("/{id}")
     @ResponseBody
     public Map<String, Object> detail(@PathVariable Long id) {
-        Resource resource = resourceService.getResourceDetail(id);
-        if (resource == null) {
-            return null;
-        }
-        List<Comment> comments = resourceService.getCommentsByResourceId(id);
-        
-        // 为每个评论添加用户头像信息
-        List<Map<String, Object>> commentsWithAvatar = new ArrayList<>();
-        for (Comment comment : comments) {
-            Map<String, Object> commentMap = new HashMap<>();
-            commentMap.put("id", comment.getId());
-            commentMap.put("resourceId", comment.getResourceId());
-            commentMap.put("author", comment.getAuthor());
-            commentMap.put("content", comment.getContent());
-            commentMap.put("createdAt", comment.getCreatedAt());
-            commentMap.put("likes", comment.getLikes());
-            commentMap.put("dislikes", comment.getDislikes());
-            commentMap.put("parentId", comment.getParentId());
-            
-            // 获取用户头像
-            List<Users> users = usersDao.findByUserName(comment.getAuthor());
-            if (!users.isEmpty() && users.get(0).getAvatar() != null) {
-                String base64Avatar = Base64.getEncoder().encodeToString(users.get(0).getAvatar());
-                String avatarUrl = "data:image/jpeg;base64," + base64Avatar;
-                commentMap.put("avatar", avatarUrl);
-            } else {
-                commentMap.put("avatar", null);
+        Map<String, Object> result = new HashMap<>();
+        try {
+            Resource resource = resourceService.getResourceDetail(id);
+            if (resource == null) {
+                result.put("success", false);
+                result.put("message", "资源不存在");
+                return result;
             }
-            
-            // 处理回复
-            List<Map<String, Object>> repliesWithAvatar = new ArrayList<>();
-            for (Comment reply : comment.getReplies()) {
-                Map<String, Object> replyMap = new HashMap<>();
-                replyMap.put("id", reply.getId());
-                replyMap.put("resourceId", reply.getResourceId());
-                replyMap.put("author", reply.getAuthor());
-                replyMap.put("content", reply.getContent());
-                replyMap.put("createdAt", reply.getCreatedAt());
-                replyMap.put("likes", reply.getLikes());
-                replyMap.put("dislikes", reply.getDislikes());
-                replyMap.put("parentId", reply.getParentId());
+            List<Comment> comments = resourceService.getCommentsByResourceId(id);
+        
+            // 为每个评论添加用户头像信息
+            List<Map<String, Object>> commentsWithAvatar = new ArrayList<>();
+            for (Comment comment : comments) {
+                Map<String, Object> commentMap = new HashMap<>();
+                commentMap.put("id", comment.getId());
+                commentMap.put("resourceId", comment.getResourceId());
+                commentMap.put("author", comment.getAuthor());
+                commentMap.put("content", comment.getContent());
+                commentMap.put("createdAt", comment.getCreatedAt());
+                commentMap.put("likes", comment.getLikes());
+                commentMap.put("dislikes", comment.getDislikes());
+                commentMap.put("parentId", comment.getParentId());
                 
-                // 获取回复用户的头像
-                List<Users> replyUsers = usersDao.findByUserName(reply.getAuthor());
-                if (!replyUsers.isEmpty() && replyUsers.get(0).getAvatar() != null) {
-                    String base64Avatar = Base64.getEncoder().encodeToString(replyUsers.get(0).getAvatar());
+                // 获取用户头像
+                List<Users> users = usersDao.findByUserName(comment.getAuthor());
+                if (!users.isEmpty() && users.get(0).getAvatar() != null) {
+                    String base64Avatar = Base64.getEncoder().encodeToString(users.get(0).getAvatar());
                     String avatarUrl = "data:image/jpeg;base64," + base64Avatar;
-                    replyMap.put("avatar", avatarUrl);
+                    commentMap.put("avatar", avatarUrl);
                 } else {
-                    replyMap.put("avatar", null);
+                    commentMap.put("avatar", null);
                 }
                 
-                repliesWithAvatar.add(replyMap);
+                // 处理回复
+                List<Map<String, Object>> repliesWithAvatar = new ArrayList<>();
+                for (Comment reply : comment.getReplies()) {
+                    Map<String, Object> replyMap = new HashMap<>();
+                    replyMap.put("id", reply.getId());
+                    replyMap.put("resourceId", reply.getResourceId());
+                    replyMap.put("author", reply.getAuthor());
+                    replyMap.put("content", reply.getContent());
+                    replyMap.put("createdAt", reply.getCreatedAt());
+                    replyMap.put("likes", reply.getLikes());
+                    replyMap.put("dislikes", reply.getDislikes());
+                    replyMap.put("parentId", reply.getParentId());
+                    
+                    // 获取回复用户的头像
+                    List<Users> replyUsers = usersDao.findByUserName(reply.getAuthor());
+                    if (!replyUsers.isEmpty() && replyUsers.get(0).getAvatar() != null) {
+                        String base64Avatar = Base64.getEncoder().encodeToString(replyUsers.get(0).getAvatar());
+                        String avatarUrl = "data:image/jpeg;base64," + base64Avatar;
+                        replyMap.put("avatar", avatarUrl);
+                    } else {
+                        replyMap.put("avatar", null);
+                    }
+                    
+                    repliesWithAvatar.add(replyMap);
+                }
+                commentMap.put("replies", repliesWithAvatar);
+                commentsWithAvatar.add(commentMap);
             }
-            commentMap.put("replies", repliesWithAvatar);
-            commentsWithAvatar.add(commentMap);
+            
+            result.put("success", true);
+            result.put("resource", resource);
+            result.put("comments", commentsWithAvatar);
+        } catch (Exception e) {
+            e.printStackTrace();
+            result.put("success", false);
+            result.put("message", "获取资源详情失败: " + e.getMessage());
         }
-        
-        Map<String, Object> result = new HashMap<>();
-        result.put("resource", resource);
-        result.put("comments", commentsWithAvatar);
         return result;
     }
 
