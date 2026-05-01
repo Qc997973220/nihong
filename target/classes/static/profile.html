@@ -138,6 +138,8 @@
             font-weight: 700;
             font-size: 3rem;
             box-shadow: 0 0 20px #3f6eff;
+            text-align: center;
+            line-height: 150px;
         }
         .user-info h1 {
             margin: 0;
@@ -259,13 +261,6 @@
                 <div class="user-info">
                     <h1 id="nickname">用户名</h1>
                     <p id="userName">@username</p>
-                    <div id="avatarUploadSection" style="margin-top: 15px; display: none;">
-                        <input type="file" id="fileInput" class="file-input" accept="image/*">
-                        <label for="fileInput" class="upload-btn">
-                            <i class="fas fa-camera"></i>
-                            更换头像
-                        </label>
-                    </div>
                 </div>
             </div>
 
@@ -381,12 +376,6 @@
                 alert('加载用户信息失败');
             }
         }
-
-        // 上传头像功能已禁用
-        document.getElementById('fileInput').addEventListener('change', async function(e) {
-            alert('头像上传功能已禁用，所有用户使用系统默认字母头像');
-            e.target.value = ''; // 清除已选择的文件
-        });
 
         // 加载用户信息
         loadUserInfo();
