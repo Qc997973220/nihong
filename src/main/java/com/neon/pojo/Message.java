@@ -7,6 +7,11 @@ import java.time.LocalDateTime;
 
 @Entity
 @Data
+@Table(indexes = {
+    @Index(name = "idx_message_user_id", columnList = "userId"),
+    @Index(name = "idx_message_is_read", columnList = "isRead"),
+    @Index(name = "idx_message_created_at", columnList = "createdAt")
+})
 public class Message {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

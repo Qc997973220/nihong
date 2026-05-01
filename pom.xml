@@ -90,6 +90,11 @@
             <artifactId>jackson-databind</artifactId>
             <version>2.15.3</version>
         </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+            <version>2.15.3</version>
+        </dependency>
 
 
         <!-- lombok -->
@@ -109,6 +114,24 @@
 <!--            <artifactId>mybatis-plus-boot-starter</artifactId>-->
 <!--            <version>3.0.5</version>-->
 <!--        </dependency>-->
+
+        <!-- Redis 依赖 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+        
+        <!-- Spring Boot Actuator 监控 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+    
+      <dependency>
+        <groupId>com.linecorp.armeria</groupId>
+        <artifactId>armeria-spring-boot-actuator-autoconfigure</artifactId>
+        <version>0.99.5</version>
+      </dependency>
     </dependencies>
 
     <build>
@@ -126,6 +149,13 @@
                         </exclude>
                     </excludes>
                 </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

@@ -711,6 +711,23 @@
             return;
         }
 
+        // 检查缓存
+        const cacheKey = `resource_detail_${id}`;
+        const cachedData = localStorage.getItem(cacheKey);
+        const cachedTimestamp = localStorage.getItem(`${cacheKey}_timestamp`);
+        const now = Date.now();
+        
+        if (cachedData && cachedTimestamp && (now - parseInt(cachedTimestamp)) < 5 * 60 * 1000) { // 5分钟缓存
+            console.log('使用缓存数据');
+            try {
+                const data = JSON.parse(cachedData);
+                renderDetail(data);
+            } catch (e) {
+                console.error('解析缓存数据失败:', e);
+                // 缓存解析失败，继续从服务器获取
+            }
+        }
+
         try {
             const url = `http://${getHost()}:8060/resources/${id}`;
             console.log('请求URL:', url);
@@ -722,6 +739,11 @@
             }
             const data = await response.json();
             console.log('后端返回数据:', data);
+            
+            // 更新缓存
+            localStorage.setItem(cacheKey, JSON.stringify(data));
+            localStorage.setItem(`${cacheKey}_timestamp`, Date.now().toString());
+            
             renderDetail(data);
         } catch (error) {
             console.error('获取详情失败:', error);

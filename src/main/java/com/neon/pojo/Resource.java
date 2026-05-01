@@ -7,6 +7,10 @@ import java.time.LocalDateTime;
 
 @Entity
 @Data
+@Table(indexes = {
+    @Index(name = "idx_resource_created_at", columnList = "createdAt"),
+    @Index(name = "idx_resource_category", columnList = "category")
+})
 public class Resource {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

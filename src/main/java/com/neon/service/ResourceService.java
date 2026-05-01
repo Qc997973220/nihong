@@ -20,13 +20,45 @@ public class ResourceService {
     private CommentDao commentRepository;
     @Autowired
     private UserActionDao userActionRepository;
+    @Autowired
+    private CacheService cacheService;
 
     public List<Resource> getAllResources() {
-        return resourceRepository.findAll();
+        // 尝试从缓存获取
+        String cacheKey = cacheService.getResourceListKey();
+        List<Resource> resources = (List<Resource>) cacheService.get(cacheKey);
+        
+        if (resources != null) {
+            return resources;
+        }
+        
+        // 从数据库获取
+        resources = resourceRepository.findAll();
+        
+        // 缓存结果，过期时间30分钟
+        cacheService.set(cacheKey, resources, 1800);
+        
+        return resources;
     }
 
     public Resource getResourceDetail(Long id) {
-        return resourceRepository.findById(id).orElse(null);
+        // 尝试从缓存获取
+        String cacheKey = cacheService.getResourceDetailKey(id);
+        Resource resource = (Resource) cacheService.get(cacheKey);
+        
+        if (resource != null) {
+            return resource;
+        }
+        
+        // 从数据库获取
+        resource = resourceRepository.findById(id).orElse(null);
+        
+        // 缓存结果，过期时间30分钟
+        if (resource != null) {
+            cacheService.set(cacheKey, resource, 1800);
+        }
+        
+        return resource;
     }
 
     public List<Comment> getCommentsByResourceId(Long resourceId) {
@@ -62,7 +94,13 @@ public class ResourceService {
     public Resource saveResource(Resource resource) {
         resource.setCreatedAt(LocalDateTime.now());
         resource.setUpdatedAt(LocalDateTime.now());
-        return resourceRepository.save(resource);
+        Resource savedResource = resourceRepository.save(resource);
+        
+        // 清除资源列表缓存
+        String listCacheKey = cacheService.getResourceListKey();
+        cacheService.delete(listCacheKey);
+        
+        return savedResource;
     }
 
     public Comment saveComment(Comment comment) {

@@ -5,6 +5,7 @@ import com.neon.pojo.Message;
 import com.neon.pojo.Resource;
 import com.neon.pojo.Users;
 import com.neon.service.ResourceService;
+import com.neon.service.AsyncService;
 import com.neon.dao.MessageDao;
 import com.neon.dao.UsersDao;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +30,9 @@ public class ResourceController {
     
     @Autowired
     private MessageDao messageDao;
+    
+    @Autowired
+    private AsyncService asyncService;
 
     // 获取资源列表（只返回卡片所需字段，也可直接返回完整Resource，前端自行提取）
     @GetMapping("/list")
@@ -61,8 +66,10 @@ public class ResourceController {
             
             // 获取用户头像
             List<Users> users = usersDao.findByUserName(comment.getAuthor());
-            if (!users.isEmpty()) {
-                commentMap.put("avatar", users.get(0).getAvatar());
+            if (!users.isEmpty() && users.get(0).getAvatar() != null) {
+                String base64Avatar = Base64.getEncoder().encodeToString(users.get(0).getAvatar());
+                String avatarUrl = "data:image/jpeg;base64," + base64Avatar;
+                commentMap.put("avatar", avatarUrl);
             } else {
                 commentMap.put("avatar", null);
             }
@@ -82,8 +89,10 @@ public class ResourceController {
                 
                 // 获取回复用户的头像
                 List<Users> replyUsers = usersDao.findByUserName(reply.getAuthor());
-                if (!replyUsers.isEmpty()) {
-                    replyMap.put("avatar", replyUsers.get(0).getAvatar());
+                if (!replyUsers.isEmpty() && replyUsers.get(0).getAvatar() != null) {
+                    String base64Avatar = Base64.getEncoder().encodeToString(replyUsers.get(0).getAvatar());
+                    String avatarUrl = "data:image/jpeg;base64," + base64Avatar;
+                    replyMap.put("avatar", avatarUrl);
                 } else {
                     replyMap.put("avatar", null);
                 }
@@ -134,15 +143,13 @@ public class ResourceController {
                 // 查找父评论
                 Comment parentComment = resourceService.getCommentById(comment.getParentId());
                 if (parentComment != null && parentComment.getAuthor() != null && !parentComment.getAuthor().equals(comment.getAuthor())) {
-                    // 创建消息通知
-                    Message message = new Message();
-                    message.setUserId(parentComment.getAuthor());
-                    message.setContent(comment.getAuthor() + " 回复了你的评论：" + comment.getContent());
-                    message.setType("comment_reply");
-                    message.setRelatedId(comment.getId());
-                    message.setIsRead(false);
-                    message.setCreatedAt(LocalDateTime.now());
-                    messageDao.save(message);
+                    // 异步发送消息通知
+                    asyncService.sendMessageNotification(
+                            parentComment.getAuthor(),
+                            comment.getAuthor() + " 回复了你的评论：" + comment.getContent(),
+                            "comment_reply",
+                            comment.getId()
+                    );
                 }
             }
         } catch (Exception e) {

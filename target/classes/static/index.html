@@ -1434,9 +1434,32 @@
 
         // 加载资源列表
         function loadResources() {
+            // 尝试从localStorage获取缓存的资源列表
+            const cachedResources = localStorage.getItem('cachedResources');
+            if (cachedResources) {
+                try {
+                    const resources = JSON.parse(cachedResources);
+                    const resourceGrid = document.getElementById('resourceGrid');
+                    if (resourceGrid) {
+                        resourceGrid.innerHTML = '';
+                        resources.forEach(resource => {
+                            const card = createResourceCard(resource);
+                            resourceGrid.appendChild(card);
+                        });
+                    }
+                } catch (e) {
+                    console.error('解析缓存资源失败:', e);
+                }
+            }
+            
+            // 从服务器获取最新资源列表
             fetch(`/resources/list`)
                 .then(response => response.json())
                 .then(resources => {
+                    // 缓存资源列表到localStorage，过期时间10分钟
+                    localStorage.setItem('cachedResources', JSON.stringify(resources));
+                    localStorage.setItem('cachedResourcesTimestamp', Date.now().toString());
+                    
                     const resourceGrid = document.getElementById('resourceGrid');
                     if (resourceGrid) {
                         resourceGrid.innerHTML = '';
@@ -1613,17 +1636,44 @@
 
     // 获取资源列表
     async function fetchResources() {
+        // 尝试从localStorage获取缓存的资源列表
+        const cachedResources = localStorage.getItem('cachedResources');
+        const cachedTimestamp = localStorage.getItem('cachedResourcesTimestamp');
+        const now = Date.now();
+        
+        // 如果缓存存在且未过期（10分钟），使用缓存
+        if (cachedResources && cachedTimestamp && (now - parseInt(cachedTimestamp)) < 10 * 60 * 1000) {
+            try {
+                const resources = JSON.parse(cachedResources);
+                allResources = resources;
+                const activeChip = document.querySelector('.category-chip.active');
+                const currentCategory = activeChip ? activeChip.textContent.trim() : '全部';
+                renderCards(allResources, currentCategory);
+            } catch (e) {
+                console.error('解析缓存资源失败:', e);
+            }
+        }
+        
+        // 从服务器获取最新资源列表
         try {
-            const response = await fetch(`http://${getHost()}:8060/resources/list`);
+            const response = await fetch(`/resources/list`);
             if (!response.ok) throw new Error('网络错误');
             const data = await response.json();
             allResources = data;
+            
+            // 缓存资源列表到localStorage，过期时间10分钟
+            localStorage.setItem('cachedResources', JSON.stringify(data));
+            localStorage.setItem('cachedResourcesTimestamp', Date.now().toString());
+            
             const activeChip = document.querySelector('.category-chip.active');
             const currentCategory = activeChip ? activeChip.textContent.trim() : '全部';
             renderCards(allResources, currentCategory);
         } catch (error) {
             console.error('获取资源列表失败', error);
-            document.getElementById('resourceGrid').innerHTML = '<p style="color:#ff8a8a;">加载失败，请刷新重试</p>';
+            // 如果没有缓存，显示错误信息
+            if (!cachedResources) {
+                document.getElementById('resourceGrid').innerHTML = '<p style="color:#ff8a8a;">加载失败，请刷新重试</p>';
+            }
         }
     }
 

@@ -2,6 +2,8 @@ package com.neon.controller;
 
 import com.neon.dao.UsersDao;
 import com.neon.pojo.Users;
+import com.neon.service.CacheService;
+import com.neon.service.AsyncService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,6 +25,10 @@ public class FileUploadController {
 
     @Autowired
     private UsersDao usersDao;
+    @Autowired
+    private CacheService cacheService;
+    @Autowired
+    private AsyncService asyncService;
 
     @PostMapping("/upload/avatar")
     public Map<String, Object> uploadAvatar(@RequestParam("file") MultipartFile file, @RequestParam("userName") String userName) {
@@ -55,6 +61,13 @@ public class FileUploadController {
                 result.put("status", true);
                 result.put("message", "头像上传成功");
                 result.put("avatarUrl", avatarUrl);
+                
+                // 清除用户信息缓存
+                String cacheKey = cacheService.getUserInfoKey(userName);
+                cacheService.delete(cacheKey);
+                
+                // 异步处理文件上传后的操作
+                asyncService.processFileUpload(userName, avatarUrl);
             } else {
                 // 尝试使用findOneByUserName方法
                 System.out.println("尝试使用findOneByUserName查询");
@@ -71,6 +84,13 @@ public class FileUploadController {
                     result.put("status", true);
                     result.put("message", "头像上传成功");
                     result.put("avatarUrl", avatarUrl);
+                    
+                    // 清除用户信息缓存
+                    String cacheKey = cacheService.getUserInfoKey(userName);
+                    cacheService.delete(cacheKey);
+                    
+                    // 异步处理文件上传后的操作
+                    asyncService.processFileUpload(userName, avatarUrl);
                 } else {
                     result.put("status", false);
                     result.put("message", "用户不存在");
