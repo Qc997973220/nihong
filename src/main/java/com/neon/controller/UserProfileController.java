@@ -48,14 +48,8 @@ public class UserProfileController {
                 userInfo.put("email", user.getEmail());
                 userInfo.put("phone", user.getPhone());
                 
-                // 将头像转换为Base64编码
-                if (user.getAvatar() != null) {
-                    String base64Avatar = Base64.getEncoder().encodeToString(user.getAvatar());
-                    String avatarUrl = "data:image/jpeg;base64," + base64Avatar;
-                    userInfo.put("avatar", avatarUrl);
-                } else {
-                    userInfo.put("avatar", null);
-                }
+                // 不再返回用户头像，所有用户使用系统默认字母头像
+                userInfo.put("avatar", null);
                 
                 userInfo.put("lastLoginTime", user.getLastLoginTime());
 
@@ -75,14 +69,8 @@ public class UserProfileController {
                     userInfo.put("email", user.getEmail());
                     userInfo.put("phone", user.getPhone());
                     
-                    // 将头像转换为Base64编码
-                    if (user.getAvatar() != null) {
-                        String base64Avatar = Base64.getEncoder().encodeToString(user.getAvatar());
-                        String avatarUrl = "data:image/jpeg;base64," + base64Avatar;
-                        userInfo.put("avatar", avatarUrl);
-                    } else {
-                        userInfo.put("avatar", null);
-                    }
+                    // 不再返回用户头像，所有用户使用系统默认字母头像
+                    userInfo.put("avatar", null);
                     
                     userInfo.put("lastLoginTime", user.getLastLoginTime());
 

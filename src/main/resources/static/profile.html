@@ -382,34 +382,10 @@
             }
         }
 
-        // 上传头像
+        // 上传头像功能已禁用
         document.getElementById('fileInput').addEventListener('change', async function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('userName', getUrlParam('userName'));
-
-            try {
-                const response = await fetch('/upload/avatar', {
-                    method: 'POST',
-                    body: formData
-                });
-                const data = await response.json();
-                
-                if (data.status) {
-                    document.getElementById('avatar').src = data.avatarUrl;
-                    document.getElementById('avatar').style.display = 'block';
-                    document.getElementById('avatarPlaceholder').style.display = 'none';
-                    alert('头像上传成功');
-                } else {
-                    alert('头像上传失败: ' + data.message);
-                }
-            } catch (error) {
-                console.error('上传头像失败:', error);
-                alert('上传头像失败，请检查网络连接');
-            }
+            alert('头像上传功能已禁用，所有用户使用系统默认字母头像');
+            e.target.value = ''; // 清除已选择的文件
         });
 
         // 加载用户信息

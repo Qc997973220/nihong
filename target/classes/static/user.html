@@ -332,54 +332,10 @@
         }
     }
 
-    // 上传头像
+    // 上传头像功能已禁用
     document.getElementById('fileInput').addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        // 检查文件大小（限制为2MB）
-        const maxSize = 2 * 1024 * 1024; // 2MB
-        if (file.size > maxSize) {
-            alert('头像大小不能超过2MB，请选择较小的文件');
-            return;
-        }
-
-        // 检查文件类型
-        const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
-        if (!allowedTypes.includes(file.type)) {
-            alert('只支持 JPG、PNG、WebP 格式的图片');
-            return;
-        }
-
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('userName', username);
-
-        fetch('/upload/avatar', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status) {
-                // 更新头像显示
-                document.getElementById('avatar').src = data.avatarUrl;
-                document.getElementById('avatar').style.display = 'block';
-                document.getElementById('avatarPlaceholder').style.display = 'none';
-                
-                // 更新localStorage中的用户信息
-                userData.avatar = data.avatarUrl;
-                localStorage.setItem('userInfo', JSON.stringify(userData));
-                
-                alert('头像上传成功');
-            } else {
-                alert('头像上传失败: ' + data.message);
-            }
-        })
-        .catch(error => {
-            console.error('上传失败:', error);
-            alert('头像上传失败，请检查网络连接');
-        });
+        alert('头像上传功能已禁用，所有用户使用系统默认字母头像');
+        e.target.value = ''; // 清除已选择的文件
     });
 
     // 退出登录

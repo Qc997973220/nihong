@@ -55,8 +55,8 @@ public class ResourceController {
             }
             List<Comment> comments = resourceService.getCommentsByResourceId(id);
         
-            // 为每个评论添加用户头像信息
-            List<Map<String, Object>> commentsWithAvatar = new ArrayList<>();
+            // 简化评论数据，不再包含Base64头像（头像数据量太大）
+            List<Map<String, Object>> simplifiedComments = new ArrayList<>();
             for (Comment comment : comments) {
                 Map<String, Object> commentMap = new HashMap<>();
                 commentMap.put("id", comment.getId());
@@ -68,18 +68,8 @@ public class ResourceController {
                 commentMap.put("dislikes", comment.getDislikes());
                 commentMap.put("parentId", comment.getParentId());
                 
-                // 获取用户头像
-                List<Users> users = usersDao.findByUserName(comment.getAuthor());
-                if (!users.isEmpty() && users.get(0).getAvatar() != null) {
-                    String base64Avatar = Base64.getEncoder().encodeToString(users.get(0).getAvatar());
-                    String avatarUrl = "data:image/jpeg;base64," + base64Avatar;
-                    commentMap.put("avatar", avatarUrl);
-                } else {
-                    commentMap.put("avatar", null);
-                }
-                
-                // 处理回复
-                List<Map<String, Object>> repliesWithAvatar = new ArrayList<>();
+                // 处理回复（同样不返回Base64头像）
+                List<Map<String, Object>> replies = new ArrayList<>();
                 for (Comment reply : comment.getReplies()) {
                     Map<String, Object> replyMap = new HashMap<>();
                     replyMap.put("id", reply.getId());
@@ -90,26 +80,15 @@ public class ResourceController {
                     replyMap.put("likes", reply.getLikes());
                     replyMap.put("dislikes", reply.getDislikes());
                     replyMap.put("parentId", reply.getParentId());
-                    
-                    // 获取回复用户的头像
-                    List<Users> replyUsers = usersDao.findByUserName(reply.getAuthor());
-                    if (!replyUsers.isEmpty() && replyUsers.get(0).getAvatar() != null) {
-                        String base64Avatar = Base64.getEncoder().encodeToString(replyUsers.get(0).getAvatar());
-                        String avatarUrl = "data:image/jpeg;base64," + base64Avatar;
-                        replyMap.put("avatar", avatarUrl);
-                    } else {
-                        replyMap.put("avatar", null);
-                    }
-                    
-                    repliesWithAvatar.add(replyMap);
+                    replies.add(replyMap);
                 }
-                commentMap.put("replies", repliesWithAvatar);
-                commentsWithAvatar.add(commentMap);
+                commentMap.put("replies", replies);
+                simplifiedComments.add(commentMap);
             }
             
             result.put("success", true);
             result.put("resource", resource);
-            result.put("comments", commentsWithAvatar);
+            result.put("comments", simplifiedComments);
         } catch (Exception e) {
             e.printStackTrace();
             result.put("success", false);

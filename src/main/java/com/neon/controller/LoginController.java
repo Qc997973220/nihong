@@ -35,7 +35,8 @@ public class LoginController {
                 userInfo.put("email", user.getEmail());
                 userInfo.put("gender", user.getGender());
                 userInfo.put("token", user.getToken());
-                userInfo.put("avatar", user.getAvatar());
+                // 不再返回用户头像，所有用户使用系统默认字母头像
+                userInfo.put("avatar", null);
                 userInfo.put("lastLoginTime", user.getLastLoginTime());
                 result.put("user", userInfo);
             }
