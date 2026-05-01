@@ -100,6 +100,12 @@ public class ResourceService {
         String listCacheKey = cacheService.getResourceListKey();
         cacheService.delete(listCacheKey);
         
+        // 清除该资源详情缓存
+        if (savedResource.getId() != null) {
+            String detailCacheKey = cacheService.getResourceDetailKey(savedResource.getId());
+            cacheService.delete(detailCacheKey);
+        }
+        
         return savedResource;
     }
 
