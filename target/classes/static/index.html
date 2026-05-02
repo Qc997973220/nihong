@@ -1679,8 +1679,11 @@
                         setTimeout(() => {
                             publishModal.classList.remove('active');
                             resetPublishForm();
+                            // 清除资源列表缓存
+                            localStorage.removeItem('cachedResources');
+                            localStorage.removeItem('cachedResourcesTimestamp');
                             // 刷新资源列表
-                            loadResources();
+                            fetchResources();
                         }, 1500);
                     } else {
                         showPublishMessage(data.message, true);
@@ -1807,7 +1810,7 @@
                 if (keyword) {
                     searchResources(keyword);
                 } else {
-                    loadResources();
+                    fetchResources();
                 }
             }
 
@@ -1858,7 +1861,7 @@
         }
 
         initSearch();
-        loadResources();
+        fetchResources();
     });
 
     // 查看资源详情
