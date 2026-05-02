@@ -254,12 +254,6 @@
             <div class="profile-header">
                 <div class="user-info">
                     <div style="display: flex; align-items: center; gap: 16px;">
-                        <div class="avatar-container" style="width: 40px; height: 40px;">
-                            <div id="avatarPlaceholder" class="avatar-placeholder" style="width: 40px; height: 40px; font-size: 1.5rem; display: block;"></div>
-                            <img id="avatar" class="avatar" style="width: 40px; height: 40px; display: none; position: absolute; top: 0; left: 0;" alt="用户头像">
-                            <input type="file" id="fileInput" class="file-input" accept="image/*">
-                            <label for="fileInput" style="position: absolute; top: 0; left: 0; width: 40px; height: 40px; border-radius: 50%; opacity: 0; cursor: pointer; z-index: 10;"></label>
-                        </div>
                         <h1 id="nickname" style="margin: 0; font-size: 1.8rem;">用户名</h1>
                     </div>
                     <p>普通会员 · 欢迎回来</p>
@@ -318,25 +312,11 @@
             document.getElementById('nickname').innerText = username;
             document.getElementById('infoUserName').innerText = username;
             document.getElementById('infoNickname').innerText = username;
-            document.getElementById('avatarPlaceholder').innerText = username.charAt(0).toUpperCase();
-            
-            // 检查用户是否有头像
-            if (userData.avatar) {
-                document.getElementById('avatar').src = userData.avatar;
-                document.getElementById('avatar').style.display = 'block';
-                document.getElementById('avatarPlaceholder').style.display = 'none';
-            }
         } catch (e) {
             console.error('解析用户信息失败:', e);
             window.location.href = '/';
         }
     }
-
-    // 上传头像功能已禁用
-    document.getElementById('fileInput').addEventListener('change', function(e) {
-        alert('头像上传功能已禁用，所有用户使用系统默认字母头像');
-        e.target.value = ''; // 清除已选择的文件
-    });
 
     // 退出登录
     document.getElementById('logoutBtn').addEventListener('click', function() {

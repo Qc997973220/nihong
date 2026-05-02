@@ -27,17 +27,17 @@ public class ResourceService {
         // 尝试从缓存获取
         String cacheKey = cacheService.getResourceListKey();
         List<Resource> resources = (List<Resource>) cacheService.get(cacheKey);
-        
+
         if (resources != null) {
             return resources;
         }
-        
-        // 从数据库获取
-        resources = resourceRepository.findAll();
-        
+
+        // 从数据库获取只返回审核通过(status=1)的资源
+        resources = resourceRepository.findByStatusOrderByCreatedAtDesc(1);
+
         // 缓存结果，过期时间30分钟
         cacheService.set(cacheKey, resources, 1800);
-        
+
         return resources;
     }
 
@@ -154,5 +154,23 @@ public class ResourceService {
     // 根据评论ID查找评论
     public Comment getCommentById(Long commentId) {
         return commentRepository.findById(commentId).orElse(null);
+    }
+
+    // 获取待审核资源列表
+    public List<Resource> getPendingResources() {
+        return resourceRepository.findByStatusOrderByCreatedAtDesc(0);
+    }
+
+    // 更新资源审核状态
+    public void updateResourceStatus(Long id, Integer status) {
+        Resource resource = resourceRepository.findById(id).orElse(null);
+        if (resource != null) {
+            resource.setStatus(status);
+            resource.setUpdatedAt(LocalDateTime.now());
+            resourceRepository.save(resource);
+            // 清除缓存
+            cacheService.delete(cacheService.getResourceListKey());
+            cacheService.delete(cacheService.getResourceDetailKey(id));
+        }
     }
 }

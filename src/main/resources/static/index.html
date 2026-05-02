@@ -1152,6 +1152,11 @@
                 <div class="user-avatar" id="userAvatar">U</div>
                 <span class="user-name" id="displayUsername">加载中...</span>
             </div>
+            <div id="adminLink" style="display: none;">
+                <a href="admin.html" class="back-link" style="background: rgba(255, 71, 87, 0.2); padding: 6px 16px; border-radius: 60px; border: 1px solid rgba(255, 71, 87, 0.5);">
+                    <i class="fas fa-shield-alt"></i> 审核管理
+                </a>
+            </div>
         </div>
     </nav>
 
@@ -1310,16 +1315,20 @@
         document.getElementById('displayUsername').textContent = currentUser.username;
         document.getElementById('userAvatar').textContent = currentUser.username.charAt(0).toUpperCase();
 
-        // 打开发布资源模态框
+        // 检查是否为管理员，显示审核管理入口
+        if (currentUser.role === '1') {
+            document.getElementById('adminLink').style.display = 'block';
+        }
+
+        // 点击发布资源按钮
         if (publishResourceBtn) {
             publishResourceBtn.addEventListener('click', function(e) {
                 e.preventDefault();
-                // 检查用户权限
-                if (currentUser.role !== '1') {
-                    showErrorToast('抱歉,您暂时还没有发布的权限,请联系管理员获取权限');
+                if (!isLoggedIn()) {
+                    showLogin();
                     return;
                 }
-                publishModal.classList.add('active');
+                window.location.href = 'publish.html';
             });
         }
 

@@ -187,4 +187,39 @@ public class ResourceController {
         }
         return result;
     }
+
+    // 获取待审核资源列表（status=0）
+    @GetMapping("/pending")
+    @ResponseBody
+    public Map<String, Object> getPendingResources() {
+        Map<String, Object> result = new HashMap<>();
+        try {
+            List<Resource> pendingResources = resourceService.getPendingResources();
+            result.put("success", true);
+            result.put("resources", pendingResources);
+            result.put("count", pendingResources.size());
+        } catch (Exception e) {
+            result.put("success", false);
+            result.put("message", "获取待审核资源失败：" + e.getMessage());
+        }
+        return result;
+    }
+
+    // 审核资源（通过或不通过）
+    @PostMapping("/audit")
+    @ResponseBody
+    public Map<String, Object> auditResource(@RequestBody Map<String, Object> request) {
+        Map<String, Object> result = new HashMap<>();
+        try {
+            Long id = Long.valueOf(request.get("id").toString());
+            Integer status = Integer.valueOf(request.get("status").toString());
+            resourceService.updateResourceStatus(id, status);
+            result.put("success", true);
+            result.put("message", status == 1 ? "资源已通过审核" : "资源已拒绝");
+        } catch (Exception e) {
+            result.put("success", false);
+            result.put("message", "审核操作失败：" + e.getMessage());
+        }
+        return result;
+    }
 }

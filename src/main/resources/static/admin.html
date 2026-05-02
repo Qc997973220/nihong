@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>资源审核 · NEON 霓虹之都</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: "Inter", system-ui, -apple-system, sans-serif;
+            background: #0b0e14;
+            color: #eef3fc;
+            line-height: 1.5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow-x: hidden;
+        }
+        #bgCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+            z-index: 0;
+            pointer-events: none;
+        }
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image:
+                    linear-gradient(rgba(120, 180, 255, 0.03) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(120, 180, 255, 0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .navbar {
+            background: rgba(10, 17, 28, 0.6);
+            backdrop-filter: blur(20px) saturate(200%);
+            border-bottom: 1px solid rgba(90, 160, 255, 0.2);
+            padding: 14px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .navbar .container {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .logo {
+            font-size: 1.6rem;
+            font-weight: 450;
+            background: linear-gradient(135deg, #e0efff, #b2d9ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.3px;
+            filter: drop-shadow(0 0 8px #3f8eff);
+            white-space: nowrap;
+        }
+        .back-link {
+            color: #5ba5ff;
+            text-decoration: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.2s, text-shadow 0.2s;
+        }
+        .back-link:hover {
+            color: white;
+            text-shadow: 0 0 8px #4d9eff;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 24px;
+            width: 100%;
+            flex: 1;
+            position: relative;
+            z-index: 10;
+        }
+        .page-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .page-header h1 {
+            font-size: 2rem;
+            background: linear-gradient(135deg, #e0efff, #b2d9ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 10px #3f8eff);
+        }
+        .pending-badge {
+            background: rgba(255, 71, 87, 0.2);
+            border: 1px solid rgba(255, 71, 87, 0.5);
+            color: #ff8a8a;
+            padding: 6px 16px;
+            border-radius: 60px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        .refresh-btn {
+            padding: 10px 20px;
+            background: rgba(91, 165, 255, 0.2);
+            border: 1px solid rgba(91, 165, 255, 0.5);
+            border-radius: 60px;
+            color: #5ba5ff;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .refresh-btn:hover {
+            background: rgba(91, 165, 255, 0.3);
+            border-color: #5ba5ff;
+            box-shadow: 0 0 15px rgba(91, 165, 255, 0.5);
+        }
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            background: rgba(20, 30, 50, 0.5);
+            border-radius: 24px;
+            border: 1px solid rgba(90, 160, 255, 0.2);
+        }
+        .empty-state i {
+            font-size: 4rem;
+            color: #5ba5ff;
+            margin-bottom: 20px;
+        }
+        .empty-state h2 {
+            color: #b8dcff;
+            margin-bottom: 10px;
+        }
+        .empty-state p {
+            color: #90b0d1;
+        }
+        .resource-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .resource-card {
+            background: rgba(20, 30, 50, 0.5);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 24px;
+            border: 1px solid rgba(90, 160, 255, 0.2);
+            transition: all 0.3s;
+        }
+        .resource-card:hover {
+            border-color: rgba(90, 160, 255, 0.4);
+            box-shadow: 0 0 20px rgba(90, 160, 255, 0.2);
+        }
+        .resource-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .resource-title {
+            font-size: 1.3rem;
+            color: #ffffff;
+            font-weight: 600;
+        }
+        .resource-meta {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .meta-tag {
+            padding: 4px 12px;
+            border-radius: 60px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        .meta-tag.category {
+            background: rgba(91, 165, 255, 0.2);
+            color: #5ba5ff;
+        }
+        .meta-tag.author {
+            background: rgba(150, 100, 255, 0.2);
+            color: #c4a0ff;
+        }
+        .meta-tag.time {
+            background: rgba(90, 160, 255, 0.1);
+            color: #90b0d1;
+        }
+        .resource-summary {
+            color: #b0c8e0;
+            margin-bottom: 16px;
+            line-height: 1.6;
+        }
+        .resource-content {
+            background: rgba(10, 18, 32, 0.5);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            color: #a0b8d0;
+            line-height: 1.7;
+            max-height: 200px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        .resource-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+        }
+        .btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 60px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 550;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-approve {
+            background: linear-gradient(105deg, #1a8a4a, #25b85a);
+            color: white;
+            box-shadow: 0 5px 15px -5px #0a5a2a, 0 0 0 1px rgba(0, 255, 150, 0.3) inset;
+        }
+        .btn-approve:hover {
+            background: linear-gradient(105deg, #25b85a, #30d06a);
+            box-shadow: 0 0 30px #00cc55;
+            transform: scale(1.02);
+        }
+        .btn-reject {
+            background: rgba(120, 120, 120, 0.3);
+            color: #ffb0b0;
+            border: 1px solid rgba(255, 100, 100, 0.5);
+        }
+        .btn-reject:hover {
+            background: rgba(255, 100, 100, 0.3);
+            border-color: #ff6666;
+            color: white;
+        }
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .toast {
+            position: fixed;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 500;
+            z-index: 1000;
+            transition: transform 0.3s;
+            backdrop-filter: blur(10px);
+        }
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+        .toast.success {
+            background: rgba(0, 200, 150, 0.2);
+            color: #b0ffde;
+            border: 1px solid rgba(0, 255, 200, 0.4);
+        }
+        .toast.error {
+            background: rgba(255, 80, 80, 0.2);
+            color: #ffb0b0;
+            border: 1px solid rgba(255, 100, 100, 0.5);
+        }
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+        }
+        .loading i {
+            font-size: 2rem;
+            color: #5ba5ff;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        @media (max-width: 768px) {
+            .container {
+                padding: 24px 16px;
+            }
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .resource-header {
+                flex-direction: column;
+            }
+            .resource-actions {
+                justify-content: stretch;
+            }
+            .resource-actions .btn {
+                flex: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="bgCanvas"></canvas>
+
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">霓虹资源站</div>
+            <a href="/" class="back-link">
+                <i class="fas fa-arrow-left"></i>
+                返回首页
+            </a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <div style="display: flex; align-items: center; gap: 16px;">
+                <h1><i class="fas fa-shield-alt"></i> 资源审核</h1>
+                <span class="pending-badge" id="pendingCount">0 条待审核</span>
+            </div>
+            <button class="refresh-btn" id="refreshBtn">
+                <i class="fas fa-sync-alt"></i> 刷新列表
+            </button>
+        </div>
+
+        <div id="contentArea">
+            <div class="loading">
+                <i class="fas fa-spinner"></i>
+                <p style="margin-top: 12px; color: #90b0d1;">加载中...</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        function getHost() {
+            return window.location.hostname || '127.0.0.1';
+        }
+
+        function showToast(message, isError = false) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = isError ? 'toast error show' : 'toast success show';
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return '未知';
+            const date = new Date(dateString);
+            return date.toLocaleString('zh-CN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function checkAdmin() {
+            const userInfo = localStorage.getItem('userInfo');
+            if (!userInfo) {
+                showToast('请先登录', true);
+                setTimeout(() => window.location.href = '/', 1500);
+                return null;
+            }
+            try {
+                const user = JSON.parse(userInfo);
+                if (user.role !== '1') {
+                    showToast('您没有管理员权限', true);
+                    setTimeout(() => window.location.href = '/', 1500);
+                    return null;
+                }
+                return user;
+            } catch (e) {
+                showToast('登录信息解析失败', true);
+                setTimeout(() => window.location.href = '/', 1500);
+                return null;
+            }
+        }
+
+        function loadPendingResources() {
+            const contentArea = document.getElementById('contentArea');
+            contentArea.innerHTML = `
+                <div class="loading">
+                    <i class="fas fa-spinner"></i>
+                    <p style="margin-top: 12px; color: #90b0d1;">加载中...</p>
+                </div>
+            `;
+
+            fetch(`/resources/pending`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        renderResources(data.resources || []);
+                        document.getElementById('pendingCount').textContent =
+                            (data.resources || []).length + ' 条待审核';
+                    } else {
+                        showToast(data.message || '加载失败', true);
+                    }
+                })
+                .catch(error => {
+                    console.error('加载待审核资源失败:', error);
+                    showToast('网络错误', true);
+                });
+        }
+
+        function renderResources(resources) {
+            const contentArea = document.getElementById('contentArea');
+
+            if (resources.length === 0) {
+                contentArea.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-check-circle"></i>
+                        <h2>太棒了！</h2>
+                        <p>目前没有待审核的资源</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '<div class="resource-list">';
+            resources.forEach(resource => {
+                html += `
+                    <div class="resource-card" id="resource-${resource.id}">
+                        <div class="resource-header">
+                            <div class="resource-title">${escapeHtml(resource.title)}</div>
+                            <div class="resource-meta">
+                                <span class="meta-tag category">${escapeHtml(resource.category)}</span>
+                                <span class="meta-tag author"><i class="fas fa-user"></i> ${escapeHtml(resource.author)}</span>
+                                <span class="meta-tag time"><i class="far fa-clock"></i> ${formatDate(resource.createdAt)}</span>
+                            </div>
+                        </div>
+                        <div class="resource-summary">${escapeHtml(resource.summary)}</div>
+                        <div class="resource-content">${escapeHtml(resource.content)}</div>
+                        <div class="resource-actions">
+                            <button class="btn btn-reject" onclick="rejectResource(${resource.id})">
+                                <i class="fas fa-times"></i> 拒绝
+                            </button>
+                            <button class="btn btn-approve" onclick="approveResource(${resource.id})">
+                                <i class="fas fa-check"></i> 通过审核
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            contentArea.innerHTML = html;
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function approveResource(id) {
+            const card = document.getElementById(`resource-${id}`);
+            const btns = card.querySelectorAll('.btn');
+            btns.forEach(btn => btn.disabled = true);
+
+            fetch(`/resources/audit`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: id, status: 1 })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('资源已通过审核');
+                    card.style.opacity = '0.5';
+                    card.style.transform = 'scale(0.98)';
+                    setTimeout(() => {
+                        loadPendingResources();
+                    }, 500);
+                } else {
+                    showToast(data.message || '操作失败', true);
+                    btns.forEach(btn => btn.disabled = false);
+                }
+            })
+            .catch(error => {
+                console.error('审核失败:', error);
+                showToast('网络错误', true);
+                btns.forEach(btn => btn.disabled = false);
+            });
+        }
+
+        function rejectResource(id) {
+            const card = document.getElementById(`resource-${id}`);
+            const btns = card.querySelectorAll('.btn');
+            btns.forEach(btn => btn.disabled = true);
+
+            fetch(`/resources/audit`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: id, status: -1 })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('资源已拒绝');
+                    card.style.opacity = '0.5';
+                    card.style.transform = 'scale(0.98)';
+                    setTimeout(() => {
+                        loadPendingResources();
+                    }, 500);
+                } else {
+                    showToast(data.message || '操作失败', true);
+                    btns.forEach(btn => btn.disabled = false);
+                }
+            })
+            .catch(error => {
+                console.error('审核失败:', error);
+                showToast('网络错误', true);
+                btns.forEach(btn => btn.disabled = false);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const admin = checkAdmin();
+            if (!admin) return;
+
+            loadPendingResources();
+
+            document.getElementById('refreshBtn').addEventListener('click', loadPendingResources);
+        });
+    </script>
+</body>
+</html>

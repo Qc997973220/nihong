@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>发布资源 · NEON 霓虹之都</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: "Inter", system-ui, -apple-system, sans-serif;
+            background: #0b0e14;
+            color: #eef3fc;
+            line-height: 1.5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow-x: hidden;
+        }
+        #bgCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+            z-index: 0;
+            pointer-events: none;
+        }
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image:
+                    linear-gradient(rgba(120, 180, 255, 0.03) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(120, 180, 255, 0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .navbar {
+            background: rgba(10, 17, 28, 0.6);
+            backdrop-filter: blur(20px) saturate(200%);
+            border-bottom: 1px solid rgba(90, 160, 255, 0.2);
+            padding: 14px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .navbar .container {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .logo {
+            font-size: 1.6rem;
+            font-weight: 450;
+            background: linear-gradient(135deg, #e0efff, #b2d9ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.3px;
+            filter: drop-shadow(0 0 8px #3f8eff);
+            white-space: nowrap;
+        }
+        .back-link {
+            color: #5ba5ff;
+            text-decoration: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.2s, text-shadow 0.2s;
+        }
+        .back-link:hover {
+            color: white;
+            text-shadow: 0 0 8px #4d9eff;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 24px;
+            width: 100%;
+            flex: 1;
+            position: relative;
+            z-index: 10;
+        }
+        .page-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .page-header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #e0efff, #b2d9ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 10px #3f8eff);
+            margin-bottom: 10px;
+        }
+        .page-header p {
+            color: #90b0d1;
+            font-size: 1.1rem;
+        }
+        .publish-card {
+            background: rgba(20, 30, 50, 0.5);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 40px;
+            border: 1px solid rgba(90, 160, 255, 0.2);
+        }
+        .form-group {
+            margin-bottom: 28px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #b5d5ff;
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+        .form-group label i {
+            margin-right: 8px;
+            color: #5ba5ff;
+        }
+        .form-group label .required {
+            color: #ff8a8a;
+        }
+        .form-input {
+            width: 100%;
+            padding: 16px 22px;
+            background: rgba(8, 18, 32, 0.6);
+            border: 1.5px solid rgba(90, 160, 255, 0.25);
+            border-radius: 16px;
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
+            color: #e0f0ff;
+            outline: none;
+            transition: all 0.25s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        .form-input:focus {
+            border-color: #3f9eff;
+            background: rgba(10, 25, 45, 0.8);
+            box-shadow: 0 0 20px #1e88e5, 0 5px 15px #00000050;
+        }
+        .form-input::placeholder {
+            color: #6a8ab0;
+        }
+        textarea.form-input {
+            border-radius: 20px;
+            resize: vertical;
+            min-height: 150px;
+            line-height: 1.6;
+        }
+        .form-select {
+            width: 100%;
+            padding: 16px 22px;
+            background: rgba(8, 18, 32, 0.6) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2390b0d1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat right 20px center;
+            background-size: 16px;
+            border: 1.5px solid rgba(90, 160, 255, 0.25);
+            border-radius: 16px;
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
+            color: #e0f0ff;
+            outline: none;
+            transition: all 0.25s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            appearance: none;
+            cursor: pointer;
+        }
+        .form-select:focus {
+            border-color: #3f9eff;
+            background-color: rgba(10, 25, 45, 0.8);
+            box-shadow: 0 0 20px #1e88e5, 0 5px 15px #00000050;
+        }
+        .form-select option {
+            background: #0b0e14;
+            color: #e0f0ff;
+        }
+        .author-row {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+        .author-row .form-input {
+            flex: 1;
+        }
+        .auto-fill-btn {
+            padding: 12px 20px;
+            background: rgba(91, 165, 255, 0.2);
+            border: 1px solid rgba(91, 165, 255, 0.5);
+            border-radius: 16px;
+            color: #5ba5ff;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .auto-fill-btn:hover {
+            background: rgba(91, 165, 255, 0.3);
+            border-color: #5ba5ff;
+            box-shadow: 0 0 15px rgba(91, 165, 255, 0.5);
+        }
+        .auto-fill-btn.filled {
+            background: rgba(0, 200, 150, 0.2);
+            border-color: rgba(0, 255, 200, 0.5);
+            color: #8bffb0;
+        }
+        .form-hint {
+            font-size: 0.85rem;
+            color: #6a8ab0;
+            margin-top: 8px;
+        }
+        .btn-group {
+            display: flex;
+            gap: 16px;
+            margin-top: 36px;
+        }
+        .btn {
+            flex: 1;
+            padding: 16px 24px;
+            border: none;
+            border-radius: 60px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 550;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .btn-primary {
+            background: linear-gradient(105deg, #1f4f9e, #2d6fc4);
+            color: white;
+            box-shadow: 0 10px 25px -5px #0a2a5a, 0 0 0 1px #5b9eff inset;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .btn-primary:hover {
+            background: linear-gradient(105deg, #2a5fb0, #3f82da);
+            box-shadow: 0 15px 30px -5px #1f4f9e, 0 0 30px #0077ff;
+            transform: scale(1.02);
+        }
+        .btn-primary:disabled {
+            background: linear-gradient(105deg, #1f4f9e, #2d6fc4);
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .btn-secondary {
+            background: rgba(120, 120, 120, 0.3);
+            color: #b0b0b0;
+            border: 1px solid rgba(120, 120, 120, 0.5);
+        }
+        .btn-secondary:hover {
+            background: rgba(150, 150, 150, 0.4);
+            color: white;
+            border-color: #999;
+        }
+        .message {
+            margin-top: 20px;
+            padding: 14px 20px;
+            border-radius: 16px;
+            text-align: center;
+            font-weight: 500;
+            display: none;
+            backdrop-filter: blur(10px);
+            font-size: 0.95rem;
+        }
+        .message.error {
+            background: rgba(220, 60, 60, 0.2);
+            color: #ffb0b0;
+            border: 1px solid rgba(255, 100, 100, 0.5);
+        }
+        .message.success {
+            background: rgba(0, 200, 150, 0.15);
+            color: #b0ffde;
+            border: 1px solid rgba(0, 255, 200, 0.4);
+        }
+        .tips-card {
+            background: rgba(10, 22, 38, 0.5);
+            border-radius: 16px;
+            padding: 20px 24px;
+            margin-bottom: 28px;
+            border: 1px solid rgba(90, 160, 255, 0.15);
+        }
+        .tips-card h3 {
+            color: #b5d5ff;
+            font-size: 1rem;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .tips-card h3 i {
+            color: #5ba5ff;
+        }
+        .tips-card ul {
+            list-style: none;
+            padding: 0;
+        }
+        .tips-card li {
+            color: #90b0d1;
+            font-size: 0.9rem;
+            padding: 6px 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+        .tips-card li::before {
+            content: '•';
+            color: #5ba5ff;
+            font-weight: bold;
+        }
+        @media (max-width: 768px) {
+            .container {
+                padding: 24px 16px;
+            }
+            .publish-card {
+                padding: 24px;
+            }
+            .page-header h1 {
+                font-size: 1.8rem;
+            }
+            .author-row {
+                flex-direction: column;
+                gap: 12px;
+            }
+            .auto-fill-btn {
+                width: 100%;
+            }
+            .btn-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="bgCanvas"></canvas>
+
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">霓虹资源站</div>
+            <a href="/" class="back-link">
+                <i class="fas fa-arrow-left"></i>
+                返回首页
+            </a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h1><i class="fas fa-paper-plane"></i> 发布资源</h1>
+            <p>分享你的资源，让更多人受益</p>
+        </div>
+
+        <div class="publish-card">
+            <div class="tips-card">
+                <h3><i class="fas fa-lightbulb"></i> 发布须知</h3>
+                <ul>
+                    <li>发布后资源需经过审核才能在首页展示</li>
+                    <li>标题和简介将展示在首页卡片中，请认真填写</li>
+                    <li>详细内容支持详细描述资源使用方法、功能特点等</li>
+                    <li>请选择准确的分类，方便用户查找</li>
+                    <li>作者名称将显示在资源详情页</li>
+                </ul>
+            </div>
+
+            <form id="publishForm">
+                <div class="form-group">
+                    <label><i class="fas fa-heading"></i> 资源标题 <span class="required">*</span></label>
+                    <input type="text" id="resourceTitle" class="form-input" placeholder="请输入资源标题，例如：某软件破解版" maxlength="50" required>
+                    <div class="form-hint">控制在30字以内，突出资源特点</div>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-file-alt"></i> 资源简介 <span class="required">*</span></label>
+                    <input type="text" id="resourceSummary" class="form-input" placeholder="请输入资源简介（首页卡片显示）" maxlength="100" required>
+                    <div class="form-hint">显示在首页卡片中，建议30-50字，简明扼要</div>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-align-left"></i> 详细内容 <span class="required">*</span></label>
+                    <textarea id="resourceContent" class="form-input" placeholder="请输入资源详细内容" required></textarea>
+                    <div class="form-hint">详细描述资源的功能、使用方法、下载方式等</div>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-tag"></i> 资源分类 <span class="required">*</span></label>
+                    <select id="resourceCategory" class="form-select" required>
+                        <option value="" selected disabled>-- 请选择分类 --</option>
+                        <option value="免费">免费</option>
+                        <option value="破解">破解</option>
+                        <option value="辅助">辅助</option>
+                        <option value="游戏">游戏</option>
+                        <option value="直播">直播</option>
+                        <option value="福利">福利</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-user"></i> 作者名称 <span class="required">*</span></label>
+                    <div class="author-row">
+                        <input type="text" id="resourceAuthor" class="form-input" placeholder="请输入作者名称" maxlength="20" required>
+                        <button type="button" id="autoFillBtn" class="auto-fill-btn">
+                            <i class="fas fa-bolt"></i> 填充我的账号
+                        </button>
+                    </div>
+                    <div class="form-hint">点击右侧按钮快速填充你登录的账号名称</div>
+                </div>
+
+                <div class="message" id="publishMessage"></div>
+
+                <div class="btn-group">
+                    <button type="button" class="btn btn-secondary" id="cancelBtn">
+                        <i class="fas fa-times"></i> 取消
+                    </button>
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                        <i class="fas fa-paper-plane"></i> 发布资源
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function getHost() {
+            return window.location.hostname || '127.0.0.1';
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const publishForm = document.getElementById('publishForm');
+            const submitBtn = document.getElementById('submitBtn');
+            const cancelBtn = document.getElementById('cancelBtn');
+            const autoFillBtn = document.getElementById('autoFillBtn');
+            const resourceAuthor = document.getElementById('resourceAuthor');
+            const messageDiv = document.getElementById('publishMessage');
+
+            const userInfo = localStorage.getItem('userInfo');
+            if (!userInfo) {
+                showMessage('请先登录后再发布资源', true);
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 2000);
+                return;
+            }
+
+            let currentUser = null;
+            try {
+                currentUser = JSON.parse(userInfo);
+            } catch (e) {
+                console.error('解析用户信息失败:', e);
+                window.location.href = '/';
+                return;
+            }
+
+            autoFillBtn.addEventListener('click', function() {
+                if (currentUser && currentUser.username) {
+                    resourceAuthor.value = currentUser.username;
+                    autoFillBtn.classList.add('filled');
+                    autoFillBtn.innerHTML = '<i class="fas fa-check"></i> 已填充';
+                }
+            });
+
+            cancelBtn.addEventListener('click', function() {
+                window.location.href = '/';
+            });
+
+            publishForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                submitResource();
+            });
+
+            function submitResource() {
+                const title = document.getElementById('resourceTitle').value.trim();
+                const summary = document.getElementById('resourceSummary').value.trim();
+                const content = document.getElementById('resourceContent').value.trim();
+                const category = document.getElementById('resourceCategory').value;
+                const author = resourceAuthor.value.trim();
+
+                if (!title) {
+                    showMessage('请输入资源标题', true);
+                    return;
+                }
+                if (!summary) {
+                    showMessage('请输入资源简介', true);
+                    return;
+                }
+                if (!content) {
+                    showMessage('请输入资源详细内容', true);
+                    return;
+                }
+                if (!category) {
+                    showMessage('请选择资源分类', true);
+                    return;
+                }
+                if (!author) {
+                    showMessage('请输入作者名称', true);
+                    return;
+                }
+
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 发布中...';
+
+                const resource = {
+                    title: title,
+                    summary: summary,
+                    content: content,
+                    category: category,
+                    author: author
+                };
+
+                fetch(`/resources/publish`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(resource)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showMessage('发布成功！资源待审核后将在首页展示...', false);
+                        setTimeout(() => {
+                            window.location.href = '/';
+                        }, 2000);
+                    } else {
+                        showMessage(data.message || '发布失败，请稍后重试', true);
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> 发布资源';
+                    }
+                })
+                .catch(error => {
+                    console.error('发布资源失败:', error);
+                    showMessage('网络错误，发布失败', true);
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> 发布资源';
+                });
+            }
+
+            function showMessage(message, isError) {
+                messageDiv.textContent = message;
+                messageDiv.className = isError ? 'message error' : 'message success';
+                messageDiv.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>
