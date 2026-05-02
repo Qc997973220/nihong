@@ -503,49 +503,56 @@
 
         .search-box {
             display: flex;
-            max-width: 600px;
-            margin: 0 auto;
-            background: rgba(10, 22, 38, 0.6);
-            backdrop-filter: blur(12px);
+            max-width: 680px;
+            margin: 28px auto 0;
+            background: rgba(10, 22, 38, 0.75);
+            backdrop-filter: blur(20px);
             border-radius: 80px;
-            border: 1px solid rgba(90, 170, 255, 0.4);
-            box-shadow: 0 15px 35px -10px #00000080, 0 0 0 1px #3f9eff20 inset;
+            border: 1px solid rgba(90, 170, 255, 0.35);
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5), 0 0 30px rgba(57, 138, 255, 0.1), 0 0 0 1px rgba(63, 158, 255, 0.15) inset;
+            overflow: hidden;
         }
         .search-box input {
             flex: 1;
-            padding: 16px 24px;
+            padding: 18px 28px;
             background: transparent;
             border: none;
             outline: none;
-            font-size: 1rem;
-            color: white;
-            font-weight: 350;
+            font-size: 1.05rem;
+            color: #ffffff;
+            font-weight: 380;
             min-width: 0;
+            letter-spacing: 0.3px;
         }
         .search-box input::placeholder {
-            color: #7f9bc0;
-            font-weight: 300;
+            color: #6b8cb8;
+            font-weight: 350;
+            letter-spacing: 0.5px;
         }
         .search-box button {
-            background: linear-gradient(145deg, #1f4c9e, #306ac5);
+            background: linear-gradient(135deg, #1e4a96 0%, #2d60c0 50%, #3d80e8 100%);
             border: none;
             color: white;
-            padding: 0 28px;
-            border-radius: 80px;
-            font-weight: 500;
+            padding: 0 32px;
+            border-radius: 0 80px 80px 0;
+            font-weight: 550;
             font-size: 1rem;
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 8px;
-            box-shadow: 0 0 20px #006eff;
-            border-left: 1px solid #7fc9ff;
-            transition: 0.2s;
+            gap: 9px;
+            box-shadow: 0 0 25px rgba(30, 108, 232, 0.4), 0 4px 15px rgba(0, 0, 0, 0.3);
+            border-left: 1px solid rgba(127, 201, 255, 0.4);
+            transition: all 0.3s ease;
             white-space: nowrap;
         }
         .search-box button:hover {
-            background: linear-gradient(145deg, #2e62b5, #467edf);
-            box-shadow: 0 0 35px #1e88e5;
+            background: linear-gradient(135deg, #2a5db0 0%, #3d75d8 50%, #4d90f0 100%);
+            box-shadow: 0 0 35px rgba(30, 136, 229, 0.55), 0 6px 20px rgba(0, 0, 0, 0.35);
+            transform: translateY(-1px);
+        }
+        .search-box button:active {
+            transform: translateY(1px);
         }
 
         /* 问候卡片（保留原有，但移除了问候文本，只保留状态徽章） */
@@ -1192,9 +1199,9 @@
             .hero { padding: 40px 0 30px; }
             .hero p { font-size: 1rem; }
             .greeting-scroll { max-width: 100%; }
-            .search-box { flex-direction: column; border-radius: 40px; background: rgba(10,22,38,0.8); overflow: hidden; }
+            .search-box { flex-direction: column; border-radius: 40px; background: rgba(10,22,38,0.85); overflow: hidden; margin-top: 20px; }
             .search-box input { padding: 16px 20px; text-align: center; border-bottom: 1px solid rgba(90,170,255,0.3); }
-            .search-box button { padding: 14px 20px; border-left: none; border-radius: 0; justify-content: center; }
+            .search-box button { padding: 14px 20px; border-left: none; border-radius: 0; justify-content: center; box-shadow: 0 0 20px rgba(30, 108, 232, 0.3); }
             .greeting-card { padding: 20px 24px; flex-direction: column; align-items: flex-start; }
             .badge { align-self: flex-start; }
             .external-links { padding: 12px 16px; }
@@ -1356,8 +1363,8 @@
             </h1>
             <p>精选免费资源、工具、设计素材和各种黑科技</p>
             <div class="search-box">
-                <input type="text" placeholder="搜索资源（例如：免费、破解、辅助）">
-                <button><i class="fa-solid fa-magnifying-glass"></i> 搜索</button>
+                <input type="text" id="searchInput" placeholder="搜索资源">
+                <button id="searchBtn"><i class="fa-solid fa-magnifying-glass"></i> 搜索</button>
             </div>
         </section>
 
@@ -1738,7 +1745,67 @@
             }
         }
 
-        // 初始化加载资源列表
+        // 搜索功能
+        function initSearch() {
+            const searchInput = document.getElementById('searchInput');
+            const searchBtn = document.getElementById('searchBtn');
+
+            function performSearch() {
+                const keyword = searchInput.value.trim();
+                if (keyword) {
+                    searchResources(keyword);
+                } else {
+                    loadResources();
+                }
+            }
+
+            if (searchBtn) {
+                searchBtn.addEventListener('click', performSearch);
+            }
+
+            if (searchInput) {
+                searchInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        performSearch();
+                    }
+                });
+            }
+        }
+
+        let currentSearchKeyword = '';
+        let currentSearchResults = [];
+
+        function searchResources(keyword) {
+            currentSearchKeyword = keyword;
+            fetch(`/resources/search?keyword=${encodeURIComponent(keyword)}`)
+                .then(response => response.json())
+                .then(resources => {
+                    currentSearchResults = resources;
+                    const resourceGrid = document.getElementById('resourceGrid');
+                    if (resourceGrid) {
+                        if (resources.length === 0) {
+                            resourceGrid.innerHTML = `
+                                <div style="text-align: center; padding: 60px 20px; color: #7f9bc0; grid-column: 1/-1;">
+                                    <i class="fas fa-search" style="font-size: 3rem; margin-bottom: 16px; opacity: 0.5;"></i>
+                                    <p style="font-size: 1.1rem;">未找到与"${keyword}"相关的资源</p>
+                                    <p style="font-size: 0.9rem; margin-top: 8px; opacity: 0.7;">试试其他关键词吧~</p>
+                                </div>
+                            `;
+                        } else {
+                            const activeChip = document.querySelector('.category-chip.active');
+                            const currentCategory = activeChip ? activeChip.textContent.trim() : '全部';
+                            renderCards(resources, currentCategory);
+                        }
+                    }
+                    localStorage.setItem('searchKeyword', keyword);
+                })
+                .catch(error => {
+                    console.error('搜索失败:', error);
+                    showErrorToast('搜索失败，请稍后重试');
+                });
+        }
+
+        initSearch();
         loadResources();
     });
 
@@ -1853,7 +1920,10 @@
 
     // 获取资源列表
     async function fetchResources() {
-        // 尝试从localStorage获取缓存的资源列表
+        currentSearchKeyword = '';
+        currentSearchResults = [];
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) searchInput.value = '';
         const cachedResources = localStorage.getItem('cachedResources');
         const cachedTimestamp = localStorage.getItem('cachedResourcesTimestamp');
         const now = Date.now();
@@ -1899,7 +1969,12 @@
         chip.addEventListener('click', function() {
             document.querySelectorAll('.category-chip').forEach(c => c.classList.remove('active'));
             this.classList.add('active');
-            renderCards(allResources, this.textContent.trim());
+            const category = this.textContent.trim();
+            if (currentSearchKeyword && currentSearchResults.length > 0) {
+                renderCards(currentSearchResults, category);
+            } else {
+                renderCards(allResources, category);
+            }
         });
     });
 
@@ -1932,14 +2007,14 @@
         leftContainer.innerHTML = leftItems.map(r => `
             <div class="recommend-item" onclick="window.location.href='detail.html?id=${r.id}'">
                 <i class="fas fa-chevron-right" style="color:#5a85c0;font-size:0.7rem;"></i>
-                <a href="detail.html?id=${r.id}">${escapeHtml(r.title)}</a>
+                <a href="detail.html?id=${r.id}">${r.title}</a>
             </div>
         `).join('');
 
         rightContainer.innerHTML = rightItems.map(r => `
             <div class="recommend-item" onclick="window.location.href='detail.html?id=${r.id}'">
                 <i class="fas fa-chevron-right" style="color:#5a85c0;font-size:0.7rem;"></i>
-                <a href="detail.html?id=${r.id}">${escapeHtml(r.title)}</a>
+                <a href="detail.html?id=${r.id}">${r.title}</a>
             </div>
         `).join('');
     }

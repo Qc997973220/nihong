@@ -24,7 +24,6 @@ public class ResourceService {
     private CacheService cacheService;
 
     public List<Resource> getAllResources() {
-        // 尝试从缓存获取
         String cacheKey = cacheService.getResourceListKey();
         List<Resource> resources = (List<Resource>) cacheService.get(cacheKey);
 
@@ -32,13 +31,14 @@ public class ResourceService {
             return resources;
         }
 
-        // 从数据库获取只返回审核通过(status=1)的资源
-        resources = resourceRepository.findByStatusOrderByCreatedAtDesc(1);
-
-        // 缓存结果，过期时间30分钟
+        resources = resourceRepository.findByStatusInOrderByCreatedAtDesc(Arrays.asList(1, 2));
         cacheService.set(cacheKey, resources, 1800);
 
         return resources;
+    }
+
+    public List<Resource> searchResources(String keyword) {
+        return resourceRepository.findByTitleContainingIgnoreCaseAndStatusIn(keyword, Arrays.asList(1, 2));
     }
 
     public Resource getResourceDetail(Long id) {

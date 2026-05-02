@@ -96,6 +96,15 @@ public class ResourceController {
         return resourceService.getAllResources();
     }
 
+    @GetMapping("/search")
+    @ResponseBody
+    public List<Resource> search(@RequestParam String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return resourceService.getAllResources();
+        }
+        return resourceService.searchResources(keyword.trim());
+    }
+
     // 获取资源详情（包含评论）
     @GetMapping("/{id}")
     @ResponseBody
