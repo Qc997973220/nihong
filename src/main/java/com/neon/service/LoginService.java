@@ -30,6 +30,10 @@ public class LoginService {
         if (usersDao.existsByAccount(users.getAccount())) {
             return 0;
         }
+        // 检查用户名是否已存在
+        if (usersDao.existsByUserName(users.getUserName())) {
+            return 2;
+        }
         if (users.getActivationCode().equals("666668")){
             users.setId(UUID.randomUUID().toString());
             // 设置默认角色为0（普通用户）

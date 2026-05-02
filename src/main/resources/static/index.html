@@ -2062,6 +2062,10 @@
                 messageDiv.className = 'message error';
                 messageDiv.innerText = '注册失败，账号已存在';
                 messageDiv.style.display = 'block';
+            } else if (result === '2') {
+                messageDiv.className = 'message error';
+                messageDiv.innerText = '注册失败，用户名已存在';
+                messageDiv.style.display = 'block';
             } else if (result === '-1') {
                 messageDiv.className = 'message error';
                 messageDiv.innerText = '激活码无效，请联系站长获取有效激活码';

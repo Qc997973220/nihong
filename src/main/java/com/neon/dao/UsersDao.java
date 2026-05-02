@@ -13,5 +13,6 @@ public interface UsersDao extends JpaRepository<Users, String> {
     List<Users> findByUserName(String userName);
     Users findByAccount(String account);
     boolean existsByAccount(String account);
+    boolean existsByUserName(String userName);
 
 }
