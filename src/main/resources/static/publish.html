@@ -749,6 +749,8 @@
                     const data = await response.json();
 
                     if (data.success) {
+                        localStorage.removeItem('cachedResources');
+                        localStorage.removeItem('cachedResourcesTimestamp');
                         showMessage('发布成功！资源待审核后将在首页展示...', false);
                         setTimeout(() => {
                             window.location.href = '/';

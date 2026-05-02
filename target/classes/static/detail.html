@@ -188,6 +188,14 @@
             text-align: center;
             text-shadow: 0 0 10px rgba(95, 158, 255, 0.5);
         }
+        .article-cover {
+            width: 100%;
+            max-height: 400px;
+            object-fit: cover;
+            border-radius: 20px;
+            margin: 20px 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
         .article-meta {
             color: #90b0d1;
             margin-bottom: 30px;
@@ -558,7 +566,7 @@
     // 获取未读消息数量
     async function getUnreadMessageCount(username) {
         try {
-            const response = await fetch(`http://${getHost()}:8060/messages/unread/count/${username}`);
+            const response = await fetch(`/messages/unread/count/${username}`);
             if (response.ok) {
                 const result = await response.json();
                 if (result.success) {
@@ -580,7 +588,7 @@
     // 获取未读消息列表
     async function getUnreadMessages(username) {
         try {
-            const response = await fetch(`http://${getHost()}:8060/messages/unread/${username}`);
+            const response = await fetch(`/messages/unread/${username}`);
             if (response.ok) {
                 const result = await response.json();
                 if (result.success) {
@@ -636,7 +644,7 @@
     // 标记消息为已读
     async function markMessageAsRead(messageId) {
         try {
-            const response = await fetch(`http://${getHost()}:8060/messages/read/${messageId}`, {
+            const response = await fetch(`/messages/read/${messageId}`, {
                 method: 'POST'
             });
             if (response.ok) {
@@ -713,7 +721,7 @@
 
         // 直接从服务器获取资源详情（不缓存，因为数据较大包含Base64头像）
         try {
-            const url = `http://${getHost()}:8060/resources/${id}`;
+            const url = `/resources/${id}`;
             console.log('请求URL:', url);
             const response = await fetch(url);
             console.log('响应状态:', response.status);
@@ -759,6 +767,7 @@
         const category = resource.category || '未分类';
         const createdAt = resource.createdAt;
         const content = resource.content || '';
+        const image = resource.image || '';
 
         // 安全格式化日期
         let createdDate = '未知';
@@ -778,6 +787,7 @@
         console.log('渲染字段:', { title, author, category, createdDate, contentLength: content.length });
 
         // 构建 HTML（包含评论输入框）
+        let coverImageHtml = image ? `<img class="article-cover" src="${image}" alt="${title}">` : '';
         let html = `
                 <h1 class="article-title">${title}</h1>
                 <div class="article-meta">
@@ -785,6 +795,7 @@
                     <span>发布于：${createdDate}</span> ·
                     <span>分类：${escapeHtml(category)}</span>
                 </div>
+                ${coverImageHtml}
                 <div class="article-content">
                     ${content ? escapeHtml(content).replace(/\n/g, '<br>') : '暂无内容'}
                 </div>
@@ -923,7 +934,7 @@
         };
 
         try {
-            const response = await fetch(`http://${getHost()}:8060/resources/comment`, {
+            const response = await fetch(`/resources/comment`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(commentData)
@@ -969,7 +980,7 @@
         }
 
         try {
-            const response = await fetch(`http://${getHost()}:8060/resources/comment/${commentId}/like`, {
+            const response = await fetch(`/resources/comment/${commentId}/like`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ userId: savedUsername })
@@ -1009,7 +1020,7 @@
         if (!savedUsername) return;
 
         try {
-            const response = await fetch(`http://${getHost()}:8060/resources/comment/${commentId}/user/${savedUsername}/liked`);
+            const response = await fetch(`/resources/comment/${commentId}/user/${savedUsername}/liked`);
             if (response.ok) {
                 const result = await response.json();
                 if (result.success) {
@@ -1076,7 +1087,7 @@
                 parentId: commentId  // 设置父评论ID
             };
 
-            const response = await fetch(`http://${getHost()}:8060/resources/comment`, {
+            const response = await fetch(`/resources/comment`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(replyData)

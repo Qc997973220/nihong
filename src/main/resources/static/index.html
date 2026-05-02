@@ -1823,7 +1823,7 @@
         messageDiv.style.display = 'none';
 
         try {
-            const url = `http://${getHost()}:8060/login/first?userName=${encodeURIComponent(userName)}&password=${encodeURIComponent(password)}`;
+            const url = `/login/first?userName=${encodeURIComponent(userName)}&password=${encodeURIComponent(password)}`;
             const response = await fetch(url);
             const result = await response.json();
 
@@ -1932,7 +1932,7 @@
         if (phone) formData.append('phone', phone);
 
         try {
-            const url = `http://${getHost()}:8060/login/registered`;
+            const url = `/login/registered`;
             const response = await fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -1945,7 +1945,7 @@
                 messageDiv.innerText = '注册成功，正在自动登录...';
                 messageDiv.style.display = 'block';
 
-                const loginUrl = `http://${getHost()}:8060/login/first?userName=${encodeURIComponent(userName)}&password=${encodeURIComponent(password)}`;
+                const loginUrl = `/login/first?userName=${encodeURIComponent(userName)}&password=${encodeURIComponent(password)}`;
                 const loginResponse = await fetch(loginUrl);
                 const loginResult = await loginResponse.json();
 
@@ -2029,7 +2029,7 @@
     // 获取未读消息数量
     async function getUnreadMessageCount(username) {
         try {
-            const response = await fetch(`http://${getHost()}:8060/messages/unread/count/${username}`);
+            const response = await fetch(`/messages/unread/count/${username}`);
             if (response.ok) {
                 const result = await response.json();
                 if (result.success) {
@@ -2051,7 +2051,7 @@
     // 获取未读消息列表
     async function getUnreadMessages(username) {
         try {
-            const response = await fetch(`http://${getHost()}:8060/messages/unread/${username}`);
+            const response = await fetch(`/messages/unread/${username}`);
             if (response.ok) {
                 const result = await response.json();
                 if (result.success) {
@@ -2107,7 +2107,7 @@
     // 标记消息为已读
     async function markMessageAsRead(messageId) {
         try {
-            const response = await fetch(`http://${getHost()}:8060/messages/read/${messageId}`, {
+            const response = await fetch(`/messages/read/${messageId}`, {
                 method: 'POST'
             });
             if (response.ok) {
@@ -2140,7 +2140,7 @@
                 }
                 
                 // 从数据库中获取最新的用户信息
-                fetch(`http://${getHost()}:8060/api/user?userName=${encodeURIComponent(userInfo.username)}`)
+                fetch(`/api/user?userName=${encodeURIComponent(userInfo.username)}`)
                     .then(response => response.json())
                     .then(data => {
                         if (data.status) {

@@ -332,7 +332,7 @@
             try {
                 // 这里应该从后端获取用户信息
                 // 暂时使用模拟数据
-                const response = await fetch(`http://${getHost()}:8060/api/user?userName=${encodeURIComponent(userName)}`);
+                const response = await fetch(`/api/user?userName=${encodeURIComponent(userName)}`);
                 const data = await response.json();
                 
                 if (data.status) {
