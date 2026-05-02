@@ -46,6 +46,82 @@
             pointer-events: none;
             z-index: 1;
         }
+        .float-contact {
+            position: fixed;
+            right: 24px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            z-index: 999;
+        }
+        .contact-btn {
+            position: relative;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: 1px solid rgba(90, 170, 255, 0.5);
+            background: rgba(15, 30, 55, 0.8);
+            backdrop-filter: blur(16px);
+            box-shadow: 0 0 25px rgba(30, 136, 229, 0.3), 0 4px 12px rgba(0, 0, 0, 0.4);
+            transition: all 0.3s ease;
+        }
+        .contact-btn i { font-size: 1.5rem; }
+        .contact-btn:nth-child(1) { color: #07c160; }
+        .contact-btn:nth-child(2) { color: #12b7f5; }
+        .contact-btn:nth-child(3) { color: #ff6b6b; }
+        .contact-btn:hover {
+            transform: scale(1.15);
+            box-shadow: 0 0 35px rgba(30, 136, 229, 0.5), 0 6px 15px rgba(0, 0, 0, 0.5);
+            border-color: #5a9eff;
+        }
+        .contact-popup {
+            position: absolute;
+            right: 70px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(15, 30, 55, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(90, 170, 255, 0.4);
+            border-radius: 16px;
+            padding: 16px;
+            min-width: 200px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+        .contact-btn:hover .contact-popup {
+            opacity: 1;
+            visibility: visible;
+            right: 65px;
+        }
+        .contact-popup img {
+            width: 160px;
+            height: 160px;
+            border-radius: 12px;
+            display: block;
+            margin: 0 auto 12px;
+            border: 2px solid rgba(90, 170, 255, 0.3);
+        }
+        .contact-popup p {
+            text-align: center;
+            color: #a0bedd;
+            margin: 0;
+            font-size: 0.9rem;
+        }
+        .contact-popup .email-text {
+            color: #5a9eff;
+            font-size: 1rem;
+            font-weight: 500;
+            margin-top: 8px;
+            font-family: 'Courier New', monospace;
+        }
         .navbar {
             background: rgba(10, 17, 28, 0.6);
             backdrop-filter: blur(20px) saturate(200%);
@@ -815,5 +891,30 @@
             }
         });
     </script>
+    
+    <!-- 悬浮联系按钮组 -->
+    <div class="float-contact">
+        <div class="contact-btn" id="wechatBtn">
+            <i class="fa-brands fa-weixin"></i>
+            <div class="contact-popup wechat-popup">
+                <img src="/uploads/wechat_qr.png" alt="微信二维码">
+                <p>扫码添加微信</p>
+            </div>
+        </div>
+        <div class="contact-btn" id="qqBtn">
+            <i class="fa-brands fa-qq"></i>
+            <div class="contact-popup qq-popup">
+                <img src="/uploads/qq_qr.png" alt="QQ二维码">
+                <p>扫码添加QQ</p>
+            </div>
+        </div>
+        <div class="contact-btn" id="emailBtn">
+            <i class="fa-solid fa-envelope"></i>
+            <div class="contact-popup email-popup">
+                <p>邮箱地址</p>
+                <p class="email-text">997973220@qq.com</p>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

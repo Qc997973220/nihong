@@ -966,39 +966,85 @@
             font-weight: 350;
         }
 
-        /* 悬浮按钮 */
-        .float-btn {
+        /* 悬浮联系按钮组 */
+        .float-contact {
             position: fixed;
             right: 24px;
             top: 50%;
             transform: translateY(-50%);
-            background: rgba(15, 30, 55, 0.7);
-            backdrop-filter: blur(16px);
-            color: white;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
             display: flex;
             flex-direction: column;
+            gap: 16px;
+            z-index: 999;
+        }
+        .contact-btn {
+            position: relative;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            border: 1px solid #5a9eff;
-            box-shadow: 0 0 30px #1e88e5, 0 5px 15px #00000080;
-            z-index: 999;
-            transition: 0.2s;
-            font-size: 0.7rem;
-            line-height: 1.2;
-            font-weight: 400;
-            gap: 2px;
+            border: 1px solid rgba(90, 170, 255, 0.5);
+            background: rgba(15, 30, 55, 0.8);
+            backdrop-filter: blur(16px);
+            box-shadow: 0 0 25px rgba(30, 136, 229, 0.3), 0 4px 12px rgba(0, 0, 0, 0.4);
+            transition: all 0.3s ease;
         }
-        .float-btn:hover {
-            background: #1f4f9e;
-            transform: translateY(-50%) scale(1.1);
-            box-shadow: 0 0 45px #0077ff;
+        .contact-btn i {
+            font-size: 1.5rem;
         }
-        .float-btn i {
-            font-size: 1.4rem;
+        .contact-btn:nth-child(1) { color: #07c160; }
+        .contact-btn:nth-child(2) { color: #12b7f5; }
+        .contact-btn:nth-child(3) { color: #ff6b6b; }
+        .contact-btn:hover {
+            transform: scale(1.15);
+            box-shadow: 0 0 35px rgba(30, 136, 229, 0.5), 0 6px 15px rgba(0, 0, 0, 0.5);
+            border-color: #5a9eff;
+        }
+        .contact-popup {
+            position: absolute;
+            right: 70px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(15, 30, 55, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(90, 170, 255, 0.4);
+            border-radius: 16px;
+            padding: 16px;
+            min-width: 200px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 30px rgba(57, 138, 255, 0.15);
+            z-index: 1000;
+        }
+        .contact-btn:hover .contact-popup {
+            opacity: 1;
+            visibility: visible;
+            right: 65px;
+        }
+        .contact-popup img {
+            width: 160px;
+            height: 160px;
+            border-radius: 12px;
+            display: block;
+            margin: 0 auto 12px;
+            border: 2px solid rgba(90, 170, 255, 0.3);
+        }
+        .contact-popup p {
+            text-align: center;
+            color: #a0bedd;
+            margin: 0;
+            font-size: 0.9rem;
+        }
+        .contact-popup .email-text {
+            color: #5a9eff;
+            font-size: 1rem;
+            font-weight: 500;
+            margin-top: 8px;
+            font-family: 'Courier New', monospace;
         }
 
         /* 模态框 */
@@ -1213,8 +1259,11 @@
             .resource-card { padding: 20px; }
             .card-title { font-size: 1.3rem; }
             .footer { padding: 20px 0; font-size: 0.9rem; }
-            .float-btn { right: 16px; width: 52px; height: 52px; font-size: 0.65rem; }
-            .float-btn i { font-size: 1.2rem; }
+            .float-contact { right: 12px; }
+            .contact-btn { width: 48px; height: 48px; }
+            .contact-btn i { font-size: 1.3rem; }
+            .contact-popup { min-width: 160px; padding: 12px; }
+            .contact-popup img { width: 130px; height: 130px; }
             .modal-card { padding: 28px 24px; }
             .modal-card h3 { font-size: 1.8rem; }
             .contact-item { padding: 12px 16px; }
@@ -1401,25 +1450,28 @@
     </footer>
 </div>
 
-<!-- 悬浮按钮 -->
-<div class="float-btn" id="contactBtn">
-    <i class="fa-regular fa-message"></i>
-    联系站长
-</div>
-
-<!-- 模态框 -->
-<div class="modal-overlay" id="contactModal">
-    <div class="modal-card">
-        <h3>联系站长</h3>
-        <div class="contact-item" data-copy="997973220">
-            <i class="fa-brands fa-qq"></i>
-            <span>QQ：997973220</span>
+<!-- 悬浮联系按钮组 -->
+<div class="float-contact">
+    <div class="contact-btn" id="wechatBtn">
+        <i class="fa-brands fa-weixin"></i>
+        <div class="contact-popup wechat-popup">
+            <img src="/uploads/wechat_qr.png" alt="微信二维码">
+            <p>扫码添加微信</p>
         </div>
-        <div class="contact-item" data-copy="QC-0416-666">
-            <i class="fa-brands fa-weixin"></i>
-            <span>微信：QC-0416-666</span>
+    </div>
+    <div class="contact-btn" id="qqBtn">
+        <i class="fa-brands fa-qq"></i>
+        <div class="contact-popup qq-popup">
+            <img src="/uploads/qq_qr.png" alt="QQ二维码">
+            <p>扫码添加QQ</p>
         </div>
-        <button class="close-btn" id="closeModal">关闭</button>
+    </div>
+    <div class="contact-btn" id="emailBtn">
+        <i class="fa-solid fa-envelope"></i>
+        <div class="contact-popup email-popup">
+            <p>邮箱地址</p>
+            <p class="email-text">997973220@qq.com</p>
+        </div>
     </div>
 </div>
 
@@ -2516,14 +2568,6 @@
             }
         });
     })();
-
-    // 联系站长模态框
-    const contactBtn = document.getElementById('contactBtn');
-    const modal = document.getElementById('contactModal');
-    const closeModal = document.getElementById('closeModal');
-    contactBtn.addEventListener('click', () => modal.classList.add('active'));
-    closeModal.addEventListener('click', () => modal.classList.remove('active'));
-    modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('active'); });
 
     // 复制
     const toast = document.getElementById('toast');
