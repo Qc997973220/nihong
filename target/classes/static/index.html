@@ -1538,7 +1538,7 @@
             card.className = 'resource-card';
             const imageHtml = resource.image
                 ? `<img class="card-image" src="${resource.image}" alt="${resource.title}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                   <div class="card-image-placeholder" style="display:flex;"><i class="fas fa-image"></i></div>`
+                   <div class="card-image-placeholder" style="display:none;"><i class="fas fa-image"></i></div>`
                 : `<div class="card-image-placeholder"><i class="fas fa-image"></i></div>`;
             card.innerHTML = `
                     ${imageHtml}

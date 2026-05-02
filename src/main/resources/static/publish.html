@@ -505,6 +505,18 @@
                     </div>
 
                     <div class="form-group">
+                        <label><i class="fas fa-link"></i> 资源下载链接（可选）</label>
+                        <input type="url" id="resourceDownloadLink" class="form-input" placeholder="请输入资源下载页面链接，例如：https://example.com/download">
+                        <div class="form-hint">提供资源下载页面的直链，方便用户获取资源</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fas fa-key"></i> 资源获取密码（可选）</label>
+                        <input type="text" id="resourceDownloadPassword" class="form-input" placeholder="如果链接需要密码，请填写">
+                        <div class="form-hint">如果下载链接需要访问密码或解压密码，请填写</div>
+                    </div>
+
+                    <div class="form-group">
                         <label><i class="fas fa-image"></i> 封面图片（可选）</label>
                         <div class="upload-area" id="uploadArea">
                             <div class="upload-content" id="uploadContent">
@@ -698,6 +710,8 @@
                 const content = document.getElementById('resourceContent').value.trim();
                 const category = document.getElementById('resourceCategory').value;
                 const author = currentUser.username;
+                const downloadLink = document.getElementById('resourceDownloadLink').value.trim();
+                const downloadPassword = document.getElementById('resourceDownloadPassword').value.trim();
 
                 if (!title) {
                     showMessage('请输入资源标题', true);
@@ -723,19 +737,19 @@
                 try {
                     let imageUrl = '';
 
-                    // 如果有图片，先上传图片
                     if (selectedFile) {
                         imageUrl = await uploadImage(selectedFile);
                     }
 
-                    // 提交资源
                     const resource = {
                         title: title,
                         summary: summary,
                         content: content,
                         category: category,
                         author: author,
-                        image: imageUrl
+                        image: imageUrl,
+                        downloadLink: downloadLink,
+                        downloadPassword: downloadPassword
                     };
 
                     const response = await fetch(`/resources/publish`, {

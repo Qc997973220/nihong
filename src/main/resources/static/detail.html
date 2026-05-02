@@ -196,6 +196,81 @@
             margin: 20px 0;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
+        .download-section {
+            background: linear-gradient(135deg, rgba(0, 180, 120, 0.15), rgba(0, 150, 200, 0.15));
+            border: 1px solid rgba(0, 200, 150, 0.4);
+            border-radius: 20px;
+            padding: 24px 28px;
+            margin: 24px 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .download-info {
+            flex: 1;
+            min-width: 200px;
+        }
+        .download-link-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #b0ffd8;
+            font-size: 0.95rem;
+            margin-bottom: 10px;
+        }
+        .download-link-item i {
+            color: #00c896;
+        }
+        .download-link-text {
+            color: #5bdeff;
+            text-decoration: none;
+            word-break: break-all;
+            transition: color 0.2s;
+        }
+        .download-link-text:hover {
+            color: #00a8ff;
+            text-decoration: underline;
+        }
+        .download-password-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #b0ffd8;
+            font-size: 0.95rem;
+        }
+        .download-password-item i {
+            color: #00c896;
+        }
+        .download-password {
+            background: rgba(0, 200, 150, 0.2);
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 1.1rem;
+            color: #00ffaa;
+            letter-spacing: 2px;
+        }
+        .download-btn {
+            background: linear-gradient(135deg, #00b878, #00a8ff);
+            color: white;
+            padding: 14px 32px;
+            border-radius: 60px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s;
+            box-shadow: 0 8px 20px rgba(0, 180, 120, 0.3);
+            white-space: nowrap;
+        }
+        .download-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 30px rgba(0, 180, 120, 0.5);
+        }
         .article-meta {
             color: #90b0d1;
             margin-bottom: 30px;
@@ -410,6 +485,29 @@
         #submitCommentBtn:hover {
             background: linear-gradient(105deg, #2a5fb0, #3f82da);
             box-shadow: 0 0 30px #0077ff;
+        }
+        .disclaimer {
+            background: rgba(80, 50, 30, 0.3);
+            border: 1px solid rgba(255, 150, 80, 0.4);
+            border-radius: 16px;
+            padding: 20px 24px;
+            margin-top: 30px;
+        }
+        .disclaimer h4 {
+            color: #ffb88a;
+            font-size: 1rem;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .disclaimer h4 i {
+            color: #ff9040;
+        }
+        .disclaimer p {
+            color: #c0a080;
+            font-size: 0.88rem;
+            line-height: 1.7;
         }
     </style>
 </head>
@@ -768,6 +866,8 @@
         const createdAt = resource.createdAt;
         const content = resource.content || '';
         const image = resource.image || '';
+        const downloadLink = resource.downloadLink || '';
+        const downloadPassword = resource.downloadPassword || '';
 
         // 安全格式化日期
         let createdDate = '未知';
@@ -786,6 +886,32 @@
 
         console.log('渲染字段:', { title, author, category, createdDate, contentLength: content.length });
 
+        // 构建下载区域 HTML
+        let downloadSectionHtml = '';
+        if (downloadLink) {
+            downloadSectionHtml = `
+                <div class="download-section">
+                    <div class="download-info">
+                        <div class="download-link-item">
+                            <i class="fas fa-link"></i>
+                            <span>下载链接：</span>
+                            <a href="${escapeHtml(downloadLink)}" target="_blank" class="download-link-text">${escapeHtml(downloadLink)}</a>
+                        </div>
+                        ${downloadPassword ? `
+                        <div class="download-password-item">
+                            <i class="fas fa-key"></i>
+                            <span>获取密码：</span>
+                            <span class="download-password">${escapeHtml(downloadPassword)}</span>
+                        </div>
+                        ` : ''}
+                    </div>
+                    <a href="${escapeHtml(downloadLink)}" target="_blank" class="download-btn">
+                        <i class="fas fa-download"></i> 立即获取
+                    </a>
+                </div>
+            `;
+        }
+
         // 构建 HTML（包含评论输入框）
         let coverImageHtml = image ? `<img class="article-cover" src="${image}" alt="${title}">` : '';
         let html = `
@@ -796,6 +922,7 @@
                     <span>分类：${escapeHtml(category)}</span>
                 </div>
                 ${coverImageHtml}
+                ${downloadSectionHtml}
                 <div class="article-content">
                     ${content ? escapeHtml(content).replace(/\n/g, '<br>') : '暂无内容'}
                 </div>
@@ -809,6 +936,10 @@
                     <div id="commentList">
                         ${renderComments(comments)}
                     </div>
+                </div>
+                <div class="disclaimer">
+                    <h4><i class="fas fa-exclamation-circle"></i> 免责声明</h4>
+                    <p>本站提供的一切软件、教程和内容信息仅限用于学习和研究目的；不得将上述内容用于商业或者非法用途，否则，一切后果请用户自负。本站信息来自网络收集整理，版权争议与本站无关。您必须在下载后的24个小时之内，从您的电脑或手机中彻底删除上述内容。如果您喜欢该程序和内容，请支持正版，购买注册，得到更好的正版服务。我们非常重视版权问题，如有侵权请邮件与我们联系处理。敬请谅解！</p>
                 </div>
             `;
         document.getElementById('detailContent').innerHTML = html;
