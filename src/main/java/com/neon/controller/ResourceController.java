@@ -277,4 +277,11 @@ public class ResourceController {
         }
         return result;
     }
+
+    // 根据状态获取资源列表
+    @GetMapping("/status/{status}")
+    @ResponseBody
+    public List<Resource> getResourcesByStatus(@PathVariable Integer status) {
+        return resourceService.getResourcesByStatus(status);
+    }
 }

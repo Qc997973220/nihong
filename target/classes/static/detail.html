@@ -478,28 +478,75 @@
             background: linear-gradient(105deg, #2a5fb0, #3f82da);
             box-shadow: 0 0 30px #0077ff;
         }
-        .disclaimer {
-            background: rgba(80, 50, 30, 0.3);
-            border: 1px solid rgba(255, 150, 80, 0.4);
-            border-radius: 16px;
-            padding: 20px 24px;
-            margin-top: 30px;
+        .disclaimer-container {
+            background: linear-gradient(145deg, rgba(30, 35, 45, 0.9), rgba(20, 25, 35, 0.95));
+            border: 1px solid rgba(100, 120, 180, 0.3);
+            border-radius: 20px;
+            padding: 0;
+            margin-top: 35px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4), inset 0 0 30px rgba(100, 120, 180, 0.05);
+            overflow: hidden;
         }
-        .disclaimer h4 {
-            color: #ffb88a;
-            font-size: 1rem;
-            margin-bottom: 12px;
+        .disclaimer-header {
+            background: linear-gradient(90deg, #4a6fa5, #355a8a);
+            padding: 18px 24px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
-        .disclaimer h4 i {
-            color: #ff9040;
+        .disclaimer-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: #8ab8e8;
         }
-        .disclaimer p {
-            color: #c0a080;
-            font-size: 0.88rem;
-            line-height: 1.7;
+        .disclaimer-header h3 {
+            color: #e8f0fe;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 0;
+        }
+        .disclaimer-content {
+            padding: 24px;
+        }
+        .disclaimer-content ol {
+            margin: 0;
+            padding-left: 24px;
+            list-style: none;
+            counter-reset: disclaimer-counter;
+        }
+        .disclaimer-content li {
+            counter-increment: disclaimer-counter;
+            color: #b8c5d6;
+            font-size: 0.9rem;
+            line-height: 1.8;
+            padding: 10px 0;
+            border-bottom: 1px dashed rgba(100, 120, 180, 0.2);
+            position: relative;
+        }
+        .disclaimer-content li:last-child {
+            border-bottom: none;
+        }
+        .disclaimer-content li::before {
+            content: counter(disclaimer-counter);
+            position: absolute;
+            left: -24px;
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(135deg, #5a85c0, #4a6fa5);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            color: white;
+            font-weight: 600;
         }
     </style>
 </head>
@@ -950,9 +997,24 @@
                         ${renderComments(comments)}
                     </div>
                 </div>
-                <div class="disclaimer">
-                    <h4><i class="fas fa-exclamation-circle"></i> 免责声明</h4>
-                    <p>本站提供的一切软件、教程和内容信息仅限用于学习和研究目的；不得将上述内容用于商业或者非法用途，否则，一切后果请用户自负。本站信息来自网络收集整理，版权争议与本站无关。您必须在下载后的24个小时之内，从您的电脑或手机中彻底删除上述内容。如果您喜欢该程序和内容，请支持正版，购买注册，得到更好的正版服务。我们非常重视版权问题，如有侵权请邮件18639520138@163.com与我们联系处理。敬请谅解！</p>
+                <div class="disclaimer-container">
+                    <div class="disclaimer-header">
+                        <div class="disclaimer-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h3>免责声明</h3>
+                    </div>
+                    <div class="disclaimer-content">
+                        <ol>
+                            <li>本网站的文章部分内容可能来源于网络，仅供大家学习与参考，如有侵权或违规举报，请联系站长 QQ2858861803进行删除封号处理。</li>
+                            <li>本站一切资源不代表本站立场，并不代表本站赞同其观点和对其真实性负责。</li>
+                            <li>互联网转载资源审核不严格可能会有一些其他联系方式，请大家不要盲目相信，被骗本站概不负责！</li>
+                            <li>本网站部分内容只做项目揭秘,交流学习，无法一对一教学指导，每篇文章内都含项目全套的教程讲解，请仔细阅读。</li>
+                            <li>本站分享的所有平台仅供展示，本站不对平台真实性负责，站长建议大家自己根据项目关键词自己选择平台。</li>
+                            <li>[网创]板块因文章发布时间和您阅读文章时间存在时间差，有些项目红利期可能已经过了，能不能赚钱需要自己判断，本网站仅做资源分享，不做任何收益保障。</li>
+                            <li>本站资源大多存储在云盘，如发现链接失效，请联系我们我们会第一时间更新。</li>
+                        </ol>
+                    </div>
                 </div>
             `;
         document.getElementById('detailContent').innerHTML = html;

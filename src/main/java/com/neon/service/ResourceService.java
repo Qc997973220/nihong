@@ -161,6 +161,11 @@ public class ResourceService {
         return resourceRepository.findByStatusOrderByCreatedAtDesc(0);
     }
 
+    // 根据状态获取资源列表
+    public List<Resource> getResourcesByStatus(Integer status) {
+        return resourceRepository.findByStatusOrderByCreatedAtDesc(status);
+    }
+
     // 更新资源审核状态
     public void updateResourceStatus(Long id, Integer status) {
         Resource resource = resourceRepository.findById(id).orElse(null);

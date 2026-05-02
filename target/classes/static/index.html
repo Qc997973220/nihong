@@ -575,6 +575,69 @@
             white-space: nowrap;
         }
 
+        /* 今日推荐模块 */
+        .recommend-section {
+            background: rgba(14, 26, 44, 0.5);
+            backdrop-filter: blur(16px);
+            border-radius: 40px;
+            padding: 24px 32px;
+            margin: 50px 0 30px;
+            border: 1px solid rgba(100, 180, 255, 0.25);
+            box-shadow: 0 20px 40px -15px #000000, 0 0 0 1px #ffffff0a inset;
+        }
+        .recommend-header {
+            margin-bottom: 16px;
+        }
+        .recommend-header h3 {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #b5e0ff;
+            text-shadow: 0 0 8px #2f9eff;
+            letter-spacing: 0.5px;
+            margin: 0;
+        }
+        .recommend-header h3 i {
+            margin-right: 8px;
+            color: #ffd700;
+        }
+        .recommend-content {
+            display: flex;
+            gap: 40px;
+        }
+        .recommend-list {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .recommend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: rgba(10, 22, 38, 0.5);
+            border-radius: 20px;
+            border: 1px solid rgba(90, 170, 255, 0.2);
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .recommend-item:hover {
+            background: rgba(20, 40, 70, 0.6);
+            border-color: rgba(90, 170, 255, 0.5);
+            transform: translateX(4px);
+        }
+        .recommend-item a {
+            color: #b5e0ff;
+            text-decoration: none;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .recommend-item:hover a {
+            color: #8ac8ff;
+        }
+
         /* 外部链接模块（新增） */
         .external-links {
             width: 100%;
@@ -685,6 +748,30 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+        }
+
+        .links-scroll-msg {
+            margin-top: 12px;
+            padding: 10px 16px;
+            background: rgba(10, 22, 38, 0.5);
+            border-radius: 30px;
+            border: 1px solid rgba(90, 170, 255, 0.2);
+            overflow: hidden;
+        }
+        .scroll-content-msg {
+            display: inline-block;
+            white-space: nowrap;
+            animation: scrollMarquee 25s linear infinite;
+        }
+        .scroll-content-msg span {
+            display: inline-block;
+            padding-right: 50px;
+            color: #b5e0ff;
+            font-size: 0.88rem;
+        }
+        @keyframes scrollMarquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
         }
 
         /* 分类标签 */
@@ -1261,16 +1348,7 @@
 
     <div class="container">
         <section class="hero">
-            <!-- 滚动问候（新增，位于H1上方） -->
-            <div class="greeting-scroll">
-                <span class="scroll-label">来自总部的消息：</span>
-                <div class="scroll-wrapper">
-                    <div class="scroll-content" id="scrollMessage">
-                        <span>正在连接总部...</span>
-                        <span>正在连接总部...</span>  <!-- 副本用于无缝衔接 -->
-                    </div>
-                </div>
-            </div>
+
             <h1 class="neon-title">
                 <span class="lightning-left"></span>
                 NEON 霓虹之都
@@ -1283,9 +1361,15 @@
             </div>
         </section>
 
-        <!-- 总部问候卡片（仅保留状态徽章） -->
-        <div class="greeting-card" id="greetingCard">
-            <span class="badge"><i class="fa-regular fa-circle-check"></i> 总部状态：<span id="backendStatus">检测中</span></span>
+        <!-- 今日推荐模块 -->
+        <div class="recommend-section" id="recommendSection">
+            <div class="recommend-header">
+                <h3><i class="fas fa-star"></i> 今日推荐</h3>
+            </div>
+            <div class="recommend-content">
+                <div class="recommend-list" id="recommendLeft"></div>
+                <div class="recommend-list" id="recommendRight"></div>
+            </div>
         </div>
 
         <!-- 外部链接模块（新增） -->
@@ -1683,6 +1767,8 @@
         const container = document.getElementById('externalLinks');
         if (!container) return;
 
+        const scrollMsgText = '欢迎进入霓虹之都资源库,本站24小时自动更新，同步更新中创、冒泡、福缘、自学成才、创业5大资源网站的课程。网站会员免费查看，请勿轻信课程老师。';
+
         let html = `
                 <div class="links-header">
                     <h3><i class="fa-regular fa-compass" style="margin-right: 8px;"></i>便捷链接</h3>
@@ -1706,6 +1792,11 @@
         });
 
         html += `
+                    </div>
+                </div>
+                <div class="links-scroll-msg">
+                    <div class="scroll-content-msg" id="scrollMessage">
+                        <span>${scrollMsgText}</span><span>${scrollMsgText}</span>
                     </div>
                 </div>
             `;
@@ -1812,22 +1903,45 @@
         });
     });
 
-    // 获取滚动消息和状态徽章
-    async function fetchGreeting() {
-        const scrollMsg = document.getElementById('scrollMessage');
-        const backendStatusSpan = document.getElementById('backendStatus');
+    // 获取今日推荐资源
+    async function fetchRecommendedResources() {
         try {
-            const disclaimer = '免责声明：本网站仅供网友交流学习，所有资源均来自用户分享，任何黄赌毒违法内容与本站无关。文明上网，学习共享，有问题可联系站长QQ：997973220 或邮箱：18639520138@163.com';
-            scrollMsg.innerHTML = `<span>${disclaimer}</span><span>${disclaimer}</span>`;
-            backendStatusSpan.innerText = '在线';
-            backendStatusSpan.style.color = '#8bffb0';
+            const response = await fetch('/api/resources/status/2');
+            const resources = await response.json();
+            renderRecommendList(resources);
         } catch (error) {
-            console.error('获取消息失败:', error);
-            const disclaimer = '免责声明：本网站仅供网友交流学习，所有资源均来自用户分享，任何黄赌毒违法内容与本站无关。文明上网，学习共享，有问题可联系站长QQ：997973220 或邮箱：18639520138@163.com';
-            scrollMsg.innerHTML = `<span>${disclaimer}</span><span>${disclaimer}</span>`;
-            backendStatusSpan.innerText = '在线';
-            backendStatusSpan.style.color = '#8bffb0';
+            console.error('获取推荐资源失败:', error);
         }
+    }
+
+    function renderRecommendList(resources) {
+        const leftContainer = document.getElementById('recommendLeft');
+        const rightContainer = document.getElementById('recommendRight');
+        if (!leftContainer || !rightContainer) return;
+
+        if (!resources || resources.length === 0) {
+            leftContainer.innerHTML = '<div class="recommend-item"><span style="color:#666;">暂无推荐内容</span></div>';
+            rightContainer.innerHTML = '';
+            return;
+        }
+
+        const midpoint = Math.ceil(resources.length / 2);
+        const leftItems = resources.slice(0, midpoint);
+        const rightItems = resources.slice(midpoint);
+
+        leftContainer.innerHTML = leftItems.map(r => `
+            <div class="recommend-item" onclick="window.location.href='detail.html?id=${r.id}'">
+                <i class="fas fa-chevron-right" style="color:#5a85c0;font-size:0.7rem;"></i>
+                <a href="detail.html?id=${r.id}">${escapeHtml(r.title)}</a>
+            </div>
+        `).join('');
+
+        rightContainer.innerHTML = rightItems.map(r => `
+            <div class="recommend-item" onclick="window.location.href='detail.html?id=${r.id}'">
+                <i class="fas fa-chevron-right" style="color:#5a85c0;font-size:0.7rem;"></i>
+                <a href="detail.html?id=${r.id}">${escapeHtml(r.title)}</a>
+            </div>
+        `).join('');
     }
     // 登录/注册相关
     function showLogin() {
@@ -1923,7 +2037,7 @@
                 const activeChip = document.querySelector('.category-chip.active');
                 const currentCategory = activeChip ? activeChip.textContent.trim() : '全部';
                 renderCards(allResources, currentCategory);
-                fetchGreeting();
+                fetchRecommendedResources();
             } else if (result.status === 0) {
                 messageDiv.className = 'message error';
                 messageDiv.innerText = '密码错误';
@@ -2050,7 +2164,7 @@
                     const activeChip = document.querySelector('.category-chip.active');
                     const currentCategory = activeChip ? activeChip.textContent.trim() : '全部';
                     renderCards(allResources, currentCategory);
-                    fetchGreeting();
+                    fetchRecommendedResources();
                 } else {
                     messageDiv.innerText = '注册成功，但自动登录失败，请手动登录';
                     document.getElementById('loginPanel').classList.remove('hidden');
@@ -2264,7 +2378,7 @@
 
         // 获取资源列表
         fetchResources();
-        fetchGreeting();
+        fetchRecommendedResources();
 
         // 音乐播放器
         const audio = new Audio('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3');
