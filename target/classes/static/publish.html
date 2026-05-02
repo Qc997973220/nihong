@@ -413,13 +413,8 @@
 
                 <div class="form-group">
                     <label><i class="fas fa-user"></i> 作者名称 <span class="required">*</span></label>
-                    <div class="author-row">
-                        <input type="text" id="resourceAuthor" class="form-input" placeholder="请输入作者名称" maxlength="20" required>
-                        <button type="button" id="autoFillBtn" class="auto-fill-btn">
-                            <i class="fas fa-bolt"></i> 填充我的账号
-                        </button>
-                    </div>
-                    <div class="form-hint">点击右侧按钮快速填充你登录的账号名称</div>
+                    <input type="text" id="resourceAuthor" class="form-input" readonly style="background: rgba(10, 25, 45, 0.8); cursor: not-allowed;" maxlength="20" required>
+                    <div class="form-hint">作者名称将自动使用您的账号名称</div>
                 </div>
 
                 <div class="message" id="publishMessage"></div>
@@ -438,7 +433,7 @@
 
     <script>
         function getHost() {
-            return window.location.hostname || '127.0.0.1';
+            return '';
         }
 
         document.addEventListener('DOMContentLoaded', function() {
@@ -467,13 +462,10 @@
                 return;
             }
 
-            autoFillBtn.addEventListener('click', function() {
-                if (currentUser && currentUser.username) {
-                    resourceAuthor.value = currentUser.username;
-                    autoFillBtn.classList.add('filled');
-                    autoFillBtn.innerHTML = '<i class="fas fa-check"></i> 已填充';
-                }
-            });
+            // 自动填充用户名为作者
+            if (currentUser && currentUser.username) {
+                resourceAuthor.value = currentUser.username;
+            }
 
             cancelBtn.addEventListener('click', function() {
                 window.location.href = '/';

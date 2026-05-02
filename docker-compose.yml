@@ -1,14 +1,40 @@
 version: '3.8'
 
 services:
+  # Nginx 反向代理
+  nginx:
+    image: nginx:alpine
+    container_name: neon-nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./static:/app/static:ro
+    depends_on:
+      - neon
+    restart: unless-stopped
+    networks:
+      - neon-network
+
+  # Spring Boot 应用
   neon:
     build: .
-    network_mode: host
+    container_name: neon-app
+    expose:
+      - "8060"
     volumes:
       - ./avatars:/app/avatars
       - ./application.properties:/app/application.properties
+      - ./static:/app/static
     environment:
       - SPRING_PROFILES_ACTIVE=prod
       - SPRING_REDIS_HOST=127.0.0.1
       - SPRING_REDIS_PORT=6379
       - SPRING_REDIS_PASSWORD=neon_redis_password_2026
+    restart: unless-stopped
+    networks:
+      - neon-network
+
+networks:
+  neon-network:
+    driver: bridge
