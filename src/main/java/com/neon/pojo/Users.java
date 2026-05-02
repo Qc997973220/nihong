@@ -19,7 +19,9 @@ import java.util.List;
 public class Users {
     @Id
     String id;                  // 用户ID
-    String userName;
+    @Column(unique = true, nullable = false)
+    String account;             // 账号（登录用，字母数字，唯一）
+    String userName;            // 用户名（展示用，支持中文）
     String password;
     String nickname;
     String activationCode; //激活码

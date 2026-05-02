@@ -786,12 +786,11 @@
         }
         .card-meta {
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-start;
             align-items: center;
             border-top: 1px solid #2a4f80;
             padding-top: 16px;
-            flex-wrap: wrap;
-            gap: 8px;
+            gap: 12px;
         }
         .card-type {
             background: rgba(0, 100, 200, 0.2);
@@ -801,27 +800,65 @@
             border: 1px solid #2f7fff;
             font-size: 0.85rem;
             font-weight: 450;
+            flex-shrink: 0;
         }
         .card-date {
             color: #90b0d1;
             font-size: 0.85rem;
-            margin-left: auto;
-            margin-right: auto;
+            flex-shrink: 0;
         }
         .card-link {
-            color: #b0dcff;
+            color: #ffffff;
             text-decoration: none;
-            font-weight: 480;
-            display: flex;
+            font-weight: 600;
+            display: inline-flex;
             align-items: center;
             gap: 6px;
-            font-size: 0.95rem;
+            font-size: 0.85rem;
+            padding: 5px 12px;
+            border-radius: 6px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            margin-left: auto;
+            flex-shrink: 0;
+        }
+        .card-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+            color: #ffffff;
         }
         .card-link i {
             transition: transform 0.2s;
         }
         .card-link:hover i {
-            transform: translateX(5px);
+            transform: translateX(3px);
+        }
+        .card-image-wrapper {
+            cursor: pointer;
+            position: relative;
+        }
+        .card-image-wrapper:hover .card-image-overlay {
+            opacity: 1;
+        }
+        .card-image-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .card-image-overlay i {
+            color: #ffffff;
+            font-size: 2rem;
         }
 
         /* 页脚 */
@@ -1119,12 +1156,12 @@
             <h2>NEON 霓虹之都</h2>
             <div class="sub">登录后解锁全部资源</div>
             <div class="input-group">
-                <label><i class="fa-regular fa-user" style="margin-right: 6px;"></i> 用户名</label>
-                <input type="text" id="userName" placeholder="请输入用户名" autofocus>
+                <label><i class="fa-regular fa-user" style="margin-right: 6px;"></i> 账号 <span style="color:#ff8a8a;">*</span></label>
+                <input type="text" id="loginAccount" placeholder="请输入账号" autofocus>
             </div>
             <div class="input-group">
-                <label><i class="fa-solid fa-lock" style="margin-right: 6px;"></i> 密码</label>
-                <input type="password" id="password" placeholder="请输入密码">
+                <label><i class="fa-solid fa-lock" style="margin-right: 6px;"></i> 密码 <span style="color:#ff8a8a;">*</span></label>
+                <input type="password" id="loginPassword" placeholder="请输入密码">
             </div>
             <button class="login-btn" id="loginBtn"><i class="fa-solid fa-arrow-right-to-bracket"></i> 登录 · 进入</button>
             <button class="cancel-btn" id="cancelLoginBtn"><i class="fa-solid fa-home"></i> 返回首页</button>
@@ -1139,8 +1176,12 @@
             <h2>创建账号</h2>
             <div class="sub">注册成为霓虹之都的会员</div>
             <div class="input-group">
-                <label><i class="fa-regular fa-user" style="margin-right: 6px;"></i> 用户名 <span style="color:#ff8a8a;">*</span></label>
-                <input type="text" id="regUserName" placeholder="限字母/数字，最少6位">
+                <label><i class="fa-regular fa-user" style="margin-right: 6px;"></i> 账号 <span style="color:#ff8a8a;">*</span></label>
+                <input type="text" id="regAccount" placeholder="限字母/数字，最少6位">
+            </div>
+            <div class="input-group">
+                <label><i class="fa-solid fa-id-card" style="margin-right: 6px;"></i> 用户名 <span style="color:#ff8a8a;">*</span></label>
+                <input type="text" id="regUserName" placeholder="支持中文，最多8字符，无特殊符号">
             </div>
             <div class="input-group">
                 <label><i class="fa-solid fa-lock" style="margin-right: 6px;"></i> 密码 <span style="color:#ff8a8a;">*</span></label>
@@ -1252,12 +1293,11 @@
 
         <div class="categories">
             <span class="category-chip active">全部</span>
-            <span class="category-chip">免费</span>
+            <span class="category-chip">网创</span>
             <span class="category-chip">破解</span>
             <span class="category-chip">辅助</span>
             <span class="category-chip">游戏</span>
-            <span class="category-chip">直播</span>
-            <span class="category-chip">福利</span>
+            <span class="category-chip">资源</span>
         </div>
 
         <div class="resource-grid" id="resourceGrid"></div>
@@ -1350,6 +1390,14 @@
 
     // ========== 发布资源功能 ==========
     document.addEventListener('DOMContentLoaded', function() {
+        // 检查URL参数，自动显示登录框
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('showLogin') === 'true') {
+            showLogin();
+            // 清除URL参数
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+
         const publishResourceBtn = document.getElementById('publishResourceBtn');
         const publishModal = document.getElementById('publishModal');
         const closePublishModal = document.getElementById('closePublishModal');
@@ -1548,9 +1596,12 @@
             const card = document.createElement('div');
             card.className = 'resource-card';
             const imageHtml = resource.image
-                ? `<img class="card-image" src="${resource.image}" alt="${resource.title}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                   <div class="card-image-placeholder" style="display:none;"><i class="fas fa-image"></i></div>`
-                : `<div class="card-image-placeholder"><i class="fas fa-image"></i></div>`;
+                ? `<div class="card-image-wrapper" onclick="viewResource(${resource.id})">
+                       <img class="card-image" src="${resource.image}" alt="${resource.title}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                       <div class="card-image-placeholder" style="display:none;"><i class="fas fa-image"></i></div>
+                       <div class="card-image-overlay"><i class="fas fa-search-plus"></i></div>
+                   </div>`
+                : `<div class="card-image-wrapper"><div class="card-image-placeholder"><i class="fas fa-image"></i></div></div>`;
             card.innerHTML = `
                     ${imageHtml}
                     <h3 class="card-title">${resource.title}</h3>
@@ -1558,7 +1609,7 @@
                     <div class="card-meta">
                         <span class="card-type">${resource.category}</span>
                         <span class="card-date">${formatDate(resource.createdAt)}</span>
-                        <a href="#" class="card-link" onclick="viewResource(${resource.id}); return false;">
+                        <a href="javascript:void(0)" class="card-link" onclick="viewResource(${resource.id});">
                             查看详情 <i class="fa-solid fa-arrow-right"></i>
                         </a>
                     </div>
@@ -1609,11 +1660,7 @@
 
     // 查看资源详情
     function viewResource(id) {
-        if (isLoggedIn()) {
-            window.location.href = `detail.html?id=${id}`;
-        } else {
-            showLogin();
-        }
+        window.location.href = `detail.html?id=${id}`;
     }
 
     // ========== 外部链接数据 ==========
@@ -1693,9 +1740,12 @@
                 year: 'numeric', month: '2-digit', day: '2-digit'
             }) : '未知';
             const imageHtml = r.image
-                ? `<img class="card-image" src="${r.image}" alt="${r.title}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                   <div class="card-image-placeholder" style="display:none;"><i class="fas fa-image"></i></div>`
-                : `<div class="card-image-placeholder"><i class="fas fa-image"></i></div>`;
+                ? `<div class="card-image-wrapper" onclick="viewResource(${r.id})">
+                       <img class="card-image" src="${r.image}" alt="${r.title}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                       <div class="card-image-placeholder" style="display:none;"><i class="fas fa-image"></i></div>
+                       <div class="card-image-overlay"><i class="fas fa-search-plus"></i></div>
+                   </div>`
+                : `<div class="card-image-wrapper"><div class="card-image-placeholder"><i class="fas fa-image"></i></div></div>`;
             return `
                 <div class="resource-card">
                     ${imageHtml}
@@ -1704,7 +1754,7 @@
                     <div class="card-meta">
                         <span class="card-type">${r.category || '未分类'}</span>
                         <span class="card-date">${date}</span>
-                        <a href="#" class="card-link" onclick="viewResource(${r.id}); return false;">查看 <i class="fa-solid fa-arrow-right"></i></a>
+                        <a href="javascript:void(0)" class="card-link" onclick="viewResource(${r.id});">查看详情 <i class="fa-solid fa-arrow-right"></i></a>
                     </div>
                 </div>
             `}).join('');
@@ -1767,15 +1817,14 @@
         const scrollMsg = document.getElementById('scrollMessage');
         const backendStatusSpan = document.getElementById('backendStatus');
         try {
-            // 直接使用默认消息，避免调用不存在的接口
-            const fallback = '目前处于内测阶段,功能逐步开放中...各位不要急哦! 马上霓虹之都就可以和大家见面啦^.^ , 有问题可联系站长QQ:997973220 ';
-            scrollMsg.innerHTML = `<span>${fallback}</span><span>${fallback}</span>`;
+            const disclaimer = '免责声明：本网站仅供网友交流学习，所有资源均来自用户分享，任何黄赌毒违法内容与本站无关。文明上网，学习共享，有问题可联系站长QQ：997973220 或邮箱：18639520138@163.com';
+            scrollMsg.innerHTML = `<span>${disclaimer}</span><span>${disclaimer}</span>`;
             backendStatusSpan.innerText = '在线';
             backendStatusSpan.style.color = '#8bffb0';
         } catch (error) {
             console.error('获取消息失败:', error);
-            const fallback = '目前处于内测阶段,功能逐步开放中...各位不要急哦! 马上霓虹之都就可以和大家见面啦^.^ , 有问题可联系站长QQ:997973220 ';
-            scrollMsg.innerHTML = `<span>${fallback}</span><span>${fallback}</span>`;
+            const disclaimer = '免责声明：本网站仅供网友交流学习，所有资源均来自用户分享，任何黄赌毒违法内容与本站无关。文明上网，学习共享，有问题可联系站长QQ：997973220 或邮箱：18639520138@163.com';
+            scrollMsg.innerHTML = `<span>${disclaimer}</span><span>${disclaimer}</span>`;
             backendStatusSpan.innerText = '在线';
             backendStatusSpan.style.color = '#8bffb0';
         }
@@ -1815,13 +1864,13 @@
 
     // 登录
     document.getElementById('loginBtn').addEventListener('click', async function() {
-        const userName = document.getElementById('userName').value.trim();
-        const password = document.getElementById('password').value.trim();
+        const account = document.getElementById('loginAccount').value.trim();
+        const password = document.getElementById('loginPassword').value.trim();
         const messageDiv = document.getElementById('loginMessage');
 
-        if (!userName || !password) {
+        if (!account || !password) {
             messageDiv.className = 'message warning';
-            messageDiv.innerText = '用户名和密码不能为空';
+            messageDiv.innerText = '账号和密码不能为空';
             messageDiv.style.display = 'block';
             return;
         }
@@ -1832,7 +1881,7 @@
         messageDiv.style.display = 'none';
 
         try {
-            const url = `/login/first?userName=${encodeURIComponent(userName)}&password=${encodeURIComponent(password)}`;
+            const url = `/login/first?account=${encodeURIComponent(account)}&password=${encodeURIComponent(password)}`;
             const response = await fetch(url);
             const result = await response.json();
 
@@ -1841,9 +1890,13 @@
                 messageDiv.innerText = '登录成功！';
                 messageDiv.style.display = 'block';
 
+                // 使用userName作为显示名称和头像
+                const displayName = result.user.userName || result.user.account;
+
                 // 存储用户信息到localStorage
                 const userInfo = {
-                    username: userName,
+                    account: result.user.account,
+                    username: displayName,
                     role: result.user.role !== undefined && result.user.role !== null ? result.user.role : '0',
                     avatar: result.user.avatar
                 };
@@ -1852,16 +1905,17 @@
                 // 更新currentUser
                 currentUser = {
                     ...currentUser,
-                    username: userName,
+                    account: result.user.account,
+                    username: displayName,
                     role: result.user.role !== undefined && result.user.role !== null ? result.user.role : '0',
                     avatar: result.user.avatar
                 };
 
-                document.getElementById('displayUsername').innerText = userName;
+                document.getElementById('displayUsername').innerText = displayName;
                 if (result.user.avatar) {
                     document.getElementById('userAvatar').innerHTML = `<img src="${result.user.avatar}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
                 } else {
-                    document.getElementById('userAvatar').innerText = userName.charAt(0).toUpperCase();
+                    document.getElementById('userAvatar').innerText = displayName.charAt(0).toUpperCase();
                 }
 
                 hideLogin();
@@ -1876,7 +1930,7 @@
                 messageDiv.style.display = 'block';
             } else if (result.status === -1) {
                 messageDiv.className = 'message error';
-                messageDiv.innerText = '用户不存在';
+                messageDiv.innerText = '账号不存在';
                 messageDiv.style.display = 'block';
             } else {
                 messageDiv.className = 'message error';
@@ -1894,12 +1948,13 @@
         }
     });
 
-    document.getElementById('password').addEventListener('keypress', function(e) {
+    document.getElementById('loginPassword').addEventListener('keypress', function(e) {
         if (e.key === 'Enter') document.getElementById('loginBtn').click();
     });
 
     // 注册
     document.getElementById('registerBtn').addEventListener('click', async function() {
+        const account = document.getElementById('regAccount').value.trim();
         const userName = document.getElementById('regUserName').value.trim();
         const password = document.getElementById('regPassword').value.trim();
         const activationCode = document.getElementById('activationCode').value.trim();
@@ -1907,20 +1962,30 @@
         const phone = document.getElementById('phone').value.trim();
         const messageDiv = document.getElementById('registerMessage');
 
-        if (!userName || !password || !activationCode) {
+        if (!account || !userName || !password || !activationCode) {
             messageDiv.className = 'message warning';
-            messageDiv.innerText = '用户名、密码和激活码为必填项';
+            messageDiv.innerText = '账号、用户名、密码和激活码为必填项';
             messageDiv.style.display = 'block';
             return;
         }
 
         const alphanumericRegex = /^[A-Za-z0-9]{6,}$/;
-        if (!alphanumericRegex.test(userName)) {
+        if (!alphanumericRegex.test(account)) {
             messageDiv.className = 'message warning';
-            messageDiv.innerText = '用户名只能包含字母和数字，且最少6位';
+            messageDiv.innerText = '账号只能包含字母和数字，且最少6位';
             messageDiv.style.display = 'block';
             return;
         }
+        
+        // 用户名验证：支持中文，最多8字符，无特殊符号和空格
+        const userNameRegex = /^[\u4e00-\u9fa5A-Za-z0-9]{1,8}$/;
+        if (!userNameRegex.test(userName)) {
+            messageDiv.className = 'message warning';
+            messageDiv.innerText = '用户名支持中文、字母、数字，最多8字符，不能有特殊符号和空格';
+            messageDiv.style.display = 'block';
+            return;
+        }
+        
         if (!alphanumericRegex.test(password)) {
             messageDiv.className = 'message warning';
             messageDiv.innerText = '密码只能包含字母和数字，且最少6位';
@@ -1934,6 +1999,7 @@
         messageDiv.style.display = 'none';
 
         const formData = new URLSearchParams();
+        formData.append('account', account);
         formData.append('userName', userName);
         formData.append('password', password);
         formData.append('activationCode', activationCode);
@@ -1954,14 +2020,18 @@
                 messageDiv.innerText = '注册成功，正在自动登录...';
                 messageDiv.style.display = 'block';
 
-                const loginUrl = `/login/first?userName=${encodeURIComponent(userName)}&password=${encodeURIComponent(password)}`;
+                const loginUrl = `/login/first?account=${encodeURIComponent(account)}&password=${encodeURIComponent(password)}`;
                 const loginResponse = await fetch(loginUrl);
                 const loginResult = await loginResponse.json();
 
                 if (loginResult.status === 1) {
+                    // 使用userName作为显示名称
+                    const displayName = loginResult.user.userName || loginResult.user.account;
+                    
                     // 存储用户信息到localStorage
                     const userInfo = {
-                        username: userName,
+                        account: loginResult.user.account,
+                        username: displayName,
                         role: loginResult.user.role !== undefined && loginResult.user.role !== null ? loginResult.user.role : '0'
                     };
                     localStorage.setItem('userInfo', JSON.stringify(userInfo));
@@ -1969,12 +2039,13 @@
                     // 更新currentUser
                     currentUser = {
                         ...currentUser,
-                        username: userName,
+                        account: loginResult.user.account,
+                        username: displayName,
                         role: loginResult.user.role !== undefined && loginResult.user.role !== null ? loginResult.user.role : '0'
                     };
 
-                    document.getElementById('displayUsername').innerText = userName;
-                    document.getElementById('userAvatar').innerText = userName.charAt(0).toUpperCase();
+                    document.getElementById('displayUsername').innerText = displayName;
+                    document.getElementById('userAvatar').innerText = displayName.charAt(0).toUpperCase();
                     hideLogin();
                     const activeChip = document.querySelector('.category-chip.active');
                     const currentCategory = activeChip ? activeChip.textContent.trim() : '全部';
@@ -1984,12 +2055,12 @@
                     messageDiv.innerText = '注册成功，但自动登录失败，请手动登录';
                     document.getElementById('loginPanel').classList.remove('hidden');
                     document.getElementById('registerPanel').classList.add('hidden');
-                    document.getElementById('userName').value = userName;
-                    document.getElementById('password').value = '';
+                    document.getElementById('loginAccount').value = account;
+                    document.getElementById('loginPassword').value = '';
                 }
             } else if (result === '0') {
                 messageDiv.className = 'message error';
-                messageDiv.innerText = '注册失败，用户名已存在';
+                messageDiv.innerText = '注册失败，账号已存在';
                 messageDiv.style.display = 'block';
             } else if (result === '-1') {
                 messageDiv.className = 'message error';

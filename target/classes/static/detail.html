@@ -622,9 +622,8 @@
         return localStorage.getItem('userInfo') !== null;
     }
 
-    if (!isLoggedIn()) {
-        // 如果没登录，直接跳回首页并显示登录框
-        window.location.href = 'index.html';
+    function showLoginPrompt() {
+        window.location.href = 'index.html?showLogin=true';
     }
 
     // ========== 用户信息 ==========
@@ -881,27 +880,49 @@
         // 构建下载区域 HTML
         let downloadSectionHtml = '';
         if (downloadLink) {
-            downloadSectionHtml = `
-                <div class="download-section">
-                    <div class="download-info">
-                        <div class="download-label">
-                            <i class="fas fa-download"></i>
-                            <span>资源下载</span>
+            const loggedIn = isLoggedIn();
+            if (loggedIn) {
+                downloadSectionHtml = `
+                    <div class="download-section">
+                        <div class="download-info">
+                            <div class="download-label">
+                                <i class="fas fa-download"></i>
+                                <span>资源下载</span>
+                            </div>
+                            ${downloadPassword ? `
+                            <div class="download-password-item">
+                                <i class="fas fa-key"></i>
+                                <span>获取密码：</span>
+                                <span class="download-password">${escapeHtml(downloadPassword)}</span>
+                            </div>
+                            ` : ''}
                         </div>
-                        ${downloadPassword ? `
-                        <div class="download-password-item">
-                            <i class="fas fa-key"></i>
-                            <span>获取密码：</span>
-                            <span class="download-password">${escapeHtml(downloadPassword)}</span>
-                        </div>
-                        ` : ''}
+                        <a href="${escapeHtml(downloadLink)}" target="_blank" class="download-btn">
+                            <i class="fas fa-external-link-alt"></i>
+                            <span>立即获取</span>
+                        </a>
                     </div>
-                    <a href="${escapeHtml(downloadLink)}" target="_blank" class="download-btn">
-                        <i class="fas fa-external-link-alt"></i>
-                        <span>立即获取</span>
-                    </a>
-                </div>
-            `;
+                `;
+            } else {
+                downloadSectionHtml = `
+                    <div class="download-section">
+                        <div class="download-info">
+                            <div class="download-label">
+                                <i class="fas fa-lock"></i>
+                                <span>资源下载</span>
+                            </div>
+                            <div class="download-password-item">
+                                <i class="fas fa-info-circle"></i>
+                                <span>登录后可查看下载链接和密码</span>
+                            </div>
+                        </div>
+                        <a href="javascript:void(0)" onclick="showLoginPrompt()" class="download-btn">
+                            <i class="fas fa-sign-in-alt"></i>
+                            <span>登录后获取</span>
+                        </a>
+                    </div>
+                `;
+            }
         }
 
         // 构建 HTML（包含评论输入框）
@@ -931,7 +952,7 @@
                 </div>
                 <div class="disclaimer">
                     <h4><i class="fas fa-exclamation-circle"></i> 免责声明</h4>
-                    <p>本站提供的一切软件、教程和内容信息仅限用于学习和研究目的；不得将上述内容用于商业或者非法用途，否则，一切后果请用户自负。本站信息来自网络收集整理，版权争议与本站无关。您必须在下载后的24个小时之内，从您的电脑或手机中彻底删除上述内容。如果您喜欢该程序和内容，请支持正版，购买注册，得到更好的正版服务。我们非常重视版权问题，如有侵权请邮件与我们联系处理。敬请谅解！</p>
+                    <p>本站提供的一切软件、教程和内容信息仅限用于学习和研究目的；不得将上述内容用于商业或者非法用途，否则，一切后果请用户自负。本站信息来自网络收集整理，版权争议与本站无关。您必须在下载后的24个小时之内，从您的电脑或手机中彻底删除上述内容。如果您喜欢该程序和内容，请支持正版，购买注册，得到更好的正版服务。我们非常重视版权问题，如有侵权请邮件18639520138@163.com与我们联系处理。敬请谅解！</p>
                 </div>
             `;
         document.getElementById('detailContent').innerHTML = html;

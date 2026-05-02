@@ -18,16 +18,16 @@ public class LoginController {
     UsersDao usersDao;
     @GetMapping("/first")
     @ResponseBody
-    public Map<String, Object> first(@RequestParam String userName, @RequestParam String password){
+    public Map<String, Object> first(@RequestParam String account, @RequestParam String password){
         Map<String, Object> result = new HashMap<>();
-        int loginResult = loginService.login(userName, password);
+        int loginResult = loginService.login(account, password);
         result.put("status", loginResult);
         if (loginResult == 1) {
-            List<Users> users = usersDao.findByUserName(userName);
-            if (!users.isEmpty()) {
-                Users user = users.get(0);
+            Users user = usersDao.findByAccount(account);
+            if (user != null) {
                 // 只返回必要的用户信息
                 Map<String, Object> userInfo = new HashMap<>();
+                userInfo.put("account", user.getAccount());
                 userInfo.put("userName", user.getUserName());
                 userInfo.put("role", user.getRole() != null && !user.getRole().isEmpty() ? user.getRole() : "0");
                 userInfo.put("nickname", user.getNickname());

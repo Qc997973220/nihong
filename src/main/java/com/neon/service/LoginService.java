@@ -11,14 +11,13 @@ import java.util.UUID;
 public class LoginService {
     @Autowired
     UsersDao usersDao;
-    public int login(String userName,String password){
-        List<Users> users = usersDao.findByUserName(userName);
-        if (users.isEmpty()) return -1;
-        if (users.get(0).getPassword().equals(password)){
-            Users usersUpdate = users.get(0);
-            usersUpdate.setToken(UUID.randomUUID().toString());
-            usersUpdate.setLastLoginTime(java.time.LocalDateTime.now());
-            usersDao.save(usersUpdate);
+    public int login(String account, String password){
+        Users user = usersDao.findByAccount(account);
+        if (user == null) return -1;
+        if (user.getPassword().equals(password)){
+            user.setToken(UUID.randomUUID().toString());
+            user.setLastLoginTime(java.time.LocalDateTime.now());
+            usersDao.save(user);
             return 1;
         }else {
             return 0;
@@ -27,8 +26,8 @@ public class LoginService {
 
 
     public int registered(Users users) {
-        List<Users> name = usersDao.findByUserName(users.getUserName());
-        if (!name.isEmpty()) {
+        // 检查账号是否已存在
+        if (usersDao.existsByAccount(users.getAccount())) {
             return 0;
         }
         if (users.getActivationCode().equals("666668")){

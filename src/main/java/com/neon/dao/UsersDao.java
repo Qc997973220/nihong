@@ -11,5 +11,7 @@ import java.util.Optional;
 public interface UsersDao extends JpaRepository<Users, String> {
     Optional<Users> findOneByUserName(String userName);
     List<Users> findByUserName(String userName);
+    Users findByAccount(String account);
+    boolean existsByAccount(String account);
 
 }

@@ -1,6 +1,17 @@
 version: '3.8'
 
 services:
+  # Redis 缓存服务
+  redis:
+    image: redis:6.2-alpine
+    container_name: neon-redis
+    command: redis-server --requirepass neon_redis_password_2026 --appendonly yes
+    volumes:
+      - ./redis-data:/data
+    restart: unless-stopped
+    networks:
+      - neon-network
+
   # Nginx 反向代理
   nginx:
     image: nginx:alpine
@@ -29,7 +40,7 @@ services:
       - ./static:/app/static
     environment:
       - SPRING_PROFILES_ACTIVE=prod
-      - SPRING_REDIS_HOST=127.0.0.1
+      - SPRING_REDIS_HOST=redis
       - SPRING_REDIS_PORT=6379
       - SPRING_REDIS_PASSWORD=neon_redis_password_2026
     restart: unless-stopped
