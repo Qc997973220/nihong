@@ -89,7 +89,7 @@
             text-shadow: 0 0 8px #4d9eff;
         }
         .container {
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
             padding: 40px 24px;
             width: 100%;
@@ -99,36 +99,100 @@
         }
         .page-header {
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 36px;
         }
         .page-header h1 {
-            font-size: 2.5rem;
+            font-size: 2.2rem;
             background: linear-gradient(135deg, #e0efff, #b2d9ff);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             filter: drop-shadow(0 0 10px #3f8eff);
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
         .page-header p {
             color: #90b0d1;
-            font-size: 1.1rem;
+            font-size: 1rem;
         }
-        .publish-card {
+        .publish-layout {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 24px;
+            align-items: start;
+        }
+        .publish-main {
             background: rgba(20, 30, 50, 0.5);
             backdrop-filter: blur(10px);
             border-radius: 24px;
-            padding: 40px;
+            padding: 32px;
             border: 1px solid rgba(90, 160, 255, 0.2);
         }
+        .publish-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .info-card {
+            background: rgba(20, 30, 50, 0.5);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 24px;
+            border: 1px solid rgba(90, 160, 255, 0.2);
+        }
+        .info-card h3 {
+            color: #b5d5ff;
+            font-size: 1rem;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .info-card h3 i {
+            color: #5ba5ff;
+        }
+        .info-card ul {
+            list-style: none;
+            padding: 0;
+        }
+        .info-card li {
+            color: #90b0d1;
+            font-size: 0.88rem;
+            padding: 8px 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            border-bottom: 1px solid rgba(90, 160, 255, 0.1);
+        }
+        .info-card li:last-child {
+            border-bottom: none;
+        }
+        .info-card li::before {
+            content: '•';
+            color: #5ba5ff;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+        .section-title {
+            font-size: 1.1rem;
+            color: #b5d5ff;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(90, 160, 255, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .section-title i {
+            color: #5ba5ff;
+        }
         .form-group {
-            margin-bottom: 28px;
+            margin-bottom: 24px;
         }
         .form-group label {
             display: block;
             font-weight: 600;
             color: #b5d5ff;
             margin-bottom: 10px;
-            font-size: 1rem;
+            font-size: 0.95rem;
         }
         .form-group label i {
             margin-right: 8px;
@@ -139,11 +203,11 @@
         }
         .form-input {
             width: 100%;
-            padding: 16px 22px;
+            padding: 14px 18px;
             background: rgba(8, 18, 32, 0.6);
             border: 1.5px solid rgba(90, 160, 255, 0.25);
-            border-radius: 16px;
-            font-size: 1rem;
+            border-radius: 14px;
+            font-size: 0.95rem;
             font-family: 'Inter', sans-serif;
             color: #e0f0ff;
             outline: none;
@@ -159,19 +223,19 @@
             color: #6a8ab0;
         }
         textarea.form-input {
-            border-radius: 20px;
+            border-radius: 16px;
             resize: vertical;
-            min-height: 150px;
+            min-height: 140px;
             line-height: 1.6;
         }
         .form-select {
             width: 100%;
-            padding: 16px 22px;
-            background: rgba(8, 18, 32, 0.6) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2390b0d1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat right 20px center;
+            padding: 14px 18px;
+            background: rgba(8, 18, 32, 0.6) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2390b0d1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat right 16px center;
             background-size: 16px;
             border: 1.5px solid rgba(90, 160, 255, 0.25);
-            border-radius: 16px;
-            font-size: 1rem;
+            border-radius: 14px;
+            font-size: 0.95rem;
             font-family: 'Inter', sans-serif;
             color: #e0f0ff;
             outline: none;
@@ -189,45 +253,121 @@
             background: #0b0e14;
             color: #e0f0ff;
         }
-        .author-row {
-            display: flex;
-            gap: 16px;
-            align-items: center;
+        .form-hint {
+            font-size: 0.82rem;
+            color: #6a8ab0;
+            margin-top: 6px;
         }
-        .author-row .form-input {
+        .author-display {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            background: rgba(10, 25, 45, 0.8);
+            border-radius: 12px;
+            border: 1px solid rgba(90, 160, 255, 0.2);
+        }
+        .author-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(145deg, #1e4f9e, #6d3fc9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 1.1rem;
+            box-shadow: 0 0 15px #3f6eff;
+        }
+        .author-info {
             flex: 1;
         }
-        .auto-fill-btn {
-            padding: 12px 20px;
-            background: rgba(91, 165, 255, 0.2);
-            border: 1px solid rgba(91, 165, 255, 0.5);
-            border-radius: 16px;
-            color: #5ba5ff;
-            cursor: pointer;
-            font-size: 0.9rem;
-            font-weight: 500;
-            transition: all 0.2s;
-            white-space: nowrap;
+        .author-info .name {
+            color: #e0f0ff;
+            font-weight: 600;
+            font-size: 0.95rem;
         }
-        .auto-fill-btn:hover {
-            background: rgba(91, 165, 255, 0.3);
-            border-color: #5ba5ff;
-            box-shadow: 0 0 15px rgba(91, 165, 255, 0.5);
-        }
-        .auto-fill-btn.filled {
-            background: rgba(0, 200, 150, 0.2);
-            border-color: rgba(0, 255, 200, 0.5);
-            color: #8bffb0;
-        }
-        .form-hint {
-            font-size: 0.85rem;
+        .author-info .label {
             color: #6a8ab0;
-            margin-top: 8px;
+            font-size: 0.8rem;
+        }
+        .upload-area {
+            border: 2px dashed rgba(90, 160, 255, 0.4);
+            border-radius: 16px;
+            padding: 32px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: rgba(8, 18, 32, 0.3);
+        }
+        .upload-area:hover {
+            border-color: #3f9eff;
+            background: rgba(10, 25, 45, 0.5);
+        }
+        .upload-area.dragover {
+            border-color: #3f9eff;
+            background: rgba(62, 158, 255, 0.15);
+        }
+        .upload-area.has-image {
+            border-style: solid;
+            border-color: rgba(0, 200, 150, 0.5);
+            padding: 12px;
+        }
+        .upload-icon {
+            font-size: 2.5rem;
+            color: #5ba5ff;
+            margin-bottom: 12px;
+        }
+        .upload-text {
+            color: #90b0d1;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+        }
+        .upload-hint {
+            color: #6a8ab0;
+            font-size: 0.8rem;
+        }
+        .upload-preview {
+            position: relative;
+            display: none;
+            width: 100%;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .upload-preview.show {
+            display: block;
+        }
+        .upload-preview img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            display: block;
+        }
+        .upload-preview .remove-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 32px;
+            height: 32px;
+            background: rgba(255, 80, 80, 0.9);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .upload-preview .remove-btn:hover {
+            background: rgba(255, 80, 80, 1);
+            transform: scale(1.1);
         }
         .btn-group {
             display: flex;
             gap: 16px;
-            margin-top: 36px;
+            margin-top: 32px;
         }
         .btn {
             flex: 1;
@@ -235,7 +375,7 @@
             border: none;
             border-radius: 60px;
             cursor: pointer;
-            font-size: 1.1rem;
+            font-size: 1.05rem;
             font-weight: 550;
             transition: all 0.2s;
             display: flex;
@@ -290,57 +430,15 @@
             color: #b0ffde;
             border: 1px solid rgba(0, 255, 200, 0.4);
         }
-        .tips-card {
-            background: rgba(10, 22, 38, 0.5);
-            border-radius: 16px;
-            padding: 20px 24px;
-            margin-bottom: 28px;
-            border: 1px solid rgba(90, 160, 255, 0.15);
-        }
-        .tips-card h3 {
-            color: #b5d5ff;
-            font-size: 1rem;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .tips-card h3 i {
-            color: #5ba5ff;
-        }
-        .tips-card ul {
-            list-style: none;
-            padding: 0;
-        }
-        .tips-card li {
-            color: #90b0d1;
-            font-size: 0.9rem;
-            padding: 6px 0;
-            display: flex;
-            align-items: flex-start;
-            gap: 8px;
-        }
-        .tips-card li::before {
-            content: '•';
-            color: #5ba5ff;
-            font-weight: bold;
-        }
         @media (max-width: 768px) {
             .container {
                 padding: 24px 16px;
             }
-            .publish-card {
+            .publish-layout {
+                grid-template-columns: 1fr;
+            }
+            .publish-main {
                 padding: 24px;
-            }
-            .page-header h1 {
-                font-size: 1.8rem;
-            }
-            .author-row {
-                flex-direction: column;
-                gap: 12px;
-            }
-            .auto-fill-btn {
-                width: 100%;
             }
             .btn-group {
                 flex-direction: column;
@@ -364,70 +462,104 @@
     <div class="container">
         <div class="page-header">
             <h1><i class="fas fa-paper-plane"></i> 发布资源</h1>
-            <p>分享你的资源，让更多人受益</p>
+            <p>分享你的发现，让更多人受益</p>
         </div>
 
-        <div class="publish-card">
-            <div class="tips-card">
-                <h3><i class="fas fa-lightbulb"></i> 发布须知</h3>
-                <ul>
-                    <li>发布后资源需经过审核才能在首页展示</li>
-                    <li>标题和简介将展示在首页卡片中，请认真填写</li>
-                    <li>详细内容支持详细描述资源使用方法、功能特点等</li>
-                    <li>请选择准确的分类，方便用户查找</li>
-                    <li>作者名称将显示在资源详情页</li>
-                </ul>
+        <div class="publish-layout">
+            <div class="publish-main">
+                <div class="section-title">
+                    <i class="fas fa-edit"></i>
+                    填写资源信息
+                </div>
+
+                <form id="publishForm">
+                    <div class="form-group">
+                        <label><i class="fas fa-heading"></i> 资源标题 <span class="required">*</span></label>
+                        <input type="text" id="resourceTitle" class="form-input" placeholder="请输入资源标题，例如：某软件破解版" maxlength="50" required>
+                        <div class="form-hint">控制在30字以内，突出资源特点</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fas fa-tag"></i> 资源分类 <span class="required">*</span></label>
+                        <select id="resourceCategory" class="form-select" required>
+                            <option value="" selected disabled>-- 请选择分类 --</option>
+                            <option value="免费">免费</option>
+                            <option value="破解">破解</option>
+                            <option value="辅助">辅助</option>
+                            <option value="游戏">游戏</option>
+                            <option value="直播">直播</option>
+                            <option value="福利">福利</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fas fa-file-alt"></i> 资源简介 <span class="required">*</span></label>
+                        <input type="text" id="resourceSummary" class="form-input" placeholder="请输入资源简介（首页卡片显示）" maxlength="100" required>
+                        <div class="form-hint">显示在首页卡片中，建议30-50字，简明扼要</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fas fa-align-left"></i> 详细内容 <span class="required">*</span></label>
+                        <textarea id="resourceContent" class="form-input" placeholder="请输入资源详细内容" required></textarea>
+                        <div class="form-hint">详细描述资源的功能、使用方法、下载方式等</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fas fa-image"></i> 封面图片（可选）</label>
+                        <div class="upload-area" id="uploadArea">
+                            <div class="upload-content" id="uploadContent">
+                                <div class="upload-icon">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                </div>
+                                <div class="upload-text">点击或拖拽图片到此处上传</div>
+                                <div class="upload-hint">支持 JPG、PNG、WebP 格式，最大 5MB</div>
+                            </div>
+                            <div class="upload-preview" id="uploadPreview">
+                                <img id="previewImage" src="" alt="预览">
+                                <button type="button" class="remove-btn" id="removeImage">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <input type="file" id="imageInput" accept="image/jpeg,image/png,image/webp" style="display: none;">
+                    </div>
+
+                    <div class="message" id="publishMessage"></div>
+
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-secondary" id="cancelBtn">
+                            <i class="fas fa-arrow-left"></i> 返回
+                        </button>
+                        <button type="submit" class="btn btn-primary" id="submitBtn">
+                            <i class="fas fa-paper-plane"></i> 发布资源
+                        </button>
+                    </div>
+                </form>
             </div>
 
-            <form id="publishForm">
-                <div class="form-group">
-                    <label><i class="fas fa-heading"></i> 资源标题 <span class="required">*</span></label>
-                    <input type="text" id="resourceTitle" class="form-input" placeholder="请输入资源标题，例如：某软件破解版" maxlength="50" required>
-                    <div class="form-hint">控制在30字以内，突出资源特点</div>
+            <div class="publish-sidebar">
+                <div class="info-card">
+                    <h3><i class="fas fa-user-circle"></i> 作者信息</h3>
+                    <div class="author-display">
+                        <div class="author-avatar" id="authorAvatar">U</div>
+                        <div class="author-info">
+                            <div class="name" id="authorName">用户名</div>
+                            <div class="label">发布者</div>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label><i class="fas fa-file-alt"></i> 资源简介 <span class="required">*</span></label>
-                    <input type="text" id="resourceSummary" class="form-input" placeholder="请输入资源简介（首页卡片显示）" maxlength="100" required>
-                    <div class="form-hint">显示在首页卡片中，建议30-50字，简明扼要</div>
+                <div class="info-card">
+                    <h3><i class="fas fa-lightbulb"></i> 发布须知</h3>
+                    <ul>
+                        <li>发布后资源需经过审核才能在首页展示</li>
+                        <li>标题和简介将展示在首页卡片中，请认真填写</li>
+                        <li>详细内容支持详细描述资源使用方法、功能特点等</li>
+                        <li>请选择准确的分类，方便用户查找</li>
+                        <li>封面图片为可选项，建议上传以获得更好的展示效果</li>
+                    </ul>
                 </div>
-
-                <div class="form-group">
-                    <label><i class="fas fa-align-left"></i> 详细内容 <span class="required">*</span></label>
-                    <textarea id="resourceContent" class="form-input" placeholder="请输入资源详细内容" required></textarea>
-                    <div class="form-hint">详细描述资源的功能、使用方法、下载方式等</div>
-                </div>
-
-                <div class="form-group">
-                    <label><i class="fas fa-tag"></i> 资源分类 <span class="required">*</span></label>
-                    <select id="resourceCategory" class="form-select" required>
-                        <option value="" selected disabled>-- 请选择分类 --</option>
-                        <option value="免费">免费</option>
-                        <option value="破解">破解</option>
-                        <option value="辅助">辅助</option>
-                        <option value="游戏">游戏</option>
-                        <option value="直播">直播</option>
-                        <option value="福利">福利</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label><i class="fas fa-user"></i> 作者名称 <span class="required">*</span></label>
-                    <input type="text" id="resourceAuthor" class="form-input" readonly style="background: rgba(10, 25, 45, 0.8); cursor: not-allowed;" maxlength="20" required>
-                    <div class="form-hint">作者名称将自动使用您的账号名称</div>
-                </div>
-
-                <div class="message" id="publishMessage"></div>
-
-                <div class="btn-group">
-                    <button type="button" class="btn btn-secondary" id="cancelBtn">
-                        <i class="fas fa-times"></i> 取消
-                    </button>
-                    <button type="submit" class="btn btn-primary" id="submitBtn">
-                        <i class="fas fa-paper-plane"></i> 发布资源
-                    </button>
-                </div>
-            </form>
+            </div>
         </div>
     </div>
 
@@ -440,9 +572,15 @@
             const publishForm = document.getElementById('publishForm');
             const submitBtn = document.getElementById('submitBtn');
             const cancelBtn = document.getElementById('cancelBtn');
-            const autoFillBtn = document.getElementById('autoFillBtn');
-            const resourceAuthor = document.getElementById('resourceAuthor');
+            const uploadArea = document.getElementById('uploadArea');
+            const uploadContent = document.getElementById('uploadContent');
+            const uploadPreview = document.getElementById('uploadPreview');
+            const previewImage = document.getElementById('previewImage');
+            const imageInput = document.getElementById('imageInput');
+            const removeImageBtn = document.getElementById('removeImage');
             const messageDiv = document.getElementById('publishMessage');
+
+            let selectedFile = null;
 
             const userInfo = localStorage.getItem('userInfo');
             if (!userInfo) {
@@ -462,9 +600,87 @@
                 return;
             }
 
-            // 自动填充用户名为作者
+            // 设置作者信息
             if (currentUser && currentUser.username) {
-                resourceAuthor.value = currentUser.username;
+                document.getElementById('authorName').textContent = currentUser.username;
+                document.getElementById('authorAvatar').textContent = currentUser.username.charAt(0).toUpperCase();
+            }
+
+            // 上传区域点击
+            uploadArea.addEventListener('click', function(e) {
+                if (e.target !== removeImageBtn && !removeImageBtn.contains(e.target)) {
+                    imageInput.click();
+                }
+            });
+
+            // 文件选择
+            imageInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    handleFileSelect(file);
+                }
+            });
+
+            // 拖拽上传
+            uploadArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.classList.add('dragover');
+            });
+
+            uploadArea.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                this.classList.remove('dragover');
+            });
+
+            uploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.classList.remove('dragover');
+                const file = e.dataTransfer.files[0];
+                if (file && file.type.startsWith('image/')) {
+                    handleFileSelect(file);
+                }
+            });
+
+            // 删除图片
+            removeImageBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                removeImage();
+            });
+
+            function handleFileSelect(file) {
+                // 验证文件类型
+                const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+                if (!allowedTypes.includes(file.type)) {
+                    showMessage('只支持 JPG、PNG、WebP 格式的图片', true);
+                    return;
+                }
+
+                // 验证文件大小（5MB）
+                if (file.size > 5 * 1024 * 1024) {
+                    showMessage('图片大小不能超过 5MB', true);
+                    return;
+                }
+
+                selectedFile = file;
+
+                // 显示预览
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImage.src = e.target.result;
+                    uploadContent.style.display = 'none';
+                    uploadPreview.classList.add('show');
+                    uploadArea.classList.add('has-image');
+                };
+                reader.readAsDataURL(file);
+            }
+
+            function removeImage() {
+                selectedFile = null;
+                imageInput.value = '';
+                previewImage.src = '';
+                uploadPreview.classList.remove('show');
+                uploadContent.style.display = 'block';
+                uploadArea.classList.remove('has-image');
             }
 
             cancelBtn.addEventListener('click', function() {
@@ -476,12 +692,12 @@
                 submitResource();
             });
 
-            function submitResource() {
+            async function submitResource() {
                 const title = document.getElementById('resourceTitle').value.trim();
                 const summary = document.getElementById('resourceSummary').value.trim();
                 const content = document.getElementById('resourceContent').value.trim();
                 const category = document.getElementById('resourceCategory').value;
-                const author = resourceAuthor.value.trim();
+                const author = currentUser.username;
 
                 if (!title) {
                     showMessage('请输入资源标题', true);
@@ -499,31 +715,39 @@
                     showMessage('请选择资源分类', true);
                     return;
                 }
-                if (!author) {
-                    showMessage('请输入作者名称', true);
-                    return;
-                }
 
                 submitBtn.disabled = true;
                 submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 发布中...';
+                hideMessage();
 
-                const resource = {
-                    title: title,
-                    summary: summary,
-                    content: content,
-                    category: category,
-                    author: author
-                };
+                try {
+                    let imageUrl = '';
 
-                fetch(`/resources/publish`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(resource)
-                })
-                .then(response => response.json())
-                .then(data => {
+                    // 如果有图片，先上传图片
+                    if (selectedFile) {
+                        imageUrl = await uploadImage(selectedFile);
+                    }
+
+                    // 提交资源
+                    const resource = {
+                        title: title,
+                        summary: summary,
+                        content: content,
+                        category: category,
+                        author: author,
+                        image: imageUrl
+                    };
+
+                    const response = await fetch(`/resources/publish`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(resource)
+                    });
+
+                    const data = await response.json();
+
                     if (data.success) {
                         showMessage('发布成功！资源待审核后将在首页展示...', false);
                         setTimeout(() => {
@@ -534,12 +758,34 @@
                         submitBtn.disabled = false;
                         submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> 发布资源';
                     }
-                })
-                .catch(error => {
+                } catch (error) {
                     console.error('发布资源失败:', error);
                     showMessage('网络错误，发布失败', true);
                     submitBtn.disabled = false;
                     submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> 发布资源';
+                }
+            }
+
+            async function uploadImage(file) {
+                return new Promise((resolve, reject) => {
+                    const formData = new FormData();
+                    formData.append('file', file);
+
+                    fetch(`/resources/upload`, {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success && data.url) {
+                            resolve(data.url);
+                        } else {
+                            reject(new Error(data.message || '图片上传失败'));
+                        }
+                    })
+                    .catch(error => {
+                        reject(error);
+                    });
                 });
             }
 
@@ -547,6 +793,10 @@
                 messageDiv.textContent = message;
                 messageDiv.className = isError ? 'message error' : 'message success';
                 messageDiv.style.display = 'block';
+            }
+
+            function hideMessage() {
+                messageDiv.style.display = 'none';
             }
         });
     </script>

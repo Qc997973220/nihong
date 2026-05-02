@@ -21,6 +21,7 @@ public class Resource {
     private String content;          // 详细内容（详情页用）
     private String category;         // 分类（如“游戏”、“免费”）
     private String author;           // 创建人
+    private String image;            // 封面图片URL
     private Integer status = 0;      // 审核状态：0-待审核，1-审核通过
     private LocalDateTime createdAt; // 创建时间
     private LocalDateTime updatedAt; // 修改时间

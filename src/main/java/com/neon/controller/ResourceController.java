@@ -10,6 +10,7 @@ import com.neon.dao.MessageDao;
 import com.neon.dao.UsersDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -33,6 +34,60 @@ public class ResourceController {
     
     @Autowired
     private AsyncService asyncService;
+
+    // 图片上传
+    @PostMapping("/upload")
+    @ResponseBody
+    public Map<String, Object> uploadImage(@RequestParam("file") MultipartFile file) {
+        Map<String, Object> result = new HashMap<>();
+        try {
+            if (file.isEmpty()) {
+                result.put("success", false);
+                result.put("message", "请选择要上传的图片");
+                return result;
+            }
+
+            String contentType = file.getContentType();
+            if (contentType == null || !contentType.startsWith("image/")) {
+                result.put("success", false);
+                result.put("message", "只支持上传图片文件");
+                return result;
+            }
+
+            long maxSize = 5 * 1024 * 1024;
+            if (file.getSize() > maxSize) {
+                result.put("success", false);
+                result.put("message", "图片大小不能超过 5MB");
+                return result;
+            }
+
+            String originalFilename = file.getOriginalFilename();
+            String extension = "";
+            if (originalFilename != null && originalFilename.contains(".")) {
+                extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+            }
+            String newFilename = System.currentTimeMillis() + "_" + (int)(Math.random() * 10000) + extension;
+
+            String uploadPath = System.getProperty("user.dir") + "/uploads";
+            java.io.File uploadDir = new java.io.File(uploadPath);
+            if (!uploadDir.exists()) {
+                uploadDir.mkdirs();
+            }
+
+            java.io.File destFile = new java.io.File(uploadPath, newFilename);
+            file.transferTo(destFile);
+
+            String imageUrl = "/uploads/" + newFilename;
+            result.put("success", true);
+            result.put("url", imageUrl);
+            result.put("message", "图片上传成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            result.put("success", false);
+            result.put("message", "图片上传失败：" + e.getMessage());
+        }
+        return result;
+    }
 
     // 获取资源列表（只返回卡片所需字段，也可直接返回完整Resource，前端自行提取）
     @GetMapping("/list")

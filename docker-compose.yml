@@ -24,6 +24,7 @@ services:
       - "8060"
     volumes:
       - ./avatars:/app/avatars
+      - ./uploads:/app/uploads
       - ./application.properties:/app/application.properties
       - ./static:/app/static
     environment:
