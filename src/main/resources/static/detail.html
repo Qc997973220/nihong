@@ -212,26 +212,18 @@
             flex: 1;
             min-width: 200px;
         }
-        .download-link-item {
+        .download-label {
             display: flex;
             align-items: center;
             gap: 10px;
             color: #b0ffd8;
-            font-size: 0.95rem;
-            margin-bottom: 10px;
+            font-size: 1.05rem;
+            font-weight: 600;
+            margin-bottom: 8px;
         }
-        .download-link-item i {
+        .download-label i {
             color: #00c896;
-        }
-        .download-link-text {
-            color: #5bdeff;
-            text-decoration: none;
-            word-break: break-all;
-            transition: color 0.2s;
-        }
-        .download-link-text:hover {
-            color: #00a8ff;
-            text-decoration: underline;
+            font-size: 1.2rem;
         }
         .download-password-item {
             display: flex;
@@ -892,10 +884,9 @@
             downloadSectionHtml = `
                 <div class="download-section">
                     <div class="download-info">
-                        <div class="download-link-item">
-                            <i class="fas fa-link"></i>
-                            <span>下载链接：</span>
-                            <a href="${escapeHtml(downloadLink)}" target="_blank" class="download-link-text">${escapeHtml(downloadLink)}</a>
+                        <div class="download-label">
+                            <i class="fas fa-download"></i>
+                            <span>资源下载</span>
                         </div>
                         ${downloadPassword ? `
                         <div class="download-password-item">
@@ -906,7 +897,8 @@
                         ` : ''}
                     </div>
                     <a href="${escapeHtml(downloadLink)}" target="_blank" class="download-btn">
-                        <i class="fas fa-download"></i> 立即获取
+                        <i class="fas fa-external-link-alt"></i>
+                        <span>立即获取</span>
                     </a>
                 </div>
             `;

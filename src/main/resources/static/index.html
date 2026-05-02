@@ -765,6 +765,12 @@
             font-weight: 500;
             color: #ecf5ff;
             margin-bottom: 8px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.5;
         }
         .card-desc {
             color: #a5c2e5;
@@ -772,6 +778,11 @@
             margin-bottom: 20px;
             font-weight: 350;
             line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         .card-meta {
             display: flex;
@@ -1168,7 +1179,7 @@
         <div class="container">
             <div class="left-area">
                 <div class="visitor-count" id="visitorCount">
-                    <i class="fa-regular fa-eye"></i> 今日访客 <span id="visitorNumber">92837</span>
+                    <i class="fa-regular fa-eye"></i> 累计访客 <span id="visitorNumber">92895</span>
                 </div>
                 <div class="logo"><i class="fa-solid fa-cube" style="margin-right: 8px;"></i> NEON 霓虹之都</div>
             </div>
@@ -1555,15 +1566,13 @@
             return card;
         }
 
-        // 格式化日期
+        // 格式化日期（只显示到日）
         function formatDate(dateString) {
             const date = new Date(dateString);
-            return date.toLocaleString('zh-CN', {
+            return date.toLocaleDateString('zh-CN', {
                 year: 'numeric',
                 month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit'
+                day: '2-digit'
             });
         }
 
@@ -1685,7 +1694,7 @@
             }) : '未知';
             const imageHtml = r.image
                 ? `<img class="card-image" src="${r.image}" alt="${r.title}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                   <div class="card-image-placeholder" style="display:flex;"><i class="fas fa-image"></i></div>`
+                   <div class="card-image-placeholder" style="display:none;"><i class="fas fa-image"></i></div>`
                 : `<div class="card-image-placeholder"><i class="fas fa-image"></i></div>`;
             return `
                 <div class="resource-card">
@@ -2268,17 +2277,46 @@
         });
     });
 
-    // 今日访客增长
-    let visitorCount = 92837;
+    // 累计访客（从Redis获取并持久化）
+    let visitorCount = 92895;
     const visitorSpan = document.getElementById('visitorNumber');
+
+    async function fetchVisitorCount() {
+        try {
+            const response = await fetch('/visitor/count');
+            const data = await response.json();
+            if (data.success && data.count) {
+                visitorCount = parseInt(data.count);
+                if (visitorSpan) visitorSpan.innerText = visitorCount;
+            }
+        } catch (e) {
+            console.log('获取访客量失败，使用默认值');
+        }
+    }
+
+    async function incrementVisitor() {
+        if (Math.random() < 0.1) {
+            try {
+                const response = await fetch('/visitor/count/increment', { method: 'POST' });
+                const data = await response.json();
+                if (data.success && data.count) {
+                    visitorCount = parseInt(data.count);
+                    if (visitorSpan) {
+                        visitorSpan.innerText = visitorCount;
+                        visitorSpan.style.transition = 'opacity 0.1s';
+                        visitorSpan.style.opacity = '0.7';
+                        setTimeout(() => visitorSpan.style.opacity = '1', 100);
+                    }
+                }
+            } catch (e) {
+                console.log('更新访客量失败');
+            }
+        }
+    }
+
     if (visitorSpan) {
-        setInterval(() => {
-            visitorCount += Math.floor(Math.random() * 3) + 1;
-            visitorSpan.innerText = visitorCount;
-            visitorSpan.style.transition = 'opacity 0.1s';
-            visitorSpan.style.opacity = '0.7';
-            setTimeout(() => visitorSpan.style.opacity = '1', 100);
-        }, 5000);
+        fetchVisitorCount();
+        setInterval(incrementVisitor, 2000);
     }
 
     // canvas背景
