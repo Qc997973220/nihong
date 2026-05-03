@@ -1237,6 +1237,45 @@
             100% { background-position: -100% 0; opacity: 0.2; }
         }
 
+        /* 分页样式 */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+        .page-btn {
+            background: rgba(20, 40, 70, 0.5);
+            border: 1px solid rgba(90, 170, 255, 0.3);
+            color: #b5e0ff;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+        .page-btn:hover {
+            background: rgba(30, 80, 140, 0.6);
+            border-color: rgba(90, 170, 255, 0.6);
+        }
+        .page-btn.active {
+            background: linear-gradient(135deg, #1e4a96, #2d60c0);
+            border-color: #4da6ff;
+            color: white;
+            box-shadow: 0 0 15px rgba(30, 136, 229, 0.4);
+        }
+        .page-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        .page-info {
+            color: #6b8cb8;
+            font-size: 0.9rem;
+            margin: 0 8px;
+        }
+
         /* 响应式 */
         @media (max-width: 768px) {
             .container { padding: 0 16px; }
@@ -1250,6 +1289,9 @@
             .search-box button { padding: 14px 20px; border-left: none; border-radius: 0; justify-content: center; box-shadow: 0 0 20px rgba(30, 108, 232, 0.3); }
             .greeting-card { padding: 20px 24px; flex-direction: column; align-items: flex-start; }
             .badge { align-self: flex-start; }
+            .recommend-section { padding: 20px 24px; margin: 30px 0 24px; }
+            .recommend-content { flex-direction: column; gap: 16px; }
+            .recommend-item a { font-size: 0.85rem; }
             .external-links { padding: 12px 16px; }
             .link-card { width: 150px; padding: 12px; }
             .link-name { font-size: 0.9rem; }
@@ -1331,8 +1373,8 @@
                 <input type="password" id="regPassword" placeholder="限字母数字，最少6位">
             </div>
             <div class="input-group">
-                <label><i class="fa-solid fa-key" style="margin-right: 6px;"></i> 激活码 <span style="color:#ff8a8a;">*</span></label>
-                <input type="text" id="activationCode" placeholder="(内测限时激活码:666668)">
+                <label><i class="fa-solid fa-key" style="margin-right: 6px;"></i> 注册卡密 <span style="color:#ff8a8a;">*</span></label>
+                <input type="text" id="activationCode" placeholder="(咸鱼搜"霓虹之都卡密")">
             </div>
             <div class="input-group">
                 <label><i class="fa-solid fa-venus-mars" style="margin-right: 6px;"></i> 性别</label>
@@ -1420,7 +1462,7 @@
         <!-- 今日推荐模块 -->
         <div class="recommend-section" id="recommendSection">
             <div class="recommend-header">
-                <h3><i class="fas fa-star"></i> 今日推荐</h3>
+                <h3><i class="fas fa-fire"></i> 今日推荐</h3>
             </div>
             <div class="recommend-content">
                 <div class="recommend-list" id="recommendLeft"></div>
@@ -1441,6 +1483,7 @@
         </div>
 
         <div class="resource-grid" id="resourceGrid"></div>
+        <div class="pagination" id="pagination"></div>
     </div>
 
     <footer class="footer">
@@ -1940,6 +1983,9 @@
 
     // 全局变量存储资源列表
     let allResources = [];
+    const PAGE_SIZE = 12;
+    let currentPage = 1;
+    let currentFilteredResources = [];
 
     // 渲染卡片
     function renderCards(resources, filterCategory = '全部') {
@@ -1948,7 +1994,15 @@
             ? resources
             : resources.filter(r => r.category === filterCategory);
 
-        grid.innerHTML = filtered.map(r => {
+        currentFilteredResources = filtered;
+        const totalPages = Math.ceil(filtered.length / PAGE_SIZE) || 1;
+        if (currentPage > totalPages) currentPage = totalPages;
+
+        const start = (currentPage - 1) * PAGE_SIZE;
+        const end = start + PAGE_SIZE;
+        const pageResources = filtered.slice(start, end);
+
+        grid.innerHTML = pageResources.map(r => {
             const date = r.createdAt ? new Date(r.createdAt).toLocaleDateString('zh-CN', {
                 year: 'numeric', month: '2-digit', day: '2-digit'
             }) : '未知';
@@ -1971,6 +2025,54 @@
                     </div>
                 </div>
             `}).join('');
+
+        renderPagination(totalPages);
+    }
+
+    function renderPagination(totalPages) {
+        const pagination = document.getElementById('pagination');
+        if (totalPages <= 1) {
+            pagination.innerHTML = '';
+            return;
+        }
+
+        let html = '';
+        html += `<button class="page-btn" onclick="goToPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}><i class="fas fa-chevron-left"></i></button>`;
+
+        const maxVisible = 5;
+        let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+        let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+        if (endPage - startPage < maxVisible - 1) {
+            startPage = Math.max(1, endPage - maxVisible + 1);
+        }
+
+        if (startPage > 1) {
+            html += `<button class="page-btn" onclick="goToPage(1)">1</button>`;
+            if (startPage > 2) html += `<span class="page-info">...</span>`;
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
+            html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="goToPage(${i})">${i}</button>`;
+        }
+
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) html += `<span class="page-info">...</span>`;
+            html += `<button class="page-btn" onclick="goToPage(${totalPages})">${totalPages}</button>`;
+        }
+
+        html += `<button class="page-btn" onclick="goToPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}><i class="fas fa-chevron-right"></i></button>`;
+        html += `<span class="page-info">第${currentPage}/${totalPages}页 共${currentFilteredResources.length}条</span>`;
+
+        pagination.innerHTML = html;
+    }
+
+    function goToPage(page) {
+        const totalPages = Math.ceil(currentFilteredResources.length / PAGE_SIZE) || 1;
+        if (page < 1 || page > totalPages) return;
+        currentPage = page;
+        const activeChip = document.querySelector('.category-chip.active');
+        const currentCategory = activeChip ? activeChip.textContent.trim() : '全部';
+        renderCards(currentFilteredResources, currentCategory);
     }
 
     // 获取资源列表
@@ -2208,7 +2310,7 @@
 
         if (!account || !userName || !password || !activationCode) {
             messageDiv.className = 'message warning';
-            messageDiv.innerText = '账号、用户名、密码和激活码为必填项';
+            messageDiv.innerText = '账号、用户名、密码和卡密为必填项';
             messageDiv.style.display = 'block';
             return;
         }
@@ -2312,7 +2414,7 @@
                 messageDiv.style.display = 'block';
             } else if (result === '-1') {
                 messageDiv.className = 'message error';
-                messageDiv.innerText = '激活码无效，请联系站长获取有效激活码';
+                messageDiv.innerText = '卡密无效，请咸鱼搜索"霓虹之都卡密"获取有效卡密';
                 messageDiv.style.display = 'block';
             } else {
                 messageDiv.className = 'message error';
