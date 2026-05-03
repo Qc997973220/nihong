@@ -401,6 +401,265 @@
                 flex: 1;
             }
         }
+        .tab-nav {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            border-bottom: 1px solid rgba(90, 160, 255, 0.2);
+            padding-bottom: 12px;
+        }
+        .tab-btn {
+            padding: 12px 24px;
+            background: rgba(20, 30, 50, 0.5);
+            border: 1px solid rgba(90, 160, 255, 0.3);
+            border-radius: 12px;
+            color: #90b0d1;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .tab-btn:hover {
+            background: rgba(91, 165, 255, 0.2);
+            color: #b8dcff;
+        }
+        .tab-btn.active {
+            background: rgba(91, 165, 255, 0.3);
+            border-color: rgba(91, 165, 255, 0.6);
+            color: #ffffff;
+            box-shadow: 0 0 20px rgba(91, 165, 255, 0.3);
+        }
+        .cardkey-panel {
+            background: rgba(20, 30, 50, 0.5);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 24px;
+            border: 1px solid rgba(90, 160, 255, 0.2);
+        }
+        .cardkey-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .cardkey-stats {
+            display: flex;
+            gap: 32px;
+        }
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .stat-label {
+            font-size: 0.85rem;
+            color: #90b0d1;
+        }
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #5ba5ff;
+            font-family: 'Orbitron', sans-serif;
+        }
+        .cardkey-actions {
+            display: flex;
+            gap: 12px;
+        }
+        .btn-generate {
+            background: linear-gradient(105deg, #1a6a9a, #2580c5);
+            color: white;
+            border: none;
+        }
+        .btn-generate:hover {
+            background: linear-gradient(105deg, #2580c5, #3090e0);
+            box-shadow: 0 0 25px rgba(37, 128, 197, 0.6);
+            transform: scale(1.02);
+        }
+        .btn-refresh {
+            padding: 10px 20px;
+            background: rgba(91, 165, 255, 0.15);
+            border: 1px solid rgba(91, 165, 255, 0.4);
+            color: #5ba5ff;
+        }
+        .btn-refresh:hover {
+            background: rgba(91, 165, 255, 0.25);
+            border-color: #5ba5ff;
+        }
+        .generate-form {
+            background: rgba(15, 25, 45, 0.6);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(90, 160, 255, 0.3);
+        }
+        .form-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .form-row label {
+            color: #b0c8e0;
+            font-weight: 500;
+        }
+        .form-row input {
+            width: 100px;
+            padding: 8px 12px;
+            background: rgba(10, 18, 32, 0.8);
+            border: 1px solid rgba(90, 160, 255, 0.4);
+            border-radius: 8px;
+            color: #ffffff;
+            font-size: 1rem;
+        }
+        .form-row input:focus {
+            outline: none;
+            border-color: #5ba5ff;
+            box-shadow: 0 0 10px rgba(91, 165, 255, 0.3);
+        }
+        .btn-confirm {
+            background: linear-gradient(105deg, #1a8a4a, #25b85a);
+            color: white;
+        }
+        .btn-confirm:hover {
+            box-shadow: 0 0 25px rgba(0, 200, 100, 0.5);
+            transform: scale(1.02);
+        }
+        .btn-cancel {
+            background: rgba(120, 120, 120, 0.2);
+            color: #b0b0b0;
+            border: 1px solid rgba(120, 120, 120, 0.4);
+        }
+        .btn-cancel:hover {
+            background: rgba(255, 100, 100, 0.2);
+            border-color: rgba(255, 100, 100, 0.5);
+            color: #ffb0b0;
+        }
+        .cardkey-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+        }
+        .cardkey-card {
+            background: rgba(15, 25, 45, 0.6);
+            border: 1px solid rgba(90, 160, 255, 0.25);
+            border-radius: 12px;
+            padding: 16px;
+            transition: all 0.2s;
+        }
+        .cardkey-card:hover {
+            border-color: rgba(90, 160, 255, 0.5);
+            box-shadow: 0 0 15px rgba(91, 165, 255, 0.15);
+        }
+        .cardkey-card.used {
+            opacity: 0.6;
+            border-color: rgba(150, 150, 150, 0.3);
+        }
+        .cardkey-key {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.1rem;
+            color: #5ba5ff;
+            font-weight: 600;
+            margin-bottom: 8px;
+            word-break: break-all;
+        }
+        .cardkey-card.used .cardkey-key {
+            color: #90b0d1;
+            text-decoration: line-through;
+        }
+        .cardkey-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            color: #90b0d1;
+        }
+        .cardkey-status {
+            padding: 2px 10px;
+            border-radius: 60px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        .cardkey-status.available {
+            background: rgba(0, 200, 100, 0.2);
+            color: #70ffb0;
+        }
+        .cardkey-status.used {
+            background: rgba(150, 150, 150, 0.2);
+            color: #a0a0a0;
+        }
+        .cardkey-used-by {
+            font-size: 0.8rem;
+            color: #b0c8e0;
+            margin-top: 4px;
+        }
+        .cardkey-empty {
+            text-align: center;
+            padding: 40px;
+            color: #90b0d1;
+        }
+        .generated-keys-box {
+            background: rgba(10, 18, 32, 0.8);
+            border: 1px solid rgba(0, 200, 100, 0.4);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+        .generated-keys-title {
+            color: #70ffb0;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .generated-keys-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .generated-key-item {
+            background: rgba(0, 150, 80, 0.2);
+            border: 1px solid rgba(0, 200, 100, 0.3);
+            border-radius: 8px;
+            padding: 8px 14px;
+            font-family: 'Orbitron', monospace;
+            font-size: 0.95rem;
+            color: #70ffb0;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .generated-key-item:hover {
+            background: rgba(0, 200, 100, 0.3);
+            transform: scale(1.05);
+        }
+        @media (max-width: 768px) {
+            .cardkey-stats {
+                flex-wrap: wrap;
+                gap: 20px;
+            }
+            .cardkey-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .cardkey-actions {
+                width: 100%;
+            }
+            .cardkey-actions .btn {
+                flex: 1;
+            }
+            .tab-nav {
+                flex-wrap: wrap;
+            }
+            .tab-btn {
+                flex: 1;
+                justify-content: center;
+            }
+        }
     </style>
 </head>
 <body>
@@ -427,10 +686,68 @@
             </button>
         </div>
 
+        <div class="tab-nav">
+            <button class="tab-btn active" id="tabAudit" onclick="switchTab('audit')">
+                <i class="fas fa-check-circle"></i> 待审核资源
+            </button>
+            <button class="tab-btn" id="tabCardKey" onclick="switchTab('cardkey')">
+                <i class="fas fa-key"></i> 卡密管理
+            </button>
+        </div>
+
         <div id="contentArea">
             <div class="loading">
                 <i class="fas fa-spinner"></i>
                 <p style="margin-top: 12px; color: #90b0d1;">加载中...</p>
+            </div>
+        </div>
+
+        <div id="cardKeyArea" style="display: none;">
+            <div class="cardkey-panel">
+                <div class="cardkey-header">
+                    <div class="cardkey-stats">
+                        <div class="stat-item">
+                            <span class="stat-label">可用卡密</span>
+                            <span class="stat-value" id="availableCount">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">已使用</span>
+                            <span class="stat-value" id="usedCount">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">总卡密数</span>
+                            <span class="stat-value" id="totalCount">0</span>
+                        </div>
+                    </div>
+                    <div class="cardkey-actions">
+                        <button class="btn btn-generate" id="generateBtn">
+                            <i class="fas fa-plus"></i> 生成卡密
+                        </button>
+                        <button class="btn btn-refresh" id="refreshCardKeyBtn">
+                            <i class="fas fa-sync-alt"></i> 刷新列表
+                        </button>
+                    </div>
+                </div>
+
+                <div class="generate-form" id="generateForm" style="display: none;">
+                    <div class="form-row">
+                        <label>生成数量：</label>
+                        <input type="number" id="generateCount" min="1" max="100" value="10">
+                        <button class="btn btn-confirm" id="confirmGenerateBtn">
+                            <i class="fas fa-check"></i> 确认生成
+                        </button>
+                        <button class="btn btn-cancel" id="cancelGenerateBtn">
+                            <i class="fas fa-times"></i> 取消
+                        </button>
+                    </div>
+                </div>
+
+                <div id="cardKeyListArea">
+                    <div class="loading">
+                        <i class="fas fa-spinner"></i>
+                        <p style="margin-top: 12px; color: #90b0d1;">加载中...</p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -630,7 +947,157 @@
             loadPendingResources();
 
             document.getElementById('refreshBtn').addEventListener('click', loadPendingResources);
+
+            document.getElementById('generateBtn').addEventListener('click', function() {
+                document.getElementById('generateForm').style.display = 'block';
+            });
+
+            document.getElementById('cancelGenerateBtn').addEventListener('click', function() {
+                document.getElementById('generateForm').style.display = 'none';
+            });
+
+            document.getElementById('confirmGenerateBtn').addEventListener('click', generateCardKeys);
+
+            document.getElementById('refreshCardKeyBtn').addEventListener('click', loadCardKeyList);
         });
+
+        let currentTab = 'audit';
+
+        function switchTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('tab' + (tab === 'audit' ? 'Audit' : 'CardKey')).classList.add('active');
+
+            if (tab === 'audit') {
+                document.getElementById('contentArea').style.display = 'block';
+                document.getElementById('cardKeyArea').style.display = 'none';
+            } else {
+                document.getElementById('contentArea').style.display = 'none';
+                document.getElementById('cardKeyArea').style.display = 'block';
+                loadCardKeyList();
+            }
+        }
+
+        function loadCardKeyList() {
+            const listArea = document.getElementById('cardKeyListArea');
+            listArea.innerHTML = '<div class="loading"><i class="fas fa-spinner"></i><p style="margin-top: 12px; color: #90b0d1;">加载中...</p></div>';
+
+            fetch('/cardkey/list')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        updateCardKeyStats(data.data || []);
+                        renderCardKeyList(data.data || []);
+                    } else {
+                        showToast('加载卡密列表失败', true);
+                    }
+                })
+                .catch(error => {
+                    console.error('加载卡密列表失败:', error);
+                    showToast('网络错误', true);
+                });
+        }
+
+        function updateCardKeyStats(cardKeys) {
+            const total = cardKeys.length;
+            const used = cardKeys.filter(k => k.status === 1).length;
+            const available = total - used;
+
+            document.getElementById('availableCount').textContent = available;
+            document.getElementById('usedCount').textContent = used;
+            document.getElementById('totalCount').textContent = total;
+        }
+
+        function renderCardKeyList(cardKeys) {
+            const listArea = document.getElementById('cardKeyListArea');
+
+            if (cardKeys.length === 0) {
+                listArea.innerHTML = '<div class="cardkey-empty"><i class="fas fa-key" style="font-size: 2rem; margin-bottom: 12px;"></i><p>暂无卡密记录</p></div>';
+                return;
+            }
+
+            let html = '<div class="cardkey-list">';
+            cardKeys.forEach(key => {
+                const isUsed = key.status === 1;
+                html += `
+                    <div class="cardkey-card ${isUsed ? 'used' : ''}">
+                        <div class="cardkey-key">${key.cardKey}</div>
+                        <div class="cardkey-meta">
+                            <span class="cardkey-status ${isUsed ? 'used' : 'available'}">
+                                ${isUsed ? '已使用' : '可用'}
+                            </span>
+                            <span>${formatDate(key.createdAt)}</span>
+                        </div>
+                        ${isUsed && key.usedBy ? '<div class="cardkey-used-by">使用者: ' + key.usedBy + '</div>' : ''}
+                    </div>
+                `;
+            });
+            html += '</div>';
+            listArea.innerHTML = html;
+        }
+
+        function generateCardKeys() {
+            const count = parseInt(document.getElementById('generateCount').value);
+
+            if (isNaN(count) || count < 1 || count > 100) {
+                showToast('生成数量必须在1-100之间', true);
+                return;
+            }
+
+            const confirmBtn = document.getElementById('confirmGenerateBtn');
+            confirmBtn.disabled = true;
+            confirmBtn.innerHTML = '<i class="fas fa-spinner"></i> 生成中...';
+
+            fetch('/cardkey/generate?count=' + count, {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('成功生成 ' + data.count + ' 个卡密');
+                    document.getElementById('generateForm').style.display = 'none';
+                    showGeneratedKeys(data.keys);
+                    loadCardKeyList();
+                } else {
+                    showToast(data.message || '生成失败', true);
+                }
+            })
+            .catch(error => {
+                console.error('生成卡密失败:', error);
+                showToast('网络错误', true);
+            })
+            .finally(() => {
+                confirmBtn.disabled = false;
+                confirmBtn.innerHTML = '<i class="fas fa-check"></i> 确认生成';
+            });
+        }
+
+        function showGeneratedKeys(keys) {
+            const listArea = document.getElementById('cardKeyListArea');
+            let html = '<div class="generated-keys-box">';
+            html += '<div class="generated-keys-title"><i class="fas fa-check-circle"></i> 成功生成以下卡密（点击复制）：</div>';
+            html += '<div class="generated-keys-list">';
+            keys.forEach(key => {
+                html += '<div class="generated-key-item" onclick="copyToClipboard(\'' + key + '\')">' + key + '</div>';
+            });
+            html += '</div></div>';
+            html += '<div id="cardKeyListAreaInner"></div>';
+            listArea.innerHTML = html;
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(function() {
+                showToast('已复制到剪贴板: ' + text);
+            }, function() {
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                showToast('已复制到剪贴板: ' + text);
+            });
+        }
     </script>
     
     <!-- 悬浮联系按钮组 -->
@@ -654,6 +1121,20 @@
             <div class="contact-popup email-popup">
                 <p>邮箱地址</p>
                 <p class="email-text">997973220@qq.com</p>
+            </div>
+        </div>
+        <div class="contact-btn" id="officialAccountBtn">
+            <i class="fa-solid fa-square-rss"></i>
+            <div class="contact-popup official-popup">
+                <img src="/uploads/official_qr.png" alt="公众号二维码">
+                <p>扫码关注公众号</p>
+            </div>
+        </div>
+        <div class="contact-btn" id="douyinBtn">
+            <i class="fa-brands fa-tiktok"></i>
+            <div class="contact-popup douyin-popup">
+                <img src="/uploads/douyin_qr.png" alt="抖音二维码">
+                <p>扫码关注抖音</p>
             </div>
         </div>
     </div>
