@@ -8,7 +8,7 @@ import java.util.Map;
 
 @CrossOrigin(origins = "*")
 @RestController
-@RequestMapping("/api/visitor")
+@RequestMapping("/visitor")
 public class VisitorController {
 
     private static final String VISITOR_COUNT_KEY = "site:visitor:count";

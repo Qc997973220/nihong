@@ -828,7 +828,7 @@
                         downloadPassword: downloadPassword
                     };
 
-                    const response = await fetch(`/resources/publish`, {
+                    const response = await fetch(`/api/resources/publish`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
@@ -863,7 +863,7 @@
                     const formData = new FormData();
                     formData.append('file', file);
 
-                    fetch(`/resources/upload`, {
+                    fetch(`/api/resources/upload`, {
                         method: 'POST',
                         body: formData
                     })

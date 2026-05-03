@@ -811,7 +811,7 @@
                 </div>
             `;
 
-            fetch(`/resources/pending`)
+            fetch(`/api/resources/pending`)
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
@@ -883,7 +883,7 @@
             const btns = card.querySelectorAll('.btn');
             btns.forEach(btn => btn.disabled = true);
 
-            fetch(`/resources/audit`, {
+            fetch(`/api/resources/audit`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ id: id, status: 1 })
@@ -914,7 +914,7 @@
             const btns = card.querySelectorAll('.btn');
             btns.forEach(btn => btn.disabled = true);
 
-            fetch(`/resources/audit`, {
+            fetch(`/api/resources/audit`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ id: id, status: -1 })
