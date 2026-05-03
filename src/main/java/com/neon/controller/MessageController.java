@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.ArrayList;
 
 @RestController
-@RequestMapping("/messages")
+@RequestMapping("/api/messages")
 @CrossOrigin(origins = "*")  // 允许跨域
 public class MessageController {
     @Autowired

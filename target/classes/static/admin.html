@@ -982,7 +982,7 @@
             const listArea = document.getElementById('cardKeyListArea');
             listArea.innerHTML = '<div class="loading"><i class="fas fa-spinner"></i><p style="margin-top: 12px; color: #90b0d1;">加载中...</p></div>';
 
-            fetch('/cardkey/list')
+            fetch('/api/cardkey/list')
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
@@ -1048,7 +1048,7 @@
             confirmBtn.disabled = true;
             confirmBtn.innerHTML = '<i class="fas fa-spinner"></i> 生成中...';
 
-            fetch('/cardkey/generate?count=' + count, {
+            fetch('/api/cardkey/generate?count=' + count, {
                 method: 'POST'
             })
             .then(response => response.json())

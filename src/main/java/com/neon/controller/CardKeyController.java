@@ -11,7 +11,7 @@ import java.util.Map;
 
 @CrossOrigin(origins = "*")
 @RestController
-@RequestMapping("/cardkey")
+@RequestMapping("/api/cardkey")
 public class CardKeyController {
 
     @Autowired

@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 @CrossOrigin(origins = "*")
 @RestController
-@RequestMapping("/login")
+@RequestMapping("/api/login")
 public class LoginController {
     @Autowired
     LoginService loginService;

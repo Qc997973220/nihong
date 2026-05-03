@@ -2153,7 +2153,7 @@
     // 获取今日推荐资源
     async function fetchRecommendedResources() {
         try {
-            const response = await fetch('/resources/status/2');
+            const response = await fetch('/api/resources/status/2');
             const resources = await response.json();
             renderRecommendList(resources);
         } catch (error) {
@@ -2711,7 +2711,7 @@
 
     async function fetchVisitorCount() {
         try {
-            const response = await fetch('/visitor/count');
+            const response = await fetch('/api/visitor/count');
             const data = await response.json();
             if (data.success && data.count) {
                 visitorCount = parseInt(data.count);
@@ -2725,7 +2725,7 @@
     async function incrementVisitor() {
         if (Math.random() < 0.1) {
             try {
-                const response = await fetch('/visitor/count/increment', { method: 'POST' });
+                const response = await fetch('/api/visitor/count/increment', { method: 'POST' });
                 const data = await response.json();
                 if (data.success && data.count) {
                     visitorCount = parseInt(data.count);

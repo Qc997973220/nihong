@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/resources")
+@RequestMapping("/api/resources")
 @CrossOrigin(origins = "*")  // 允许跨域
 public class ResourceController {
     @Autowired
