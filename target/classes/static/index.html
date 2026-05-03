@@ -1499,14 +1499,14 @@
     <div class="contact-btn" id="wechatBtn">
         <i class="fa-brands fa-weixin"></i>
         <div class="contact-popup wechat-popup">
-            <img src="/uploads/wechat_qr.png" alt="微信二维码">
+            <img src="uploads/wechat_qr.png" alt="微信二维码">
             <p>扫码添加微信</p>
         </div>
     </div>
     <div class="contact-btn" id="qqBtn">
         <i class="fa-brands fa-qq"></i>
         <div class="contact-popup qq-popup">
-            <img src="/uploads/qq_qr.png" alt="QQ二维码">
+            <img src="uploads/qq_qr.png" alt="QQ二维码">
             <p>扫码添加QQ</p>
         </div>
     </div>
@@ -2139,7 +2139,7 @@
     // 获取今日推荐资源
     async function fetchRecommendedResources() {
         try {
-            const response = await fetch('/api/resources/status/2');
+            const response = await fetch('/resources/status/2');
             const resources = await response.json();
             renderRecommendList(resources);
         } catch (error) {

@@ -1,52 +1,20 @@
 version: '3.8'
 
 services:
-  # Redis 缓存服务
-  redis:
-    image: redis:6.2-alpine
-    container_name: neon-redis
-    command: redis-server --requirepass neon_redis_password_2026 --appendonly yes
-    volumes:
-      - ./redis-data:/data
-    restart: unless-stopped
-    networks:
-      - neon-network
-
-  # Nginx 反向代理
   nginx:
-    image: nginx:alpine
-    container_name: neon-nginx
-    ports:
-      - "80:80"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./static:/app/static:ro
-    depends_on:
-      - neon
-    restart: unless-stopped
-    networks:
-      - neon-network
-
-  # Spring Boot 应用
+    # ...保持不变...
+    network_mode: host  # 加上这一行，完全共享宿主机网络
+    # ...注意：网络模式改为host后，容器内的76端口会直接暴露在宿主机80上
+        
   neon:
     build: .
     container_name: neon-app
-    expose:
-      - "8060"
+    network_mode: host   # 关键！加上这一行。
     volumes:
       - ./avatars:/app/avatars
       - ./uploads:/app/uploads
-      - ./application.properties:/app/application.properties
+      - ./application.properties:/app/application.properties  # 这里必须放改好配置的文件
       - ./static:/app/static
     environment:
       - SPRING_PROFILES_ACTIVE=prod
-      - SPRING_REDIS_HOST=redis
-      - SPRING_REDIS_PORT=6379
-      - SPRING_REDIS_PASSWORD=neon_redis_password_2026
     restart: unless-stopped
-    networks:
-      - neon-network
-
-networks:
-  neon-network:
-    driver: bridge
