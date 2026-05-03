@@ -787,11 +787,35 @@
 
     // ========== 登录检查 ==========
     function isLoggedIn() {
-        return localStorage.getItem('userInfo') !== null;
+        const userInfo = localStorage.getItem('userInfo');
+        if (!userInfo) return false;
+        try {
+            const info = JSON.parse(userInfo);
+            if (info.memberStatus === 'permanent' || info.memberStatus === 'active') {
+                return true;
+            }
+            return false;
+        } catch (e) {
+            return false;
+        }
     }
 
     function showLoginPrompt() {
         window.location.href = 'index.html?showLogin=true';
+    }
+
+    function getMemberStatusText() {
+        const userInfo = localStorage.getItem('userInfo');
+        if (!userInfo) return null;
+        try {
+            const info = JSON.parse(userInfo);
+            if (info.memberStatus === 'permanent') return '永久会员';
+            if (info.memberStatus === 'active') return info.memberExpireText;
+            if (info.memberStatus === 'expired') return '会员已到期';
+            return null;
+        } catch (e) {
+            return null;
+        }
     }
 
     // ========== 用户信息 ==========
@@ -978,7 +1002,7 @@
 
         // 直接从服务器获取资源详情（不缓存，因为数据较大包含Base64头像）
         try {
-            const url = `/resources/${id}`;
+            const url = `/api/resources/${id}`;
             console.log('请求URL:', url);
             const response = await fetch(url);
             console.log('响应状态:', response.status);
@@ -1049,6 +1073,8 @@
         let downloadSectionHtml = '';
         if (downloadLink) {
             const loggedIn = isLoggedIn();
+            const memberStatusText = getMemberStatusText();
+
             if (loggedIn) {
                 downloadSectionHtml = `
                     <div class="download-section">
@@ -1068,6 +1094,25 @@
                         <a href="${escapeHtml(downloadLink)}" target="_blank" class="download-btn">
                             <i class="fas fa-external-link-alt"></i>
                             <span>立即获取</span>
+                        </a>
+                    </div>
+                `;
+            } else if (memberStatusText) {
+                downloadSectionHtml = `
+                    <div class="download-section">
+                        <div class="download-info">
+                            <div class="download-label">
+                                <i class="fas fa-lock"></i>
+                                <span>资源下载</span>
+                            </div>
+                            <div class="download-password-item">
+                                <i class="fas fa-info-circle"></i>
+                                <span>${memberStatusText}，无法查看下载链接</span>
+                            </div>
+                        </div>
+                        <a href="javascript:void(0)" onclick="showLoginPrompt()" class="download-btn" style="background: rgba(255, 71, 87, 0.3); border: 1px solid rgba(255, 71, 87, 0.5);">
+                            <i class="fas fa-hourglass-half"></i>
+                            <span>会员已到期</span>
                         </a>
                     </div>
                 `;

@@ -11,27 +11,48 @@ import java.util.Map;
 
 @CrossOrigin(origins = "*")
 @RestController
-@RequestMapping("/cardkey")
+@RequestMapping("/api/cardkey")
 public class CardKeyController {
 
     @Autowired
     private CardKeyService cardKeyService;
 
     @PostMapping("/generate")
-    public Map<String, Object> generateCardKeys(@RequestParam(defaultValue = "10") int count) {
+    public Map<String, Object> generateCardKeys(
+            @RequestParam(defaultValue = "10") int count,
+            @RequestParam(defaultValue = "1") int memberType) {
         Map<String, Object> result = new HashMap<>();
         if (count <= 0 || count > 100) {
             result.put("success", false);
             result.put("message", "生成数量必须在1-100之间");
             return result;
         }
-        
-        List<String> keys = cardKeyService.generateCardKeys(count);
+
+        if (memberType < 1 || memberType > 4) {
+            result.put("success", false);
+            result.put("message", "会员类型无效");
+            return result;
+        }
+
+        String typeName = getMemberTypeName(memberType);
+        List<String> keys = cardKeyService.generateCardKeys(count, memberType);
         result.put("success", true);
-        result.put("message", "成功生成" + count + "个卡密");
+        result.put("message", "成功生成" + count + "个" + typeName + "卡密");
         result.put("count", keys.size());
         result.put("keys", keys);
+        result.put("memberType", memberType);
+        result.put("memberTypeName", typeName);
         return result;
+    }
+
+    private String getMemberTypeName(int memberType) {
+        switch (memberType) {
+            case CardKey.TYPE_MONTHLY: return "月度会员(30天)";
+            case CardKey.TYPE_QUARTERLY: return "季度会员(90天)";
+            case CardKey.TYPE_YEARLY: return "年度会员(360天)";
+            case CardKey.TYPE_PERMANENT: return "永久会员";
+            default: return "未知";
+        }
     }
 
     @GetMapping("/list")

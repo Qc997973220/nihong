@@ -40,16 +40,52 @@ public class LoginService {
         if (cardKey == null || cardKey.trim().isEmpty()) {
             return -1;
         }
-        if (!cardKeyService.validateCardKey(cardKey.trim())) {
+        java.util.Map<String, Object> cardResult = cardKeyService.useCardKey(cardKey.trim(), users.getAccount());
+        if (!(boolean) cardResult.get("success")) {
             return -1;
         }
+
         users.setId(UUID.randomUUID().toString());
         if (users.getRole() == null || users.getRole().isEmpty()) {
             users.setRole("0");
         }
+        users.setCreateTime(java.time.LocalDateTime.now());
+
+        Integer memberType = (Integer) cardResult.get("memberType");
+        int expireDays = (int) cardResult.get("expireDays");
+        users.setMemberType(memberType);
+        if (expireDays == Integer.MAX_VALUE) {
+            users.setMemberExpiredAt(null);
+        } else {
+            users.setMemberExpiredAt(java.time.LocalDateTime.now().plusDays(expireDays));
+        }
+
+        String inviteCode = generateInviteCode();
+        while (usersDao.existsByInviteCode(inviteCode)) {
+            inviteCode = generateInviteCode();
+        }
+        users.setInviteCode(inviteCode);
+        String invitedBy = users.getInvitedBy();
+        if (invitedBy != null && !invitedBy.trim().isEmpty()) {
+            Users inviter = usersDao.findByAccount(invitedBy.trim());
+            if (inviter == null) {
+                inviter = usersDao.findByInviteCode(invitedBy.trim());
+            }
+            if (inviter != null) {
+                users.setInvitedBy(inviter.getAccount());
+            }
+        }
         usersDao.save(users);
-        cardKeyService.useCardKey(cardKey.trim(), users.getAccount());
         return 1;
+    }
+
+    private String generateInviteCode() {
+        String chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+        StringBuilder code = new StringBuilder();
+        for (int i = 0; i < 8; i++) {
+            code.append(chars.charAt((int) (Math.random() * chars.length())));
+        }
+        return code.toString();
     }
 }
 

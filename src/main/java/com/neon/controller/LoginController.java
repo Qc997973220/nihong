@@ -5,17 +5,20 @@ import com.neon.pojo.Users;
 import com.neon.service.LoginService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 @CrossOrigin(origins = "*")
 @RestController
-@RequestMapping("/login")
+@RequestMapping("/api/login")
 public class LoginController {
     @Autowired
     LoginService loginService;
     @Autowired
     UsersDao usersDao;
+
     @GetMapping("/first")
     @ResponseBody
     public Map<String, Object> first(@RequestParam String account, @RequestParam String password){
@@ -25,7 +28,6 @@ public class LoginController {
         if (loginResult == 1) {
             Users user = usersDao.findByAccount(account);
             if (user != null) {
-                // 只返回必要的用户信息
                 Map<String, Object> userInfo = new HashMap<>();
                 userInfo.put("account", user.getAccount());
                 userInfo.put("userName", user.getUserName());
@@ -35,9 +37,24 @@ public class LoginController {
                 userInfo.put("email", user.getEmail());
                 userInfo.put("gender", user.getGender());
                 userInfo.put("token", user.getToken());
-                // 不再返回用户头像，所有用户使用系统默认字母头像
                 userInfo.put("avatar", null);
                 userInfo.put("lastLoginTime", user.getLastLoginTime());
+                userInfo.put("memberType", user.getMemberType() != null ? user.getMemberType() : 0);
+                userInfo.put("inviteCode", user.getInviteCode());
+
+                if (user.getMemberType() != null && user.getMemberType() == 4) {
+                    userInfo.put("memberStatus", "permanent");
+                    userInfo.put("memberExpireText", "永久会员");
+                } else if (user.getMemberExpiredAt() != null) {
+                    boolean isExpired = user.getMemberExpiredAt().isBefore(LocalDateTime.now());
+                    userInfo.put("memberStatus", isExpired ? "expired" : "active");
+                    userInfo.put("memberExpireAt", user.getMemberExpiredAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+                    userInfo.put("memberExpireText", isExpired ? "已到期" : "到期时间: " + user.getMemberExpiredAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+                } else {
+                    userInfo.put("memberStatus", "none");
+                    userInfo.put("memberExpireText", "非会员");
+                }
+
                 result.put("user", userInfo);
             }
         }
@@ -46,7 +63,27 @@ public class LoginController {
 
     @PostMapping("/registered")
     @ResponseBody
-    public int registered(Users users){
-        return loginService.registered(users);
+    public Map<String, Object> registered(Users users){
+        Map<String, Object> result = new HashMap<>();
+        int regResult = loginService.registered(users);
+        result.put("status", regResult);
+        if (regResult == 1) {
+            Users user = usersDao.findByAccount(users.getAccount());
+            if (user != null) {
+                String memberTypeName = "未知";
+                if (user.getMemberType() != null) {
+                    switch (user.getMemberType()) {
+                        case 1: memberTypeName = "月度会员(30天)"; break;
+                        case 2: memberTypeName = "季度会员(90天)"; break;
+                        case 3: memberTypeName = "年度会员(360天)"; break;
+                        case 4: memberTypeName = "永久会员"; break;
+                        default: memberTypeName = "非会员"; break;
+                    }
+                }
+                result.put("memberType", user.getMemberType());
+                result.put("memberTypeName", memberTypeName);
+            }
+        }
+        return result;
     }
 }

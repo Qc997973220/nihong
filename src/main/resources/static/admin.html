@@ -592,6 +592,13 @@
             background: rgba(150, 150, 150, 0.2);
             color: #a0a0a0;
         }
+        .cardkey-type {
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            background: rgba(100, 150, 255, 0.2);
+            color: #90c0ff;
+        }
         .cardkey-used-by {
             font-size: 0.8rem;
             color: #b0c8e0;
@@ -733,6 +740,15 @@
                     <div class="form-row">
                         <label>生成数量：</label>
                         <input type="number" id="generateCount" min="1" max="100" value="10">
+                    </div>
+                    <div class="form-row">
+                        <label>会员类型：</label>
+                        <select id="memberType" style="padding: 8px 12px; border: 1px solid #3d5a80; border-radius: 4px; background: #1a1a2e; color: #e8e8e8;">
+                            <option value="1">月度会员(30天)</option>
+                            <option value="2">季度会员(90天)</option>
+                            <option value="3">年度会员(360天)</option>
+                            <option value="4">永久会员</option>
+                        </select>
                         <button class="btn btn-confirm" id="confirmGenerateBtn">
                             <i class="fas fa-check"></i> 确认生成
                         </button>
@@ -1019,10 +1035,12 @@
             let html = '<div class="cardkey-list">';
             cardKeys.forEach(key => {
                 const isUsed = key.status === 1;
+                const memberTypeName = key.memberTypeName || getMemberTypeName(key.memberType);
                 html += `
                     <div class="cardkey-card ${isUsed ? 'used' : ''}">
                         <div class="cardkey-key">${key.cardKey}</div>
                         <div class="cardkey-meta">
+                            <span class="cardkey-type">${memberTypeName}</span>
                             <span class="cardkey-status ${isUsed ? 'used' : 'available'}">
                                 ${isUsed ? '已使用' : '可用'}
                             </span>
@@ -1036,8 +1054,19 @@
             listArea.innerHTML = html;
         }
 
+        function getMemberTypeName(type) {
+            switch (type) {
+                case 1: return '月度会员(30天)';
+                case 2: return '季度会员(90天)';
+                case 3: return '年度会员(360天)';
+                case 4: return '永久会员';
+                default: return '未知';
+            }
+        }
+
         function generateCardKeys() {
             const count = parseInt(document.getElementById('generateCount').value);
+            const memberType = parseInt(document.getElementById('memberType').value);
 
             if (isNaN(count) || count < 1 || count > 100) {
                 showToast('生成数量必须在1-100之间', true);
@@ -1048,15 +1077,15 @@
             confirmBtn.disabled = true;
             confirmBtn.innerHTML = '<i class="fas fa-spinner"></i> 生成中...';
 
-            fetch('/api/cardkey/generate?count=' + count, {
+            fetch('/api/cardkey/generate?count=' + count + '&memberType=' + memberType, {
                 method: 'POST'
             })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    showToast('成功生成 ' + data.count + ' 个卡密');
+                    showToast(data.message || '成功生成 ' + data.count + ' 个卡密');
                     document.getElementById('generateForm').style.display = 'none';
-                    showGeneratedKeys(data.keys);
+                    showGeneratedKeys(data.keys, data.memberTypeName);
                     loadCardKeyList();
                 } else {
                     showToast(data.message || '生成失败', true);
@@ -1072,10 +1101,10 @@
             });
         }
 
-        function showGeneratedKeys(keys) {
+        function showGeneratedKeys(keys, memberTypeName) {
             const listArea = document.getElementById('cardKeyListArea');
             let html = '<div class="generated-keys-box">';
-            html += '<div class="generated-keys-title"><i class="fas fa-check-circle"></i> 成功生成以下卡密（点击复制）：</div>';
+            html += '<div class="generated-keys-title"><i class="fas fa-check-circle"></i> 成功生成以下 ' + (memberTypeName || '') + ' 卡密（点击复制）：</div>';
             html += '<div class="generated-keys-list">';
             keys.forEach(key => {
                 html += '<div class="generated-key-item" onclick="copyToClipboard(\'' + key + '\')">' + key + '</div>';

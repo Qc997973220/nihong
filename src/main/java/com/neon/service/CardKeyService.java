@@ -7,7 +7,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 
@@ -35,19 +37,25 @@ public class CardKeyService {
     }
 
     @Transactional
-    public boolean useCardKey(String cardKey, String usedBy) {
+    public Map<String, Object> useCardKey(String cardKey, String usedBy) {
+        Map<String, Object> result = new HashMap<>();
+        result.put("success", false);
+
         if (cardKey == null || cardKey.trim().isEmpty()) {
-            return false;
+            result.put("message", "卡密不能为空");
+            return result;
         }
 
         Optional<CardKey> cardKeyOpt = cardKeyDao.findByCardKey(cardKey.trim());
         if (cardKeyOpt.isEmpty()) {
-            return false;
+            result.put("message", "卡密不存在");
+            return result;
         }
 
         CardKey ck = cardKeyOpt.get();
         if (ck.getStatus() != 0) {
-            return false;
+            result.put("message", "卡密已被使用");
+            return result;
         }
 
         ck.setStatus(1);
@@ -55,7 +63,23 @@ public class CardKeyService {
         ck.setUsedBy(usedBy);
         ck.setUpdatedAt(LocalDateTime.now());
         cardKeyDao.save(ck);
-        return true;
+
+        result.put("success", true);
+        result.put("memberType", ck.getMemberType());
+        result.put("memberTypeName", ck.getMemberTypeName());
+        result.put("expireDays", getExpireDays(ck.getMemberType()));
+        return result;
+    }
+
+    public static int getExpireDays(Integer memberType) {
+        if (memberType == null) return 0;
+        switch (memberType) {
+            case CardKey.TYPE_MONTHLY: return 30;
+            case CardKey.TYPE_QUARTERLY: return 90;
+            case CardKey.TYPE_YEARLY: return 360;
+            case CardKey.TYPE_PERMANENT: return Integer.MAX_VALUE;
+            default: return 0;
+        }
     }
 
     public CardKey save(CardKey cardKey) {
@@ -78,10 +102,10 @@ public class CardKeyService {
     }
 
     @Transactional
-    public List<String> generateCardKeys(int count) {
+    public List<String> generateCardKeys(int count, int memberType) {
         List<String> generatedKeys = new ArrayList<>();
         Random random = new Random();
-        
+
         for (int i = 0; i < count; i++) {
             String key;
             do {
@@ -91,12 +115,13 @@ public class CardKeyService {
                 }
                 key = sb.toString();
             } while (cardKeyDao.existsByCardKey(key));
-            
+
             CardKey cardKey = new CardKey(key);
+            cardKey.setMemberType(memberType);
             cardKeyDao.save(cardKey);
             generatedKeys.add(key);
         }
-        
+
         return generatedKeys;
     }
 

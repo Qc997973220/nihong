@@ -30,6 +30,13 @@ public class Users {
     String email;               // 邮箱
     String gender;              //性别
     String token;              //令牌
+    @Column(unique = true)
+    String inviteCode;         //邀请码（每个用户唯一）
+    String invitedBy;          //被谁邀请的（邀请人账号）
+
+    Integer memberType;       //会员类型: 1月度 2季度 3年度 4永久 0非会员
+    LocalDateTime memberExpiredAt;  //会员到期时间
+
     @Column(columnDefinition = "LONGBLOB")
     byte[] avatar;             //头像
     @ElementCollection

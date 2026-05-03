@@ -7,6 +7,11 @@ import java.time.LocalDateTime;
 @Table(name = "card_key")
 public class CardKey {
 
+    public static final int TYPE_MONTHLY = 1;    // 月度会员 30天
+    public static final int TYPE_QUARTERLY = 2;  // 季度会员 90天
+    public static final int TYPE_YEARLY = 3;     // 年度会员 360天
+    public static final int TYPE_PERMANENT = 4;  // 永久会员
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -16,6 +21,8 @@ public class CardKey {
 
     @Column(nullable = false)
     private Integer status = 0;
+
+    private Integer memberType = 1;
 
     private LocalDateTime usedAt;
 
@@ -90,5 +97,24 @@ public class CardKey {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public Integer getMemberType() {
+        return memberType;
+    }
+
+    public void setMemberType(Integer memberType) {
+        this.memberType = memberType;
+    }
+
+    public String getMemberTypeName() {
+        if (memberType == null) return "未知";
+        switch (memberType) {
+            case TYPE_MONTHLY: return "月度会员(30天)";
+            case TYPE_QUARTERLY: return "季度会员(90天)";
+            case TYPE_YEARLY: return "年度会员(360天)";
+            case TYPE_PERMANENT: return "永久会员";
+            default: return "未知";
+        }
     }
 }

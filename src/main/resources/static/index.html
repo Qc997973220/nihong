@@ -399,6 +399,13 @@
             font-weight: 480;
             color: #edf5ff;
         }
+        .member-badge {
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-left: 8px;
+            font-weight: 500;
+        }
         .publish-btn {
             background: linear-gradient(105deg, #1f4f9e, #2d6fc4);
             border: none;
@@ -1362,12 +1369,12 @@
             <h2>创建账号</h2>
             <div class="sub">注册成为霓虹之都的会员</div>
             <div class="input-group">
-                <label><i class="fa-regular fa-user" style="margin-right: 6px;"></i> 账号 <span style="color:#ff8a8a;">*</span></label>
-                <input type="text" id="regAccount" placeholder="限字母/数字，最少6位">
+                <label><i class="fa-solid fa-star" style="margin-right: 6px;"></i> 用户名 <span style="color:#ff8a8a;">*</span></label>
+                <input type="text" id="regUserName" placeholder="你的用户名，用于展示">
             </div>
             <div class="input-group">
-                <label><i class="fa-solid fa-id-card" style="margin-right: 6px;"></i> 用户名 <span style="color:#ff8a8a;">*</span></label>
-                <input type="text" id="regUserName" placeholder="支持中文，最多8字符，无特殊符号">
+                <label><i class="fa-regular fa-user" style="margin-right: 6px;"></i> 账号 <span style="color:#ff8a8a;">*</span></label>
+                <input type="text" id="regAccount" placeholder="限字母/数字，最少6位">
             </div>
             <div class="input-group">
                 <label><i class="fa-solid fa-lock" style="margin-right: 6px;"></i> 密码 <span style="color:#ff8a8a;">*</span></label>
@@ -1376,6 +1383,10 @@
             <div class="input-group">
                 <label><i class="fa-solid fa-key" style="margin-right: 6px;"></i> 注册卡密 <span style="color:#ff8a8a;">*</span></label>
                 <input type="text" id="activationCode" placeholder="(咸鱼搜'霓虹之都卡密')">
+            </div>
+            <div class="input-group">
+                <label><i class="fa-solid fa-gift" style="margin-right: 6px;"></i> 邀请码</label>
+                <input type="text" id="inviteCode" placeholder="选填，老会员的邀请码">
             </div>
             <div class="input-group">
                 <label><i class="fa-solid fa-venus-mars" style="margin-right: 6px;"></i> 性别</label>
@@ -1436,6 +1447,7 @@
             <div class="user-info" id="userInfo">
                 <div class="user-avatar" id="userAvatar">U</div>
                 <span class="user-name" id="displayUsername">加载中...</span>
+                <span class="member-badge" id="memberBadge" style="display: none;"></span>
             </div>
             <div id="adminLink" style="display: none;">
                 <a href="admin.html" class="back-link" style="background: rgba(255, 71, 87, 0.2); padding: 6px 16px; border-radius: 60px; border: 1px solid rgba(255, 71, 87, 0.5);">
@@ -1890,7 +1902,7 @@
 
         function searchResources(keyword) {
             currentSearchKeyword = keyword;
-            fetch(`/resources/search?keyword=${encodeURIComponent(keyword)}`)
+            fetch(`/api/resources/search?keyword=${encodeURIComponent(keyword)}`)
                 .then(response => response.json())
                 .then(resources => {
                     currentSearchResults = resources;
@@ -2197,6 +2209,31 @@
         document.getElementById('registerPanel').classList.add('hidden');
         document.getElementById('userName').focus();
     }
+
+    function updateMemberBadge(user) {
+        const badge = document.getElementById('memberBadge');
+        if (!badge) return;
+
+        if (user.memberStatus === 'permanent') {
+            badge.textContent = '永久会员';
+            badge.style.display = 'inline-block';
+            badge.style.background = 'linear-gradient(135deg, #FFD700, #FFA500)';
+            badge.style.color = '#1a1a2e';
+        } else if (user.memberStatus === 'active') {
+            badge.textContent = user.memberExpireText || '会员';
+            badge.style.display = 'inline-block';
+            badge.style.background = 'rgba(0, 200, 100, 0.2)';
+            badge.style.color = '#70ffb0';
+        } else if (user.memberStatus === 'expired') {
+            badge.textContent = '已到期';
+            badge.style.display = 'inline-block';
+            badge.style.background = 'rgba(255, 71, 87, 0.2)';
+            badge.style.color = '#ff8a8a';
+        } else {
+            badge.style.display = 'none';
+        }
+    }
+
     function hideLogin() {
         document.getElementById('loginWrapper').style.display = 'none';
     }
@@ -2242,7 +2279,7 @@
         messageDiv.style.display = 'none';
 
         try {
-            const url = `/login/first?account=${encodeURIComponent(account)}&password=${encodeURIComponent(password)}`;
+            const url = `/api/login/first?account=${encodeURIComponent(account)}&password=${encodeURIComponent(password)}`;
             const response = await fetch(url);
             const result = await response.json();
 
@@ -2259,7 +2296,10 @@
                     account: result.user.account,
                     username: displayName,
                     role: result.user.role !== undefined && result.user.role !== null ? result.user.role : '0',
-                    avatar: result.user.avatar
+                    avatar: result.user.avatar,
+                    memberType: result.user.memberType,
+                    memberStatus: result.user.memberStatus,
+                    memberExpireText: result.user.memberExpireText
                 };
                 localStorage.setItem('userInfo', JSON.stringify(userInfo));
 
@@ -2269,7 +2309,10 @@
                     account: result.user.account,
                     username: displayName,
                     role: result.user.role !== undefined && result.user.role !== null ? result.user.role : '0',
-                    avatar: result.user.avatar
+                    avatar: result.user.avatar,
+                    memberType: result.user.memberType,
+                    memberStatus: result.user.memberStatus,
+                    memberExpireText: result.user.memberExpireText
                 };
 
                 document.getElementById('displayUsername').innerText = displayName;
@@ -2278,7 +2321,7 @@
                 } else {
                     document.getElementById('userAvatar').innerText = displayName.charAt(0).toUpperCase();
                 }
-
+                updateMemberBadge(result.user);
                 hideLogin();
 
                 const activeChip = document.querySelector('.category-chip.active');
@@ -2315,17 +2358,18 @@
 
     // 注册
     document.getElementById('registerBtn').addEventListener('click', async function() {
-        const account = document.getElementById('regAccount').value.trim();
         const userName = document.getElementById('regUserName').value.trim();
+        const account = document.getElementById('regAccount').value.trim();
         const password = document.getElementById('regPassword').value.trim();
         const activationCode = document.getElementById('activationCode').value.trim();
+        const inviteCode = document.getElementById('inviteCode').value.trim();
         const gender = document.getElementById('gender').value;
         const phone = document.getElementById('phone').value.trim();
         const messageDiv = document.getElementById('registerMessage');
 
-        if (!account || !userName || !password || !activationCode) {
+        if (!userName || !account || !password || !activationCode) {
             messageDiv.className = 'message warning';
-            messageDiv.innerText = '账号、用户名、密码和卡密为必填项';
+            messageDiv.innerText = '用户名、账号、密码和卡密为必填项';
             messageDiv.style.display = 'block';
             return;
         }
@@ -2337,7 +2381,7 @@
             messageDiv.style.display = 'block';
             return;
         }
-        
+
         // 用户名验证：支持中文，最多8字符，无特殊符号和空格
         const userNameRegex = /^[\u4e00-\u9fa5A-Za-z0-9]{1,8}$/;
         if (!userNameRegex.test(userName)) {
@@ -2346,7 +2390,7 @@
             messageDiv.style.display = 'block';
             return;
         }
-        
+
         if (!alphanumericRegex.test(password)) {
             messageDiv.className = 'message warning';
             messageDiv.innerText = '密码只能包含字母和数字，且最少6位';
@@ -2360,10 +2404,11 @@
         messageDiv.style.display = 'none';
 
         const formData = new URLSearchParams();
-        formData.append('account', account);
         formData.append('userName', userName);
+        formData.append('account', account);
         formData.append('password', password);
         formData.append('activationCode', activationCode);
+        if (inviteCode) formData.append('invitedBy', inviteCode);
         if (gender) formData.append('gender', gender);
         if (phone) formData.append('phone', phone);
 
@@ -2374,14 +2419,15 @@
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: formData
             });
-            const result = await response.text();
+            const result = await response.json();
 
-            if (result === '1') {
+            if (result.status === 1) {
+                const memberTypeName = result.memberTypeName || '会员';
                 messageDiv.className = 'message success';
-                messageDiv.innerText = '注册成功，正在自动登录...';
+                messageDiv.innerText = `注册成功，激活${memberTypeName}成功！正在自动登录...`;
                 messageDiv.style.display = 'block';
 
-                const loginUrl = `/login/first?account=${encodeURIComponent(account)}&password=${encodeURIComponent(password)}`;
+                const loginUrl = `/api/login/first?account=${encodeURIComponent(account)}&password=${encodeURIComponent(password)}`;
                 const loginResponse = await fetch(loginUrl);
                 const loginResult = await loginResponse.json();
 
@@ -2402,11 +2448,15 @@
                         ...currentUser,
                         account: loginResult.user.account,
                         username: displayName,
-                        role: loginResult.user.role !== undefined && loginResult.user.role !== null ? loginResult.user.role : '0'
+                        role: loginResult.user.role !== undefined && loginResult.user.role !== null ? loginResult.user.role : '0',
+                        memberType: loginResult.user.memberType,
+                        memberStatus: loginResult.user.memberStatus,
+                        memberExpireText: loginResult.user.memberExpireText
                     };
 
                     document.getElementById('displayUsername').innerText = displayName;
                     document.getElementById('userAvatar').innerText = displayName.charAt(0).toUpperCase();
+                    updateMemberBadge(loginResult.user);
                     hideLogin();
                     const activeChip = document.querySelector('.category-chip.active');
                     const currentCategory = activeChip ? activeChip.textContent.trim() : '全部';
@@ -2419,21 +2469,17 @@
                     document.getElementById('loginAccount').value = account;
                     document.getElementById('loginPassword').value = '';
                 }
-            } else if (result === '0') {
+            } else if (result.status === 0) {
                 messageDiv.className = 'message error';
                 messageDiv.innerText = '注册失败，账号已存在';
                 messageDiv.style.display = 'block';
-            } else if (result === '2') {
+            } else if (result.status === 2) {
                 messageDiv.className = 'message error';
                 messageDiv.innerText = '注册失败，用户名已存在';
                 messageDiv.style.display = 'block';
-            } else if (result === '-1') {
-                messageDiv.className = 'message error';
-                messageDiv.innerText = '卡密无效，请咸鱼搜索"霓虹之都卡密"获取有效卡密';
-                messageDiv.style.display = 'block';
             } else {
                 messageDiv.className = 'message error';
-                messageDiv.innerText = '注册失败，请稍后重试';
+                messageDiv.innerText = '卡密无效，请咸鱼搜索"霓虹之都卡密"获取有效卡密';
                 messageDiv.style.display = 'block';
             }
         } catch (error) {
