@@ -363,6 +363,14 @@
                     <div class="info-label">积分：</div>
                     <div class="info-value" id="userPoints">1280</div>
                 </div>
+                <div class="info-item">
+                    <div class="info-label">我的邀请码：</div>
+                    <div class="info-value" id="infoInviteCode" style="color: #5ba5ff; font-weight: bold;"></div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">会员状态：</div>
+                    <div class="info-value" id="infoMemberStatus">非会员</div>
+                </div>
             </div>
 
             <div class="action-buttons">
@@ -389,6 +397,34 @@
             document.getElementById('nickname').innerText = username;
             document.getElementById('infoUserName').innerText = username;
             document.getElementById('infoNickname').innerText = username;
+
+            // 显示邀请码
+            if (userData.inviteCode) {
+                document.getElementById('infoInviteCode').innerText = userData.inviteCode;
+            } else {
+                document.getElementById('infoInviteCode').innerText = '暂无';
+            }
+
+            // 显示会员状态（个人中心显示会员类型 + 到期时间）
+            let memberStatusDisplay = '';
+            if (userData.memberStatus === 'permanent') {
+                memberStatusDisplay = '永久会员';
+                document.getElementById('infoMemberStatus').style.color = '#FFD700';
+            } else if (userData.memberStatus === 'active') {
+                let memberTypeName = '会员';
+                if (userData.memberType === 1) memberTypeName = '月度会员';
+                else if (userData.memberType === 2) memberTypeName = '季度会员';
+                else if (userData.memberType === 3) memberTypeName = '年度会员';
+                memberStatusDisplay = memberTypeName + ' · ' + (userData.memberExpireText || '未知');
+                document.getElementById('infoMemberStatus').style.color = '#70ffb0';
+            } else if (userData.memberStatus === 'expired') {
+                memberStatusDisplay = '已到期';
+                document.getElementById('infoMemberStatus').style.color = '#ff8a8a';
+            } else {
+                memberStatusDisplay = '非会员';
+                document.getElementById('infoMemberStatus').style.color = '#90b0d1';
+            }
+            document.getElementById('infoMemberStatus').innerText = memberStatusDisplay;
         } catch (e) {
             console.error('解析用户信息失败:', e);
             window.location.href = '/';

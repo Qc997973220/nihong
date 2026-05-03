@@ -406,6 +406,30 @@
             margin-left: 8px;
             font-weight: 500;
         }
+        .member-status-bar {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(0, 180, 100, 0.15);
+            border: 1px solid rgba(0, 200, 100, 0.3);
+            border-radius: 60px;
+            padding: 4px 14px;
+            font-size: 0.85rem;
+            white-space: nowrap;
+        }
+        .member-status-icon {
+            color: #70ffb0;
+            font-size: 0.75rem;
+        }
+        .member-status-text {
+            color: #70ffb0;
+            font-weight: 500;
+        }
+        .member-expire-text {
+            color: #a0d8ff;
+            font-size: 0.78rem;
+            margin-left: 4px;
+        }
         .publish-btn {
             background: linear-gradient(105deg, #1f4f9e, #2d6fc4);
             border: none;
@@ -1293,6 +1317,17 @@
             .hero p { font-size: 1rem; }
             .greeting-scroll { max-width: 100%; }
             .search-box { flex-direction: column; border-radius: 40px; background: rgba(10,22,38,0.85); overflow: hidden; margin-top: 20px; }
+            .member-status-bar { 
+                padding: 3px 10px; 
+                font-size: 0.75rem;
+                order: 3;
+                margin-top: 8px;
+                width: 100%;
+                justify-content: center;
+            }
+            .member-expire-text { 
+                font-size: 0.7rem; 
+            }
             .search-box input { padding: 16px 20px; text-align: center; border-bottom: 1px solid rgba(90,170,255,0.3); }
             .search-box button { padding: 14px 20px; border-left: none; border-radius: 0; justify-content: center; box-shadow: 0 0 20px rgba(30, 108, 232, 0.3); }
             .greeting-card { padding: 20px 24px; flex-direction: column; align-items: flex-start; }
@@ -1331,8 +1366,34 @@
             .user-info { padding: 4px 12px 4px 8px; }
             .user-avatar { width: 30px; height: 30px; font-size: 0.9rem; }
             .user-name { font-size: 0.9rem; }
+            .member-status-bar {
+                padding: 3px 10px;
+                font-size: 0.7rem;
+                margin-top: 6px;
+            }
+            .member-status-text { font-size: 0.7rem; }
             .login-card { padding: 32px 24px; }
             .login-card h2 { font-size: 1.8rem; }
+        }
+        @media (max-width: 480px) {
+            .navbar .container {
+                justify-content: center;
+            }
+            .navbar .container > * {
+                flex-basis: auto;
+            }
+            .left-area {
+                width: 100%;
+                justify-content: center;
+            }
+            .nav-links {
+                width: 100%;
+                justify-content: center;
+            }
+            .member-status-bar {
+                width: auto;
+                align-self: center;
+            }
         }
     </style>
 </head>
@@ -1447,8 +1508,13 @@
             <div class="user-info" id="userInfo">
                 <div class="user-avatar" id="userAvatar">U</div>
                 <span class="user-name" id="displayUsername">加载中...</span>
-                <span class="member-badge" id="memberBadge" style="display: none;"></span>
             </div>
+            <div class="member-status-bar" id="memberStatusBar" style="display: none;">
+                <span class="member-status-icon"><i class="fas fa-crown"></i></span>
+                <span class="member-status-text" id="memberStatusText"></span>
+                <span class="member-expire-text" id="memberExpireText"></span>
+            </div>
+            <span class="member-badge" id="memberBadge" style="display: none;"></span>
             <div id="adminLink" style="display: none;">
                 <a href="admin.html" class="back-link" style="background: rgba(255, 71, 87, 0.2); padding: 6px 16px; border-radius: 60px; border: 1px solid rgba(255, 71, 87, 0.5);">
                     <i class="fas fa-shield-alt"></i> 审核管理
@@ -1625,8 +1691,19 @@
                 currentUser = {
                     ...currentUser,
                     username: userInfo.username,
-                    role: userInfo.role
+                    role: userInfo.role,
+                    avatar: userInfo.avatar,
+                    account: userInfo.account,
+                    memberType: userInfo.memberType,
+                    memberStatus: userInfo.memberStatus,
+                    memberExpireText: userInfo.memberExpireText
                 };
+                // 更新用户头像
+                if (userInfo.avatar) {
+                    document.getElementById('userAvatar').innerHTML = `<img src="${userInfo.avatar}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+                }
+                // 更新会员徽章
+                updateMemberBadge(userInfo);
             } catch (e) {
                 console.error('解析用户信息失败:', e);
             }
@@ -2211,27 +2288,65 @@
     }
 
     function updateMemberBadge(user) {
-        const badge = document.getElementById('memberBadge');
-        if (!badge) return;
+        const statusBar = document.getElementById('memberStatusBar');
+        const statusText = document.getElementById('memberStatusText');
+        const expireText = document.getElementById('memberExpireText');
+
+        if (!statusBar || !statusText) return;
+
+        let memberTypeText = '';
+        let bgColor = '';
+        let textColor = '';
+        let iconColor = '';
 
         if (user.memberStatus === 'permanent') {
-            badge.textContent = '永久会员';
-            badge.style.display = 'inline-block';
-            badge.style.background = 'linear-gradient(135deg, #FFD700, #FFA500)';
-            badge.style.color = '#1a1a2e';
+            memberTypeText = '永久会员';
+            bgColor = 'rgba(255, 215, 0, 0.2)';
+            textColor = '#FFD700';
+            iconColor = '#FFD700';
         } else if (user.memberStatus === 'active') {
-            badge.textContent = user.memberExpireText || '会员';
-            badge.style.display = 'inline-block';
-            badge.style.background = 'rgba(0, 200, 100, 0.2)';
-            badge.style.color = '#70ffb0';
+            const type = user.memberType;
+            if (type === 1) {
+                memberTypeText = '月度会员';
+                bgColor = 'rgba(120, 100, 255, 0.2)';
+                textColor = '#b48aff';
+                iconColor = '#b48aff';
+            } else if (type === 2) {
+                memberTypeText = '季度会员';
+                bgColor = 'rgba(0, 200, 100, 0.2)';
+                textColor = '#70ffb0';
+                iconColor = '#70ffb0';
+            } else if (type === 3) {
+                memberTypeText = '年度会员';
+                bgColor = 'rgba(255, 150, 50, 0.2)';
+                textColor = '#ffb070';
+                iconColor = '#ffb070';
+            } else {
+                memberTypeText = '会员';
+                bgColor = 'rgba(0, 180, 255, 0.2)';
+                textColor = '#70c0ff';
+                iconColor = '#70c0ff';
+            }
+            expireText.textContent = '';
         } else if (user.memberStatus === 'expired') {
-            badge.textContent = '已到期';
-            badge.style.display = 'inline-block';
-            badge.style.background = 'rgba(255, 71, 87, 0.2)';
-            badge.style.color = '#ff8a8a';
+            memberTypeText = '已到期';
+            bgColor = 'rgba(255, 71, 87, 0.2)';
+            textColor = '#ff8a8a';
+            iconColor = '#ff8a8a';
+            expireText.textContent = '';
         } else {
-            badge.style.display = 'none';
+            statusBar.style.display = 'none';
+            return;
         }
+
+        statusBar.style.display = 'flex';
+        statusText.textContent = memberTypeText;
+        expireText.textContent = '';
+        statusBar.style.background = bgColor;
+        statusBar.style.borderColor = bgColor.replace('0.2', '0.4');
+        statusText.style.color = textColor;
+        const icon = document.querySelector('.member-status-icon');
+        if (icon) icon.style.color = iconColor;
     }
 
     function hideLogin() {
@@ -2299,7 +2414,9 @@
                     avatar: result.user.avatar,
                     memberType: result.user.memberType,
                     memberStatus: result.user.memberStatus,
-                    memberExpireText: result.user.memberExpireText
+                    memberExpireText: result.user.memberExpireText,
+                    memberExpireAt: result.user.memberExpireAt,
+                    inviteCode: result.user.inviteCode
                 };
                 localStorage.setItem('userInfo', JSON.stringify(userInfo));
 
@@ -2439,7 +2556,13 @@
                     const userInfo = {
                         account: loginResult.user.account,
                         username: displayName,
-                        role: loginResult.user.role !== undefined && loginResult.user.role !== null ? loginResult.user.role : '0'
+                        role: loginResult.user.role !== undefined && loginResult.user.role !== null ? loginResult.user.role : '0',
+                        avatar: loginResult.user.avatar,
+                        memberType: loginResult.user.memberType,
+                        memberStatus: loginResult.user.memberStatus,
+                        memberExpireText: loginResult.user.memberExpireText,
+                        memberExpireAt: loginResult.user.memberExpireAt,
+                        inviteCode: loginResult.user.inviteCode
                     };
                     localStorage.setItem('userInfo', JSON.stringify(userInfo));
 

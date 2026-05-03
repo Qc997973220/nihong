@@ -158,6 +158,30 @@
             font-weight: 480;
             color: #edf5ff;
         }
+        .member-status-bar {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(0, 180, 100, 0.15);
+            border: 1px solid rgba(0, 200, 100, 0.3);
+            border-radius: 60px;
+            padding: 4px 14px;
+            font-size: 0.85rem;
+            white-space: nowrap;
+        }
+        .member-status-icon {
+            color: #70ffb0;
+            font-size: 0.75rem;
+        }
+        .member-status-text {
+            color: #70ffb0;
+            font-weight: 500;
+        }
+        .member-expire-text {
+            color: #a0d8ff;
+            font-size: 0.78rem;
+            margin-left: 4px;
+        }
 
         /* 悬浮联系按钮组 */
         .float-contact {
@@ -646,6 +670,11 @@
             <div class="user-avatar" id="userAvatar">U</div>
             <span class="user-name" id="displayUsername">加载中...</span>
         </div>
+        <div class="member-status-bar" id="memberStatusBar" style="display: none;">
+            <span class="member-status-icon"><i class="fas fa-crown"></i></span>
+            <span class="member-status-text" id="memberStatusText"></span>
+            <span class="member-expire-text" id="memberExpireText"></span>
+        </div>
         <div class="notification-container" id="notificationContainer">
             <div class="notification-icon" id="notificationIcon" style="position: relative; cursor: pointer; margin-left: 16px;">
                 <i class="fa-solid fa-bell" style="font-size: 1.2rem; color: #c5dcff;"></i>
@@ -818,6 +847,68 @@
         }
     }
 
+    function updateMemberBadge(user) {
+        const statusBar = document.getElementById('memberStatusBar');
+        const statusText = document.getElementById('memberStatusText');
+        const expireText = document.getElementById('memberExpireText');
+
+        if (!statusBar || !statusText) return;
+
+        let memberTypeText = '';
+        let bgColor = '';
+        let textColor = '';
+        let iconColor = '';
+
+        if (user.memberStatus === 'permanent') {
+            memberTypeText = '永久会员';
+            bgColor = 'rgba(255, 215, 0, 0.2)';
+            textColor = '#FFD700';
+            iconColor = '#FFD700';
+        } else if (user.memberStatus === 'active') {
+            const type = user.memberType;
+            if (type === 1) {
+                memberTypeText = '月度会员';
+                bgColor = 'rgba(120, 100, 255, 0.2)';
+                textColor = '#b48aff';
+                iconColor = '#b48aff';
+            } else if (type === 2) {
+                memberTypeText = '季度会员';
+                bgColor = 'rgba(0, 200, 100, 0.2)';
+                textColor = '#70ffb0';
+                iconColor = '#70ffb0';
+            } else if (type === 3) {
+                memberTypeText = '年度会员';
+                bgColor = 'rgba(255, 150, 50, 0.2)';
+                textColor = '#ffb070';
+                iconColor = '#ffb070';
+            } else {
+                memberTypeText = '会员';
+                bgColor = 'rgba(0, 180, 255, 0.2)';
+                textColor = '#70c0ff';
+                iconColor = '#70c0ff';
+            }
+            expireText.textContent = '';
+        } else if (user.memberStatus === 'expired') {
+            memberTypeText = '已到期';
+            bgColor = 'rgba(255, 71, 87, 0.2)';
+            textColor = '#ff8a8a';
+            iconColor = '#ff8a8a';
+            expireText.textContent = '';
+        } else {
+            statusBar.style.display = 'none';
+            return;
+        }
+
+        statusBar.style.display = 'flex';
+        statusText.textContent = memberTypeText;
+        expireText.textContent = '';
+        statusBar.style.background = bgColor;
+        statusBar.style.borderColor = bgColor.replace('0.2', '0.4');
+        statusText.style.color = textColor;
+        const icon = document.querySelector('.member-status-icon');
+        if (icon) icon.style.color = iconColor;
+    }
+
     // ========== 用户信息 ==========
     let savedUsername = null;
     const savedUserInfo = localStorage.getItem('userInfo');
@@ -831,6 +922,9 @@
             } else {
                 document.getElementById('userAvatar').innerText = userInfo.username.charAt(0).toUpperCase();
             }
+            
+            // 更新会员状态栏
+            updateMemberBadge(userInfo);
             
             // 获取未读消息数量
             getUnreadMessageCount(savedUsername);
