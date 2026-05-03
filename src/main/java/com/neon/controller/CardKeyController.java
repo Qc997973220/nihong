@@ -13,7 +13,7 @@ import java.util.Map;
 
 @CrossOrigin(origins = "*")
 @RestController
-@RequestMapping("/api/cardkey")
+@RequestMapping("/cardkey")
 public class CardKeyController {
 
     private static final Logger log = LoggerFactory.getLogger(CardKeyController.class);

@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 @CrossOrigin(origins = "*")
 @RestController
-@RequestMapping("/api/login")
+@RequestMapping("/login")
 public class LoginController {
     @Autowired
     LoginService loginService;
