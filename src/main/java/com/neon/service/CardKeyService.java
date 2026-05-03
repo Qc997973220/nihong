@@ -2,6 +2,8 @@ package com.neon.service;
 
 import com.neon.dao.CardKeyDao;
 import com.neon.pojo.CardKey;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +17,8 @@ import java.util.Random;
 
 @Service
 public class CardKeyService {
+
+    private static final Logger log = LoggerFactory.getLogger(CardKeyService.class);
 
     @Autowired
     private CardKeyDao cardKeyDao;
@@ -105,28 +109,40 @@ public class CardKeyService {
     public List<String> generateCardKeys(int count, int memberType) {
         List<String> generatedKeys = new ArrayList<>();
         Random random = new Random();
+        log.info("开始生成 {} 个会员类型为 {} 的卡密", count, memberType);
+        try {
+            for (int i = 0; i < count; i++) {
+                String key;
+                do {
+                    StringBuilder sb = new StringBuilder();
+                    for (int j = 0; j < KEY_LENGTH; j++) {
+                        sb.append(CHAR_POOL.charAt(random.nextInt(CHAR_POOL.length())));
+                    }
+                    key = sb.toString();
+                } while (cardKeyDao.existsByCardKey(key));
 
-        for (int i = 0; i < count; i++) {
-            String key;
-            do {
-                StringBuilder sb = new StringBuilder();
-                for (int j = 0; j < KEY_LENGTH; j++) {
-                    sb.append(CHAR_POOL.charAt(random.nextInt(CHAR_POOL.length())));
-                }
-                key = sb.toString();
-            } while (cardKeyDao.existsByCardKey(key));
-
-            CardKey cardKey = new CardKey(key);
-            cardKey.setMemberType(memberType);
-            cardKeyDao.save(cardKey);
-            generatedKeys.add(key);
+                CardKey cardKey = new CardKey(key);
+                cardKey.setMemberType(memberType);
+                cardKeyDao.save(cardKey);
+                generatedKeys.add(key);
+            }
+            log.info("成功生成 {} 个卡密", generatedKeys.size());
+        } catch (Exception e) {
+            log.error("生成卡密失败: {}", e.getMessage(), e);
+            throw e;
         }
-
         return generatedKeys;
     }
 
     public List<CardKey> findAll() {
-        return cardKeyDao.findAll();
+        try {
+            List<CardKey> keys = cardKeyDao.findAll();
+            log.info("查询到 {} 个卡密", keys.size());
+            return keys;
+        } catch (Exception e) {
+            log.error("查询卡密列表失败: {}", e.getMessage(), e);
+            throw e;
+        }
     }
 
     @Transactional

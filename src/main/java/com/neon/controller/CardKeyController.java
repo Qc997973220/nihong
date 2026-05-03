@@ -2,6 +2,8 @@ package com.neon.controller;
 
 import com.neon.pojo.CardKey;
 import com.neon.service.CardKeyService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,6 +16,8 @@ import java.util.Map;
 @RequestMapping("/api/cardkey")
 public class CardKeyController {
 
+    private static final Logger log = LoggerFactory.getLogger(CardKeyController.class);
+
     @Autowired
     private CardKeyService cardKeyService;
 
@@ -21,28 +25,37 @@ public class CardKeyController {
     public Map<String, Object> generateCardKeys(
             @RequestParam(defaultValue = "10") int count,
             @RequestParam(defaultValue = "1") int memberType) {
+        log.info("收到生成卡密请求: count={}, memberType={}", count, memberType);
         Map<String, Object> result = new HashMap<>();
-        if (count <= 0 || count > 100) {
+        try {
+            if (count <= 0 || count > 100) {
+                result.put("success", false);
+                result.put("message", "生成数量必须在1-100之间");
+                return result;
+            }
+
+            if (memberType < 1 || memberType > 4) {
+                result.put("success", false);
+                result.put("message", "会员类型无效");
+                return result;
+            }
+
+            String typeName = getMemberTypeName(memberType);
+            List<String> keys = cardKeyService.generateCardKeys(count, memberType);
+            result.put("success", true);
+            result.put("message", "成功生成" + count + "个" + typeName + "卡密");
+            result.put("count", keys.size());
+            result.put("keys", keys);
+            result.put("memberType", memberType);
+            result.put("memberTypeName", typeName);
+            log.info("卡密生成成功: {} 个", keys.size());
+            return result;
+        } catch (Exception e) {
+            log.error("生成卡密异常: {}", e.getMessage(), e);
             result.put("success", false);
-            result.put("message", "生成数量必须在1-100之间");
+            result.put("message", "生成失败: " + e.getMessage());
             return result;
         }
-
-        if (memberType < 1 || memberType > 4) {
-            result.put("success", false);
-            result.put("message", "会员类型无效");
-            return result;
-        }
-
-        String typeName = getMemberTypeName(memberType);
-        List<String> keys = cardKeyService.generateCardKeys(count, memberType);
-        result.put("success", true);
-        result.put("message", "成功生成" + count + "个" + typeName + "卡密");
-        result.put("count", keys.size());
-        result.put("keys", keys);
-        result.put("memberType", memberType);
-        result.put("memberTypeName", typeName);
-        return result;
     }
 
     private String getMemberTypeName(int memberType) {
@@ -57,12 +70,21 @@ public class CardKeyController {
 
     @GetMapping("/list")
     public Map<String, Object> listCardKeys() {
+        log.info("收到查询卡密列表请求");
         Map<String, Object> result = new HashMap<>();
-        List<CardKey> keys = cardKeyService.findAll();
-        result.put("success", true);
-        result.put("data", keys);
-        result.put("total", keys.size());
-        return result;
+        try {
+            List<CardKey> keys = cardKeyService.findAll();
+            result.put("success", true);
+            result.put("data", keys);
+            result.put("total", keys.size());
+            log.info("卡密列表查询成功: {} 条记录", keys.size());
+            return result;
+        } catch (Exception e) {
+            log.error("查询卡密列表异常: {}", e.getMessage(), e);
+            result.put("success", false);
+            result.put("message", "查询失败: " + e.getMessage());
+            return result;
+        }
     }
 
     @GetMapping("/count")
