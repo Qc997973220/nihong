@@ -342,18 +342,20 @@
             align-items: center;
             gap: 10px;
             cursor: pointer;
-            background: rgba(20, 40, 70, 0.4);
+            background: linear-gradient(135deg, rgba(30, 60, 120, 0.6), rgba(60, 30, 100, 0.5));
             backdrop-filter: blur(10px);
             padding: 6px 16px 6px 10px;
             border-radius: 60px;
-            border: 1px solid rgba(0, 180, 255, 0.25);
-            transition: 0.2s;
+            border: 1px solid rgba(100, 180, 255, 0.4);
+            box-shadow: 0 0 20px rgba(80, 150, 255, 0.2);
+            transition: 0.3s;
             white-space: nowrap;
         }
         .user-info:hover {
-            background: rgba(30, 60, 110, 0.6);
-            border-color: #4da6ff;
-            box-shadow: 0 0 25px #1e88e5;
+            background: linear-gradient(135deg, rgba(50, 90, 160, 0.7), rgba(90, 50, 140, 0.6));
+            border-color: rgba(120, 200, 255, 0.7);
+            box-shadow: 0 0 30px rgba(80, 180, 255, 0.4), 0 0 15px rgba(100, 150, 255, 0.3);
+            transform: translateY(-1px);
         }
         .user-avatar {
             width: 36px; height: 36px;
@@ -1518,9 +1520,9 @@
                 NEON 霓虹之都
                 <span class="lightning-right"></span>
             </h1>
-            <p>精选免费资源、工具、设计素材和各种黑科技</p>
+            <p>精选全网付费可实操课程,蓝海项目,最新风口资讯和各种黑科技</p>
             <div class="search-box">
-                <input type="text" id="searchInput" placeholder="搜索资源">
+                <input type="text" id="searchInput" placeholder="命运的齿轮开始转动~欢迎来到梦开始的地方~">
                 <button id="searchBtn"><i class="fa-solid fa-magnifying-glass"></i> 搜索</button>
             </div>
         </section>
@@ -2026,7 +2028,7 @@
         const container = document.getElementById('externalLinks');
         if (!container) return;
 
-        const scrollMsgText = '欢迎进入霓虹之都资源库,本站24小时自动更新，同步更新中创、冒泡、福缘、自学成才、创业5大资源网站的课程。网站会员免费查看，请勿轻信课程老师。';
+        const scrollMsgText = '欢迎进入霓虹之都网创资源库,本站24小时实时更新，同步更新各大资源网站的付费可实操课程。网站会员免费查看，资源审核工作量大, 请勿轻信课程广告 , 具体内容需自行分辨 , 谨防上当受骗。';
 
         let html = `
                 <div class="links-header">
@@ -2914,9 +2916,28 @@
             if (data.success && data.count) {
                 visitorCount = parseInt(data.count);
                 if (visitorSpan) visitorSpan.innerText = visitorCount;
+                incrementVisitorOnLoad();
             }
         } catch (e) {
             console.log('获取访客量失败，使用默认值');
+        }
+    }
+
+    async function incrementVisitorOnLoad() {
+        try {
+            const response = await fetch('/api/visitor/count/increment', { method: 'POST' });
+            const data = await response.json();
+            if (data.success && data.count) {
+                visitorCount = parseInt(data.count);
+                if (visitorSpan) {
+                    visitorSpan.innerText = visitorCount;
+                    visitorSpan.style.transition = 'opacity 0.1s';
+                    visitorSpan.style.opacity = '0.7';
+                    setTimeout(() => visitorSpan.style.opacity = '1', 100);
+                }
+            }
+        } catch (e) {
+            console.log('更新访客量失败');
         }
     }
 
@@ -3029,16 +3050,40 @@
             <button class="vip-close-btn" id="closeVipModal"><i class="fas fa-times"></i></button>
         </div>
         <div class="vip-modal-body">
-            <div class="vip-info">
-                <div class="vip-info-item"><i class="fas fa-gem"></i> 解锁全部付费资源</div>
-                <div class="vip-info-item"><i class="fas fa-clock"></i> 专属会员时长</div>
-                <div class="vip-info-item"><i class="fas fa-star"></i> 优先客服支持</div>
-                <div class="vip-info-item"><i class="fas fa-bolt"></i> 优先审核通道</div>
+            <div class="vip-promotion-bar">
+                <div class="vip-promotion-date" id="vipPromotionDate">2026-05-04 12:00:00</div>
+                <div class="vip-promotion-title">限时特惠 · 全场低至3折</div>
+            </div>
+            <div class="vip-price-cards">
+                <div class="vip-price-card">
+                    <div class="vip-card-name">月卡</div>
+                    <div class="vip-card-price">¥29.9 <s>¥89.7</s></div>
+                    <div class="vip-card-rights">每日2篇</div>
+                    <div class="vip-card-cycle">30天</div>
+                </div>
+                <div class="vip-price-card">
+                    <div class="vip-card-name">季卡</div>
+                    <div class="vip-card-price">¥49.9 <s>¥149.7</s></div>
+                    <div class="vip-card-rights">每日3篇</div>
+                    <div class="vip-card-cycle">90天</div>
+                </div>
+                <div class="vip-price-card">
+                    <div class="vip-card-name">年卡</div>
+                    <div class="vip-card-price">¥79.9 <s>¥358.8</s></div>
+                    <div class="vip-card-rights">无限制</div>
+                    <div class="vip-card-cycle">360天</div>
+                </div>
+                <div class="vip-price-card vip-price-card-hot">
+                    <div class="vip-card-hot-tag">推荐</div>
+                    <div class="vip-card-name">永久</div>
+                    <div class="vip-card-price">¥189.9 <s>¥888</s></div>
+                    <div class="vip-card-rights">无限制</div>
+                    <div class="vip-card-cycle">永久有效</div>
+                </div>
             </div>
             <div class="vip-get-code">
-                <div class="vip-get-code-title"><i class="fas fa-info-circle"></i> 激活码获取方式</div>
+                <div class="vip-get-code-title"><i class="fas fa-info-circle"></i> 激活码卡密获取方式</div>
                 <div class="vip-get-code-content">
-                    <p>区域代理商购买</p>
                     <p>咸鱼/淘宝搜索：<span style="color: #FFD700;">霓虹之都激活码</span> 或 <span style="color: #FFD700;">neonvip</span></p>
                 </div>
             </div>
@@ -3047,6 +3092,16 @@
                 <input type="text" id="vipActivationCode" placeholder="请输入VIP激活码">
             </div>
             <div class="vip-message" id="vipMessage"></div>
+            <div class="vip-info-compact">
+                <div class="vip-info-row">
+                    <span><i class="fas fa-gem"></i> 解锁付费资源</span>
+                    <span><i class="fas fa-clock"></i> 专属会员时长</span>
+                </div>
+                <div class="vip-info-row">
+                    <span><i class="fas fa-star"></i> 优先客服支持</span>
+                    <span><i class="fas fa-bolt"></i> 优先审核通道</span>
+                </div>
+            </div>
         </div>
         <div class="vip-modal-footer">
             <button class="btn btn-secondary" id="cancelVipBtn">取消</button>
@@ -3155,6 +3210,116 @@
     .vip-get-code-content p {
         margin: 4px 0;
     }
+    .vip-price-cards {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 16px;
+    }
+    .vip-price-card {
+        flex: 1;
+        background: rgba(20, 15, 5, 0.6);
+        border: 1px solid rgba(212, 175, 55, 0.3);
+        border-radius: 12px;
+        padding: 14px 10px;
+        text-align: center;
+        position: relative;
+    }
+    .vip-card-name {
+        font-size: 0.9rem;
+        color: #c0b090;
+        margin-bottom: 6px;
+    }
+    .vip-card-price {
+        font-size: 1.1rem;
+        color: #70ffb0;
+        font-weight: 700;
+        margin-bottom: 6px;
+    }
+    .vip-card-price s {
+        color: #888;
+        font-size: 0.75rem;
+        font-weight: 400;
+    }
+    .vip-card-rights {
+        font-size: 0.78rem;
+        color: #a0a0a0;
+        margin-bottom: 4px;
+    }
+    .vip-card-cycle {
+        font-size: 0.75rem;
+        color: #808080;
+    }
+    .vip-price-card-hot {
+        border-color: rgba(212, 175, 55, 0.6);
+        background: rgba(212, 175, 55, 0.1);
+    }
+    .vip-price-card-hot .vip-card-name {
+        color: #FFD700;
+        font-weight: 600;
+    }
+    .vip-price-card-hot .vip-card-price {
+        color: #FFD700;
+    }
+    .vip-card-hot-tag {
+        position: absolute;
+        top: -8px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: linear-gradient(135deg, #ff6b6b, #ff8e53);
+        color: white;
+        font-size: 0.65rem;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-weight: 600;
+    }
+    .vip-promotion-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: linear-gradient(135deg, rgba(255, 100, 100, 0.15), rgba(255, 150, 50, 0.15));
+        border: 1px solid rgba(255, 120, 80, 0.3);
+        border-radius: 10px;
+        padding: 10px 14px;
+        margin-bottom: 14px;
+    }
+    .vip-promotion-date {
+        font-size: 0.82rem;
+        color: #ff9966;
+        font-family: 'Courier New', monospace;
+    }
+    .vip-promotion-title {
+        font-size: 0.88rem;
+        color: #FFD700;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .vip-promotion-title::before {
+        content: '🔥';
+    }
+    .vip-info-compact {
+        background: rgba(212, 175, 55, 0.08);
+        border: 1px solid rgba(212, 175, 55, 0.2);
+        border-radius: 10px;
+        padding: 10px 14px;
+    }
+    .vip-info-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 15px;
+    }
+    .vip-info-row span {
+        font-size: 0.82rem;
+        color: #c0b090;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    .vip-info-row span i {
+        font-size: 0.75rem;
+        color: #d4af37;
+    }
     .vip-form-group {
         margin-bottom: 16px;
     }
@@ -3247,7 +3412,21 @@
         document.getElementById('vipModal').classList.add('active');
         document.getElementById('vipActivationCode').value = '';
         document.getElementById('vipMessage').style.display = 'none';
+        updatePromotionDate();
+        setInterval(updatePromotionDate, 1000);
     });
+
+    function updatePromotionDate() {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = now.getMonth();
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0);
+        const startMonth = String(firstDay.getMonth() + 1).padStart(2, '0');
+        const endMonth = String(lastDay.getMonth() + 1).padStart(2, '0');
+        document.getElementById('vipPromotionDate').textContent =
+            `${year}-${startMonth}-01 ~ ${year}-${endMonth}-30 限时特惠`;
+    }
 
     document.getElementById('closeVipModal').addEventListener('click', function() {
         document.getElementById('vipModal').classList.remove('active');

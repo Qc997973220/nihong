@@ -369,6 +369,22 @@
             transform: scale(1.05);
             box-shadow: 0 12px 30px rgba(0, 180, 120, 0.5);
         }
+        .download-warning {
+            background: linear-gradient(135deg, rgba(255, 71, 87, 0.1), rgba(255, 120, 80, 0.1));
+            border: 1px solid rgba(255, 71, 87, 0.4);
+            border-radius: 12px;
+            padding: 14px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #ff6b6b;
+            font-size: 0.9rem;
+        }
+        .download-warning i {
+            font-size: 1.2rem;
+            color: #ff4757;
+        }
         .article-meta {
             color: #90b0d1;
             margin-bottom: 30px;
@@ -1268,6 +1284,10 @@
                 </div>
                 ${coverImageHtml}
                 ${downloadSectionHtml}
+                <div class="download-warning">
+                    <i class="fas fa-shield-alert"></i>
+                    <span>再好的蓝海项目，参与的人多了，收益也会大幅缩水。为保障霓虹之都全体会员的权益，本站资源链接严禁向站外分享传播，任何侵权外传行为都将面临账号封禁，甚至更严重的后果！！！</span>
+                </div>
                 <div class="article-content">
                     ${content ? escapeHtml(content).replace(/\n/g, '<br>') : '暂无内容'}
                 </div>

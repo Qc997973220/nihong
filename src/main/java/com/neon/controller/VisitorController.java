@@ -1,7 +1,7 @@
 package com.neon.controller;
 
+import com.neon.service.SiteStatsService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.Map;
@@ -11,29 +11,19 @@ import java.util.Map;
 @RequestMapping("/visitor")
 public class VisitorController {
 
-    private static final String VISITOR_COUNT_KEY = "site:visitor:count";
-    private static final long INITIAL_COUNT = 92895L;
-
     @Autowired
-    private RedisTemplate<String, Object> redisTemplate;
+    private SiteStatsService siteStatsService;
 
     @GetMapping("/count")
     public Map<String, Object> getVisitorCount() {
         Map<String, Object> result = new HashMap<>();
         try {
-            Object count = redisTemplate.opsForValue().get(VISITOR_COUNT_KEY);
-            long visitorCount;
-            if (count == null) {
-                visitorCount = INITIAL_COUNT;
-                redisTemplate.opsForValue().set(VISITOR_COUNT_KEY, visitorCount);
-            } else {
-                visitorCount = Long.parseLong(count.toString());
-            }
+            Long visitorCount = siteStatsService.getVisitorCount();
             result.put("success", true);
             result.put("count", visitorCount);
         } catch (Exception e) {
             result.put("success", false);
-            result.put("count", INITIAL_COUNT);
+            result.put("count", 92895L);
             result.put("error", e.getMessage());
         }
         return result;
@@ -43,7 +33,7 @@ public class VisitorController {
     public Map<String, Object> incrementVisitorCount() {
         Map<String, Object> result = new HashMap<>();
         try {
-            Long newCount = redisTemplate.opsForValue().increment(VISITOR_COUNT_KEY);
+            Long newCount = siteStatsService.incrementInRedis();
             result.put("success", true);
             result.put("count", newCount);
         } catch (Exception e) {
