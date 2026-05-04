@@ -19,13 +19,13 @@ public class LoginAttempt {
     String account;
     
     @Column(nullable = false)
-    Integer failedCount;
+    Integer failedCount = 0;
     
     @Column
     LocalDateTime lockedUntil;
     
     @Column(nullable = false)
-    LocalDateTime attemptTime;
+    LocalDateTime attemptTime = LocalDateTime.now();
     
     @Column
     String ipAddress;

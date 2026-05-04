@@ -50,9 +50,6 @@ public class AuthService {
                     attempt.getLockedUntil().toString().replace("T", " ") + " 后重试");
                 return result;
             }
-            
-            // 锁定已过期，清除旧记录
-            loginAttemptDao.delete(attempt);
         }
 
         return result;
@@ -62,16 +59,26 @@ public class AuthService {
      * 记录登录失败
      */
     public void recordFailedAttempt(String account) {
-        LoginAttempt attempt = loginAttemptDao.findByAccount(account).orElse(new LoginAttempt());
+        LoginAttempt attempt = loginAttemptDao.findByAccount(account).orElse(null);
         
-        if (attempt.getAccount() == null) {
+        if (attempt == null) {
+            // 创建新记录
+            attempt = new LoginAttempt();
             attempt.setAccount(account);
             attempt.setFailedCount(1);
+            attempt.setAttemptTime(LocalDateTime.now());
         } else {
-            attempt.setFailedCount(attempt.getFailedCount() + 1);
+            // 更新现有记录
+            // 如果锁定已过期，重置失败计数
+            if (attempt.getLockedUntil() != null && 
+                attempt.getLockedUntil().isBefore(LocalDateTime.now())) {
+                attempt.setFailedCount(1);
+                attempt.setLockedUntil(null);
+            } else {
+                attempt.setFailedCount(attempt.getFailedCount() + 1);
+            }
+            attempt.setAttemptTime(LocalDateTime.now());
         }
-        
-        attempt.setAttemptTime(LocalDateTime.now());
         
         // 达到失败上限，锁定账号
         if (attempt.getFailedCount() >= MAX_FAILED_ATTEMPTS) {
