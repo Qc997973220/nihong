@@ -1106,6 +1106,81 @@
             border: 1px solid rgba(100, 180, 255, 0.5);
             box-shadow: 0 40px 80px -20px black, 0 0 0 1px #ffffff0a inset, 0 0 60px #1e88e5;
         }
+        .news-modal-card {
+            background: rgba(20, 28, 45, 0.95) !important;
+            border: 1px solid rgba(255, 180, 80, 0.4) !important;
+            max-width: 500px !important;
+            border-radius: 20px !important;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5) !important;
+        }
+        .news-close-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: rgba(255, 100, 100, 0.2);
+            border-radius: 50%;
+            color: #ff8888;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+        }
+        .news-close-btn:hover {
+            background: rgba(255, 100, 100, 0.4);
+            color: #ff6666;
+        }
+        .news-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(255, 180, 80, 0.2);
+        }
+        .news-header i {
+            font-size: 1.4rem;
+            color: #ffb450;
+        }
+        .news-header h3 {
+            font-size: 1.3rem !important;
+            color: #ffb450;
+            font-weight: 600;
+            margin-bottom: 0 !important;
+        }
+        .news-date {
+            margin-left: auto;
+            font-size: 0.85rem;
+            color: #90a0b0;
+        }
+        .news-content {
+            margin-bottom: 24px;
+        }
+        .news-content p {
+            font-size: 1rem;
+            color: #e0e8f0;
+            line-height: 1.8;
+            text-align: justify;
+        }
+        .news-confirm-btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            background: linear-gradient(135deg, #ffb450, #ff8c42);
+            border-radius: 12px;
+            color: #1a1a2e;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .news-confirm-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 180, 80, 0.4);
+        }
         .modal-card h3 {
             font-size: 2rem;
             font-weight: 500;
@@ -1597,6 +1672,24 @@
             <img src="uploads/douyin_qr.png" alt="抖音二维码">
             <p>扫码关注抖音</p>
         </div>
+    </div>
+</div>
+
+<!-- 今日资讯弹窗 -->
+<div class="modal-overlay" id="newsModal">
+    <div class="modal-card news-modal-card" style="max-width: 500px;">
+        <button class="news-close-btn" id="closeNewsModal"><i class="fas fa-times"></i></button>
+        <div class="news-header">
+            <i class="fas fa-newspaper"></i>
+            <h3>今日资讯</h3>
+            <span class="news-date" id="newsDate"></span>
+        </div>
+        <div class="news-content">
+            <p>AI短视频赛道的项目目前做的人接近饱和,新人不建议入坑,有剪辑能力依然可以考虑</p>
+        </div>
+        <button class="news-confirm-btn" id="confirmNewsModal">
+            我知道了
+        </button>
     </div>
 </div>
 
@@ -3407,6 +3500,39 @@
 </style>
 
 <script>
+    // 今日资讯弹窗逻辑
+    document.addEventListener('DOMContentLoaded', function() {
+        const today = new Date().toDateString();
+        const lastReadDate = localStorage.getItem('newsReadDate');
+        
+        if (lastReadDate !== today) {
+            const newsDate = document.getElementById('newsDate');
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            newsDate.textContent = `${year}年${month}月${day}日`;
+            document.getElementById('newsModal').classList.add('active');
+        }
+
+        document.getElementById('closeNewsModal').addEventListener('click', function() {
+            document.getElementById('newsModal').classList.remove('active');
+            localStorage.setItem('newsReadDate', new Date().toDateString());
+        });
+
+        document.getElementById('confirmNewsModal').addEventListener('click', function() {
+            document.getElementById('newsModal').classList.remove('active');
+            localStorage.setItem('newsReadDate', new Date().toDateString());
+        });
+
+        document.getElementById('newsModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.classList.remove('active');
+                localStorage.setItem('newsReadDate', new Date().toDateString());
+            }
+        });
+    });
+
     document.getElementById('vipUpgradeBtn').addEventListener('click', function(e) {
         e.preventDefault();
         document.getElementById('vipModal').classList.add('active');
