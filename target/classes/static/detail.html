@@ -1507,7 +1507,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         account: info.account,
-                        resourceId: currentResourceId,
+                        resourceId: parseInt(id),
                         resourceTitle: document.querySelector('.article-title')?.textContent || ''
                     })
                 });
