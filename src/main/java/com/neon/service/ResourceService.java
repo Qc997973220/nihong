@@ -7,6 +7,9 @@ import com.neon.pojo.Comment;
 import com.neon.pojo.Resource;
 import com.neon.pojo.UserAction;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -23,6 +26,9 @@ public class ResourceService {
     @Autowired
     private CacheService cacheService;
 
+    private static final int DEFAULT_PAGE_SIZE = 12;
+    private static final int MAX_PAGE_SIZE = 50;
+
     public List<Resource> getAllResources() {
         String cacheKey = cacheService.getResourceListKey();
         List<Resource> resources = (List<Resource>) cacheService.get(cacheKey);
@@ -32,9 +38,38 @@ public class ResourceService {
         }
 
         resources = resourceRepository.findByStatusInOrderByCreatedAtDesc(Arrays.asList(1, 2));
-        cacheService.set(cacheKey, resources, 1800);
+        cacheService.set(cacheKey, resources, 180);
 
         return resources;
+    }
+
+    public Map<String, Object> getResourcesByPage(int page, int size) {
+        size = Math.min(size, MAX_PAGE_SIZE);
+        if (size <= 0) size = DEFAULT_PAGE_SIZE;
+        if (page <= 0) page = 1;
+
+        String cacheKey = cacheService.getResourceListKey() + ":page:" + page + ":" + size;
+        Map<String, Object> cachedData = (Map<String, Object>) cacheService.get(cacheKey);
+
+        if (cachedData != null) {
+            return cachedData;
+        }
+
+        Pageable pageable = PageRequest.of(page - 1, size);
+        Page<Resource> resourcePage = resourceRepository.findByStatusInOrderByCreatedAtDesc(Arrays.asList(1, 2), pageable);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("content", resourcePage.getContent());
+        result.put("currentPage", page);
+        result.put("pageSize", size);
+        result.put("totalElements", resourcePage.getTotalElements());
+        result.put("totalPages", resourcePage.getTotalPages());
+        result.put("hasNext", resourcePage.hasNext());
+        result.put("hasPrevious", resourcePage.hasPrevious());
+
+        cacheService.set(cacheKey, result, 180);
+
+        return result;
     }
 
     public List<Resource> searchResources(String keyword) {

@@ -1,6 +1,8 @@
 package com.neon.dao;
 
 import com.neon.pojo.Resource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -11,4 +13,6 @@ public interface ResourceDao extends JpaRepository<Resource, Long> {
     List<Resource> findByStatusOrderByCreatedAtDesc(Integer status);
     List<Resource> findByStatusInOrderByCreatedAtDesc(List<Integer> statuses);
     List<Resource> findByTitleContainingIgnoreCaseAndStatusIn(String title, List<Integer> statuses);
+    Page<Resource> findByStatusInOrderByCreatedAtDesc(List<Integer> statuses, Pageable pageable);
+    long countByStatusIn(List<Integer> statuses);
 }

@@ -92,8 +92,17 @@ public class ResourceController {
     // 获取资源列表（只返回卡片所需字段，也可直接返回完整Resource，前端自行提取）
     @GetMapping("/list")
     @ResponseBody
-    public List<Resource> list() {
-        return resourceService.getAllResources();
+    public Map<String, Object> list(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "12") int pageSize) {
+        try {
+            return resourceService.getResourcesByPage(page, pageSize);
+        } catch (Exception e) {
+            Map<String, Object> result = new HashMap<>();
+            result.put("success", false);
+            result.put("message", "获取资源列表失败: " + e.getMessage());
+            return result;
+        }
     }
 
     @GetMapping("/search")
