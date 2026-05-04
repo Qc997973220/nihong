@@ -6,6 +6,7 @@ import com.neon.pojo.Resource;
 import com.neon.pojo.Users;
 import com.neon.service.ResourceService;
 import com.neon.service.AsyncService;
+import com.neon.service.DownloadQuotaService;
 import com.neon.dao.MessageDao;
 import com.neon.dao.UsersDao;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +35,9 @@ public class ResourceController {
     
     @Autowired
     private AsyncService asyncService;
+
+    @Autowired
+    private DownloadQuotaService downloadQuotaService;
 
     // 图片上传
     @PostMapping("/upload")
@@ -301,5 +305,52 @@ public class ResourceController {
     @ResponseBody
     public List<Resource> getResourcesByStatus(@PathVariable Integer status) {
         return resourceService.getResourcesByStatus(status);
+    }
+
+    // 验证下载额度并记录下载
+    @PostMapping("/verify-download")
+    @ResponseBody
+    public Map<String, Object> verifyDownload(@RequestBody Map<String, Object> request) {
+        Map<String, Object> result = new HashMap<>();
+        try {
+            String account = (String) request.get("account");
+            Long resourceId = Long.valueOf(request.get("resourceId").toString());
+            String resourceTitle = (String) request.get("resourceTitle");
+
+            if (account == null || account.trim().isEmpty()) {
+                result.put("success", false);
+                result.put("message", "用户未登录");
+                return result;
+            }
+
+            if (resourceId == null) {
+                result.put("success", false);
+                result.put("message", "资源ID不能为空");
+                return result;
+            }
+
+            Map<String, Object> quotaResult = downloadQuotaService.recordDownload(account, resourceId, resourceTitle);
+            return quotaResult;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            result.put("success", false);
+            result.put("message", "验证下载额度失败：" + e.getMessage());
+            return result;
+        }
+    }
+
+    // 获取下载额度信息
+    @GetMapping("/download-quota")
+    @ResponseBody
+    public Map<String, Object> getDownloadQuota(@RequestParam String account) {
+        try {
+            return downloadQuotaService.getDownloadQuotaInfo(account);
+        } catch (Exception e) {
+            Map<String, Object> result = new HashMap<>();
+            result.put("success", false);
+            result.put("message", "获取下载额度信息失败：" + e.getMessage());
+            return result;
+        }
     }
 }

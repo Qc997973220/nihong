@@ -221,14 +221,54 @@
             color: #90b0d1;
             font-size: 0.95rem;
         }
-        .switch-link span {
-            color: #7bb9ff;
-            cursor: pointer;
-            text-decoration: underline;
-            transition: color 0.2s;
+        .switch-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            margin-top: 20px;
+            color: #90b0d1;
+            font-size: 0.95rem;
         }
-        .switch-link span:hover {
-            color: #b0dcff;
+        .link-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            border: none;
+        }
+        .link-btn i {
+            font-size: 0.85rem;
+        }
+        .link-btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        .link-btn-primary:hover {
+            background: linear-gradient(135deg, #7b8ff0 0%, #8a60b8 100%);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+            transform: translateY(-2px);
+        }
+        .link-btn-secondary {
+            background: rgba(91, 165, 255, 0.1);
+            color: #7bb9ff;
+            border: 1px solid rgba(91, 165, 255, 0.3);
+        }
+        .link-btn-secondary:hover {
+            background: rgba(91, 165, 255, 0.2);
+            border-color: rgba(91, 165, 255, 0.5);
+            color: #a0d0ff;
+            transform: translateY(-2px);
+        }
+        .link-separator {
+            color: rgba(91, 165, 255, 0.3);
+            font-weight: 300;
         }
 
         .message {
@@ -375,6 +415,9 @@
         .loader-step.completed {
             color: #00c882;
         }
+        .loader-step.error {
+            color: #ff6b6b;
+        }
         .step-dot {
             width: 10px;
             height: 10px;
@@ -390,6 +433,10 @@
         .loader-step.completed .step-dot {
             background: #00c882;
             box-shadow: 0 0 10px rgba(0, 200, 130, 0.5);
+        }
+        .loader-step.error .step-dot {
+            background: #ff6b6b;
+            box-shadow: 0 0 10px rgba(255, 107, 107, 0.5);
         }
         @keyframes dotPulse {
             0%, 100% { transform: scale(1); }
@@ -503,6 +550,202 @@
             color: #708090;
             font-size: 0.85rem !important;
             margin-top: 12px;
+        }
+
+        .forgot-password-modal {
+            position: relative;
+            background: rgba(18, 25, 40, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 40px;
+            padding: 44px 40px;
+            width: 100%;
+            max-width: 460px;
+            box-shadow: 0 30px 60px -20px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.06) inset, 0 0 30px rgba(0, 160, 255, 0.2);
+            border: 1px solid rgba(130, 200, 255, 0.15);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .forgot-password-modal::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .forgot-password-modal::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.05);
+            border-radius: 3px;
+        }
+
+        .forgot-password-modal::-webkit-scrollbar-thumb {
+            background: rgba(90, 160, 255, 0.3);
+            border-radius: 3px;
+        }
+
+        .forgot-password-modal h2 {
+            font-size: 2.2rem;
+            font-weight: 500;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, #f0f5ff, #b0d0ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+            text-align: center;
+            text-shadow: 0 0 20px #2f9eff40;
+        }
+
+        .forgot-password-modal .sub {
+            color: #90b0d1;
+            text-align: center;
+            margin-bottom: 36px;
+            font-weight: 350;
+            font-size: 0.95rem;
+        }
+
+        .email-warning-box {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 16px;
+            background: rgba(255, 138, 138, 0.15);
+            border: 1px solid rgba(255, 138, 138, 0.3);
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-size: 0.85rem;
+            color: #ff8a8a;
+        }
+
+        .email-warning-box i {
+            font-size: 1rem;
+        }
+
+        .recovery-loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 0;
+        }
+
+        .recovery-result {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        .recovery-result h3 {
+            margin: 16px 0;
+            font-size: 1.5rem;
+        }
+
+        .result-icon {
+            font-size: 4rem;
+        }
+
+        .result-icon.success {
+            color: #4ade80;
+        }
+
+        .result-icon.error {
+            color: #ff6b6b;
+        }
+
+        .result-password {
+            margin: 20px 0;
+            padding: 16px 24px;
+            background: rgba(30, 50, 80, 0.6);
+            border: 1px solid rgba(90, 160, 255, 0.3);
+            border-radius: 16px;
+            width: 100%;
+        }
+
+        .result-password label {
+            display: block;
+            margin-bottom: 8px;
+            color: #90b0d1;
+            font-size: 0.9rem;
+        }
+
+        .password-display {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #4ade80;
+            letter-spacing: 2px;
+            word-break: break-all;
+        }
+
+        .customer-service-info {
+            text-align: center;
+            padding: 10px 0;
+        }
+
+        .customer-service-info > i {
+            font-size: 3rem;
+            color: #7bb9ff;
+            margin-bottom: 16px;
+        }
+
+        .customer-service-info h3 {
+            margin-bottom: 12px;
+            color: #f0f5ff;
+        }
+
+        .customer-service-info p {
+            color: #90b0d1;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .contact-methods {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 12px;
+            background: rgba(30, 50, 80, 0.5);
+            border-radius: 12px;
+            color: #b8dcff;
+        }
+
+        .contact-item i {
+            font-size: 1.2rem;
+            color: #7bb9ff;
+        }
+
+        .service-tip {
+            font-size: 0.85rem;
+            color: #6b8ab0;
+        }
+
+        .recovery-error {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 30px 0;
+        }
+
+        .recovery-error .result-icon {
+            font-size: 4rem;
+            color: #ff6b6b;
+        }
+
+        .recovery-error h3 {
+            margin: 16px 0 12px;
+            color: #ff6b6b;
+            font-size: 1.4rem;
+        }
+
+        .recovery-error p {
+            color: #ff8a8a;
+            font-size: 0.95rem;
+            line-height: 1.5;
         }
 
         /* 主内容区域 */
@@ -1765,109 +2008,13 @@
             <button class="cancel-btn" id="cancelLoginBtn"><i class="fa-solid fa-home"></i> 返回首页</button>
             <div class="message" id="loginMessage"></div>
             <div class="switch-link">
-                还没有账号？ <span id="goToRegister">立即注册</span>
-                <span style="margin-left: 12px;">|</span>
-                <span id="goToForgotPassword" style="color: #7bb9ff; cursor: pointer; text-decoration: underline; transition: color 0.2s;">忘记密码</span>
+                <span class="link-btn link-btn-primary" id="goToRegister"><i class="fa-solid fa-user-plus"></i> 立即注册</span>
+                <span class="link-separator">|</span>
+                <span class="link-btn link-btn-secondary" id="goToForgotPassword"><i class="fa-solid fa-key"></i> 忘记密码</span>
             </div>
         </div>
 
-        <!-- 密码找回面板 (初始隐藏) -->
-        <div id="forgotPasswordPanel" class="panel hidden">
-            <h2><i class="fa-solid fa-key" style="margin-right: 8px;"></i>密码找回</h2>
-            <div class="sub">选择找回方式</div>
-            <div id="forgotPasswordStep1">
-                <div class="forgot-option" id="forgotByEmail">
-                    <i class="fa-solid fa-envelope"></i>
-                    <span>通过邮箱找回</span>
-                </div>
-                <div class="forgot-option" id="forgotByCustomer">
-                    <i class="fa-solid fa-headset"></i>
-                    <span>联系客服人工找回</span>
-                </div>
-            </div>
-            <div id="forgotPasswordStep2" class="hidden">
-                <div class="input-group">
-                    <label><i class="fa-regular fa-user" style="margin-right: 6px;"></i>账号 <span style="color:#ff8a8a;">*</span></label>
-                    <input type="text" id="forgotAccount" maxlength="9" placeholder="请输入要找回的账号">
-                </div>
-                <button class="login-btn" id="forgotNextBtn"><i class="fa-solid fa-arrow-right"></i> 下一步</button>
-            </div>
-            <div id="forgotPasswordStep3" class="hidden">
-                <div class="email-status-msg" id="emailStatusMsg"></div>
-                <div id="emailNotLoggedInSection" class="hidden">
-                    <div class="email-warning">
-                        <i class="fa-solid fa-exclamation-triangle"></i>
-                        <p>请先登录邮箱于在线状态后再试</p>
-                    </div>
-                    <button class="cancel-btn" id="backToStep2Btn"><i class="fa-solid fa-arrow-left"></i> 返回上一步</button>
-                </div>
-                <div id="emailLoggedInSection" class="hidden">
-                    <div class="email-status-confirm">
-                        <i class="fa-solid fa-check-circle"></i>
-                        <p>检测到绑定邮箱已处于在线状态</p>
-                    </div>
-                    <div class="input-group">
-                        <label><i class="fa-solid fa-envelope" style="margin-right: 6px;"></i>完整邮箱地址 <span style="color:#ff8a8a;">*</span></label>
-                        <input type="email" id="forgotEmail" placeholder="请输入完整的绑定邮箱地址">
-                    </div>
-                    <button class="login-btn" id="startRecoveryBtn"><i class="fa-solid fa-satellite-dish"></i> 启动密码自动找回</button>
-                </div>
-            </div>
-            <div id="forgotPasswordStep4" class="hidden">
-                <div class="recovery-loading">
-                    <div class="loader-ring"></div>
-                    <div class="loader-text" id="loaderText">正在初始化密码找回程序...</div>
-                    <div class="loader-progress">
-                        <div class="loader-progress-bar" id="loaderProgressBar"></div>
-                    </div>
-                    <div class="loader-steps">
-                        <div class="loader-step" id="step1"><span class="step-dot"></span><span class="step-text">正在校验当前登录环境</span></div>
-                        <div class="loader-step" id="step2"><span class="step-dot"></span><span class="step-text">正在校验邮箱状态</span></div>
-                        <div class="loader-step" id="step3"><span class="step-dot"></span><span class="step-text">正在验证账号邮箱绑定</span></div>
-                    </div>
-                </div>
-            </div>
-            <div id="forgotPasswordStep5" class="hidden">
-                <div class="recovery-result" id="recoveryResultSection">
-                    <div class="result-icon success" id="resultIconSuccess"><i class="fa-solid fa-check-circle"></i></div>
-                    <div class="result-icon error" id="resultIconError"><i class="fa-solid fa-times-circle"></i></div>
-                    <h3 id="resultTitle"></h3>
-                    <div class="result-password" id="resultPasswordSection">
-                        <label>您的密码是：</label>
-                        <div class="password-display" id="passwordDisplay"></div>
-                    </div>
-                    <div class="result-message" id="resultMessage"></div>
-                    <button class="login-btn" id="backToLoginBtn"><i class="fa-solid fa-arrow-left"></i> 返回登录</button>
-                </div>
-            </div>
-            <div id="forgotPasswordStep6" class="hidden">
-                <div class="customer-service-info">
-                    <i class="fa-solid fa-headset"></i>
-                    <h3>联系客服人工找回</h3>
-                    <p>请联系官方客服，提交相关凭证进行人工验证找回密码</p>
-                    <div class="contact-methods">
-                        <div class="contact-item">
-                            <i class="fa-brands fa-weixin"></i>
-                            <span>微信: <strong>neon_city</strong></span>
-                        </div>
-                        <div class="contact-item">
-                            <i class="fa-brands fa-qq"></i>
-                            <span>QQ: <strong>997973220</strong></span>
-                        </div>
-                        <div class="contact-item">
-                            <i class="fa-solid fa-envelope"></i>
-                            <span>邮箱: <strong>997973220@qq.com</strong></span>
-                        </div>
-                    </div>
-                    <p class="service-tip">工作时间：周一至周五 9:00-18:00</p>
-                </div>
-                <button class="cancel-btn" id="backToStep1Btn"><i class="fa-solid fa-arrow-left"></i> 返回选择方式</button>
-            </div>
-            <div class="message" id="forgotPasswordMessage"></div>
-            <div class="switch-link" style="margin-top: 16px;">
-                <span id="goToLoginFromForgot">返回登录</span>
-            </div>
-        </div>
+        <!-- 注册面板 -->
         <div id="registerPanel" class="panel hidden">
             <h2>创建账号</h2>
             <div class="sub">注册成为霓虹之都的会员</div>
@@ -1887,8 +2034,121 @@
             <button class="cancel-btn" id="cancelRegisterBtn"><i class="fa-solid fa-home"></i> 返回首页</button>
             <div class="message" id="registerMessage"></div>
             <div class="switch-link">
-                已有账号？ <span id="goToLogin">返回登录</span>
+                <span class="link-btn link-btn-secondary" id="goToLogin"><i class="fa-solid fa-arrow-left"></i> 返回登录</span>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- 密码找回弹窗 1: 选择找回方式 -->
+<div class="login-wrapper" id="forgotPasswordWrapper1" style="display: none;">
+    <div class="forgot-password-modal">
+        <h2><i class="fa-solid fa-key" style="margin-right: 8px;"></i>密码找回</h2>
+        <div class="sub">选择找回方式</div>
+        <div class="forgot-option" id="forgotByEmail">
+            <i class="fa-solid fa-envelope"></i>
+            <span>通过邮箱找回</span>
+        </div>
+        <div class="forgot-option" id="forgotByCustomer">
+            <i class="fa-solid fa-headset"></i>
+            <span>联系客服人工找回</span>
+        </div>
+        <div class="switch-link" style="margin-top: 20px;">
+            <span class="link-btn link-btn-secondary" id="goToLoginFromForgot1"><i class="fa-solid fa-arrow-left"></i> 返回登录</span>
+        </div>
+    </div>
+</div>
+
+<!-- 密码找回弹窗 2: 输入账号和邮箱 -->
+<div class="login-wrapper" id="forgotPasswordWrapper2" style="display: none;">
+    <div class="forgot-password-modal">
+        <h2><i class="fa-solid fa-satellite-dish" style="margin-right: 8px;"></i>邮箱验证</h2>
+        <div class="sub">请输入绑定的账号和邮箱</div>
+        <div class="input-group">
+            <label><i class="fa-regular fa-user" style="margin-right: 6px;"></i>账号 <span style="color:#ff8a8a;">*</span></label>
+            <input type="text" id="forgotAccount" maxlength="9" placeholder="请输入要找回的账号">
+        </div>
+        <div class="input-group">
+            <label><i class="fa-solid fa-envelope" style="margin-right: 6px;"></i>邮箱地址 <span style="color:#ff8a8a;">*</span></label>
+            <input type="email" id="forgotEmail" placeholder="请输入绑定的邮箱地址">
+        </div>
+        <div class="email-warning-box">
+            <i class="fa-solid fa-exclamation-circle"></i>
+            <span>找回期间请保持该邮箱处于登录在线状态</span>
+        </div>
+        <button class="login-btn" id="startRecoveryBtn"><i class="fa-solid fa-rocket"></i> 启动密码找回程序</button>
+        <div class="switch-link" style="margin-top: 16px;">
+            <span id="backToForgotChoice">返回选择方式</span>
+        </div>
+    </div>
+</div>
+
+<!-- 密码找回弹窗 3: 找回中(科技感动画) -->
+<div class="login-wrapper" id="forgotPasswordWrapper3" style="display: none;">
+    <div class="forgot-password-modal">
+        <div class="recovery-loading" id="recoveryLoadingSection">
+            <div class="loader-ring"></div>
+            <div class="loader-text" id="loaderText">正在初始化密码找回程序...</div>
+            <div class="loader-progress">
+                <div class="loader-progress-bar" id="loaderProgressBar"></div>
+            </div>
+            <div class="loader-steps">
+                <div class="loader-step" id="step1"><span class="step-dot"></span><span class="step-text">正在校验当前登录环境</span></div>
+                <div class="loader-step" id="step2"><span class="step-dot"></span><span class="step-text">正在校验邮箱状态</span></div>
+                <div class="loader-step" id="step3"><span class="step-dot"></span><span class="step-text">正在验证账号邮箱绑定</span></div>
+            </div>
+        </div>
+        <div class="recovery-error" id="recoveryErrorSection" style="display: none;">
+            <div class="result-icon error"><i class="fa-solid fa-times-circle"></i></div>
+            <h3 id="errorTitle">校验失败</h3>
+            <p id="errorMessage"></p>
+            <button class="login-btn" id="backFromErrorBtn" style="margin-top: 20px;"><i class="fa-solid fa-arrow-left"></i> 返回</button>
+        </div>
+    </div>
+</div>
+
+<!-- 密码找回弹窗 4: 找回结果 -->
+<div class="login-wrapper" id="forgotPasswordWrapper4" style="display: none;">
+    <div class="forgot-password-modal">
+        <div class="recovery-result" id="recoveryResultSection">
+            <div class="result-icon success" id="resultIconSuccess" style="display: none;"><i class="fa-solid fa-check-circle"></i></div>
+            <div class="result-icon error" id="resultIconError" style="display: none;"><i class="fa-solid fa-times-circle"></i></div>
+            <h3 id="resultTitle"></h3>
+            <div class="result-password" id="resultPasswordSection" style="display: none;">
+                <label>您的密码是：</label>
+                <div class="password-display" id="passwordDisplay"></div>
+            </div>
+            <div class="result-message" id="resultMessage" style="display: none;"></div>
+            <button class="login-btn" id="backToLoginFromResult"><i class="fa-solid fa-arrow-left"></i> 返回登录</button>
+        </div>
+    </div>
+</div>
+
+<!-- 密码找回弹窗 5: 联系客服 -->
+<div class="login-wrapper" id="forgotPasswordWrapper5" style="display: none;">
+    <div class="forgot-password-modal">
+        <div class="customer-service-info">
+            <i class="fa-solid fa-headset"></i>
+            <h3>联系客服人工找回</h3>
+            <p>请联系官方客服，提交相关凭证进行人工验证找回密码</p>
+            <div class="contact-methods">
+                <div class="contact-item">
+                    <i class="fa-brands fa-weixin"></i>
+                    <span>微信: <strong>neon_city</strong></span>
+                </div>
+                <div class="contact-item">
+                    <i class="fa-brands fa-qq"></i>
+                    <span>QQ: <strong>997973220</strong></span>
+                </div>
+                <div class="contact-item">
+                    <i class="fa-solid fa-envelope"></i>
+                    <span>邮箱: <strong>997973220@qq.com</strong></span>
+                </div>
+            </div>
+            <p class="service-tip">工作时间：周一至周五 9:00-18:00</p>
+        </div>
+        <div class="switch-link" style="margin-top: 20px;">
+            <span id="backToForgotChoice2">返回选择方式</span>
         </div>
     </div>
 </div>
@@ -2103,7 +2363,7 @@
     // 全局变量
     let currentUser = {
         id: 1,
-        username: '游客',
+        username: '未登录',
         role: '0' // 0: 普通用户, 1: 有权限用户
     };
 
@@ -2117,6 +2377,11 @@
         }
         if (urlParams.get('showVipModal') === 'true') {
             document.getElementById('vipModal').classList.add('active');
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+        if (urlParams.get('showForgotPassword') === 'true') {
+            document.getElementById('loginWrapper').style.display = 'none';
+            document.getElementById('forgotPasswordWrapper1').style.display = 'flex';
             window.history.replaceState({}, document.title, window.location.pathname);
         }
 
@@ -2727,7 +2992,9 @@
         document.getElementById('loginWrapper').style.display = 'flex';
         document.getElementById('loginPanel').classList.remove('hidden');
         document.getElementById('registerPanel').classList.add('hidden');
-        document.getElementById('userName').focus();
+        document.getElementById('forgotPasswordPanel').classList.add('hidden');
+        const loginAccountInput = document.getElementById('loginAccount');
+        if (loginAccountInput) loginAccountInput.focus();
     }
 
     function updateMemberBadge(user) {
@@ -2818,177 +3085,191 @@
     document.getElementById('goToLogin').addEventListener('click', function() {
         document.getElementById('registerPanel').classList.add('hidden');
         document.getElementById('loginPanel').classList.remove('hidden');
-        document.getElementById('userName').focus();
+        const loginAccountInput = document.getElementById('loginAccount');
+        if (loginAccountInput) loginAccountInput.focus();
     });
 
-    // 忘记密码 - 跳转到密码找回面板
+    // 忘记密码 - 跳转到密码找回面板 (选择方式)
     document.getElementById('goToForgotPassword').addEventListener('click', function() {
-        document.getElementById('loginPanel').classList.add('hidden');
-        document.getElementById('forgotPasswordPanel').classList.remove('hidden');
-        resetForgotPasswordPanel();
+        document.getElementById('loginWrapper').style.display = 'none';
+        document.getElementById('forgotPasswordWrapper1').style.display = 'flex';
     });
 
-    // 忘记密码 - 返回登录
-    document.getElementById('goToLoginFromForgot').addEventListener('click', function() {
-        document.getElementById('forgotPasswordPanel').classList.add('hidden');
-        document.getElementById('loginPanel').classList.remove('hidden');
-        resetForgotPasswordPanel();
-    });
-
-    // 忘记密码 - 返回第一步
-    document.getElementById('backToStep1Btn').addEventListener('click', function() {
-        showForgotStep(1);
-    });
-
-    // 忘记密码 - 返回第二步
-    document.getElementById('backToStep2Btn').addEventListener('click', function() {
-        showForgotStep(2);
-    });
-
-    // 忘记密码 - 返回登录
-    document.getElementById('backToLoginBtn').addEventListener('click', function() {
-        document.getElementById('forgotPasswordPanel').classList.add('hidden');
-        document.getElementById('loginPanel').classList.remove('hidden');
-        resetForgotPasswordPanel();
+    // 忘记密码 - 返回登录 (从选择方式)
+    document.getElementById('goToLoginFromForgot1').addEventListener('click', function() {
+        document.getElementById('forgotPasswordWrapper1').style.display = 'none';
+        document.getElementById('loginWrapper').style.display = 'flex';
     });
 
     // 忘记密码 - 通过邮箱找回点击
     document.getElementById('forgotByEmail').addEventListener('click', function() {
-        showForgotStep(2);
+        document.getElementById('forgotPasswordWrapper1').style.display = 'none';
+        document.getElementById('forgotPasswordWrapper2').style.display = 'flex';
     });
 
     // 忘记密码 - 联系客服点击
     document.getElementById('forgotByCustomer').addEventListener('click', function() {
-        showForgotStep(6);
+        document.getElementById('forgotPasswordWrapper1').style.display = 'none';
+        document.getElementById('forgotPasswordWrapper5').style.display = 'flex';
     });
 
-    // 忘记密码 - 下一步按钮
-    document.getElementById('forgotNextBtn').addEventListener('click', function() {
+    // 忘记密码 - 返回选择方式 (从输入账号邮箱)
+    document.getElementById('backToForgotChoice').addEventListener('click', function() {
+        document.getElementById('forgotPasswordWrapper2').style.display = 'none';
+        document.getElementById('forgotAccount').value = '';
+        document.getElementById('forgotEmail').value = '';
+        document.getElementById('forgotPasswordWrapper1').style.display = 'flex';
+    });
+
+    // 忘记密码 - 返回选择方式 (从联系客服)
+    document.getElementById('backToForgotChoice2').addEventListener('click', function() {
+        document.getElementById('forgotPasswordWrapper5').style.display = 'none';
+        document.getElementById('forgotPasswordWrapper1').style.display = 'flex';
+    });
+
+    // 忘记密码 - 启动密码找回程序
+    document.getElementById('startRecoveryBtn').addEventListener('click', async function() {
         const account = document.getElementById('forgotAccount').value.trim();
-        const messageDiv = document.getElementById('forgotPasswordMessage');
+        const email = document.getElementById('forgotEmail').value.trim();
 
         if (!account) {
-            messageDiv.className = 'message warning';
-            messageDiv.innerText = '请输入要找回的账号';
-            messageDiv.style.display = 'block';
+            alert('请输入要找回的账号');
             return;
         }
 
         const accountRegex = /^[A-Za-z0-9]{6,9}$/;
         if (!accountRegex.test(account)) {
-            messageDiv.className = 'message warning';
-            messageDiv.innerText = '账号格式不正确';
-            messageDiv.style.display = 'block';
+            alert('账号格式不正确，请输入6-9位字母或数字');
             return;
         }
 
-        messageDiv.style.display = 'none';
-        document.getElementById('emailStatusMsg').innerHTML = '<p style="color: #8ec8ff; font-size: 1rem;">该账号绑定邮箱是否处于登录状态？</p><div style="display: flex; gap: 12px; justify-content: center; margin-top: 16px;"><button class="login-btn" id="emailNotLoggedBtn" style="flex: 1; padding: 12px; font-size: 0.95rem;"><i class="fa-solid fa-times"></i> 未登录</button><button class="login-btn" id="emailLoggedBtn" style="flex: 1; padding: 12px; font-size: 0.95rem;"><i class="fa-solid fa-check"></i> 已登录</button></div>';
-        document.getElementById('emailStatusMsg').style.display = 'block';
-        document.getElementById('emailNotLoggedInSection').classList.add('hidden');
-        document.getElementById('emailLoggedInSection').classList.add('hidden');
-        showForgotStep(3);
-
-        document.getElementById('emailNotLoggedBtn').addEventListener('click', function() {
-            document.getElementById('emailStatusMsg').style.display = 'none';
-            document.getElementById('emailNotLoggedInSection').classList.remove('hidden');
-        });
-
-        document.getElementById('emailLoggedBtn').addEventListener('click', function() {
-            document.getElementById('emailStatusMsg').style.display = 'none';
-            document.getElementById('emailLoggedInSection').classList.remove('hidden');
-        });
-    });
-
-    // 忘记密码 - 启动密码找回
-    document.getElementById('startRecoveryBtn').addEventListener('click', async function() {
-        const account = document.getElementById('forgotAccount').value.trim();
-        const email = document.getElementById('forgotEmail').value.trim();
-        const messageDiv = document.getElementById('forgotPasswordMessage');
-
         if (!email) {
-            messageDiv.className = 'message warning';
-            messageDiv.innerText = '请输入完整的邮箱地址';
-            messageDiv.style.display = 'block';
+            alert('请输入绑定的邮箱地址');
             return;
         }
 
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
-            messageDiv.className = 'message warning';
-            messageDiv.innerText = '邮箱格式不正确';
-            messageDiv.style.display = 'block';
+            alert('邮箱格式不正确');
             return;
         }
 
-        messageDiv.style.display = 'none';
-        showForgotStep(4);
+        document.getElementById('forgotPasswordWrapper2').style.display = 'none';
+        document.getElementById('forgotPasswordWrapper3').style.display = 'flex';
+        document.getElementById('recoveryLoadingSection').style.display = 'flex';
+        document.getElementById('recoveryErrorSection').style.display = 'none';
+        resetRecoveryAnimation();
+
+        document.getElementById('loaderText').innerText = '正在初始化密码找回程序...';
+        document.getElementById('step1').classList.remove('active', 'completed', 'error');
+        document.getElementById('step2').classList.remove('active', 'completed', 'error');
+        document.getElementById('step3').classList.remove('active', 'completed', 'error');
+        document.getElementById('loaderProgressBar').style.width = '0%';
+        document.querySelector('.loader-ring').style.borderTopColor = '#7bb9ff';
+
         startRecoveryAnimation();
 
-        try {
-            const response = await fetch(`/api/login/recover`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: new URLSearchParams({ account: account, email: email })
-            });
-            const result = await response.json();
+        setTimeout(() => {
+            document.getElementById('step1').classList.add('completed');
+            document.getElementById('step1').querySelector('.step-dot').innerHTML = '<i class="fa-solid fa-check"></i>';
+            document.getElementById('loaderText').innerText = '正在校验邮箱状态...';
+            document.getElementById('step2').classList.add('active');
+            document.getElementById('loaderProgressBar').style.width = '40%';
 
             setTimeout(() => {
-                showForgotStep(5);
-                if (result.status === 1) {
-                    document.getElementById('resultIconSuccess').style.display = 'block';
-                    document.getElementById('resultIconError').style.display = 'none';
-                    document.getElementById('resultTitle').innerText = '密码找回成功！';
-                    document.getElementById('resultPasswordSection').style.display = 'block';
-                    document.getElementById('passwordDisplay').innerText = result.password || '******';
-                    document.getElementById('resultMessage').style.display = 'none';
-                } else {
-                    document.getElementById('resultIconSuccess').style.display = 'none';
-                    document.getElementById('resultIconError').style.display = 'block';
-                    document.getElementById('resultTitle').innerText = '密码找回失败';
-                    document.getElementById('resultPasswordSection').style.display = 'none';
-                    document.getElementById('resultMessage').style.display = 'block';
-                    document.getElementById('resultMessage').innerText = result.message || '账号与绑定邮箱校验不通过，请保持绑定邮箱处于在线状态';
-                }
-            }, 4000);
-        } catch (error) {
-            setTimeout(() => {
-                showForgotStep(5);
-                document.getElementById('resultIconSuccess').style.display = 'none';
-                document.getElementById('resultIconError').style.display = 'block';
-                document.getElementById('resultTitle').innerText = '密码找回失败';
-                document.getElementById('resultPasswordSection').style.display = 'none';
-                document.getElementById('resultMessage').style.display = 'block';
-                document.getElementById('resultMessage').innerText = '网络错误，请稍后重试';
-            }, 4000);
-        }
+                document.getElementById('step2').classList.add('active');
+                document.getElementById('loaderProgressBar').style.width = '60%';
+
+                fetch(`/api/login/recover`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ account: account, email: email })
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.status !== 1) {
+                        document.querySelector('.loader-ring').style.animation = 'none';
+                        document.getElementById('step2').classList.add('error');
+                        document.getElementById('step2').classList.remove('active');
+                        document.getElementById('step2').querySelector('.step-dot').innerHTML = '<i class="fa-solid fa-times"></i>';
+                        document.getElementById('loaderText').innerText = '校验失败';
+                        document.getElementById('loaderProgressBar').style.width = '60%';
+                        document.getElementById('loaderProgressBar').style.background = '#ff6b6b';
+
+                        setTimeout(() => {
+                            document.getElementById('recoveryLoadingSection').style.display = 'none';
+                            document.getElementById('recoveryErrorSection').style.display = 'flex';
+                            document.getElementById('errorMessage').innerText = result.message || '邮箱云端校验不通过，请保持绑定邮箱处于在线状态';
+                        }, 800);
+                    } else {
+                        document.getElementById('step2').classList.add('completed');
+                        document.getElementById('step2').querySelector('.step-dot').innerHTML = '<i class="fa-solid fa-check"></i>';
+                        document.getElementById('loaderText').innerText = '正在验证账号邮箱绑定...';
+                        document.getElementById('step3').classList.add('active');
+                        document.getElementById('loaderProgressBar').style.width = '80%';
+
+                        setTimeout(() => {
+                            document.getElementById('step3').classList.add('completed');
+                            document.getElementById('step3').querySelector('.step-dot').innerHTML = '<i class="fa-solid fa-check"></i>';
+                            document.getElementById('loaderText').innerText = '验证通过！';
+                            document.getElementById('loaderProgressBar').style.width = '100%';
+
+                            setTimeout(() => {
+                                document.getElementById('forgotPasswordWrapper3').style.display = 'none';
+                                document.getElementById('forgotPasswordWrapper4').style.display = 'flex';
+                                document.getElementById('resultIconSuccess').style.display = 'block';
+                                document.getElementById('resultIconError').style.display = 'none';
+                                document.getElementById('resultTitle').innerText = '密码找回成功！';
+                                document.getElementById('resultPasswordSection').style.display = 'block';
+                                document.getElementById('passwordDisplay').innerText = result.password || '******';
+                                document.getElementById('resultMessage').style.display = 'none';
+                            }, 600);
+                        }, 2000);
+                    }
+                })
+                .catch(error => {
+                    document.querySelector('.loader-ring').style.animation = 'none';
+                    document.getElementById('step2').classList.add('error');
+                    document.getElementById('step2').classList.remove('active');
+                    document.getElementById('step2').querySelector('.step-dot').innerHTML = '<i class="fa-solid fa-times"></i>';
+                    document.getElementById('loaderText').innerText = '网络错误';
+                    document.getElementById('loaderProgressBar').style.width = '60%';
+                    document.getElementById('loaderProgressBar').style.background = '#ff6b6b';
+
+                    setTimeout(() => {
+                        document.getElementById('recoveryLoadingSection').style.display = 'none';
+                        document.getElementById('recoveryErrorSection').style.display = 'flex';
+                        document.getElementById('errorMessage').innerText = '网络错误，请稍后重试';
+                    }, 800);
+                });
+            }, 2000);
+        }, 2000);
+    });
+
+    // 忘记密码 - 从结果返回登录
+    document.getElementById('backToLoginFromResult').addEventListener('click', function() {
+        document.getElementById('forgotPasswordWrapper4').style.display = 'none';
+        document.getElementById('loginWrapper').style.display = 'flex';
+    });
+
+    document.getElementById('backFromErrorBtn').addEventListener('click', function() {
+        document.getElementById('forgotPasswordWrapper3').style.display = 'none';
+        document.getElementById('forgotPasswordWrapper2').style.display = 'flex';
     });
 
     function showForgotStep(step) {
-        document.getElementById('forgotPasswordStep1').classList.add('hidden');
-        document.getElementById('forgotPasswordStep2').classList.add('hidden');
-        document.getElementById('forgotPasswordStep3').classList.add('hidden');
-        document.getElementById('forgotPasswordStep4').classList.add('hidden');
-        document.getElementById('forgotPasswordStep5').classList.add('hidden');
-        document.getElementById('forgotPasswordStep6').classList.add('hidden');
-
-        if (step === 1) document.getElementById('forgotPasswordStep1').classList.remove('hidden');
-        else if (step === 2) document.getElementById('forgotPasswordStep2').classList.remove('hidden');
-        else if (step === 3) document.getElementById('forgotPasswordStep3').classList.remove('hidden');
-        else if (step === 4) document.getElementById('forgotPasswordStep4').classList.remove('hidden');
-        else if (step === 5) document.getElementById('forgotPasswordStep5').classList.remove('hidden');
-        else if (step === 6) document.getElementById('forgotPasswordStep6').classList.remove('hidden');
     }
 
     function resetForgotPasswordPanel() {
-        showForgotStep(1);
         document.getElementById('forgotAccount').value = '';
         document.getElementById('forgotEmail').value = '';
-        document.getElementById('forgotPasswordMessage').style.display = 'none';
-        document.getElementById('emailStatusMsg').innerHTML = '';
-        document.getElementById('emailStatusMsg').style.display = 'none';
-        document.getElementById('emailNotLoggedInSection').classList.add('hidden');
-        document.getElementById('emailLoggedInSection').classList.add('hidden');
+        document.getElementById('resultIconSuccess').style.display = 'none';
+        document.getElementById('resultIconError').style.display = 'none';
+        document.getElementById('resultPasswordSection').style.display = 'none';
+        document.getElementById('resultMessage').style.display = 'none';
+        document.getElementById('resultTitle').innerText = '';
+        document.getElementById('passwordDisplay').innerText = '';
+        document.getElementById('resultMessage').innerText = '';
         resetRecoveryAnimation();
     }
 
@@ -3036,12 +3317,26 @@
         const step1 = document.getElementById('step1');
         const step2 = document.getElementById('step2');
         const step3 = document.getElementById('step3');
+        const loaderRing = document.querySelector('.loader-ring');
 
-        if (progressBar) progressBar.style.width = '0%';
+        if (progressBar) {
+            progressBar.style.width = '0%';
+            progressBar.style.background = '';
+        }
         if (loaderText) loaderText.innerText = '正在初始化密码找回程序...';
-        if (step1) step1.classList.remove('active', 'completed');
-        if (step2) step2.classList.remove('active', 'completed');
-        if (step3) step3.classList.remove('active', 'completed');
+        if (step1) {
+            step1.classList.remove('active', 'completed', 'error');
+            step1.querySelector('.step-dot').innerHTML = '';
+        }
+        if (step2) {
+            step2.classList.remove('active', 'completed', 'error');
+            step2.querySelector('.step-dot').innerHTML = '';
+        }
+        if (step3) {
+            step3.classList.remove('active', 'completed', 'error');
+            step3.querySelector('.step-dot').innerHTML = '';
+        }
+        if (loaderRing) loaderRing.style.animation = '';
     }
 
     // 取消登录返回首页
@@ -3095,7 +3390,8 @@
                     memberStatus: result.user.memberStatus,
                     memberExpireText: result.user.memberExpireText,
                     memberExpireAt: result.user.memberExpireAt,
-                    inviteCode: result.user.inviteCode
+                    inviteCode: result.user.inviteCode,
+                    email: result.user.email
                 };
                 localStorage.setItem('userInfo', JSON.stringify(userInfo));
 
@@ -3133,9 +3429,11 @@
                 hideLogin();
 
                 const activeChip = document.querySelector('.category-chip.active');
-                const currentCategory = activeChip ? activeChip.textContent.trim() : '全部';
-                renderCards(allResources, currentCategory);
-                fetchRecommendedResources();
+                if (activeChip) {
+                    const currentCategory = activeChip.textContent.trim();
+                    renderCards(allResources, currentCategory);
+                    fetchRecommendedResources();
+                }
             } else if (result.status === 0) {
                 messageDiv.className = 'message error';
                 messageDiv.innerText = '账号或密码错误';
@@ -3246,7 +3544,8 @@
                         memberStatus: loginResult.user.memberStatus,
                         memberExpireText: loginResult.user.memberExpireText,
                         memberExpireAt: loginResult.user.memberExpireAt,
-                        inviteCode: loginResult.user.inviteCode
+                        inviteCode: loginResult.user.inviteCode,
+                        email: loginResult.user.email
                     };
                     localStorage.setItem('userInfo', JSON.stringify(userInfo));
 
@@ -3330,6 +3629,10 @@
         if (isLoggedIn()) return;
         const cardLink = e.target.closest('.card-link');
         if (cardLink) {
+            const href = cardLink.getAttribute('href');
+            if (href === 'javascript:void(0)' || href === '#') {
+                return;
+            }
             e.preventDefault();
             e.stopPropagation();
             showLogin();
