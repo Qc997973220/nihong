@@ -1515,11 +1515,11 @@
             <div class="sub">注册成为霓虹之都的会员</div>
             <div class="input-group">
                 <label><i class="fa-regular fa-user" style="margin-right: 6px;"></i> 账号 <span style="color:#ff8a8a;">*</span></label>
-                <input type="text" id="regAccount" placeholder="限字母/数字，最少6位">
+                <input type="text" id="regAccount" maxlength="9" placeholder="限字母/数字，6-9位">
             </div>
             <div class="input-group">
                 <label><i class="fa-solid fa-lock" style="margin-right: 6px;"></i> 密码 <span style="color:#ff8a8a;">*</span></label>
-                <input type="password" id="regPassword" placeholder="限字母数字，最少6位">
+                <input type="password" id="regPassword" maxlength="16" placeholder="限字母数字，6-16位">
             </div>
             <div class="input-group">
                 <label><i class="fa-solid fa-gift" style="margin-right: 6px;"></i> 邀请码</label>
@@ -2597,17 +2597,18 @@
             return;
         }
 
-        const alphanumericRegex = /^[A-Za-z0-9]{6,}$/;
-        if (!alphanumericRegex.test(account)) {
+        const accountRegex = /^[A-Za-z0-9]{6,9}$/;
+        if (!accountRegex.test(account)) {
             messageDiv.className = 'message warning';
-            messageDiv.innerText = '账号只能包含字母和数字，且最少6位';
+            messageDiv.innerText = '账号只能包含字母和数字，6-9位';
             messageDiv.style.display = 'block';
             return;
         }
 
-        if (!alphanumericRegex.test(password)) {
+        const passwordRegex = /^[A-Za-z0-9]{6,16}$/;
+        if (!passwordRegex.test(password)) {
             messageDiv.className = 'message warning';
-            messageDiv.innerText = '密码只能包含字母和数字，且最少6位';
+            messageDiv.innerText = '密码只能包含字母和数字，6-16位';
             messageDiv.style.display = 'block';
             return;
         }

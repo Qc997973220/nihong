@@ -32,8 +32,8 @@ public class LoginService {
     public int registered(Users users) {
         String account = users.getAccount();
         
-        // 检查账号格式：只能包含字母和数字，6-20位
-        if (account == null || !account.matches("^[A-Za-z0-9]{6,20}$")) {
+        // 检查账号格式：只能包含字母和数字，6-9位
+        if (account == null || !account.matches("^[A-Za-z0-9]{6,9}$")) {
             return 0;
         }
         
@@ -44,6 +44,12 @@ public class LoginService {
         
         // 检查顺序号（连续4个递增或递减字符）
         if (hasSequentialChars(account, 4)) {
+            return 0;
+        }
+        
+        // 检查密码格式：只能包含字母和数字，6-16位
+        String password = users.getPassword();
+        if (password == null || !password.matches("^[A-Za-z0-9]{6,16}$")) {
             return 0;
         }
         
