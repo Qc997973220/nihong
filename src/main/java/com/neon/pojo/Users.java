@@ -36,6 +36,7 @@ public class Users {
 
     Integer memberType;       //会员类型: 1月度 2季度 3年度 4永久 0非会员
     LocalDateTime memberExpiredAt;  //会员到期时间
+    String memberStatus;     //会员状态: active, permanent, expired, none
 
     @Column(columnDefinition = "LONGBLOB")
     byte[] avatar;             //头像

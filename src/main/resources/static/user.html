@@ -415,13 +415,14 @@
                 if (userData.memberType === 1) memberTypeName = '月度会员';
                 else if (userData.memberType === 2) memberTypeName = '季度会员';
                 else if (userData.memberType === 3) memberTypeName = '年度会员';
-                memberStatusDisplay = memberTypeName + ' · 欢迎回来';
+                let expireText = userData.memberExpireText || '';
+                memberStatusDisplay = expireText ? memberTypeName + ' · ' + expireText : memberTypeName;
                 document.getElementById('infoMemberStatus').style.color = '#70ffb0';
             } else if (userData.memberStatus === 'expired') {
-                memberStatusDisplay = '已到期 · 欢迎回来';
+                memberStatusDisplay = '已到期';
                 document.getElementById('infoMemberStatus').style.color = '#ff8a8a';
             } else {
-                memberStatusDisplay = '普通会员 · 欢迎回来';
+                memberStatusDisplay = '普通会员';
                 document.getElementById('infoMemberStatus').style.color = '#90b0d1';
             }
             document.getElementById('memberTypeDisplay').innerText = memberStatusDisplay;

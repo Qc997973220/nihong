@@ -279,7 +279,14 @@
         .left-area {
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .right-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
             flex-wrap: wrap;
         }
 
@@ -287,9 +294,9 @@
             background: rgba(18, 35, 60, 0.5);
             backdrop-filter: blur(5px);
             color: #b5e0ff;
-            padding: 6px 18px;
+            padding: 6px 14px;
             border-radius: 60px;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             font-weight: 480;
             display: flex;
             align-items: center;
@@ -299,7 +306,7 @@
         }
 
         .logo {
-            font-size: 1.6rem;
+            font-size: 1.5rem;
             font-weight: 450;
             background: linear-gradient(135deg, #e0efff, #b2d9ff);
             -webkit-background-clip: text;
@@ -309,40 +316,6 @@
             white-space: nowrap;
         }
 
-        .nav-links {
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .nav-links a {
-            text-decoration: none;
-            color: #c5dcff;
-            font-weight: 430;
-            font-size: 1rem;
-            transition: color 0.2s, text-shadow 0.2s;
-            position: relative;
-            white-space: nowrap;
-        }
-        .nav-links a::after {
-            content: '';
-            position: absolute;
-            bottom: -6px; left: 0;
-            width: 0; height: 2px;
-            background: #5ba5ff;
-            box-shadow: 0 0 15px #0077ff;
-            transition: width 0.2s ease;
-        }
-        .nav-links a:hover {
-            color: white;
-            text-shadow: 0 0 8px #4d9eff;
-        }
-        .nav-links a:hover::after {
-            width: 100%;
-        }
-
-        /* 音乐播放器图标（新增） */
         .music-player {
             width: 36px;
             height: 36px;
@@ -356,7 +329,6 @@
             border: 1px solid rgba(0, 180, 255, 0.25);
             transition: 0.2s;
             color: #b5e0ff;
-            margin-right: 8px;
         }
         .music-player:hover {
             background: rgba(30, 60, 110, 0.6);
@@ -368,11 +340,11 @@
         .user-info {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
             cursor: pointer;
             background: rgba(20, 40, 70, 0.4);
             backdrop-filter: blur(10px);
-            padding: 6px 20px 6px 12px;
+            padding: 6px 16px 6px 10px;
             border-radius: 60px;
             border: 1px solid rgba(0, 180, 255, 0.25);
             transition: 0.2s;
@@ -1341,16 +1313,16 @@
             .hero p { font-size: 1rem; }
             .greeting-scroll { max-width: 100%; }
             .search-box { flex-direction: column; border-radius: 40px; background: rgba(10,22,38,0.85); overflow: hidden; margin-top: 20px; }
-            .member-status-bar { 
-                padding: 3px 10px; 
+            .member-status-bar {
+                padding: 3px 10px;
                 font-size: 0.75rem;
                 order: 3;
                 margin-top: 8px;
                 width: 100%;
                 justify-content: center;
             }
-            .member-expire-text { 
-                font-size: 0.7rem; 
+            .member-expire-text {
+                font-size: 0.7rem;
             }
             .search-box input { padding: 16px 20px; text-align: center; border-bottom: 1px solid rgba(90,170,255,0.3); }
             .search-box button { padding: 14px 20px; border-left: none; border-radius: 0; justify-content: center; box-shadow: 0 0 20px rgba(30, 108, 232, 0.3); }
@@ -1378,6 +1350,17 @@
             .contact-item { padding: 12px 16px; }
             .contact-item i { font-size: 1.2rem; }
             .contact-item span { font-size: 0.95rem; }
+            .navbar .container { flex-wrap: wrap; gap: 12px; }
+            .left-area { gap: 10px; }
+            .right-area { gap: 8px; }
+            .visitor-count { padding: 5px 10px; font-size: 0.8rem; }
+            .logo { font-size: 1.3rem; }
+            .user-info { padding: 5px 12px 5px 8px; gap: 8px; }
+            .user-avatar { width: 30px; height: 30px; font-size: 0.85rem; }
+            .user-name { font-size: 0.85rem; }
+            .publish-btn, .vip-btn { padding: 6px 12px; font-size: 0.85rem; }
+            .music-player { width: 32px; height: 32px; }
+            .member-status-bar { padding: 3px 8px; font-size: 0.7rem; }
         }
 
         @media (max-width: 480px) {
@@ -1462,10 +1445,6 @@
                 <input type="password" id="regPassword" placeholder="限字母数字，最少6位">
             </div>
             <div class="input-group">
-                <label><i class="fa-solid fa-key" style="margin-right: 6px;"></i> 注册卡密</label>
-                <input type="text" id="activationCode" placeholder="选填，没有可留空">
-            </div>
-            <div class="input-group">
                 <label><i class="fa-solid fa-gift" style="margin-right: 6px;"></i> 邀请码</label>
                 <input type="text" id="inviteCode" placeholder="选填，老会员的邀请码">
             </div>
@@ -1485,50 +1464,48 @@
         <div class="container">
             <div class="left-area">
                 <div class="visitor-count" id="visitorCount">
-                    <i class="fa-regular fa-eye"></i> 累计访客 <span id="visitorNumber">92895</span>
+                    <i class="fa-regular fa-eye"></i> <span id="visitorNumber">92895</span>
                 </div>
-                <div class="logo"><i class="fa-solid fa-cube" style="margin-right: 8px;"></i> NEON 霓虹之都</div>
+                <div class="logo"><a href="/" style="text-decoration: none; color: inherit;"><i class="fa-solid fa-cube" style="margin-right: 8px;"></i> NEON 霓虹之都</a></div>
             </div>
-            <div class="nav-links">
-                <a href="#">首页</a><a href="#">资源</a><a href="#">工具</a><a href="#">博客</a><a href="#">关于</a>
-            </div>
-            <!-- 音乐播放器（新增） -->
-            <div class="music-player" id="musicPlayer">
-                <i class="fa-solid fa-music" id="musicIcon"></i>
-            </div>
-            <a href="#" id="publishResourceBtn" class="publish-btn">
-                <i class="fa-solid fa-plus"></i> 发布资源
-            </a>
-            <a href="#" id="vipUpgradeBtn" class="vip-btn" style="display: none;">
-                <i class="fas fa-crown"></i> 升级VIP
-            </a>
-            <div class="notification-container" id="notificationContainer">
-                <div class="notification-icon" id="notificationIcon" style="position: relative; cursor: pointer; margin-right: 16px;">
-                    <i class="fa-solid fa-bell" style="font-size: 1.2rem; color: #c5dcff;"></i>
-                    <span class="notification-badge" id="notificationBadge" style="position: absolute; top: -8px; right: -8px; background: #ff4757; color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; visibility: hidden;">0</span>
-                    <div class="notification-dropdown" id="notificationDropdown" style="position: absolute; top: 100%; right: 0; margin-top: 8px; width: 300px; background: rgba(20, 30, 50, 0.95); backdrop-filter: blur(10px); border-radius: 12px; border: 1px solid rgba(90, 160, 255, 0.2); box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3); z-index: 1000; display: none;">
-                        <div class="notification-header" style="padding: 12px 16px; border-bottom: 1px solid rgba(90, 160, 255, 0.2); font-weight: 600; color: #b8dcff;">消息通知</div>
-                        <div class="notification-list" id="notificationList" style="max-height: 300px; overflow-y: auto; padding: 8px 0;"></div>
-                        <div class="notification-footer" style="padding: 12px 16px; border-top: 1px solid rgba(90, 160, 255, 0.2); text-align: right;">
-                            <button class="mark-all-read" id="markAllReadBtn" style="background: rgba(91, 165, 255, 0.2); border: 1px solid rgba(91, 165, 255, 0.5); border-radius: 60px; color: #5ba5ff; padding: 4px 16px; font-size: 0.9rem; cursor: pointer; transition: all 0.2s;">全部标记为已读</button>
+            <div class="right-area">
+                <div class="music-player" id="musicPlayer">
+                    <i class="fa-solid fa-music" id="musicIcon"></i>
+                </div>
+                <a href="#" id="publishResourceBtn" class="publish-btn">
+                    <i class="fa-solid fa-plus"></i> 发布
+                </a>
+                <a href="#" id="vipUpgradeBtn" class="vip-btn" style="display: none;">
+                    <i class="fas fa-crown"></i> 激活VIP
+                </a>
+                <div class="notification-container" id="notificationContainer">
+                    <div class="notification-icon" id="notificationIcon" style="position: relative; cursor: pointer;">
+                        <i class="fa-solid fa-bell" style="font-size: 1.2rem; color: #c5dcff;"></i>
+                        <span class="notification-badge" id="notificationBadge" style="position: absolute; top: -8px; right: -8px; background: #ff4757; color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; visibility: hidden;">0</span>
+                        <div class="notification-dropdown" id="notificationDropdown" style="position: absolute; top: 100%; right: 0; margin-top: 8px; width: 300px; background: rgba(20, 30, 50, 0.95); backdrop-filter: blur(10px); border-radius: 12px; border: 1px solid rgba(90, 160, 255, 0.2); box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3); z-index: 1000; display: none;">
+                            <div class="notification-header" style="padding: 12px 16px; border-bottom: 1px solid rgba(90, 160, 255, 0.2); font-weight: 600; color: #b8dcff;">消息通知</div>
+                            <div class="notification-list" id="notificationList" style="max-height: 300px; overflow-y: auto; padding: 8px 0;"></div>
+                            <div class="notification-footer" style="padding: 12px 16px; border-top: 1px solid rgba(90, 160, 255, 0.2); text-align: right;">
+                                <button class="mark-all-read" id="markAllReadBtn" style="background: rgba(91, 165, 255, 0.2); border: 1px solid rgba(91, 165, 255, 0.5); border-radius: 60px; color: #5ba5ff; padding: 4px 16px; font-size: 0.9rem; cursor: pointer; transition: all 0.2s;">全部标记为已读</button>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="user-info" id="userInfo">
-                <div class="user-avatar" id="userAvatar">U</div>
-                <span class="user-name" id="displayUsername">加载中...</span>
-            </div>
-            <div class="member-status-bar" id="memberStatusBar" style="display: none;">
-                <span class="member-status-icon"><i class="fas fa-crown"></i></span>
-                <span class="member-status-text" id="memberStatusText"></span>
-                <span class="member-expire-text" id="memberExpireText"></span>
-            </div>
-            <span class="member-badge" id="memberBadge" style="display: none;"></span>
-            <div id="adminLink" style="display: none;">
-                <a href="admin.html" class="back-link" style="background: rgba(255, 71, 87, 0.2); padding: 6px 16px; border-radius: 60px; border: 1px solid rgba(255, 71, 87, 0.5);">
-                    <i class="fas fa-shield-alt"></i> 审核管理
-                </a>
+                <div class="user-info" id="userInfo">
+                    <div class="user-avatar" id="userAvatar">U</div>
+                    <span class="user-name" id="displayUsername">加载中...</span>
+                </div>
+                <div class="member-status-bar" id="memberStatusBar" style="display: none;">
+                    <span class="member-status-icon"><i class="fas fa-crown"></i></span>
+                    <span class="member-status-text" id="memberStatusText"></span>
+                    <span class="member-expire-text" id="memberExpireText"></span>
+                </div>
+                <span class="member-badge" id="memberBadge" style="display: none;"></span>
+                <div id="adminLink" style="display: none;">
+                    <a href="admin.html" class="back-link" style="background: rgba(255, 71, 87, 0.2); padding: 6px 16px; border-radius: 60px; border: 1px solid rgba(255, 71, 87, 0.5);">
+                        <i class="fas fa-shield-alt"></i>
+                    </a>
+                </div>
             </div>
         </div>
     </nav>
@@ -2340,7 +2317,7 @@
                 textColor = '#70c0ff';
                 iconColor = '#70c0ff';
             }
-            expireText.textContent = '';
+            expireText.textContent = user.memberExpireText || '';
         } else if (user.memberStatus === 'expired') {
             memberTypeText = '已到期';
             bgColor = 'rgba(255, 71, 87, 0.2)';
@@ -2465,6 +2442,18 @@
                     document.getElementById('userAvatar').innerText = displayName.charAt(0).toUpperCase();
                 }
                 updateMemberBadge(result.user);
+
+                // 登录成功后立即更新VIP按钮状态
+                const vipBtn = document.getElementById('vipUpgradeBtn');
+                if (vipBtn) {
+                    const status = result.user.memberStatus;
+                    if (status === 'active' || status === 'permanent') {
+                        vipBtn.style.display = 'none';
+                    } else {
+                        vipBtn.style.display = 'flex';
+                    }
+                }
+
                 hideLogin();
 
                 const activeChip = document.querySelector('.category-chip.active');
@@ -2503,13 +2492,12 @@
     document.getElementById('registerBtn').addEventListener('click', async function() {
         const account = document.getElementById('regAccount').value.trim();
         const password = document.getElementById('regPassword').value.trim();
-        const activationCode = document.getElementById('activationCode').value.trim();
         const inviteCode = document.getElementById('inviteCode').value.trim();
         const messageDiv = document.getElementById('registerMessage');
 
-        if (!account || !password || !activationCode) {
+        if (!account || !password) {
             messageDiv.className = 'message warning';
-            messageDiv.innerText = '账号、密码和卡密为必填项';
+            messageDiv.innerText = '账号和密码为必填项';
             messageDiv.style.display = 'block';
             return;
         }
@@ -2547,7 +2535,6 @@
         formData.append('userName', generateRandomUserName());
         formData.append('account', account);
         formData.append('password', password);
-        formData.append('activationCode', activationCode);
         if (inviteCode) formData.append('invitedBy', inviteCode);
 
         try {
@@ -2560,13 +2547,8 @@
             const result = await response.json();
 
             if (result.status === 1) {
-                const memberTypeName = result.memberTypeName || '会员';
                 messageDiv.className = 'message success';
-                if (activationCode) {
-                    messageDiv.innerText = `注册成功，激活${memberTypeName}成功！正在自动登录...`;
-                } else {
-                    messageDiv.innerText = `注册成功！正在自动登录...`;
-                }
+                messageDiv.innerText = `注册成功！正在自动登录...`;
                 messageDiv.style.display = 'block';
 
                 const loginUrl = `/api/login/first?account=${encodeURIComponent(account)}&password=${encodeURIComponent(password)}`;
@@ -2605,6 +2587,18 @@
                     document.getElementById('displayUsername').innerText = displayName;
                     document.getElementById('userAvatar').innerText = displayName.charAt(0).toUpperCase();
                     updateMemberBadge(loginResult.user);
+
+                    // 注册成功后立即更新VIP按钮状态
+                    const vipBtn = document.getElementById('vipUpgradeBtn');
+                    if (vipBtn) {
+                        const status = loginResult.user.memberStatus;
+                        if (status === 'active' || status === 'permanent') {
+                            vipBtn.style.display = 'none';
+                        } else {
+                            vipBtn.style.display = 'flex';
+                        }
+                    }
+
                     hideLogin();
                     const activeChip = document.querySelector('.category-chip.active');
                     const currentCategory = activeChip ? activeChip.textContent.trim() : '全部';
@@ -3039,6 +3033,14 @@
                 <div class="vip-info-item"><i class="fas fa-gem"></i> 解锁全部付费资源</div>
                 <div class="vip-info-item"><i class="fas fa-clock"></i> 专属会员时长</div>
                 <div class="vip-info-item"><i class="fas fa-star"></i> 优先客服支持</div>
+                <div class="vip-info-item"><i class="fas fa-bolt"></i> 优先审核通道</div>
+            </div>
+            <div class="vip-get-code">
+                <div class="vip-get-code-title"><i class="fas fa-info-circle"></i> 激活码获取方式</div>
+                <div class="vip-get-code-content">
+                    <p>区域代理商购买</p>
+                    <p>咸鱼/淘宝搜索：<span style="color: #FFD700;">霓虹之都激活码</span> 或 <span style="color: #FFD700;">neonvip</span></p>
+                </div>
             </div>
             <div class="vip-form-group">
                 <label><i class="fas fa-key"></i> 输入激活码</label>
@@ -3118,7 +3120,7 @@
         border: 1px solid rgba(212, 175, 55, 0.3);
         border-radius: 12px;
         padding: 16px;
-        margin-bottom: 20px;
+        margin-bottom: 16px;
     }
     .vip-info-item {
         color: #d4af37;
@@ -3128,6 +3130,30 @@
     .vip-info-item i {
         margin-right: 10px;
         width: 20px;
+    }
+    .vip-get-code {
+        background: rgba(90, 160, 255, 0.1);
+        border: 1px solid rgba(90, 160, 255, 0.3);
+        border-radius: 12px;
+        padding: 14px 16px;
+        margin-bottom: 16px;
+    }
+    .vip-get-code-title {
+        color: #8ab4ff;
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+    .vip-get-code-title i {
+        margin-right: 8px;
+    }
+    .vip-get-code-content {
+        color: #b0c8e8;
+        font-size: 0.88rem;
+        line-height: 1.6;
+    }
+    .vip-get-code-content p {
+        margin: 4px 0;
     }
     .vip-form-group {
         margin-bottom: 16px;
@@ -3201,6 +3227,18 @@
         background: linear-gradient(105deg, #A67C00, #F4C430);
         box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
     }
+    .btn-secondary {
+        background: rgba(100, 100, 100, 0.3);
+        color: #c0c0c0;
+        border: 1px solid rgba(150, 150, 150, 0.4);
+        border-radius: 60px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .btn-secondary:hover {
+        background: rgba(120, 120, 120, 0.4);
+        color: #e0e0e0;
+    }
 </style>
 
 <script>
@@ -3260,7 +3298,7 @@
             });
             const result = await response.json();
 
-            if (result.status === 1) {
+            if (result.success === true) {
                 let memberTypeName = '会员';
                 if (result.memberType === 1) memberTypeName = '月度会员';
                 else if (result.memberType === 2) memberTypeName = '季度会员';
@@ -3268,11 +3306,17 @@
                 else if (result.memberType === 4) memberTypeName = '永久会员';
 
                 userInfo.memberType = result.memberType;
-                userInfo.memberStatus = 'active';
+                userInfo.memberStatus = result.memberStatus;
+                userInfo.memberExpireText = result.memberExpireText;
                 localStorage.setItem('userInfo', JSON.stringify(userInfo));
 
                 updateMemberBadge(result);
                 updateMemberStatusBar(result);
+
+                const vipBtn = document.getElementById('vipUpgradeBtn');
+                if (vipBtn && (result.memberStatus === 'permanent' || result.memberStatus === 'active')) {
+                    vipBtn.style.display = 'none';
+                }
 
                 messageDiv.className = 'vip-message success';
                 messageDiv.innerText = `激活成功！您已成为${memberTypeName}`;

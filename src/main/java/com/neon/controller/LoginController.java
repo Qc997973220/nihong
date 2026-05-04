@@ -44,7 +44,10 @@ public class LoginController {
 
                 if (user.getMemberType() != null && user.getMemberType() == 4) {
                     userInfo.put("memberStatus", "permanent");
-                    userInfo.put("memberExpireText", "永久会员");
+                    userInfo.put("memberExpireText", "永久有效");
+                } else if (user.getMemberType() != null && user.getMemberType() == 0) {
+                    userInfo.put("memberStatus", "none");
+                    userInfo.put("memberExpireText", "非会员");
                 } else if (user.getMemberExpiredAt() != null) {
                     boolean isExpired = user.getMemberExpiredAt().isBefore(LocalDateTime.now());
                     userInfo.put("memberStatus", isExpired ? "expired" : "active");

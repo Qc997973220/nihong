@@ -88,19 +88,30 @@ public class LoginService {
             return result;
         }
 
-        Integer memberType = (Integer) cardResult.get("memberType");
+        Integer memberType = (int) cardResult.get("memberType");
         int expireDays = (int) cardResult.get("expireDays");
         user.setMemberType(memberType);
         if (expireDays == Integer.MAX_VALUE) {
             user.setMemberExpiredAt(null);
+            user.setMemberStatus("permanent");
         } else {
             user.setMemberExpiredAt(java.time.LocalDateTime.now().plusDays(expireDays));
+            user.setMemberStatus("active");
         }
         user.setOperatingTime(java.time.LocalDateTime.now());
         usersDao.save(user);
 
         result.put("success", true);
         result.put("memberType", memberType);
+        if (memberType == 4) {
+            result.put("memberStatus", "permanent");
+            result.put("memberExpireText", "永久有效");
+        } else {
+            result.put("memberStatus", "active");
+            if (user.getMemberExpiredAt() != null) {
+                result.put("memberExpireText", user.getMemberExpiredAt().toLocalDate() + " 到期");
+            }
+        }
         result.put("message", "激活成功");
         return result;
     }
