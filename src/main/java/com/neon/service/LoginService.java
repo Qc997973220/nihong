@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
+
 @Service
 public class LoginService {
     @Autowired
@@ -28,8 +29,24 @@ public class LoginService {
         }
     }
 
-
     public int registered(Users users) {
+        String account = users.getAccount();
+        
+        // 检查账号格式：只能包含字母和数字，6-20位
+        if (account == null || !account.matches("^[A-Za-z0-9]{6,20}$")) {
+            return 0;
+        }
+        
+        // 检查豹子号（连续4个相同字符）
+        if (hasConsecutiveSameChars(account, 4)) {
+            return 0;
+        }
+        
+        // 检查顺序号（连续4个递增或递减字符）
+        if (hasSequentialChars(account, 4)) {
+            return 0;
+        }
+        
         if (usersDao.existsByAccount(users.getAccount())) {
             return 0;
         }
@@ -61,6 +78,54 @@ public class LoginService {
         }
         usersDao.save(users);
         return 1;
+    }
+
+    private boolean hasConsecutiveSameChars(String account, int count) {
+        int consecutive = 1;
+        for (int i = 1; i < account.length(); i++) {
+            if (account.charAt(i) == account.charAt(i - 1)) {
+                consecutive++;
+                if (consecutive >= count) {
+                    return true;
+                }
+            } else {
+                consecutive = 1;
+            }
+        }
+        return false;
+    }
+
+    private boolean hasSequentialChars(String account, int count) {
+        int ascending = 1;
+        int descending = 1;
+        
+        for (int i = 1; i < account.length(); i++) {
+            char current = account.charAt(i);
+            char prev = account.charAt(i - 1);
+            
+            // 检查递增（数字或字母）
+            if ((Character.isDigit(current) && Character.isDigit(prev) && current == prev + 1) ||
+                (Character.isLetter(current) && Character.isLetter(prev) && 
+                 Character.toLowerCase(current) == Character.toLowerCase(prev) + 1)) {
+                ascending++;
+            } else {
+                ascending = 1;
+            }
+            
+            // 检查递减（数字或字母）
+            if ((Character.isDigit(current) && Character.isDigit(prev) && current == prev - 1) ||
+                (Character.isLetter(current) && Character.isLetter(prev) && 
+                 Character.toLowerCase(current) == Character.toLowerCase(prev) - 1)) {
+                descending++;
+            } else {
+                descending = 1;
+            }
+            
+            if (ascending >= count || descending >= count) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public java.util.Map<String, Object> activateMember(String account, String activationCode) {
@@ -125,4 +190,3 @@ public class LoginService {
         return code.toString();
     }
 }
-
