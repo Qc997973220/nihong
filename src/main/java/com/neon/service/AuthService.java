@@ -50,6 +50,14 @@ public class AuthService {
                     attempt.getLockedUntil().toString().replace("T", " ") + " 后重试");
                 return result;
             }
+            
+            // 返回当前失败次数
+            result.put("failedCount", attempt.getFailedCount());
+            result.put("remainingAttempts", MAX_FAILED_ATTEMPTS - attempt.getFailedCount());
+        } else {
+            // 无失败记录
+            result.put("failedCount", 0);
+            result.put("remainingAttempts", MAX_FAILED_ATTEMPTS);
         }
 
         return result;
@@ -57,9 +65,12 @@ public class AuthService {
 
     /**
      * 记录登录失败
+     * @param account 账号
+     * @return 包含剩余尝试次数的信息
      */
-    public void recordFailedAttempt(String account) {
+    public Map<String, Object> recordFailedAttempt(String account) {
         LoginAttempt attempt = loginAttemptDao.findByAccount(account).orElse(null);
+        Map<String, Object> result = new HashMap<>();
         
         if (attempt == null) {
             // 创建新记录
@@ -81,11 +92,22 @@ public class AuthService {
         }
         
         // 达到失败上限，锁定账号
+        boolean locked = false;
         if (attempt.getFailedCount() >= MAX_FAILED_ATTEMPTS) {
             attempt.setLockedUntil(LocalDateTime.now().plusMinutes(LOCK_MINUTES));
+            locked = true;
         }
         
         loginAttemptDao.save(attempt);
+        
+        result.put("failedCount", attempt.getFailedCount());
+        result.put("remainingAttempts", Math.max(0, MAX_FAILED_ATTEMPTS - attempt.getFailedCount()));
+        result.put("locked", locked);
+        if (locked) {
+            result.put("lockUntil", attempt.getLockedUntil().toString().replace("T", " "));
+        }
+        
+        return result;
     }
 
     /**

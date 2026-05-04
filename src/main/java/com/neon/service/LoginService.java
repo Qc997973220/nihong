@@ -34,9 +34,15 @@ public class LoginService {
         Users user = usersDao.findByAccount(account);
         if (user == null) {
             // 账号不存在，也记录失败次数
-            authService.recordFailedAttempt(account);
+            Map<String, Object> failedResult = authService.recordFailedAttempt(account);
             result.put("status", -1);
             result.put("message", "账号或密码错误");
+            result.put("failedCount", failedResult.get("failedCount"));
+            result.put("remainingAttempts", failedResult.get("remainingAttempts"));
+            if (failedResult.get("locked") != null && (Boolean) failedResult.get("locked")) {
+                result.put("status", -2);
+                result.put("message", "登录失败次数过多，账号已锁定。请在 " + failedResult.get("lockUntil") + " 后重试");
+            }
             return result;
         }
         
@@ -52,9 +58,16 @@ public class LoginService {
             return result;
         } else {
             // 登录失败，记录
-            authService.recordFailedAttempt(account);
-            result.put("status", 0);
-            result.put("message", "账号或密码错误");
+            Map<String, Object> failedResult = authService.recordFailedAttempt(account);
+            if (failedResult.get("locked") != null && (Boolean) failedResult.get("locked")) {
+                result.put("status", -2);
+                result.put("message", "登录失败次数过多，账号已锁定。请在 " + failedResult.get("lockUntil") + " 后重试");
+            } else {
+                result.put("status", 0);
+                result.put("message", "账号或密码错误");
+                result.put("failedCount", failedResult.get("failedCount"));
+                result.put("remainingAttempts", failedResult.get("remainingAttempts"));
+            }
             return result;
         }
     }

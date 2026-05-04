@@ -2457,6 +2457,25 @@
     // ========== 登录功能 ==========
     function showLogin() {
         document.getElementById('loginWrapper').style.display = 'flex';
+        
+        // 检查是否还有锁定状态
+        if (lockUntilTime && lockUntilTime > new Date()) {
+            const btn = document.getElementById('loginBtn');
+            const messageDiv = document.getElementById('loginMessage');
+            btn.disabled = true;
+            messageDiv.className = 'message error';
+            messageDiv.innerText = '登录失败次数过多，账号已锁定。';
+            messageDiv.style.display = 'block';
+            startLockCountdown(btn, messageDiv);
+        } else {
+            // 清除锁定状态
+            if (lockCountdownInterval) {
+                clearInterval(lockCountdownInterval);
+                lockCountdownInterval = null;
+            }
+            lockUntilTime = null;
+        }
+        
         document.getElementById('loginAccount').focus();
     }
 
@@ -2493,6 +2512,9 @@
             window.location.href = 'index.html?showForgotPassword=true';
         });
 
+        let lockUntilTime = null;
+        let lockCountdownInterval = null;
+
         // 登录按钮
         document.getElementById('loginBtn')?.addEventListener('click', async function() {
             const account = document.getElementById('loginAccount').value.trim();
@@ -2505,6 +2527,10 @@
                 messageDiv.style.display = 'block';
                 return;
             }
+
+            const btn = this;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 登录中...';
 
             const formData = new URLSearchParams();
             formData.append('account', account);
@@ -2553,13 +2579,29 @@
                         fetchDetail(); // 刷新详情页，显示VIP内容
                     }, 1000);
                 } else if (result.status === 0 || result.status === -1) {
+                    let message = '账号或密码错误';
+                    if (result.remainingAttempts !== undefined && result.remainingAttempts !== null) {
+                        message += '（还剩 ' + result.remainingAttempts + ' 次机会）';
+                    }
                     messageDiv.className = 'message error';
-                    messageDiv.innerText = '账号或密码错误';
+                    messageDiv.innerText = message;
                     messageDiv.style.display = 'block';
                 } else if (result.status === -2) {
                     messageDiv.className = 'message error';
                     messageDiv.innerText = result.message || '登录失败次数过多，账号已锁定';
                     messageDiv.style.display = 'block';
+                    
+                    // 从消息中解析锁定时间
+                    const lockTimeMatch = result.message ? result.message.match(/请在\s+([\d\-:\s]+)\s+后重试/) : null;
+                    if (lockTimeMatch && lockTimeMatch[1]) {
+                        lockUntilTime = new Date(lockTimeMatch[1].replace(' ', 'T') + ':00');
+                        startLockCountdown(btn, messageDiv);
+                    } else {
+                        // 默认锁定30分钟
+                        lockUntilTime = new Date(Date.now() + 30 * 60 * 1000);
+                        startLockCountdown(btn, messageDiv);
+                    }
+                    return; // 不恢复按钮状态
                 } else {
                     messageDiv.className = 'message error';
                     messageDiv.innerText = '登录失败，请稍后重试';
@@ -2570,8 +2612,40 @@
                 messageDiv.className = 'message error';
                 messageDiv.innerText = '登录失败，请稍后重试';
                 messageDiv.style.display = 'block';
+            } finally {
+                if (!lockUntilTime || lockUntilTime < new Date()) {
+                    btn.disabled = false;
+                    btn.innerHTML = '登录';
+                }
             }
         });
+
+        // 锁定倒计时
+        function startLockCountdown(btn, messageDiv) {
+            if (lockCountdownInterval) {
+                clearInterval(lockCountdownInterval);
+            }
+            
+            lockCountdownInterval = setInterval(() => {
+                const now = new Date();
+                const remaining = lockUntilTime - now;
+                
+                if (remaining <= 0) {
+                    clearInterval(lockCountdownInterval);
+                    lockCountdownInterval = null;
+                    lockUntilTime = null;
+                    btn.disabled = false;
+                    btn.innerHTML = '登录';
+                    messageDiv.className = 'message info';
+                    messageDiv.innerText = '账号已解锁，请重新登录';
+                    return;
+                }
+                
+                const minutes = Math.floor(remaining / 60000);
+                const seconds = Math.floor((remaining % 60000) / 1000);
+                btn.innerHTML = `<i class="fa-solid fa-lock"></i> 请等待 ${minutes}:${seconds.toString().padStart(2, '0')}`;
+            }, 1000);
+        }
 
         // 注册按钮
         document.getElementById('registerBtn')?.addEventListener('click', async function() {
