@@ -36,29 +36,13 @@ public class LoginService {
         if (usersDao.existsByUserName(users.getUserName())) {
             return 2;
         }
-        String cardKey = users.getActivationCode();
-        if (cardKey == null || cardKey.trim().isEmpty()) {
-            return -1;
-        }
-        java.util.Map<String, Object> cardResult = cardKeyService.useCardKey(cardKey.trim(), users.getAccount());
-        if (!(boolean) cardResult.get("success")) {
-            return -1;
-        }
 
         users.setId(UUID.randomUUID().toString());
         if (users.getRole() == null || users.getRole().isEmpty()) {
             users.setRole("0");
         }
         users.setCreateTime(java.time.LocalDateTime.now());
-
-        Integer memberType = (Integer) cardResult.get("memberType");
-        int expireDays = (int) cardResult.get("expireDays");
-        users.setMemberType(memberType);
-        if (expireDays == Integer.MAX_VALUE) {
-            users.setMemberExpiredAt(null);
-        } else {
-            users.setMemberExpiredAt(java.time.LocalDateTime.now().plusDays(expireDays));
-        }
+        users.setMemberType(0);
 
         String inviteCode = generateInviteCode();
         while (usersDao.existsByInviteCode(inviteCode)) {
@@ -77,6 +61,48 @@ public class LoginService {
         }
         usersDao.save(users);
         return 1;
+    }
+
+    public java.util.Map<String, Object> activateMember(String account, String activationCode) {
+        java.util.Map<String, Object> result = new java.util.HashMap<>();
+        result.put("success", false);
+
+        if (account == null || account.trim().isEmpty()) {
+            result.put("message", "账号不能为空");
+            return result;
+        }
+        if (activationCode == null || activationCode.trim().isEmpty()) {
+            result.put("message", "激活码不能为空");
+            return result;
+        }
+
+        Users user = usersDao.findByAccount(account);
+        if (user == null) {
+            result.put("message", "用户不存在");
+            return result;
+        }
+
+        java.util.Map<String, Object> cardResult = cardKeyService.useCardKey(activationCode.trim(), account);
+        if (!(boolean) cardResult.get("success")) {
+            result.put("message", "激活码无效或已使用");
+            return result;
+        }
+
+        Integer memberType = (Integer) cardResult.get("memberType");
+        int expireDays = (int) cardResult.get("expireDays");
+        user.setMemberType(memberType);
+        if (expireDays == Integer.MAX_VALUE) {
+            user.setMemberExpiredAt(null);
+        } else {
+            user.setMemberExpiredAt(java.time.LocalDateTime.now().plusDays(expireDays));
+        }
+        user.setOperatingTime(java.time.LocalDateTime.now());
+        usersDao.save(user);
+
+        result.put("success", true);
+        result.put("memberType", memberType);
+        result.put("message", "激活成功");
+        return result;
     }
 
     private String generateInviteCode() {

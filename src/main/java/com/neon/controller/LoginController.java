@@ -120,4 +120,17 @@ public class LoginController {
         result.put("message", "更新成功");
         return result;
     }
+
+    @PostMapping("/activate")
+    @ResponseBody
+    public Map<String, Object> activate(@RequestParam String account,
+                                       @RequestParam String activationCode) {
+        Map<String, Object> result = loginService.activateMember(account, activationCode);
+        if ((boolean) result.get("success")) {
+            result.put("status", 1);
+        } else {
+            result.put("status", 0);
+        }
+        return result;
+    }
 }

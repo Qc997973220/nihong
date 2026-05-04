@@ -454,6 +454,30 @@
             box-shadow: 0 15px 30px -5px #1f4f9e, 0 0 30px #0077ff;
             transform: scale(1.01);
         }
+        .vip-btn {
+            background: linear-gradient(105deg, #8B6914, #D4AF37);
+            border: none;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 60px;
+            font-weight: 550;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-right: 12px;
+            text-decoration: none;
+            box-shadow: 0 10px 25px -5px #5a4000, 0 0 0 1px #FFD700 inset;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .vip-btn:hover {
+            background: linear-gradient(105deg, #A67C00, #F4C430);
+            box-shadow: 0 15px 30px -5px #8B6914, 0 0 30px #FFD700;
+            transform: scale(1.01);
+        }
 
         /* 英雄区 */
         .hero {
@@ -1438,8 +1462,8 @@
                 <input type="password" id="regPassword" placeholder="限字母数字，最少6位">
             </div>
             <div class="input-group">
-                <label><i class="fa-solid fa-key" style="margin-right: 6px;"></i> 注册卡密 <span style="color:#ff8a8a;">*</span></label>
-                <input type="text" id="activationCode" placeholder="(咸鱼搜'霓虹之都卡密')">
+                <label><i class="fa-solid fa-key" style="margin-right: 6px;"></i> 注册卡密</label>
+                <input type="text" id="activationCode" placeholder="选填，没有可留空">
             </div>
             <div class="input-group">
                 <label><i class="fa-solid fa-gift" style="margin-right: 6px;"></i> 邀请码</label>
@@ -1474,6 +1498,9 @@
             </div>
             <a href="#" id="publishResourceBtn" class="publish-btn">
                 <i class="fa-solid fa-plus"></i> 发布资源
+            </a>
+            <a href="#" id="vipUpgradeBtn" class="vip-btn" style="display: none;">
+                <i class="fas fa-crown"></i> 升级VIP
             </a>
             <div class="notification-container" id="notificationContainer">
                 <div class="notification-icon" id="notificationIcon" style="position: relative; cursor: pointer; margin-right: 16px;">
@@ -1652,11 +1679,14 @@
 
     // ========== 发布资源功能 ==========
     document.addEventListener('DOMContentLoaded', function() {
-        // 检查URL参数，自动显示登录框
+        // 检查URL参数，自动显示登录框或VIP弹窗
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('showLogin') === 'true') {
             showLogin();
-            // 清除URL参数
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+        if (urlParams.get('showVipModal') === 'true') {
+            document.getElementById('vipModal').classList.add('active');
             window.history.replaceState({}, document.title, window.location.pathname);
         }
 
@@ -2330,6 +2360,19 @@
         statusText.style.color = textColor;
         const icon = document.querySelector('.member-status-icon');
         if (icon) icon.style.color = iconColor;
+
+        const vipBtn = document.getElementById('vipUpgradeBtn');
+        if (vipBtn) {
+            if (user.memberStatus === 'active' || user.memberStatus === 'permanent') {
+                vipBtn.style.display = 'none';
+            } else {
+                vipBtn.style.display = 'flex';
+            }
+        }
+    }
+
+    function updateMemberStatusBar(user) {
+        updateMemberBadge(user);
     }
 
     function hideLogin() {
@@ -2519,7 +2562,11 @@
             if (result.status === 1) {
                 const memberTypeName = result.memberTypeName || '会员';
                 messageDiv.className = 'message success';
-                messageDiv.innerText = `注册成功，激活${memberTypeName}成功！正在自动登录...`;
+                if (activationCode) {
+                    messageDiv.innerText = `注册成功，激活${memberTypeName}成功！正在自动登录...`;
+                } else {
+                    messageDiv.innerText = `注册成功！正在自动登录...`;
+                }
                 messageDiv.style.display = 'block';
 
                 const loginUrl = `/api/login/first?account=${encodeURIComponent(account)}&password=${encodeURIComponent(password)}`;
@@ -2754,7 +2801,17 @@
                     .catch(error => {
                         console.error('获取最新用户信息失败:', error);
                     });
-                
+
+                // 控制VIP按钮显示
+                const vipBtn = document.getElementById('vipUpgradeBtn');
+                if (vipBtn) {
+                    if (userInfo.memberStatus === 'active' || userInfo.memberStatus === 'permanent') {
+                        vipBtn.style.display = 'none';
+                    } else {
+                        vipBtn.style.display = 'flex';
+                    }
+                }
+
                 // 获取未读消息数量
                 getUnreadMessageCount(userInfo.username);
             } catch (e) {
@@ -2967,6 +3024,276 @@
 
     document.addEventListener('mouseleave', () => {
         mouseX = -1000; mouseY = -1000;
+    });
+</script>
+
+<!-- VIP激活弹窗 -->
+<div class="vip-modal-overlay" id="vipModal">
+    <div class="vip-modal">
+        <div class="vip-modal-header">
+            <h2><i class="fas fa-crown"></i> 升级VIP</h2>
+            <button class="vip-close-btn" id="closeVipModal"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="vip-modal-body">
+            <div class="vip-info">
+                <div class="vip-info-item"><i class="fas fa-gem"></i> 解锁全部付费资源</div>
+                <div class="vip-info-item"><i class="fas fa-clock"></i> 专属会员时长</div>
+                <div class="vip-info-item"><i class="fas fa-star"></i> 优先客服支持</div>
+            </div>
+            <div class="vip-form-group">
+                <label><i class="fas fa-key"></i> 输入激活码</label>
+                <input type="text" id="vipActivationCode" placeholder="请输入VIP激活码">
+            </div>
+            <div class="vip-message" id="vipMessage"></div>
+        </div>
+        <div class="vip-modal-footer">
+            <button class="btn btn-secondary" id="cancelVipBtn">取消</button>
+            <button class="btn btn-vip" id="activateVipBtn"><i class="fas fa-crown"></i> 立即激活</button>
+        </div>
+    </div>
+</div>
+
+<style>
+    .vip-modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.85);
+        z-index: 2000;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+    }
+    .vip-modal-overlay.active {
+        display: flex;
+    }
+    .vip-modal {
+        background: linear-gradient(145deg, #1a1510, #0f0d08);
+        border: 2px solid rgba(212, 175, 55, 0.5);
+        border-radius: 20px;
+        width: 100%;
+        max-width: 420px;
+        box-shadow: 0 0 60px rgba(212, 175, 55, 0.3), 0 20px 60px rgba(0, 0, 0, 0.6);
+    }
+    .vip-modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 24px;
+        border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+    }
+    .vip-modal-header h2 {
+        color: #FFD700;
+        font-size: 1.3rem;
+        margin: 0;
+    }
+    .vip-modal-header h2 i {
+        margin-right: 10px;
+    }
+    .vip-close-btn {
+        background: rgba(255, 80, 80, 0.2);
+        border: 1px solid rgba(255, 80, 80, 0.5);
+        color: #ff8080;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+    }
+    .vip-close-btn:hover {
+        background: rgba(255, 80, 80, 0.4);
+        color: white;
+    }
+    .vip-modal-body {
+        padding: 24px;
+    }
+    .vip-info {
+        background: rgba(212, 175, 55, 0.1);
+        border: 1px solid rgba(212, 175, 55, 0.3);
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 20px;
+    }
+    .vip-info-item {
+        color: #d4af37;
+        font-size: 0.95rem;
+        padding: 6px 0;
+    }
+    .vip-info-item i {
+        margin-right: 10px;
+        width: 20px;
+    }
+    .vip-form-group {
+        margin-bottom: 16px;
+    }
+    .vip-form-group label {
+        display: block;
+        color: #c0b090;
+        font-size: 0.9rem;
+        margin-bottom: 8px;
+    }
+    .vip-form-group label i {
+        margin-right: 8px;
+        color: #FFD700;
+    }
+    .vip-form-group input {
+        width: 100%;
+        padding: 14px 16px;
+        background: rgba(15, 12, 5, 0.8);
+        border: 1.5px solid rgba(212, 175, 55, 0.3);
+        border-radius: 12px;
+        font-size: 1rem;
+        font-family: 'Inter', sans-serif;
+        color: #e0d0b0;
+        outline: none;
+        transition: all 0.25s;
+    }
+    .vip-form-group input:focus {
+        border-color: #FFD700;
+        box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+    }
+    .vip-form-group input::placeholder {
+        color: #806040;
+    }
+    .vip-message {
+        padding: 12px 16px;
+        border-radius: 12px;
+        text-align: center;
+        font-size: 0.9rem;
+        display: none;
+    }
+    .vip-message.error {
+        background: rgba(220, 60, 60, 0.2);
+        color: #ffb0b0;
+        border: 1px solid rgba(255, 100, 100, 0.5);
+    }
+    .vip-message.success {
+        background: rgba(0, 200, 150, 0.15);
+        color: #b0ffde;
+        border: 1px solid rgba(0, 255, 200, 0.4);
+    }
+    .vip-modal-footer {
+        padding: 16px 24px;
+        border-top: 1px solid rgba(212, 175, 55, 0.3);
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+    }
+    .vip-modal-footer .btn {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+    }
+    .btn-vip {
+        background: linear-gradient(105deg, #8B6914, #D4AF37);
+        color: white;
+        border: none;
+        border-radius: 60px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .btn-vip:hover {
+        background: linear-gradient(105deg, #A67C00, #F4C430);
+        box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+    }
+</style>
+
+<script>
+    document.getElementById('vipUpgradeBtn').addEventListener('click', function(e) {
+        e.preventDefault();
+        document.getElementById('vipModal').classList.add('active');
+        document.getElementById('vipActivationCode').value = '';
+        document.getElementById('vipMessage').style.display = 'none';
+    });
+
+    document.getElementById('closeVipModal').addEventListener('click', function() {
+        document.getElementById('vipModal').classList.remove('active');
+    });
+
+    document.getElementById('cancelVipBtn').addEventListener('click', function() {
+        document.getElementById('vipModal').classList.remove('active');
+    });
+
+    document.getElementById('vipModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            this.classList.remove('active');
+        }
+    });
+
+    document.getElementById('activateVipBtn').addEventListener('click', async function() {
+        const activationCode = document.getElementById('vipActivationCode').value.trim();
+        const messageDiv = document.getElementById('vipMessage');
+        const btn = this;
+
+        if (!activationCode) {
+            messageDiv.className = 'vip-message error';
+            messageDiv.innerText = '请输入激活码';
+            messageDiv.style.display = 'block';
+            return;
+        }
+
+        const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+        if (!userInfo || !userInfo.account) {
+            messageDiv.className = 'vip-message error';
+            messageDiv.innerText = '用户未登录';
+            messageDiv.style.display = 'block';
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 激活中...';
+
+        const formData = new URLSearchParams();
+        formData.append('account', userInfo.account);
+        formData.append('activationCode', activationCode);
+
+        try {
+            const response = await fetch('/api/login/activate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: formData
+            });
+            const result = await response.json();
+
+            if (result.status === 1) {
+                let memberTypeName = '会员';
+                if (result.memberType === 1) memberTypeName = '月度会员';
+                else if (result.memberType === 2) memberTypeName = '季度会员';
+                else if (result.memberType === 3) memberTypeName = '年度会员';
+                else if (result.memberType === 4) memberTypeName = '永久会员';
+
+                userInfo.memberType = result.memberType;
+                userInfo.memberStatus = 'active';
+                localStorage.setItem('userInfo', JSON.stringify(userInfo));
+
+                updateMemberBadge(result);
+                updateMemberStatusBar(result);
+
+                messageDiv.className = 'vip-message success';
+                messageDiv.innerText = `激活成功！您已成为${memberTypeName}`;
+                messageDiv.style.display = 'block';
+
+                setTimeout(() => {
+                    document.getElementById('vipModal').classList.remove('active');
+                }, 1500);
+            } else {
+                messageDiv.className = 'vip-message error';
+                messageDiv.innerText = result.message || '激活失败，激活码无效';
+                messageDiv.style.display = 'block';
+            }
+        } catch (error) {
+            messageDiv.className = 'vip-message error';
+            messageDiv.innerText = '网络错误，请稍后重试';
+            messageDiv.style.display = 'block';
+        }
+
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-crown"></i> 立即激活';
     });
 </script>
 </body>

@@ -833,6 +833,15 @@
         window.location.href = 'index.html?showLogin=true';
     }
 
+    function showUpgradePrompt() {
+        const userInfo = localStorage.getItem('userInfo');
+        if (!userInfo) {
+            window.location.href = 'index.html?showLogin=true';
+        } else {
+            window.location.href = 'index.html?showVipModal=true';
+        }
+    }
+
     function getMemberStatusText() {
         const userInfo = localStorage.getItem('userInfo');
         if (!userInfo) return null;
@@ -845,6 +854,22 @@
         } catch (e) {
             return null;
         }
+    }
+
+    function getMemberStatus() {
+        const userInfo = localStorage.getItem('userInfo');
+        if (!userInfo) return null;
+        try {
+            const info = JSON.parse(userInfo);
+            return info.memberStatus;
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function isVIP() {
+        const status = getMemberStatus();
+        return status === 'active' || status === 'permanent';
     }
 
     function updateMemberBadge(user) {
@@ -1166,10 +1191,10 @@
         // 构建下载区域 HTML
         let downloadSectionHtml = '';
         if (downloadLink) {
-            const loggedIn = isLoggedIn();
+            const vip = isVIP();
             const memberStatusText = getMemberStatusText();
 
-            if (loggedIn) {
+            if (vip) {
                 downloadSectionHtml = `
                     <div class="download-section">
                         <div class="download-info">
@@ -1204,7 +1229,7 @@
                                 <span>${memberStatusText}，无法查看下载链接</span>
                             </div>
                         </div>
-                        <a href="javascript:void(0)" onclick="showLoginPrompt()" class="download-btn" style="background: rgba(255, 71, 87, 0.3); border: 1px solid rgba(255, 71, 87, 0.5);">
+                        <a href="javascript:void(0)" onclick="showUpgradePrompt()" class="download-btn" style="background: rgba(255, 71, 87, 0.3); border: 1px solid rgba(255, 71, 87, 0.5);">
                             <i class="fas fa-hourglass-half"></i>
                             <span>会员已到期</span>
                         </a>
@@ -1220,12 +1245,12 @@
                             </div>
                             <div class="download-password-item">
                                 <i class="fas fa-info-circle"></i>
-                                <span>登录后可查看下载链接和密码</span>
+                                <span>升级VIP会员后可查看下载链接</span>
                             </div>
                         </div>
-                        <a href="javascript:void(0)" onclick="showLoginPrompt()" class="download-btn">
-                            <i class="fas fa-sign-in-alt"></i>
-                            <span>登录后获取</span>
+                        <a href="javascript:void(0)" onclick="showUpgradePrompt()" class="download-btn" style="background: rgba(212, 175, 55, 0.3); border: 1px solid rgba(212, 175, 55, 0.5);">
+                            <i class="fas fa-crown"></i>
+                            <span>升级VIP</span>
                         </a>
                     </div>
                 `;
