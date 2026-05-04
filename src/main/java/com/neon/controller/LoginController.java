@@ -3,6 +3,8 @@ package com.neon.controller;
 import com.neon.dao.UsersDao;
 import com.neon.pojo.Users;
 import com.neon.service.LoginService;
+import com.neon.service.AuthService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
@@ -18,15 +20,25 @@ public class LoginController {
     LoginService loginService;
     @Autowired
     UsersDao usersDao;
+    @Autowired
+    AuthService authService;
 
     @GetMapping("/first")
     @ResponseBody
     public Map<String, Object> first(@RequestParam String account, @RequestParam String password){
+        Map<String, Object> loginResult = loginService.login(account, password);
+        
+        int status = (int) loginResult.get("status");
         Map<String, Object> result = new HashMap<>();
-        int loginResult = loginService.login(account, password);
-        result.put("status", loginResult);
-        if (loginResult == 1) {
-            Users user = usersDao.findByAccount(account);
+        result.put("status", status);
+        
+        if (loginResult.containsKey("message")) {
+            result.put("message", loginResult.get("message"));
+        }
+        
+        if (status == 1) {
+            result.put("token", loginResult.get("token"));
+            Users user = (Users) loginResult.get("user");
             if (user != null) {
                 Map<String, Object> userInfo = new HashMap<>();
                 userInfo.put("account", user.getAccount());
@@ -92,18 +104,28 @@ public class LoginController {
 
     @PostMapping("/updateUserInfo")
     @ResponseBody
-    public Map<String, Object> updateUserInfo(@RequestParam String account,
+    public Map<String, Object> updateUserInfo(HttpServletRequest request,
                                               @RequestParam(required = false) String userName,
                                               @RequestParam(required = false) String gender,
                                               @RequestParam(required = false) String phone,
                                               @RequestParam(required = false) String email) {
         Map<String, Object> result = new HashMap<>();
-        Users user = usersDao.findByAccount(account);
+        
+        // 从拦截器获取当前登录用户
+        Users currentUser = (Users) request.getAttribute("currentUser");
+        if (currentUser == null) {
+            result.put("status", 0);
+            result.put("message", "请先登录");
+            return result;
+        }
+        
+        Users user = usersDao.findByAccount(currentUser.getAccount());
         if (user == null) {
             result.put("status", 0);
             result.put("message", "用户不存在");
             return result;
         }
+        
         if (userName != null && !userName.isEmpty()) {
             if (usersDao.existsByUserName(userName) && !userName.equals(user.getUserName())) {
                 result.put("status", 0);
@@ -135,14 +157,39 @@ public class LoginController {
 
     @PostMapping("/activate")
     @ResponseBody
-    public Map<String, Object> activate(@RequestParam String account,
+    public Map<String, Object> activate(HttpServletRequest request,
                                        @RequestParam String activationCode) {
-        Map<String, Object> result = loginService.activateMember(account, activationCode);
+        // 从拦截器获取当前登录用户
+        Users currentUser = (Users) request.getAttribute("currentUser");
+        if (currentUser == null) {
+            Map<String, Object> result = new HashMap<>();
+            result.put("status", 0);
+            result.put("message", "请先登录");
+            return result;
+        }
+        
+        Map<String, Object> result = loginService.activateMember(currentUser.getAccount(), activationCode);
         if ((boolean) result.get("success")) {
             result.put("status", 1);
         } else {
             result.put("status", 0);
         }
+        return result;
+    }
+
+    @PostMapping("/logout")
+    @ResponseBody
+    public Map<String, Object> logout(HttpServletRequest request) {
+        Map<String, Object> result = new HashMap<>();
+        
+        String token = request.getHeader("Authorization");
+        if (token == null) {
+            token = request.getParameter("token");
+        }
+        
+        authService.logout(token);
+        result.put("status", 1);
+        result.put("message", "登出成功");
         return result;
     }
 

@@ -30,6 +30,8 @@ public class Users {
     String email;               // 邮箱
     String gender;              //性别
     String token;              //令牌
+    @Column
+    LocalDateTime tokenExpiredAt;  //token过期时间
     @Column(unique = true)
     String inviteCode;         //邀请码（每个用户唯一）
     String invitedBy;          //被谁邀请的（邀请人账号）

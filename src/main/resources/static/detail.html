@@ -866,6 +866,101 @@
             display: none;
         }
 
+        /* 提示弹窗样式 */
+        .notice-modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 3000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .notice-modal-overlay.active {
+            display: flex;
+        }
+        .notice-modal {
+            background: linear-gradient(145deg, #1e1b16, #0f0d08);
+            border: 2px solid rgba(255, 100, 100, 0.6);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 380px;
+            box-shadow: 0 0 60px rgba(255, 80, 80, 0.3), 0 20px 60px rgba(0, 0, 0, 0.6);
+            animation: modalPopIn 0.3s ease-out;
+        }
+        @keyframes modalPopIn {
+            0% {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        .notice-modal-header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 24px 24px 16px;
+        }
+        .notice-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a5a);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 8px 25px rgba(255, 80, 80, 0.4);
+        }
+        .notice-icon i {
+            font-size: 2.2rem;
+            color: white;
+        }
+        .notice-modal-body {
+            text-align: center;
+            padding: 0 24px 24px;
+        }
+        .notice-modal-body h3 {
+            color: #ff6b6b;
+            font-size: 1.3rem;
+            margin: 0 0 12px;
+            font-weight: 600;
+        }
+        .notice-modal-body p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1rem;
+            margin: 0;
+            line-height: 1.6;
+        }
+        .notice-modal-footer {
+            padding: 16px 24px 24px;
+            border-top: 1px solid rgba(255, 100, 100, 0.2);
+            display: flex;
+            justify-content: center;
+        }
+        .notice-confirm-btn {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a5a);
+            color: white;
+            border: none;
+            padding: 12px 40px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 80, 80, 0.3);
+        }
+        .notice-confirm-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 80, 80, 0.4);
+        }
+
         /* VIP弹窗样式 */
         .vip-modal-overlay {
             display: none;
@@ -1295,6 +1390,24 @@
     </div>
 </div>
 
+<!-- 提示弹窗 -->
+<div class="notice-modal-overlay" id="noticeModal">
+    <div class="notice-modal">
+        <div class="notice-modal-header">
+            <div class="notice-icon">
+                <i class="fas fa-clock" id="noticeIcon"></i>
+            </div>
+        </div>
+        <div class="notice-modal-body">
+            <h3 id="noticeTitle">提示</h3>
+            <p id="noticeMessage">提示内容</p>
+        </div>
+        <div class="notice-modal-footer">
+            <button class="notice-confirm-btn" id="noticeConfirmBtn">确定</button>
+        </div>
+    </div>
+</div>
+
 <div class="detail-container">
     <div id="detailContent">
         <!-- 动态填充 -->
@@ -1501,12 +1614,14 @@
 
         if (isLimitedMember) {
             try {
-                const info = JSON.parse(userInfo);
+                const authToken = localStorage.getItem('authToken');
                 const response = await fetch('/api/resources/verify-download', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': authToken || ''
+                    },
                     body: JSON.stringify({
-                        account: info.account,
                         resourceId: parseInt(id),
                         resourceTitle: document.querySelector('.article-title')?.textContent || ''
                     })
@@ -1528,14 +1643,14 @@
                     }
                 } else {
                     if (result.quotaExceeded) {
-                        alert('您今日下载额度已用尽，请明天再来！');
+                        showNoticeModal('今日额度已用完', '您今日下载额度已用尽，请明天再来！', 'fa-clock');
                     } else {
-                        alert(result.message || '获取下载链接失败');
+                        showNoticeModal('提示', result.message || '获取下载链接失败', 'fa-exclamation-circle');
                     }
                 }
             } catch (error) {
                 console.error('验证下载额度失败:', error);
-                alert('验证下载额度失败，请稍后重试');
+                showNoticeModal('提示', '验证下载额度失败，请稍后重试', 'fa-exclamation-circle');
             }
         } else {
             if (downloadPassword) {
@@ -1550,6 +1665,17 @@
         if (quotaRemaining) {
             quotaRemaining.textContent = result.remaining;
         }
+    }
+
+    function showNoticeModal(title, message, icon = 'fa-clock') {
+        document.getElementById('noticeTitle').textContent = title;
+        document.getElementById('noticeMessage').textContent = message;
+        document.getElementById('noticeIcon').className = `fas ${icon}`;
+        document.getElementById('noticeModal').classList.add('active');
+    }
+
+    function hideNoticeModal() {
+        document.getElementById('noticeModal').classList.remove('active');
     }
 
     async function fetchDownloadQuota() {
@@ -2394,6 +2520,11 @@
                     messageDiv.innerText = '登录成功！';
                     messageDiv.style.display = 'block';
 
+                    // 保存token
+                    if (result.token) {
+                        localStorage.setItem('authToken', result.token);
+                    }
+
                     const displayName = result.user.userName || result.user.account;
                     const userInfo = {
                         account: result.user.account,
@@ -2504,6 +2635,11 @@
                     const loginResult = await loginResponse.json();
 
                     if (loginResult.status === 1) {
+                        // 保存token
+                        if (loginResult.token) {
+                            localStorage.setItem('authToken', loginResult.token);
+                        }
+
                         const displayName = loginResult.user.userName || loginResult.user.account;
                         const userInfo = {
                             account: loginResult.user.account,
@@ -2565,6 +2701,21 @@
             }
         });
 
+        // 提示弹窗关闭按钮
+        document.getElementById('closeNoticeModal')?.addEventListener('click', function() {
+            document.getElementById('noticeModal').classList.remove('active');
+        });
+
+        document.getElementById('noticeConfirmBtn')?.addEventListener('click', function() {
+            document.getElementById('noticeModal').classList.remove('active');
+        });
+
+        document.getElementById('noticeModal')?.addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.classList.remove('active');
+            }
+        });
+
         // VIP激活按钮
         document.getElementById('activateVipBtn')?.addEventListener('click', async function() {
             const activationCode = document.getElementById('vipActivationCode').value.trim();
@@ -2590,13 +2741,18 @@
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 激活中...';
 
             const formData = new URLSearchParams();
-            formData.append('account', userInfo.account);
             formData.append('activationCode', activationCode);
+
+            // 获取token
+            const authToken = localStorage.getItem('authToken');
 
             try {
                 const response = await fetch('/api/login/activate', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    headers: { 
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Authorization': authToken || ''
+                    },
                     body: formData
                 });
                 const result = await response.json();
@@ -2639,6 +2795,14 @@
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fas fa-crown"></i> 立即激活';
+            }
+        });
+
+        // 提示弹窗关闭按钮
+        document.getElementById('noticeConfirmBtn').addEventListener('click', hideNoticeModal);
+        document.getElementById('noticeModal').addEventListener('click', function(e) {
+            if (e.target.id === 'noticeModal') {
+                hideNoticeModal();
             }
         });
     });

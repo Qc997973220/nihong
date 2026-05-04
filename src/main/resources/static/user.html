@@ -447,8 +447,20 @@
     }
 
     // 退出登录
-    document.getElementById('logoutBtn').addEventListener('click', function() {
+    document.getElementById('logoutBtn').addEventListener('click', async function() {
+        const authToken = localStorage.getItem('authToken');
+        if (authToken) {
+            try {
+                await fetch('/api/login/logout', {
+                    method: 'POST',
+                    headers: { 'Authorization': authToken }
+                });
+            } catch (e) {
+                console.error('退出登录请求失败:', e);
+            }
+        }
         localStorage.removeItem('userInfo');
+        localStorage.removeItem('authToken');
         window.location.href = '/';
     });
 </script>
@@ -719,16 +731,21 @@
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 保存中...';
 
         const formData = new URLSearchParams();
-        formData.append('account', userData.account);
         if (userName) formData.append('userName', userName);
         if (gender) formData.append('gender', gender);
         if (phone) formData.append('phone', phone);
         if (email) formData.append('email', email);
 
+        // 获取token
+        const authToken = localStorage.getItem('authToken');
+
         try {
             const response = await fetch('/api/login/updateUserInfo', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                headers: { 
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'Authorization': authToken || ''
+                },
                 body: formData
             });
             const result = await response.json();

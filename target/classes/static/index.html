@@ -3377,6 +3377,11 @@
                 messageDiv.innerText = '登录成功！';
                 messageDiv.style.display = 'block';
 
+                // 保存token
+                if (result.token) {
+                    localStorage.setItem('authToken', result.token);
+                }
+
                 // 使用userName作为显示名称和头像
                 const displayName = result.user.userName || result.user.account;
 
@@ -3531,6 +3536,11 @@
                 const loginResult = await loginResponse.json();
 
                 if (loginResult.status === 1) {
+                    // 保存token
+                    if (loginResult.token) {
+                        localStorage.setItem('authToken', loginResult.token);
+                    }
+
                     // 使用userName作为显示名称
                     const displayName = loginResult.user.userName || loginResult.user.account;
                     
@@ -4477,13 +4487,18 @@
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 激活中...';
 
         const formData = new URLSearchParams();
-        formData.append('account', userInfo.account);
         formData.append('activationCode', activationCode);
+
+        // 获取token
+        const authToken = localStorage.getItem('authToken');
 
         try {
             const response = await fetch('/api/login/activate', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                headers: { 
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'Authorization': authToken || ''
+                },
                 body: formData
             });
             const result = await response.json();

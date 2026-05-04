@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -16,16 +17,43 @@ public class LoginService {
     @Autowired
     CardKeyService cardKeyService;
 
-    public int login(String account, String password){
+    @Autowired
+    AuthService authService;
+
+    public Map<String, Object> login(String account, String password){
+        Map<String, Object> result = new java.util.HashMap<>();
+        
+        // 检查登录失败次数
+        Map<String, Object> attemptCheck = authService.checkLoginAttempt(account);
+        if (!(Boolean) attemptCheck.get("allowed")) {
+            result.put("status", -2);
+            result.put("message", attemptCheck.get("message"));
+            return result;
+        }
+        
         Users user = usersDao.findByAccount(account);
-        if (user == null) return -1;
+        if (user == null) {
+            result.put("status", -1);
+            result.put("message", "账号不存在");
+            return result;
+        }
+        
         if (user.getPassword().equals(password)){
-            user.setToken(UUID.randomUUID().toString());
+            // 登录成功
+            String token = authService.generateToken(user);
             user.setLastLoginTime(java.time.LocalDateTime.now());
-            usersDao.save(user);
-            return 1;
-        }else {
-            return 0;
+            authService.clearFailedAttempt(account);
+            
+            result.put("status", 1);
+            result.put("token", token);
+            result.put("user", user);
+            return result;
+        } else {
+            // 登录失败，记录
+            authService.recordFailedAttempt(account);
+            result.put("status", 0);
+            result.put("message", "账号或密码错误");
+            return result;
         }
     }
 

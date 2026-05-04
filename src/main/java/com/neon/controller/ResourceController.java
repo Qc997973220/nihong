@@ -310,18 +310,19 @@ public class ResourceController {
     // 验证下载额度并记录下载
     @PostMapping("/verify-download")
     @ResponseBody
-    public Map<String, Object> verifyDownload(@RequestBody Map<String, Object> request) {
+    public Map<String, Object> verifyDownload(HttpServletRequest request, @RequestBody Map<String, Object> body) {
         Map<String, Object> result = new HashMap<>();
         try {
-            String account = (String) request.get("account");
-            Long resourceId = Long.valueOf(request.get("resourceId").toString());
-            String resourceTitle = (String) request.get("resourceTitle");
-
-            if (account == null || account.trim().isEmpty()) {
+            // 从拦截器获取当前登录用户
+            Users currentUser = (Users) request.getAttribute("currentUser");
+            if (currentUser == null) {
                 result.put("success", false);
-                result.put("message", "用户未登录");
+                result.put("message", "请先登录");
                 return result;
             }
+            
+            Long resourceId = Long.valueOf(body.get("resourceId").toString());
+            String resourceTitle = (String) body.get("resourceTitle");
 
             if (resourceId == null) {
                 result.put("success", false);
@@ -329,7 +330,7 @@ public class ResourceController {
                 return result;
             }
 
-            Map<String, Object> quotaResult = downloadQuotaService.recordDownload(account, resourceId, resourceTitle);
+            Map<String, Object> quotaResult = downloadQuotaService.recordDownload(currentUser.getAccount(), resourceId, resourceTitle);
             return quotaResult;
 
         } catch (Exception e) {
