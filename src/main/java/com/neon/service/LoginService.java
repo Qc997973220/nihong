@@ -33,8 +33,10 @@ public class LoginService {
         
         Users user = usersDao.findByAccount(account);
         if (user == null) {
+            // 账号不存在，也记录失败次数
+            authService.recordFailedAttempt(account);
             result.put("status", -1);
-            result.put("message", "账号不存在");
+            result.put("message", "账号或密码错误");
             return result;
         }
         

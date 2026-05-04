@@ -2552,9 +2552,17 @@
                         hideLogin();
                         fetchDetail(); // 刷新详情页，显示VIP内容
                     }, 1000);
-                } else {
+                } else if (result.status === 0 || result.status === -1) {
                     messageDiv.className = 'message error';
                     messageDiv.innerText = '账号或密码错误';
+                    messageDiv.style.display = 'block';
+                } else if (result.status === -2) {
+                    messageDiv.className = 'message error';
+                    messageDiv.innerText = result.message || '登录失败次数过多，账号已锁定';
+                    messageDiv.style.display = 'block';
+                } else {
+                    messageDiv.className = 'message error';
+                    messageDiv.innerText = '登录失败，请稍后重试';
                     messageDiv.style.display = 'block';
                 }
             } catch (error) {
