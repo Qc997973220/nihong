@@ -1430,10 +1430,6 @@
             <h2>创建账号</h2>
             <div class="sub">注册成为霓虹之都的会员</div>
             <div class="input-group">
-                <label><i class="fa-solid fa-star" style="margin-right: 6px;"></i> 用户名 <span style="color:#ff8a8a;">*</span></label>
-                <input type="text" id="regUserName" placeholder="你的用户名，用于展示">
-            </div>
-            <div class="input-group">
                 <label><i class="fa-regular fa-user" style="margin-right: 6px;"></i> 账号 <span style="color:#ff8a8a;">*</span></label>
                 <input type="text" id="regAccount" placeholder="限字母/数字，最少6位">
             </div>
@@ -1448,19 +1444,6 @@
             <div class="input-group">
                 <label><i class="fa-solid fa-gift" style="margin-right: 6px;"></i> 邀请码</label>
                 <input type="text" id="inviteCode" placeholder="选填，老会员的邀请码">
-            </div>
-            <div class="input-group">
-                <label><i class="fa-solid fa-venus-mars" style="margin-right: 6px;"></i> 性别</label>
-                <select id="gender">
-                    <option value="" selected disabled>-- 请选择 (选填) --</option>
-                    <option value="男">男</option>
-                    <option value="女">女</option>
-                    <option value="其他">其他</option>
-                </select>
-            </div>
-            <div class="input-group">
-                <label><i class="fa-solid fa-phone" style="margin-right: 6px;"></i> 手机</label>
-                <input type="tel" id="phone" placeholder="选填">
             </div>
             <button class="login-btn" id="registerBtn"><i class="fa-solid fa-user-plus"></i> 注册并登录</button>
             <button class="cancel-btn" id="cancelRegisterBtn"><i class="fa-solid fa-home"></i> 返回首页</button>
@@ -2207,10 +2190,10 @@
             const response = await fetch(`/api/resources/list`);
             if (!response.ok) throw new Error('网络错误');
             const data = await response.json();
-            allResources = data;
+            allResources = data.content || data;
             
             // 缓存资源列表到localStorage，过期时间10分钟
-            localStorage.setItem('cachedResources', JSON.stringify(data));
+            localStorage.setItem('cachedResources', JSON.stringify(allResources));
             localStorage.setItem('cachedResourcesTimestamp', Date.now().toString());
             
             const activeChip = document.querySelector('.category-chip.active');
@@ -2475,18 +2458,15 @@
 
     // 注册
     document.getElementById('registerBtn').addEventListener('click', async function() {
-        const userName = document.getElementById('regUserName').value.trim();
         const account = document.getElementById('regAccount').value.trim();
         const password = document.getElementById('regPassword').value.trim();
         const activationCode = document.getElementById('activationCode').value.trim();
         const inviteCode = document.getElementById('inviteCode').value.trim();
-        const gender = document.getElementById('gender').value;
-        const phone = document.getElementById('phone').value.trim();
         const messageDiv = document.getElementById('registerMessage');
 
-        if (!userName || !account || !password || !activationCode) {
+        if (!account || !password || !activationCode) {
             messageDiv.className = 'message warning';
-            messageDiv.innerText = '用户名、账号、密码和卡密为必填项';
+            messageDiv.innerText = '账号、密码和卡密为必填项';
             messageDiv.style.display = 'block';
             return;
         }
@@ -2499,20 +2479,20 @@
             return;
         }
 
-        // 用户名验证：支持中文，最多8字符，无特殊符号和空格
-        const userNameRegex = /^[\u4e00-\u9fa5A-Za-z0-9]{1,8}$/;
-        if (!userNameRegex.test(userName)) {
-            messageDiv.className = 'message warning';
-            messageDiv.innerText = '用户名支持中文、字母、数字，最多8字符，不能有特殊符号和空格';
-            messageDiv.style.display = 'block';
-            return;
-        }
-
         if (!alphanumericRegex.test(password)) {
             messageDiv.className = 'message warning';
             messageDiv.innerText = '密码只能包含字母和数字，且最少6位';
             messageDiv.style.display = 'block';
             return;
+        }
+
+        function generateRandomUserName() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            let result = '';
+            for (let i = 0; i < 6; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return '用户_' + result;
         }
 
         const btn = this;
@@ -2521,13 +2501,11 @@
         messageDiv.style.display = 'none';
 
         const formData = new URLSearchParams();
-        formData.append('userName', userName);
+        formData.append('userName', generateRandomUserName());
         formData.append('account', account);
         formData.append('password', password);
         formData.append('activationCode', activationCode);
         if (inviteCode) formData.append('invitedBy', inviteCode);
-        if (gender) formData.append('gender', gender);
-        if (phone) formData.append('phone', phone);
 
         try {
             const url = `/api/login/registered`;

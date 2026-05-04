@@ -507,6 +507,28 @@
             color: #b0ffde;
             border: 1px solid rgba(0, 255, 200, 0.4);
         }
+        .warning-card {
+            border: 1px solid rgba(255, 183, 77, 0.3);
+            background: rgba(255, 183, 77, 0.05);
+        }
+        .warning-card h3 {
+            color: #ffb84d;
+        }
+        .warning-card ul li::before {
+            color: #ffb84d;
+        }
+        .highlight-card {
+            border: 1px solid rgba(90, 160, 255, 0.3);
+            background: rgba(90, 160, 255, 0.08);
+            padding: 16px;
+        }
+        .highlight-card p {
+            color: #5ba5ff;
+            text-align: center;
+            margin: 0;
+            font-size: 0.88rem;
+            line-height: 1.6;
+        }
         @media (max-width: 768px) {
             .container {
                 padding: 24px 16px;
@@ -520,6 +542,166 @@
             .btn-group {
                 flex-direction: column;
             }
+        }
+        .rules-modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .rules-modal-overlay.active {
+            display: flex;
+        }
+        .rules-modal {
+            background: linear-gradient(145deg, #0f1a2a, #0a1018);
+            border: 1px solid rgba(90, 160, 255, 0.4);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 700px;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 50px rgba(30, 136, 229, 0.3), 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+        .rules-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            border-bottom: 1px solid rgba(90, 160, 255, 0.2);
+        }
+        .rules-modal-header h2 {
+            color: #e0f0ff;
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin: 0;
+        }
+        .rules-modal-header h2 i {
+            color: #5ba5ff;
+            margin-right: 10px;
+        }
+        .rules-close-btn {
+            background: rgba(255, 80, 80, 0.2);
+            border: 1px solid rgba(255, 80, 80, 0.5);
+            color: #ff8080;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .rules-close-btn:hover {
+            background: rgba(255, 80, 80, 0.4);
+            color: white;
+        }
+        .rules-modal-body {
+            padding: 24px;
+            overflow-y: auto;
+            flex: 1;
+        }
+        .rules-section {
+            margin-bottom: 20px;
+        }
+        .rules-section h4 {
+            color: #5ba5ff;
+            font-size: 1rem;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .rules-section h4 i {
+            font-size: 1.1rem;
+        }
+        .rules-section ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .rules-section ul li {
+            color: #a0b8d8;
+            font-size: 0.88rem;
+            line-height: 1.7;
+            padding: 6px 0 6px 20px;
+            position: relative;
+        }
+        .rules-section ul li::before {
+            content: '•';
+            position: absolute;
+            left: 5px;
+            color: #5ba5ff;
+        }
+        .rules-section.warning h4 {
+            color: #ffb84d;
+        }
+        .rules-section.warning ul li::before {
+            color: #ffb84d;
+        }
+        .rules-highlight {
+            background: rgba(255, 183, 77, 0.1);
+            border: 1px solid rgba(255, 183, 77, 0.3);
+            border-radius: 12px;
+            padding: 14px 18px;
+            margin-bottom: 20px;
+        }
+        .rules-highlight p {
+            color: #ffb84d;
+            font-size: 0.9rem;
+            text-align: center;
+            margin: 0;
+        }
+        .rules-modal-footer {
+            padding: 20px 24px;
+            border-top: 1px solid rgba(90, 160, 255, 0.2);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .rules-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            color: #a0b8d8;
+            font-size: 0.95rem;
+        }
+        .rules-checkbox input {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: #3f9eff;
+        }
+        .rules-checkbox input:disabled {
+            cursor: not-allowed;
+        }
+        #confirmRulesBtn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .form-disabled {
+            pointer-events: none;
+            opacity: 0.5;
+            filter: grayscale(0.5);
+        }
+        .form-disabled::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(10, 15, 25, 0.3);
+            z-index: 10;
         }
     </style>
 </head>
@@ -647,6 +829,32 @@
                         <li>封面图片为可选项，建议上传以获得更好的展示效果</li>
                     </ul>
                 </div>
+
+                <div class="info-card warning-card">
+                    <h3><i class="fas fa-bullhorn"></i> 网创区投稿要求</h3>
+                    <ul>
+                        <li>教程必须完整详细，不能简单理论无实操没有落地可行性，严禁欺诈！</li>
+                        <li>拒绝低质量及毫无新意的翻录、不收录网站已有重复或雷同的内容！</li>
+                        <li>所需软件及配套资源必须使用网盘完整打包，禁止任何形式留勾引流诈骗等投稿！</li>
+                        <li>不能有作者收费内容，例如要卡密的软件脚本等或者需要其他对接才能操作！</li>
+                        <li>课程质量不够好的情况下，出现广告、浮动水印、大水印，通过率较低！</li>
+                        <li>如您不符合要求，可选择付费投稿，联系QQ/微信：2858861803</li>
+                    </ul>
+                </div>
+
+                <div class="info-card warning-card" id="highlightCard" style="display: block;">
+                    <p>【全新引擎架构，秒所有同类网站，引流团队24小时不间断助力曝光，坚决不搞虚假人气！】</p>
+                </div>
+
+                <div class="info-card">
+                    <h3><i class="fas fa-info-circle"></i> 审核规则</h3>
+                    <ul>
+                        <li>审核周期1-3天，通过的会转移到首页【网创】版块</li>
+                        <li>请确保您的投稿符合要求以免浪费审核时间</li>
+                        <li>教程出现的内容不提供来源，故意留钩将被永久拉黑！</li>
+                        <li>首页【今日推荐】板块会根据后台访问量排行自动入榜！</li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
@@ -657,7 +865,6 @@
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            const publishForm = document.getElementById('publishForm');
             const submitBtn = document.getElementById('submitBtn');
             const cancelBtn = document.getElementById('cancelBtn');
             const uploadArea = document.getElementById('uploadArea');
@@ -694,7 +901,67 @@
                 document.getElementById('authorAvatar').textContent = currentUser.username.charAt(0).toUpperCase();
             }
 
-            // 上传区域点击
+            const publishForm = document.getElementById('publishForm');
+            let hasConfirmedRules = false;
+
+            function enableForm() {
+                publishForm.classList.remove('form-disabled');
+            }
+
+            function disableForm() {
+                publishForm.classList.add('form-disabled');
+            }
+
+            disableForm();
+            openRulesModal();
+
+            function openRulesModal() {
+                const modal = document.getElementById('rulesModal');
+                const checkbox = document.getElementById('rulesConfirmCheckbox');
+                const confirmBtn = document.getElementById('confirmRulesBtn');
+                if (modal) {
+                    modal.classList.add('active');
+                    checkbox.checked = false;
+                    confirmBtn.disabled = true;
+                }
+            }
+
+            window.closeRulesModal = function() {
+                const modal = document.getElementById('rulesModal');
+                if (modal) {
+                    modal.classList.remove('active');
+                }
+            };
+
+            window.confirmRules = function() {
+                const checkbox = document.getElementById('rulesConfirmCheckbox');
+                if (checkbox && checkbox.checked) {
+                    hasConfirmedRules = true;
+                    closeRulesModal();
+                    enableForm();
+                    const highlightCard = document.getElementById('highlightCard');
+                    if (highlightCard) {
+                        highlightCard.style.display = 'none';
+                    }
+                }
+            };
+
+            document.getElementById('rulesConfirmCheckbox').addEventListener('change', function() {
+                const confirmBtn = document.getElementById('confirmRulesBtn');
+                if (confirmBtn) {
+                    confirmBtn.disabled = !this.checked;
+                }
+            });
+
+            document.getElementById('rulesModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                }
+            });
+
+            publishForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                submitResource();
+            });
             uploadArea.addEventListener('click', function(e) {
                 if (e.target !== removeImageBtn && !removeImageBtn.contains(e.target)) {
                     imageInput.click();
@@ -773,11 +1040,6 @@
 
             cancelBtn.addEventListener('click', function() {
                 window.location.href = '/';
-            });
-
-            publishForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                submitResource();
             });
 
             async function submitResource() {
@@ -928,6 +1190,60 @@
             <div class="contact-popup douyin-popup">
                 <img src="/uploads/douyin_qr.png" alt="抖音二维码">
                 <p>扫码关注抖音</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="rules-modal-overlay" id="rulesModal">
+        <div class="rules-modal">
+            <div class="rules-modal-header">
+                <h2><i class="fas fa-scroll"></i> 发布须知</h2>
+                <button class="rules-close-btn" onclick="closeRulesModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="rules-modal-body">
+                <div class="rules-section">
+                    <h4><i class="fas fa-globe"></i> 通用资源</h4>
+                    <ul>
+                        <li>发布后资源需经过审核才能在首页展示</li>
+                        <li>标题和简介将展示在首页卡片中，请认真填写</li>
+                        <li>详细内容支持详细描述资源使用方法、功能特点等</li>
+                        <li>请选择准确的分类，方便用户查找</li>
+                        <li>封面图片为可选项，建议上传以获得更好的展示效果</li>
+                    </ul>
+                </div>
+                <div class="rules-section warning">
+                    <h4><i class="fas fa-bullhorn"></i> 网创区投稿要求</h4>
+                    <ul>
+                        <li>教程必须完整详细，不能简单理论无实操没有落地可行性，严禁欺诈！</li>
+                        <li>拒绝低质量及毫无新意的翻录、不收录网站已有重复或雷同的内容！</li>
+                        <li>所需软件及配套资源必须使用网盘完整打包，禁止任何形式留勾引流诈骗等投稿！</li>
+                        <li>不能有作者收费内容，例如要卡密的软件脚本等或者需要其他对接才能操作！</li>
+                        <li>课程质量不够好的情况下，出现广告、浮动水印、大水印，通过率较低！</li>
+                        <li>如您不符合要求，可选择付费投稿，联系QQ/微信：2858861803 火速审核！</li>
+                    </ul>
+                </div>
+                <div class="rules-highlight">
+                    <p>【全新引擎架构，秒所有同类网站，引流团队24小时不间断助力曝光 , 坚决不搞虚假人气！】</p>
+                </div>
+                <div class="rules-section">
+                    <h4><i class="fas fa-info-circle"></i> 审核规则</h4>
+                    <ul>
+                        <li>审核周期1-3天，通过的会转移到首页【网创】版块，没转移就是还没审核或没通过，不通过的原因请自行对照上面！</li>
+                        <li>请确保您的投稿符合要求以免浪费审核时间，多次投不合格者可能会被长期忽视！</li>
+                        <li>教程出现的内容不提供来源，提供虚假无效或类似"需要的加我微信"均属于留勾行为，故意留钩将被永久拉黑！</li>
+                        <li>首页【今日推荐】板块会根据后台访问量排行自动入榜！也可选择联系QQ/微信付费入榜！</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="rules-modal-footer">
+                <label class="rules-checkbox">
+                    <input type="checkbox" id="rulesConfirmCheckbox">
+                    <span class="checkmark"></span>
+                    <span>我已阅读并同意以上发布须知</span>
+                </label>
+                <button class="btn btn-primary" id="confirmRulesBtn" disabled onclick="confirmRules()">
+                    <i class="fas fa-check"></i> 确认发布
+                </button>
             </div>
         </div>
     </div>

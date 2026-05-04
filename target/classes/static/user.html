@@ -338,7 +338,12 @@
             </div>
 
             <div class="info-section">
-                <h2>基本信息</h2>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h2>基本信息</h2>
+                    <button class="btn btn-primary" id="editUserInfoBtn" style="padding: 8px 16px; font-size: 0.85rem;">
+                        <i class="fas fa-edit"></i> 编辑资料
+                    </button>
+                </div>
                 <div class="info-item">
                     <div class="info-label">用户名：</div>
                     <div class="info-value" id="infoUserName"></div>
@@ -476,5 +481,261 @@
         </div>
     </div>
 </div>
+
+<div class="edit-modal-overlay" id="editModal">
+    <div class="edit-modal">
+        <div class="edit-modal-header">
+            <h2><i class="fas fa-user-edit"></i> 编辑资料</h2>
+            <button class="edit-close-btn" id="closeEditModal"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="edit-modal-body">
+            <div class="edit-form-group">
+                <label><i class="fas fa-user"></i> 用户名</label>
+                <input type="text" id="editUserName" placeholder="请输入用户名" maxlength="10">
+                <div class="edit-form-hint">支持中文、字母、数字，最多10字符</div>
+            </div>
+            <div class="edit-form-group">
+                <label><i class="fas fa-venus-mars"></i> 性别</label>
+                <select id="editGender">
+                    <option value="">未设置</option>
+                    <option value="男">男</option>
+                    <option value="女">女</option>
+                    <option value="其他">其他</option>
+                </select>
+            </div>
+            <div class="edit-form-group">
+                <label><i class="fas fa-phone"></i> 手机号</label>
+                <input type="tel" id="editPhone" placeholder="请输入手机号">
+            </div>
+            <div class="edit-message" id="editMessage"></div>
+        </div>
+        <div class="edit-modal-footer">
+            <button class="btn btn-secondary" id="cancelEditBtn">取消</button>
+            <button class="btn btn-primary" id="saveEditBtn"><i class="fas fa-check"></i> 保存</button>
+        </div>
+    </div>
+</div>
+
+<style>
+    .edit-modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 2000;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+    }
+    .edit-modal-overlay.active {
+        display: flex;
+    }
+    .edit-modal {
+        background: linear-gradient(145deg, #0f1a2a, #0a1018);
+        border: 1px solid rgba(90, 160, 255, 0.4);
+        border-radius: 20px;
+        width: 100%;
+        max-width: 450px;
+        box-shadow: 0 0 50px rgba(30, 136, 229, 0.3), 0 20px 60px rgba(0, 0, 0, 0.5);
+    }
+    .edit-modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 24px;
+        border-bottom: 1px solid rgba(90, 160, 255, 0.2);
+    }
+    .edit-modal-header h2 {
+        color: #e0f0ff;
+        font-size: 1.2rem;
+        margin: 0;
+    }
+    .edit-modal-header h2 i {
+        color: #5ba5ff;
+        margin-right: 10px;
+    }
+    .edit-close-btn {
+        background: rgba(255, 80, 80, 0.2);
+        border: 1px solid rgba(255, 80, 80, 0.5);
+        color: #ff8080;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+    }
+    .edit-close-btn:hover {
+        background: rgba(255, 80, 80, 0.4);
+        color: white;
+    }
+    .edit-modal-body {
+        padding: 24px;
+    }
+    .edit-form-group {
+        margin-bottom: 20px;
+    }
+    .edit-form-group label {
+        display: block;
+        color: #a0b8d8;
+        font-size: 0.9rem;
+        margin-bottom: 8px;
+    }
+    .edit-form-group label i {
+        margin-right: 8px;
+        color: #5ba5ff;
+    }
+    .edit-form-group input,
+    .edit-form-group select {
+        width: 100%;
+        padding: 12px 16px;
+        background: rgba(8, 18, 32, 0.6);
+        border: 1.5px solid rgba(90, 160, 255, 0.25);
+        border-radius: 12px;
+        font-size: 0.95rem;
+        font-family: 'Inter', sans-serif;
+        color: #e0f0ff;
+        outline: none;
+        transition: all 0.25s;
+    }
+    .edit-form-group input:focus,
+    .edit-form-group select:focus {
+        border-color: #3f9eff;
+        box-shadow: 0 0 15px rgba(63, 158, 255, 0.3);
+    }
+    .edit-form-group select {
+        appearance: none;
+        cursor: pointer;
+    }
+    .edit-form-hint {
+        font-size: 0.8rem;
+        color: #6a8ab0;
+        margin-top: 6px;
+    }
+    .edit-message {
+        padding: 12px 16px;
+        border-radius: 12px;
+        text-align: center;
+        font-size: 0.9rem;
+        display: none;
+    }
+    .edit-message.error {
+        background: rgba(220, 60, 60, 0.2);
+        color: #ffb0b0;
+        border: 1px solid rgba(255, 100, 100, 0.5);
+    }
+    .edit-message.success {
+        background: rgba(0, 200, 150, 0.15);
+        color: #b0ffde;
+        border: 1px solid rgba(0, 255, 200, 0.4);
+    }
+    .edit-modal-footer {
+        padding: 16px 24px;
+        border-top: 1px solid rgba(90, 160, 255, 0.2);
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+    }
+    .edit-modal-footer .btn {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+    }
+</style>
+
+<script>
+    document.getElementById('editUserInfoBtn').addEventListener('click', function() {
+        const modal = document.getElementById('editModal');
+        document.getElementById('editUserName').value = userData.username || '';
+        document.getElementById('editGender').value = userData.gender || '';
+        document.getElementById('editPhone').value = userData.phone || '';
+        document.getElementById('editMessage').style.display = 'none';
+        modal.classList.add('active');
+    });
+
+    document.getElementById('closeEditModal').addEventListener('click', function() {
+        document.getElementById('editModal').classList.remove('active');
+    });
+
+    document.getElementById('cancelEditBtn').addEventListener('click', function() {
+        document.getElementById('editModal').classList.remove('active');
+    });
+
+    document.getElementById('editModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            this.classList.remove('active');
+        }
+    });
+
+    document.getElementById('saveEditBtn').addEventListener('click', async function() {
+        const userName = document.getElementById('editUserName').value.trim();
+        const gender = document.getElementById('editGender').value;
+        const phone = document.getElementById('editPhone').value.trim();
+        const messageDiv = document.getElementById('editMessage');
+        const btn = this;
+
+        if (userName) {
+            const userNameRegex = /^[\u4e00-\u9fa5A-Za-z0-9]{1,10}$/;
+            if (!userNameRegex.test(userName)) {
+                messageDiv.className = 'edit-message error';
+                messageDiv.innerText = '用户名支持中文、字母、数字，最多10字符，不能有特殊符号';
+                messageDiv.style.display = 'block';
+                return;
+            }
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 保存中...';
+
+        const formData = new URLSearchParams();
+        formData.append('account', userData.account);
+        if (userName) formData.append('userName', userName);
+        if (gender) formData.append('gender', gender);
+        if (phone) formData.append('phone', phone);
+
+        try {
+            const response = await fetch('/api/login/updateUserInfo', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: formData
+            });
+            const result = await response.json();
+
+            if (result.status === 1) {
+                if (userName) userData.username = userName;
+                if (gender) userData.gender = gender;
+                if (phone) userData.phone = phone;
+                localStorage.setItem('userInfo', JSON.stringify(userData));
+
+                document.getElementById('nickname').innerText = userData.username;
+                document.getElementById('infoUserName').innerText = userData.username;
+                document.getElementById('userPhone').innerText = userData.phone || '未绑定';
+
+                messageDiv.className = 'edit-message success';
+                messageDiv.innerText = '保存成功！';
+                messageDiv.style.display = 'block';
+
+                setTimeout(() => {
+                    document.getElementById('editModal').classList.remove('active');
+                }, 1000);
+            } else {
+                messageDiv.className = 'edit-message error';
+                messageDiv.innerText = result.message || '保存失败';
+                messageDiv.style.display = 'block';
+            }
+        } catch (error) {
+            messageDiv.className = 'edit-message error';
+            messageDiv.innerText = '网络错误，请稍后重试';
+            messageDiv.style.display = 'block';
+        }
+
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-check"></i> 保存';
+    });
+</script>
 </body>
 </html>

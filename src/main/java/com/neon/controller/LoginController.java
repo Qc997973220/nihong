@@ -86,4 +86,38 @@ public class LoginController {
         }
         return result;
     }
+
+    @PostMapping("/updateUserInfo")
+    @ResponseBody
+    public Map<String, Object> updateUserInfo(@RequestParam String account,
+                                              @RequestParam(required = false) String userName,
+                                              @RequestParam(required = false) String gender,
+                                              @RequestParam(required = false) String phone) {
+        Map<String, Object> result = new HashMap<>();
+        Users user = usersDao.findByAccount(account);
+        if (user == null) {
+            result.put("status", 0);
+            result.put("message", "用户不存在");
+            return result;
+        }
+        if (userName != null && !userName.isEmpty()) {
+            if (usersDao.existsByUserName(userName) && !userName.equals(user.getUserName())) {
+                result.put("status", 0);
+                result.put("message", "用户名已被使用");
+                return result;
+            }
+            user.setUserName(userName);
+        }
+        if (gender != null) {
+            user.setGender(gender);
+        }
+        if (phone != null) {
+            user.setPhone(phone);
+        }
+        user.setOperatingTime(LocalDateTime.now());
+        usersDao.save(user);
+        result.put("status", 1);
+        result.put("message", "更新成功");
+        return result;
+    }
 }
