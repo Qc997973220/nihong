@@ -345,6 +345,10 @@
                     </button>
                 </div>
                 <div class="info-item">
+                    <div class="info-label">账号：</div>
+                    <div class="info-value" id="infoAccount"></div>
+                </div>
+                <div class="info-item">
                     <div class="info-label">用户名：</div>
                     <div class="info-value" id="infoUserName"></div>
                 </div>
@@ -362,7 +366,7 @@
                 </div>
                 <div class="info-item">
                     <div class="info-label">积分：</div>
-                    <div class="info-value" id="userPoints">1280</div>
+                    <div class="info-value" id="userPoints">0</div>
                 </div>
                 <div class="info-item">
                     <div class="info-label">我的邀请码：</div>
@@ -396,6 +400,7 @@
             userData = JSON.parse(userInfo);
             username = userData.username;
             document.getElementById('nickname').innerText = username;
+            document.getElementById('infoAccount').innerText = userData.account || '未设置';
             document.getElementById('infoUserName').innerText = username;
 
             // 显示邀请码

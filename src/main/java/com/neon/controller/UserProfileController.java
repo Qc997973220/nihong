@@ -50,6 +50,7 @@ public class UserProfileController {
             if (!users.isEmpty()) {
                 Users user = users.get(0);
                 Map<String, Object> userInfo = new HashMap<>();
+                userInfo.put("account", user.getAccount());
                 userInfo.put("userName", user.getUserName());
                 userInfo.put("nickname", user.getNickname());
                 userInfo.put("gender", user.getGender());
@@ -66,6 +67,7 @@ public class UserProfileController {
                 if (userOptional.isPresent()) {
                     Users user = userOptional.get();
                     Map<String, Object> userInfo = new HashMap<>();
+                    userInfo.put("account", user.getAccount());
                     userInfo.put("userName", user.getUserName());
                     userInfo.put("nickname", user.getNickname());
                     userInfo.put("gender", user.getGender());
