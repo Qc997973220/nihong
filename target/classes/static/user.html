@@ -274,6 +274,12 @@
             color: #eef3fc;
             font-size: 1.1rem;
         }
+        .info-hint {
+            font-size: 0.85rem;
+            color: #5ba5ff;
+            margin-top: 4px;
+            margin-left: 120px;
+        }
         .action-buttons {
             margin-top: 40px;
             display: flex;
@@ -355,6 +361,7 @@
                 <div class="info-item">
                     <div class="info-label">邮箱：</div>
                     <div class="info-value" id="userEmail">未设置</div>
+                    <div class="info-hint">绑定邮箱，用于账号密码丢失找回</div>
                 </div>
                 <div class="info-item">
                     <div class="info-label">电话：</div>
@@ -402,6 +409,7 @@
             document.getElementById('nickname').innerText = username;
             document.getElementById('infoAccount').innerText = userData.account || '未设置';
             document.getElementById('infoUserName').innerText = username;
+            document.getElementById('userEmail').innerText = userData.email || '未设置';
 
             // 显示邀请码
             if (userData.inviteCode) {
@@ -508,6 +516,11 @@
             <div class="edit-form-group">
                 <label><i class="fas fa-phone"></i> 手机号</label>
                 <input type="tel" id="editPhone" placeholder="请输入手机号">
+            </div>
+            <div class="edit-form-group">
+                <label><i class="fas fa-envelope"></i> 邮箱</label>
+                <input type="email" id="editEmail" placeholder="请输入邮箱">
+                <div class="edit-form-hint">用于账号密码找回</div>
             </div>
             <div class="edit-message" id="editMessage"></div>
         </div>
@@ -655,6 +668,7 @@
         document.getElementById('editUserName').value = userData.username || '';
         document.getElementById('editGender').value = userData.gender || '';
         document.getElementById('editPhone').value = userData.phone || '';
+        document.getElementById('editEmail').value = userData.email || '';
         document.getElementById('editMessage').style.display = 'none';
         modal.classList.add('active');
     });
@@ -677,6 +691,7 @@
         const userName = document.getElementById('editUserName').value.trim();
         const gender = document.getElementById('editGender').value;
         const phone = document.getElementById('editPhone').value.trim();
+        const email = document.getElementById('editEmail').value.trim();
         const messageDiv = document.getElementById('editMessage');
         const btn = this;
 
@@ -690,6 +705,16 @@
             }
         }
 
+        if (email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                messageDiv.className = 'edit-message error';
+                messageDiv.innerText = '请输入有效的邮箱地址';
+                messageDiv.style.display = 'block';
+                return;
+            }
+        }
+
         btn.disabled = true;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 保存中...';
 
@@ -698,6 +723,7 @@
         if (userName) formData.append('userName', userName);
         if (gender) formData.append('gender', gender);
         if (phone) formData.append('phone', phone);
+        if (email) formData.append('email', email);
 
         try {
             const response = await fetch('/api/login/updateUserInfo', {
@@ -711,11 +737,13 @@
                 if (userName) userData.username = userName;
                 if (gender) userData.gender = gender;
                 if (phone) userData.phone = phone;
+                if (email) userData.email = email;
                 localStorage.setItem('userInfo', JSON.stringify(userData));
 
                 document.getElementById('nickname').innerText = userData.username;
                 document.getElementById('infoUserName').innerText = userData.username;
                 document.getElementById('userPhone').innerText = userData.phone || '未绑定';
+                document.getElementById('userEmail').innerText = userData.email || '未设置';
 
                 messageDiv.className = 'edit-message success';
                 messageDiv.innerText = '保存成功！';

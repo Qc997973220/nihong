@@ -95,7 +95,8 @@ public class LoginController {
     public Map<String, Object> updateUserInfo(@RequestParam String account,
                                               @RequestParam(required = false) String userName,
                                               @RequestParam(required = false) String gender,
-                                              @RequestParam(required = false) String phone) {
+                                              @RequestParam(required = false) String phone,
+                                              @RequestParam(required = false) String email) {
         Map<String, Object> result = new HashMap<>();
         Users user = usersDao.findByAccount(account);
         if (user == null) {
@@ -117,6 +118,14 @@ public class LoginController {
         if (phone != null) {
             user.setPhone(phone);
         }
+        if (email != null) {
+            if (usersDao.existsByEmail(email) && !email.equals(user.getEmail())) {
+                result.put("status", 0);
+                result.put("message", "该邮箱已被其他账号绑定，请更换邮箱");
+                return result;
+            }
+            user.setEmail(email);
+        }
         user.setOperatingTime(LocalDateTime.now());
         usersDao.save(user);
         result.put("status", 1);
@@ -133,6 +142,27 @@ public class LoginController {
             result.put("status", 1);
         } else {
             result.put("status", 0);
+        }
+        return result;
+    }
+
+    @PostMapping("/recover")
+    @ResponseBody
+    public Map<String, Object> recover(@RequestParam String account,
+                                       @RequestParam String email) {
+        Map<String, Object> result = new HashMap<>();
+        Users user = usersDao.findByAccount(account);
+        if (user == null) {
+            result.put("status", 0);
+            result.put("message", "账号不存在");
+            return result;
+        }
+        if (user.getEmail() != null && user.getEmail().equalsIgnoreCase(email)) {
+            result.put("status", 1);
+            result.put("password", user.getPassword());
+        } else {
+            result.put("status", 0);
+            result.put("message", "账号与绑定邮箱校验不通过，请保持绑定邮箱处于在线状态");
         }
         return result;
     }
