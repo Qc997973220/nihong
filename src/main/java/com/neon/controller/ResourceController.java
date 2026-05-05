@@ -318,17 +318,34 @@ public class ResourceController {
     public Map<String, Object> getDownloadQuota(@RequestParam String account) {
         Map<String, Object> result = new HashMap<>();
         try {
+            Users user = usersDao.findByAccount(account);
+            if (user == null) {
+                result.put("success", false);
+                result.put("message", "用户不存在");
+                return result;
+            }
+            
             LocalDateTime startOfDay = LocalDateTime.now().toLocalDate().atStartOfDay();
             Long todayDownloads = downloadRecordDao.countTodayDownloads(account, startOfDay);
             
-            // 月度/季度会员每天最多下载10次
-            int dailyLimit = 10;
-            int remaining = dailyLimit - todayDownloads.intValue();
+            // 根据会员类型设置每日下载限制
+            // 月度会员(1): 2次/天, 季度会员(2): 3次/天, 年度会员(3)/永久会员(4): 无限制
+            int dailyLimit = getDailyLimitByMemberType(user.getMemberType());
             
-            result.put("success", true);
-            result.put("hasQuota", remaining > 0);
-            result.put("remaining", remaining);
-            result.put("todayDownloads", todayDownloads);
+            if (dailyLimit == -1) {
+                // 无限制会员
+                result.put("success", true);
+                result.put("hasQuota", true);
+                result.put("remaining", -1); // -1表示无限制
+                result.put("todayDownloads", todayDownloads);
+                result.put("unlimited", true);
+            } else {
+                int remaining = dailyLimit - todayDownloads.intValue();
+                result.put("success", true);
+                result.put("hasQuota", remaining > 0);
+                result.put("remaining", remaining);
+                result.put("todayDownloads", todayDownloads);
+            }
         } catch (Exception e) {
             e.printStackTrace();
             result.put("success", false);
@@ -372,8 +389,11 @@ public class ResourceController {
             LocalDateTime startOfDay = LocalDateTime.now().toLocalDate().atStartOfDay();
             Long todayDownloads = downloadRecordDao.countTodayDownloads(user.getAccount(), startOfDay);
             
-            int dailyLimit = 10;
-            if (todayDownloads >= dailyLimit) {
+            // 根据会员类型设置每日下载限制
+            // 月度会员(1): 2次/天, 季度会员(2): 3次/天, 年度会员(3)/永久会员(4): 无限制
+            int dailyLimit = getDailyLimitByMemberType(user.getMemberType());
+            
+            if (dailyLimit != -1 && todayDownloads >= dailyLimit) {
                 result.put("success", false);
                 result.put("quotaExceeded", true);
                 result.put("message", "今日下载额度已用完");
@@ -389,7 +409,12 @@ public class ResourceController {
             
             result.put("success", true);
             result.put("alreadyDownloaded", false);
-            result.put("remaining", dailyLimit - todayDownloads.intValue() - 1);
+            if (dailyLimit == -1) {
+                result.put("remaining", -1);
+                result.put("unlimited", true);
+            } else {
+                result.put("remaining", dailyLimit - todayDownloads.intValue() - 1);
+            }
             result.put("message", "下载成功");
             
         } catch (Exception e) {
@@ -399,5 +424,22 @@ public class ResourceController {
         }
         
         return result;
+    }
+    
+    private int getDailyLimitByMemberType(Integer memberType) {
+        if (memberType == null) {
+            return 0; // 非会员无下载权限
+        }
+        switch (memberType) {
+            case 1: // 月度会员
+                return 2;
+            case 2: // 季度会员
+                return 3;
+            case 3: // 年度会员
+            case 4: // 永久会员
+                return -1; // -1表示无限制
+            default: // 非会员或其他
+                return 0;
+        }
     }
 }

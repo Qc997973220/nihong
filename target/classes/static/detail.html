@@ -2501,7 +2501,31 @@
         savedUsername = null;
     }
 
-    fetchDetail();
+    // 页面加载时静默验证会话有效性，如果有效则更新用户信息，如果无效也不清除本地数据
+    (async () => {
+        const token = localStorage.getItem('authToken');
+        const storedUserInfo = localStorage.getItem('userInfo');
+        
+        if (token && storedUserInfo) {
+            try {
+                const response = await fetch(`/api/login/validateToken?token=${encodeURIComponent(token)}`);
+                const result = await response.json();
+                
+                if (result.valid && result.user) {
+                    // Token有效，更新本地用户信息
+                    localStorage.setItem('userInfo', JSON.stringify(result.user));
+                    savedUsername = result.user.userName || result.user.username;
+                    updateMemberBadge(result.user);
+                }
+            } catch (error) {
+                console.error('验证会话失败:', error);
+                // 验证失败时不清除本地数据，保持现状
+            }
+        }
+        
+        // 验证完成后获取资源详情
+        fetchDetail();
+    })();
 
     // ========== 登录功能 ==========
     let lockUntilTime = null;
