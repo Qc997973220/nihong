@@ -30,6 +30,7 @@ public class Users {
     String email;               // 邮箱
     String gender;              //性别
     String token;              //令牌
+    Integer tokenVersion = 0;  //token版本号，用于单点登录
     @Column
     LocalDateTime tokenExpiredAt;  //token过期时间
     @Column(unique = true)

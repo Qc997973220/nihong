@@ -47,7 +47,11 @@ public class LoginService {
         }
         
         if (user.getPassword().equals(password)){
-            // 登录成功
+            // 检查是否有旧token（其他设备正在登录）
+            boolean wasLoggedInElsewhere = user.getToken() != null && !user.getToken().isEmpty();
+            String oldToken = user.getToken();
+            
+            // 登录成功，生成新token（这会自动使旧token失效）
             String token = authService.generateToken(user);
             user.setLastLoginTime(java.time.LocalDateTime.now());
             authService.clearFailedAttempt(account);
@@ -55,6 +59,7 @@ public class LoginService {
             result.put("status", 1);
             result.put("token", token);
             result.put("user", user);
+            result.put("wasLoggedInElsewhere", wasLoggedInElsewhere);
             return result;
         } else {
             // 登录失败，记录

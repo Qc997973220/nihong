@@ -2452,6 +2452,54 @@
         fetchDetail();
     }
 
+    // 验证Token是否过期
+    async function validateSession() {
+        const token = localStorage.getItem('authToken');
+        const storedUserInfo = localStorage.getItem('userInfo');
+        
+        if (!token || !storedUserInfo) {
+            clearUserSession();
+            return false;
+        }
+        
+        try {
+            const response = await fetch(`/api/login/validateToken?token=${encodeURIComponent(token)}`);
+            const result = await response.json();
+            
+            if (!result.valid) {
+                console.log('会话无效:', result.message);
+                if (result.kicked) {
+                    // 被其他设备挤下线
+                    clearUserSession();
+                    alert('您的账号已在其他设备登录，如非本人操作请修改密码');
+                } else {
+                    clearUserSession();
+                }
+                return false;
+            }
+            
+            // Token有效，更新用户信息
+            if (result.user) {
+                const userInfo = result.user;
+                localStorage.setItem('userInfo', JSON.stringify(userInfo));
+                
+                savedUsername = userInfo.userName || userInfo.username;
+                updateMemberBadge(userInfo);
+            }
+            return true;
+        } catch (error) {
+            console.error('验证会话失败:', error);
+            clearUserSession();
+            return false;
+        }
+    }
+    
+    function clearUserSession() {
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('userInfo');
+        savedUsername = null;
+    }
+
     fetchDetail();
 
     // ========== 登录功能 ==========

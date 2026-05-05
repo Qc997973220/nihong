@@ -118,12 +118,18 @@ public class AuthService {
     }
 
     /**
-     * 生成Token并设置过期时间
+     * 生成Token并设置过期时间（单点登录：每次登录都会使旧token失效）
      */
     public String generateToken(Users user) {
         String token = UUID.randomUUID().toString();
         user.setToken(token);
         user.setTokenExpiredAt(LocalDateTime.now().plusHours(TOKEN_VALID_HOURS));
+        // 单点登录：递增token版本号，使之前的所有token失效
+        if (user.getTokenVersion() == null) {
+            user.setTokenVersion(1);
+        } else {
+            user.setTokenVersion(user.getTokenVersion() + 1);
+        }
         usersDao.save(user);
         return token;
     }
@@ -142,8 +148,10 @@ public class AuthService {
 
         Users user = usersDao.findByToken(token);
         if (user == null) {
+            // token不存在，可能是被新登录挤掉了
             result.put("valid", false);
-            result.put("message", "无效的登录状态，请重新登录");
+            result.put("message", "您的账号已在其他设备登录，请重新登录");
+            result.put("kicked", true);
             return result;
         }
 
@@ -162,6 +170,16 @@ public class AuthService {
         result.put("valid", true);
         result.put("user", user);
         return result;
+    }
+
+    /**
+     * 使当前用户的token失效（用于单点登录挤人）
+     */
+    public void invalidateCurrentToken(Users user) {
+        user.setToken(null);
+        user.setTokenExpiredAt(null);
+        user.setTokenVersion(user.getTokenVersion() != null ? user.getTokenVersion() + 1 : 1);
+        usersDao.save(user);
     }
 
     /**

@@ -2391,27 +2391,101 @@
         const submitResourceBtn = document.getElementById('submitResourceBtn');
         const publishMessage = document.getElementById('publishMessage');
 
+        // 验证Token是否过期
+        async function validateSession() {
+            const token = localStorage.getItem('authToken');
+            const storedUserInfo = localStorage.getItem('userInfo');
+            
+            if (!token || !storedUserInfo) {
+                clearUserSession();
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/login/validateToken?token=${encodeURIComponent(token)}`);
+                const result = await response.json();
+                
+                if (!result.valid) {
+                    console.log('会话无效:', result.message);
+                    if (result.kicked) {
+                        // 被其他设备挤下线
+                        clearUserSession();
+                        alert('您的账号已在其他设备登录，如非本人操作请修改密码');
+                    } else {
+                        clearUserSession();
+                    }
+                    return;
+                }
+                
+                // Token有效，更新用户信息
+                if (result.user) {
+                    const userInfo = result.user;
+                    currentUser = {
+                        ...currentUser,
+                        username: userInfo.userName || userInfo.username,
+                        role: userInfo.role,
+                        avatar: userInfo.avatar,
+                        account: userInfo.account,
+                        memberType: userInfo.memberType,
+                        memberStatus: userInfo.memberStatus,
+                        memberExpireText: userInfo.memberExpireText
+                    };
+                    
+                    localStorage.setItem('userInfo', JSON.stringify(userInfo));
+                    
+                    document.getElementById('displayUsername').textContent = currentUser.username;
+                    if (userInfo.avatar) {
+                        document.getElementById('userAvatar').innerHTML = `<img src="${userInfo.avatar}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+                    }
+                    updateMemberBadge(userInfo);
+                    
+                    if (currentUser.role === '1') {
+                        document.getElementById('adminLink').style.display = 'block';
+                    }
+                }
+            } catch (error) {
+                console.error('验证会话失败:', error);
+                clearUserSession();
+            }
+        }
+        
+        function clearUserSession() {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('userInfo');
+            currentUser = { username: '未登录用户', role: '0' };
+            document.getElementById('displayUsername').textContent = currentUser.username;
+            document.getElementById('userAvatar').textContent = currentUser.username.charAt(0).toUpperCase();
+            document.getElementById('adminLink').style.display = 'none';
+        }
+
+        // 页面加载时验证会话
+        validateSession();
+
         // 尝试从localStorage获取用户信息
         const storedUserInfo = localStorage.getItem('userInfo');
         if (storedUserInfo) {
             try {
                 const userInfo = JSON.parse(storedUserInfo);
-                currentUser = {
-                    ...currentUser,
-                    username: userInfo.username,
-                    role: userInfo.role,
-                    avatar: userInfo.avatar,
-                    account: userInfo.account,
-                    memberType: userInfo.memberType,
-                    memberStatus: userInfo.memberStatus,
-                    memberExpireText: userInfo.memberExpireText
-                };
+                if (!currentUser.account) {
+                    currentUser = {
+                        ...currentUser,
+                        username: userInfo.username,
+                        role: userInfo.role,
+                        avatar: userInfo.avatar,
+                        account: userInfo.account,
+                        memberType: userInfo.memberType,
+                        memberStatus: userInfo.memberStatus,
+                        memberExpireText: userInfo.memberExpireText
+                    };
+                }
                 // 更新用户头像
-                if (userInfo.avatar) {
+                if (userInfo.avatar && !document.getElementById('userAvatar').querySelector('img')) {
                     document.getElementById('userAvatar').innerHTML = `<img src="${userInfo.avatar}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
                 }
                 // 更新会员徽章
-                updateMemberBadge(userInfo);
+                if (document.getElementById('memberStatusBar')) {
+                    updateMemberBadge(userInfo);
+                }
             } catch (e) {
                 console.error('解析用户信息失败:', e);
             }
@@ -2419,7 +2493,9 @@
 
         // 更新用户信息显示
         document.getElementById('displayUsername').textContent = currentUser.username;
-        document.getElementById('userAvatar').textContent = currentUser.username.charAt(0).toUpperCase();
+        if (!document.getElementById('userAvatar').querySelector('img')) {
+            document.getElementById('userAvatar').textContent = currentUser.username.charAt(0).toUpperCase();
+        }
 
         // 检查是否为管理员，显示审核管理入口
         if (currentUser.role === '1') {
