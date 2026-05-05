@@ -2794,6 +2794,14 @@
             
             try {
                 const response = await fetch(`/api/login/validateToken?token=${encodeURIComponent(token)}`);
+                
+                // 检查HTTP状态码
+                if (!response.ok) {
+                    console.error('验证会话失败，HTTP状态:', response.status);
+                    // HTTP错误但不清除本地缓存，保留用户显示状态
+                    return;
+                }
+                
                 const result = await response.json();
                 
                 if (!result.valid) {
@@ -2835,8 +2843,9 @@
                     }
                 }
             } catch (error) {
-                console.error('验证会话失败:', error);
-                clearUserSession();
+                // 网络错误或其他异常，不清除本地缓存，保留用户显示状态
+                console.error('验证会话失败(网络或服务器错误):', error);
+                // 不调用clearUserSession()，保持本地存储的用户信息
             }
         }
         
@@ -2855,9 +2864,14 @@
             const storedUserInfo = localStorage.getItem('userInfo');
             const token = localStorage.getItem('authToken');
             
+            console.log('=== initUserSession 开始 ===');
+            console.log('localStorage userInfo:', storedUserInfo ? '存在' : '不存在');
+            console.log('localStorage authToken:', token ? '存在' : '不存在');
+            
             if (storedUserInfo && token) {
                 try {
                     const userInfo = JSON.parse(storedUserInfo);
+                    console.log('解析用户信息成功:', userInfo);
                     currentUser = {
                         ...currentUser,
                         username: userInfo.username || userInfo.userName || userInfo.account || '用户',
@@ -2869,6 +2883,8 @@
                         memberExpireText: userInfo.memberExpireText
                     };
                     
+                    console.log('currentUser 更新后:', currentUser);
+                    
                     // 立即更新UI显示
                     updateUserDisplay();
                 } catch (e) {
@@ -2876,11 +2892,13 @@
                     clearUserSession();
                 }
             } else {
+                console.log('localStorage中没有用户信息或token');
                 // 如果没有用户信息，显示未登录状态
                 updateUserDisplay();
             }
             
             // 然后异步验证Token有效性
+            console.log('准备调用 validateSession...');
             await validateSession();
         }
 

@@ -71,4 +71,13 @@ public class SiteStatsService {
     public void syncNow() {
         syncVisitorCountToDb();
     }
+
+    public Integer getRunningDays() {
+        // 获取网站运行天数，从2024-01-01开始计算
+        LocalDateTime startDate = LocalDateTime.of(2024, 1, 1, 0, 0, 0);
+        LocalDateTime now = LocalDateTime.now();
+        
+        // 计算天数差
+        return java.time.Duration.between(startDate, now).toDaysPart() + 1;
+    }
 }
