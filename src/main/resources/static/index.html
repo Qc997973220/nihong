@@ -3066,19 +3066,26 @@
     // 登录/注册相关
     function showLogin() {
         document.getElementById('loginWrapper').style.display = 'flex';
-        document.getElementById('loginPanel').classList.remove('hidden');
-        document.getElementById('registerPanel').classList.add('hidden');
-        document.getElementById('forgotPasswordPanel').classList.add('hidden');
+        
+        const loginPanel = document.getElementById('loginPanel');
+        const registerPanel = document.getElementById('registerPanel');
+        const forgotPasswordPanel = document.getElementById('forgotPasswordPanel');
+        
+        if (loginPanel) loginPanel.classList.remove('hidden');
+        if (registerPanel) registerPanel.classList.add('hidden');
+        if (forgotPasswordPanel) forgotPasswordPanel.classList.add('hidden');
         
         // 检查是否还有锁定状态
         if (lockUntilTime && lockUntilTime > new Date()) {
             const btn = document.getElementById('loginBtn');
             const messageDiv = document.getElementById('loginMessage');
-            btn.disabled = true;
-            messageDiv.className = 'message error';
-            messageDiv.innerText = '登录失败次数过多，账号已锁定。';
-            messageDiv.style.display = 'block';
-            startLockCountdown(btn, messageDiv);
+            if (btn && messageDiv) {
+                btn.disabled = true;
+                messageDiv.className = 'message error';
+                messageDiv.innerText = '登录失败次数过多，账号已锁定。';
+                messageDiv.style.display = 'block';
+                startLockCountdown(btn, messageDiv);
+            }
         } else {
             // 清除锁定状态
             if (lockCountdownInterval) {
