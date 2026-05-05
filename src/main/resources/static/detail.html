@@ -2127,9 +2127,14 @@
                 <div class="comment-section">
                     <h3 style="margin-bottom:20px;">评论 (${comments.length})</h3>
                     <!-- 新增评论输入区域 -->
-                    <div class="comment-input-area">
+                    <div class="comment-input-area" id="commentInputArea">
                         <textarea id="commentContent" placeholder="写下你的评论..."></textarea>
                         <button id="submitCommentBtn">发表评论</button>
+                    </div>
+                    <div id="commentVipNotice" class="comment-vip-notice" style="display: none; text-align: center; padding: 20px; background: rgba(255, 200, 0, 0.1); border: 1px solid rgba(255, 200, 0, 0.3); border-radius: 8px; margin-bottom: 15px;">
+                        <i class="fas fa-crown" style="color: #FFD700; margin-right: 8px;"></i>
+                        <span style="color: #90b0d1;">评论功能仅对会员开放</span>
+                        <a href="index.html" style="color: #64b5f6; text-decoration: none; margin-left: 8px;">加入会员 →</a>
                     </div>
                     <div id="commentList">
                         ${renderComments(comments)}
@@ -2249,10 +2254,35 @@
     function bindCommentSubmit() {
         const submitBtn = document.getElementById('submitCommentBtn');
         if (submitBtn) {
-            // 移除之前可能绑定的监听器，避免重复（简单起见，每次重新绑定）
-            submitBtn.replaceWith(submitBtn.cloneNode(true)); // 清除旧事件
+            submitBtn.replaceWith(submitBtn.cloneNode(true));
             const newBtn = document.getElementById('submitCommentBtn');
             newBtn.addEventListener('click', submitComment);
+        }
+        updateCommentInputVisibility();
+    }
+
+    function updateCommentInputVisibility() {
+        const inputArea = document.getElementById('commentInputArea');
+        const vipNotice = document.getElementById('commentVipNotice');
+        if (!inputArea || !vipNotice) return;
+
+        if (!savedUsername) {
+            inputArea.style.display = 'none';
+            vipNotice.style.display = 'block';
+            vipNotice.querySelector('span').textContent = '登录后可发表评论';
+            vipNotice.querySelector('a').href = 'javascript:void(0)';
+            vipNotice.querySelector('a').onclick = () => showLogin();
+            vipNotice.querySelector('a').textContent = '登录 →';
+        } else if (!isVIP()) {
+            inputArea.style.display = 'none';
+            vipNotice.style.display = 'block';
+            vipNotice.querySelector('span').textContent = '评论功能仅对会员开放';
+            vipNotice.querySelector('a').href = 'index.html';
+            vipNotice.querySelector('a').onclick = null;
+            vipNotice.querySelector('a').textContent = '加入会员 →';
+        } else {
+            inputArea.style.display = 'flex';
+            vipNotice.style.display = 'none';
         }
     }
 
@@ -2260,6 +2290,12 @@
         // 检查登录
         if (!savedUsername) {
             alert('请先登录后再评论');
+            return;
+        }
+
+        // 检查是否为VIP会员
+        if (!isVIP()) {
+            alert('权限不足，请加入霓虹之都会员后再试');
             return;
         }
 
@@ -2499,6 +2535,7 @@
                 
                 savedUsername = userInfo.userName || userInfo.username;
                 updateMemberBadge(userInfo);
+                updateCommentInputVisibility();
             }
             return true;
         } catch (error) {
@@ -2512,6 +2549,7 @@
         localStorage.removeItem('authToken');
         localStorage.removeItem('userInfo');
         savedUsername = null;
+        updateCommentInputVisibility();
     }
 
     // 页面加载时静默验证会话有效性，如果有效则更新用户信息，如果无效也不清除本地数据
@@ -2667,6 +2705,7 @@
                         document.getElementById('userAvatar').innerText = displayName.charAt(0).toUpperCase();
                     }
                     updateMemberBadge(result.user);
+                    updateCommentInputVisibility();
 
                     setTimeout(() => {
                         hideLogin();

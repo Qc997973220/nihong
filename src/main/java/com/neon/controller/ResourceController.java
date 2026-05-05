@@ -270,9 +270,29 @@ public class ResourceController {
     // 发表评论
     @PostMapping("/comment")
     @ResponseBody
-    public Map<String, Object> addComment(@RequestBody Comment comment) {
+    public Map<String, Object> addComment(
+            @RequestHeader(value = "Authorization", required = false) String token,
+            @RequestBody Comment comment) {
         Map<String, Object> result = new HashMap<>();
         try {
+            // 验证token并获取用户信息
+            if (token != null && token.startsWith("Bearer ")) {
+                token = token.substring(7);
+            }
+            Users user = usersDao.findByToken(token);
+            if (user == null) {
+                result.put("success", false);
+                result.put("message", "请先登录");
+                return result;
+            }
+            
+            // 检查是否为VIP会员（memberType > 0 表示会员）
+            if (user.getMemberType() == null || user.getMemberType() == 0) {
+                result.put("success", false);
+                result.put("message", "权限不足，请加入霓虹之都会员后再试");
+                return result;
+            }
+            
             comment.setCreatedAt(java.time.LocalDateTime.now());
             Comment savedComment = resourceService.saveComment(comment);
             result.put("success", true);
