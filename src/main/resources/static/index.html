@@ -3285,7 +3285,7 @@
 
     // 查看资源详情
     function viewResource(id) {
-        window.location.href = `detail.html?id=${id}`;
+        window.open(`detail.html?id=${id}`, '_blank');
     }
 
     // ========== 外部链接数据 ==========
@@ -3538,16 +3538,16 @@
         const rightItems = resources.slice(midpoint);
 
         leftContainer.innerHTML = leftItems.map(r => `
-            <div class="recommend-item" onclick="window.location.href='detail.html?id=${r.id}'">
+            <div class="recommend-item" onclick="window.open('detail.html?id=${r.id}', '_blank')">
                 <i class="fas fa-chevron-right" style="color:#5a85c0;font-size:0.7rem;"></i>
-                <a href="detail.html?id=${r.id}">${r.title}</a>
+                <a href="detail.html?id=${r.id}" target="_blank">${r.title}</a>
             </div>
         `).join('');
 
         rightContainer.innerHTML = rightItems.map(r => `
-            <div class="recommend-item" onclick="window.location.href='detail.html?id=${r.id}'">
+            <div class="recommend-item" onclick="window.open('detail.html?id=${r.id}', '_blank')">
                 <i class="fas fa-chevron-right" style="color:#5a85c0;font-size:0.7rem;"></i>
-                <a href="detail.html?id=${r.id}">${r.title}</a>
+                <a href="detail.html?id=${r.id}" target="_blank">${r.title}</a>
             </div>
         `).join('');
     }
@@ -4359,7 +4359,7 @@
                                 
                                 // 如果是评论回复类型的消息，跳转到相关资源详情页
                                 if (message.type === 'comment_reply' && message.resourceId) {
-                                    window.location.href = `detail.html?id=${message.resourceId}`;
+                                    window.open(`detail.html?id=${message.resourceId}`, '_blank');
                                 }
                             });
                             
