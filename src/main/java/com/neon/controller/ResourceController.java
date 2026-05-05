@@ -226,16 +226,18 @@ public class ResourceController {
         return result;
     }
 
-    // 获取所有资源列表（管理员用，包含所有状态）
+    // 获取所有资源列表（管理员用，包含所有状态，支持分页）
     @GetMapping("/all")
     @ResponseBody
-    public Map<String, Object> getAllResources() {
+    public Map<String, Object> getAllResources(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(required = false) String keyword) {
         Map<String, Object> result = new HashMap<>();
         try {
-            List<Resource> resources = resourceService.getAllResourcesIncludingPending();
+            Map<String, Object> data = resourceService.getAllResourcesForAdmin(page, pageSize, keyword);
             result.put("success", true);
-            result.put("resources", resources);
-            result.put("count", resources.size());
+            result.putAll(data);
         } catch (Exception e) {
             result.put("success", false);
             result.put("message", "获取资源列表失败：" + e.getMessage());

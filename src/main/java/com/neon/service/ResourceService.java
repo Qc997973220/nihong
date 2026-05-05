@@ -47,6 +47,33 @@ public class ResourceService {
         return resourceRepository.findByStatusInOrderByCreatedAtDesc(Arrays.asList(0, 1, 2));
     }
 
+    public Map<String, Object> getAllResourcesForAdmin(int page, int pageSize, String keyword) {
+        int size = Math.min(pageSize, MAX_PAGE_SIZE);
+        if (size <= 0) size = 10;
+        if (page <= 0) page = 1;
+
+        Pageable pageable = PageRequest.of(page - 1, size);
+        Page<Resource> resourcePage;
+
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            resourcePage = resourceRepository.findByTitleContainingIgnoreCaseAndStatusInOrderByCreatedAtDesc(
+                    keyword.trim(), Arrays.asList(0, 1, 2), pageable);
+        } else {
+            resourcePage = resourceRepository.findByStatusInOrderByCreatedAtDesc(Arrays.asList(0, 1, 2), pageable);
+        }
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("resources", resourcePage.getContent());
+        result.put("currentPage", page);
+        result.put("pageSize", size);
+        result.put("totalElements", resourcePage.getTotalElements());
+        result.put("totalPages", resourcePage.getTotalPages());
+        result.put("hasNext", resourcePage.hasNext());
+        result.put("hasPrevious", resourcePage.hasPrevious());
+
+        return result;
+    }
+
     public Map<String, Object> getResourcesByPage(int page, int size) {
         size = Math.min(size, MAX_PAGE_SIZE);
         if (size <= 0) size = DEFAULT_PAGE_SIZE;

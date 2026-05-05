@@ -539,6 +539,24 @@
             border-color: rgba(255, 100, 100, 0.5);
             color: #ffb0b0;
         }
+        .btn-page {
+            padding: 8px 16px;
+            background: rgba(90, 160, 255, 0.15);
+            color: #64b5f6;
+            border: 1px solid rgba(90, 160, 255, 0.3);
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+        .btn-page:hover:not(:disabled) {
+            background: rgba(90, 160, 255, 0.25);
+            border-color: rgba(90, 160, 255, 0.5);
+        }
+        .btn-page:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
         .cardkey-list {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -818,6 +836,7 @@
                         </div>
                     </div>
                     <div class="cardkey-actions">
+                        <input type="text" id="resourceSearchInput" placeholder="搜索资源标题..." style="padding: 8px 12px; border: 1px solid #3d5a80; border-radius: 4px; background: #1a1a2e; color: #e8e8e8; width: 180px; margin-right: 10px;">
                         <select id="resourceStatusFilter" style="padding: 8px 12px; border: 1px solid #3d5a80; border-radius: 4px; background: #1a1a2e; color: #e8e8e8; margin-right: 10px;">
                             <option value="all">全部状态</option>
                             <option value="0">待审核</option>
@@ -835,6 +854,16 @@
                         <i class="fas fa-spinner"></i>
                         <p style="margin-top: 12px; color: #90b0d1;">加载中...</p>
                     </div>
+                </div>
+
+                <div id="resourcePaginationArea" class="pagination-area" style="display: none; margin-top: 20px; justify-content: center;">
+                    <button class="btn btn-page" id="resourcePrevPageBtn" onclick="resourcePrevPage()">
+                        <i class="fas fa-chevron-left"></i> 上一页
+                    </button>
+                    <span id="resourcePageInfo" style="color: #90b0d1; padding: 0 16px; line-height: 36px;">第 1 / 1 页</span>
+                    <button class="btn btn-page" id="resourceNextPageBtn" onclick="resourceNextPage()">
+                        下一页 <i class="fas fa-chevron-right"></i>
+                    </button>
                 </div>
             </div>
         </div>
@@ -1162,13 +1191,19 @@
             }
         }
 
-        function loadResourceList() {
+        function loadResourceList(page = 1) {
             const listArea = document.getElementById('resourceListArea');
             listArea.innerHTML = '<div class="loading"><i class="fas fa-spinner"></i><p style="margin-top: 12px; color: #90b0d1;">加载中...</p></div>';
 
+            const keyword = document.getElementById('resourceSearchInput').value;
             const statusFilter = document.getElementById('resourceStatusFilter').value;
 
-            fetch('/api/resources/all')
+            let url = `/api/resources/all?page=${page}&pageSize=10`;
+            if (keyword) {
+                url += `&keyword=${encodeURIComponent(keyword)}`;
+            }
+
+            fetch(url)
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
@@ -1178,8 +1213,9 @@
                             resources = resources.filter(r => r.status === parseInt(statusFilter));
                         }
                         
-                        updateResourceStats(data.resources || []);
+                        updateResourceStats(data);
                         renderResourceList(resources);
+                        updateResourcePagination(data);
                     } else {
                         showToast('加载资源列表失败', true);
                     }
@@ -1190,14 +1226,57 @@
                 });
         }
 
-        function updateResourceStats(resources) {
-            const total = resources.length;
-            const published = resources.filter(r => r.status === 1).length;
-            const pending = resources.filter(r => r.status === 0).length;
+        function updateResourceStats(data) {
+            document.getElementById('resourceTotalCount').textContent = data.totalElements || 0;
+            document.getElementById('resourcePublishedCount').textContent = (data.resources || []).filter(r => r.status === 1).length;
+            document.getElementById('resourcePendingCount').textContent = (data.resources || []).filter(r => r.status === 0).length;
+        }
 
-            document.getElementById('resourceTotalCount').textContent = total;
-            document.getElementById('resourcePublishedCount').textContent = published;
-            document.getElementById('resourcePendingCount').textContent = pending;
+        function updateResourcePagination(data) {
+            const paginationArea = document.getElementById('resourcePaginationArea');
+            const pageInfo = document.getElementById('resourcePageInfo');
+            const prevBtn = document.getElementById('resourcePrevPageBtn');
+            const nextBtn = document.getElementById('resourceNextPageBtn');
+
+            if (data.totalPages > 1) {
+                paginationArea.style.display = 'flex';
+                pageInfo.textContent = `第 ${data.currentPage} / ${data.totalPages} 页，共 ${data.totalElements} 条`;
+                prevBtn.disabled = !data.hasPrevious;
+                nextBtn.disabled = !data.hasNext;
+            } else if (data.totalElements > 0) {
+                paginationArea.style.display = 'flex';
+                pageInfo.textContent = `共 ${data.totalElements} 条`;
+                prevBtn.disabled = true;
+                nextBtn.disabled = true;
+            } else {
+                paginationArea.style.display = 'none';
+            }
+        }
+
+        function resourcePrevPage() {
+            const pageInfo = document.getElementById('resourcePageInfo').textContent;
+            const match = pageInfo.match(/第 (\d+) /);
+            if (match) {
+                const currentPage = parseInt(match[1]);
+                if (currentPage > 1) {
+                    loadResourceList(currentPage - 1);
+                }
+            }
+        }
+
+        function resourceNextPage() {
+            const pageInfo = document.getElementById('resourcePageInfo').textContent;
+            const match = pageInfo.match(/第 (\d+) \/ \d+ 页/);
+            if (match) {
+                const currentPage = parseInt(match[1]);
+                const totalPagesMatch = pageInfo.match(/\/ (\d+) 页/);
+                if (totalPagesMatch) {
+                    const totalPages = parseInt(totalPagesMatch[1]);
+                    if (currentPage < totalPages) {
+                        loadResourceList(currentPage + 1);
+                    }
+                }
+            }
         }
 
         function renderResourceList(resources) {
@@ -1329,8 +1408,13 @@
             });
         }
 
-        document.getElementById('refreshResourceBtn').addEventListener('click', loadResourceList);
-        document.getElementById('resourceStatusFilter').addEventListener('change', loadResourceList);
+        document.getElementById('refreshResourceBtn').addEventListener('click', () => loadResourceList(1));
+        document.getElementById('resourceStatusFilter').addEventListener('change', () => loadResourceList(1));
+        document.getElementById('resourceSearchInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                loadResourceList(1);
+            }
+        });
 
         function loadCardKeyList() {
             const listArea = document.getElementById('cardKeyListArea');

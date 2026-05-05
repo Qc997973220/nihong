@@ -14,5 +14,6 @@ public interface ResourceDao extends JpaRepository<Resource, Long> {
     List<Resource> findByStatusInOrderByCreatedAtDesc(List<Integer> statuses);
     List<Resource> findByTitleContainingIgnoreCaseAndStatusIn(String title, List<Integer> statuses);
     Page<Resource> findByStatusInOrderByCreatedAtDesc(List<Integer> statuses, Pageable pageable);
+    Page<Resource> findByTitleContainingIgnoreCaseAndStatusInOrderByCreatedAtDesc(String title, List<Integer> statuses, Pageable pageable);
     long countByStatusIn(List<Integer> statuses);
 }
