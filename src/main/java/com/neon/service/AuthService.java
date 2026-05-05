@@ -113,7 +113,12 @@ public class AuthService {
 
     public Map<String, Object> validateToken(String token) {
         Map<String, Object> result = new HashMap<>();
-
+        
+        // 去掉 "Bearer " 前缀（如果存在）
+        if (token != null && token.startsWith("Bearer ")) {
+            token = token.substring(7);
+        }
+        
         if (token == null || token.trim().isEmpty()) {
             result.put("valid", false);
             result.put("message", "请先登录");

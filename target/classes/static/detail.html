@@ -1615,11 +1615,12 @@
         if (isLimitedMember) {
             try {
                 const authToken = localStorage.getItem('authToken');
+                console.log('发送下载验证请求, token:', authToken);
                 const response = await fetch('/api/resources/verify-download', {
                     method: 'POST',
                     headers: { 
                         'Content-Type': 'application/json',
-                        'Authorization': authToken || ''
+                        'Authorization': authToken ? `Bearer ${authToken}` : ''
                     },
                     body: JSON.stringify({
                         resourceId: parseInt(id),
@@ -1627,6 +1628,7 @@
                     })
                 });
                 const result = await response.json();
+                console.log('下载验证响应:', result);
 
                 if (result.success) {
                     if (result.alreadyDownloaded) {
@@ -1644,6 +1646,13 @@
                 } else {
                     if (result.quotaExceeded) {
                         showNoticeModal('今日额度已用完', '您今日下载额度已用尽，请明天再来！', 'fa-clock');
+                    } else if (result.message && result.message.includes('登录')) {
+                        clearUserSession();
+                        showNoticeModal('登录失效', result.message || '请重新登录', 'fa-exclamation-circle');
+                        setTimeout(() => {
+                            hideNoticeModal();
+                            showLogin();
+                        }, 2000);
                     } else {
                         showNoticeModal('提示', result.message || '获取下载链接失败', 'fa-exclamation-circle');
                     }
@@ -1687,10 +1696,14 @@
             const response = await fetch(`/api/resources/download-quota?account=${encodeURIComponent(info.account)}`);
             const result = await response.json();
 
-            if (result.success && result.hasQuota) {
+            if (result.success) {
                 const quotaRemaining = document.getElementById('quotaRemaining');
                 if (quotaRemaining) {
-                    quotaRemaining.textContent = result.remaining;
+                    if (result.unlimited) {
+                        quotaRemaining.textContent = '∞';
+                    } else if (result.remaining !== undefined) {
+                        quotaRemaining.textContent = result.remaining;
+                    }
                 }
             }
         } catch (error) {
