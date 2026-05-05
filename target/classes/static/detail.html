@@ -1677,7 +1677,21 @@
 
     async function handleDownload(downloadLink, downloadPassword) {
         const userInfo = localStorage.getItem('userInfo');
+        const authToken = localStorage.getItem('authToken');
+        
+        console.log('=== handleDownload 调试信息 ===');
+        console.log('userInfo:', userInfo ? '存在' : '不存在');
+        console.log('authToken:', authToken ? '存在，长度=' + authToken.length : '不存在');
+        console.log('authToken值:', authToken ? (authToken.length > 20 ? authToken.substring(0, 20) + '...' : authToken) : 'null');
+        
         if (!userInfo) {
+            showLogin();
+            return;
+        }
+        
+        // 如果没有Token，直接提示登录
+        if (!authToken) {
+            alert('登录已过期，请重新登录');
             showLogin();
             return;
         }
@@ -1687,7 +1701,8 @@
 
         if (isLimitedMember) {
             try {
-                const authToken = localStorage.getItem('authToken');
+                console.log('请求URL:', '/api/resources/verify-download');
+                
                 const response = await fetch('/api/resources/verify-download', {
                     method: 'POST',
                     headers: { 
@@ -1717,6 +1732,12 @@
                 } else {
                     if (result.quotaExceeded) {
                         showNoticeModal('今日额度已用完', '您今日下载额度已用尽，请明天再来！', 'fa-clock');
+                    } else if (result.message && result.message.includes('请先登录')) {
+                        // Token过期或无效，提示用户重新登录
+                        localStorage.removeItem('authToken');
+                        alert('登录已过期，请重新登录');
+                        showLogin();
+                        return; // 立即返回，防止后续代码执行
                     } else {
                         showNoticeModal('提示', result.message || '获取下载链接失败', 'fa-exclamation-circle');
                     }
@@ -2579,7 +2600,6 @@
         const storedUserInfo = localStorage.getItem('userInfo');
         
         if (!token || !storedUserInfo) {
-            clearUserSession();
             return false;
         }
         
@@ -2590,16 +2610,16 @@
             if (!result.valid) {
                 console.log('会话无效:', result.message);
                 if (result.kicked) {
-                    // 被其他设备挤下线
                     clearUserSession();
                     alert('您的账号已在其他设备登录，如非本人操作请修改密码');
                 } else {
-                    clearUserSession();
+                    // Token过期，保留userInfo但清除token，提示用户重新登录
+                    localStorage.removeItem('authToken');
+                    alert('登录已过期，请重新登录');
                 }
                 return false;
             }
             
-            // Token有效，更新用户信息
             if (result.user) {
                 const userInfo = result.user;
                 localStorage.setItem('userInfo', JSON.stringify(userInfo));
@@ -2610,7 +2630,6 @@
             return true;
         } catch (error) {
             console.error('验证会话失败:', error);
-            clearUserSession();
             return false;
         }
     }
