@@ -155,7 +155,8 @@ public class LoginService {
 
         java.util.Map<String, Object> cardResult = cardKeyService.useCardKey(activationCode.trim(), account);
         if (!(boolean) cardResult.get("success")) {
-            result.put("message", "激活码无效或已使用");
+            // 保留原始错误信息，不覆盖
+            result.put("message", cardResult.get("message"));
             return result;
         }
 

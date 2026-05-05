@@ -2787,8 +2787,13 @@
             const token = localStorage.getItem('authToken');
             const storedUserInfo = localStorage.getItem('userInfo');
             
+            console.log('=== validateSession 开始 ===');
+            console.log('token:', token ? '存在' : '不存在');
+            console.log('storedUserInfo:', storedUserInfo ? '存在' : '不存在');
+            
             if (!token || !storedUserInfo) {
-                clearUserSession();
+                console.log('没有token或用户信息，直接返回');
+                // 没有token或用户信息，使用默认状态，不清除UI
                 return;
             }
             
@@ -2803,40 +2808,60 @@
                 }
                 
                 const result = await response.json();
+                console.log('validateToken返回:', result);
                 
                 if (!result.valid) {
-                    console.log('会话无效:', result.message);
+                    console.log('会话验证结果:', result.message);
                     if (result.kicked) {
-                        // 被其他设备挤下线
+                        // 被其他设备挤下线，清除会话
                         clearUserSession();
                         alert('您的账号已在其他设备登录，如非本人操作请修改密码');
-                    } else {
-                        clearUserSession();
                     }
+                    // 否则保留本地缓存的登录状态
                     return;
                 }
                 
-                // Token有效，更新用户信息
+                // Token有效，更新用户信息（保留已有值，只更新后端返回的字段）
                 if (result.user) {
                     const userInfo = result.user;
+                    console.log('后端返回的userInfo:', userInfo);
+                    console.log('更新前的currentUser:', currentUser);
+                    
+                    // 重要：保留所有本地已有的值，只有当后端返回有效值时才更新
                     currentUser = {
                         ...currentUser,
-                        username: userInfo.userName || userInfo.username,
-                        role: userInfo.role,
-                        avatar: userInfo.avatar,
-                        account: userInfo.account,
-                        memberType: userInfo.memberType,
-                        memberStatus: userInfo.memberStatus,
-                        memberExpireText: userInfo.memberExpireText
+                        username: (userInfo.userName || userInfo.username) || currentUser.username,
+                        role: userInfo.role || currentUser.role,
+                        avatar: userInfo.avatar || currentUser.avatar,
+                        account: userInfo.account || currentUser.account,
+                        memberType: userInfo.memberType ?? currentUser.memberType,
+                        memberStatus: userInfo.memberStatus || currentUser.memberStatus,
+                        memberExpireText: userInfo.memberExpireText || currentUser.memberExpireText
                     };
                     
-                    localStorage.setItem('userInfo', JSON.stringify(userInfo));
+                    console.log('更新后的currentUser:', currentUser);
                     
-                    document.getElementById('displayUsername').textContent = currentUser.username;
-                    if (userInfo.avatar) {
-                        document.getElementById('userAvatar').innerHTML = `<img src="${userInfo.avatar}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+                    // 合并后端返回的数据和本地缓存，保留已有值
+                    const existingInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+                    const mergedUserInfo = {
+                        ...existingInfo,
+                        ...userInfo,
+                        // 确保关键字段不会被null或undefined覆盖
+                        account: userInfo.account || existingInfo.account || currentUser.account,
+                        memberType: userInfo.memberType ?? existingInfo.memberType ?? currentUser.memberType,
+                        memberStatus: userInfo.memberStatus || existingInfo.memberStatus || currentUser.memberStatus,
+                        memberExpireText: userInfo.memberExpireText || existingInfo.memberExpireText || currentUser.memberExpireText
+                    };
+                    localStorage.setItem('userInfo', JSON.stringify(mergedUserInfo));
+                    console.log('合并后的userInfo:', mergedUserInfo);
+                    
+                    if (currentUser.username) {
+                        document.getElementById('displayUsername').textContent = currentUser.username;
                     }
-                    updateMemberBadge(userInfo);
+                    if (currentUser.avatar) {
+                        document.getElementById('userAvatar').innerHTML = `<img src="${currentUser.avatar}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+                    }
+                    updateMemberBadge(currentUser);
                     
                     if (currentUser.role === '1') {
                         document.getElementById('adminLink').style.display = 'block';
@@ -2868,7 +2893,8 @@
             console.log('localStorage userInfo:', storedUserInfo ? '存在' : '不存在');
             console.log('localStorage authToken:', token ? '存在' : '不存在');
             
-            if (storedUserInfo && token) {
+            // 修改：只要有userInfo就显示登录状态，不再强制要求token
+            if (storedUserInfo) {
                 try {
                     const userInfo = JSON.parse(storedUserInfo);
                     console.log('解析用户信息成功:', userInfo);
@@ -2892,7 +2918,7 @@
                     clearUserSession();
                 }
             } else {
-                console.log('localStorage中没有用户信息或token');
+                console.log('localStorage中没有用户信息');
                 // 如果没有用户信息，显示未登录状态
                 updateUserDisplay();
             }
@@ -2903,15 +2929,26 @@
         }
 
         function updateUserDisplay() {
+            console.log('=== updateUserDisplay 被调用 ===');
+            console.log('currentUser:', currentUser);
+            
             const displayUsername = document.getElementById('displayUsername');
             const userAvatar = document.getElementById('userAvatar');
             const memberStatusBar = document.getElementById('memberStatusBar');
             const adminLink = document.getElementById('adminLink');
             const vipBtn = document.getElementById('vipUpgradeBtn');
             
+            console.log('displayUsername元素:', displayUsername);
+            console.log('userAvatar元素:', userAvatar);
+            console.log('memberStatusBar元素:', memberStatusBar);
+            
             // 更新用户名显示
             if (displayUsername) {
-                displayUsername.textContent = currentUser.username || '未登录用户';
+                const nameToShow = currentUser.username || '未登录用户';
+                displayUsername.textContent = nameToShow;
+                console.log('设置displayUsername为:', nameToShow);
+            } else {
+                console.log('displayUsername元素不存在!');
             }
             
             // 更新头像显示
@@ -2921,12 +2958,16 @@
                 } else {
                     const displayName = currentUser.username || '未登录用户';
                     userAvatar.textContent = displayName.charAt(0).toUpperCase();
+                    console.log('设置userAvatar首字符为:', displayName.charAt(0).toUpperCase());
                 }
             }
             
             // 更新会员徽章 - 只要有用户信息就显示
             if (memberStatusBar && (currentUser.account || currentUser.memberStatus)) {
+                console.log('准备更新会员徽章, memberStatus:', currentUser.memberStatus);
                 updateMemberBadge(currentUser);
+            } else {
+                console.log('会员徽章未更新, memberStatusBar:', !!memberStatusBar, 'account:', currentUser.account, 'memberStatus:', currentUser.memberStatus);
             }
             
             // 更新VIP按钮状态
@@ -5121,6 +5162,7 @@
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 激活中...';
 
         const formData = new URLSearchParams();
+        formData.append('account', userInfo.account);
         formData.append('activationCode', activationCode);
 
         // 获取token

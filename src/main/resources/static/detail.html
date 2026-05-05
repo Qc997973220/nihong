@@ -2872,6 +2872,7 @@
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 激活中...';
 
             const formData = new URLSearchParams();
+            formData.append('account', userInfo.account);
             formData.append('activationCode', activationCode);
 
             // 获取token
