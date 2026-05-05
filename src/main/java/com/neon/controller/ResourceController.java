@@ -282,7 +282,7 @@ public class ResourceController {
             System.out.println("=== 评论接口调试 ===");
             System.out.println("收到的token: " + token);
             Users user = usersDao.findByToken(token);
-            System.out.println("查询到的用户: " + (user != null ? user.getUsername() : "null"));
+            System.out.println("查询到的用户: " + (user != null ? user.getUserName() : "null"));
             if (user == null) {
                 result.put("success", false);
                 result.put("message", "请先登录");
