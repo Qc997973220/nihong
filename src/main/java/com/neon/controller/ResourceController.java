@@ -1,11 +1,14 @@
 package com.neon.controller;
 
 import com.neon.pojo.Comment;
+import com.neon.pojo.DownloadRecord;
 import com.neon.pojo.Message;
 import com.neon.pojo.Resource;
 import com.neon.pojo.Users;
 import com.neon.service.ResourceService;
 import com.neon.service.AsyncService;
+import com.neon.service.AuthService;
+import com.neon.dao.DownloadRecordDao;
 import com.neon.dao.MessageDao;
 import com.neon.dao.UsersDao;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +37,12 @@ public class ResourceController {
     
     @Autowired
     private AsyncService asyncService;
+    
+    @Autowired
+    private AuthService authService;
+    
+    @Autowired
+    private DownloadRecordDao downloadRecordDao;
 
     // 图片上传
     @PostMapping("/upload")
@@ -301,5 +310,94 @@ public class ResourceController {
     @ResponseBody
     public List<Resource> getResourcesByStatus(@PathVariable Integer status) {
         return resourceService.getResourcesByStatus(status);
+    }
+
+    // 获取下载额度
+    @GetMapping("/download-quota")
+    @ResponseBody
+    public Map<String, Object> getDownloadQuota(@RequestParam String account) {
+        Map<String, Object> result = new HashMap<>();
+        try {
+            LocalDateTime startOfDay = LocalDateTime.now().toLocalDate().atStartOfDay();
+            Long todayDownloads = downloadRecordDao.countTodayDownloads(account, startOfDay);
+            
+            // 月度/季度会员每天最多下载10次
+            int dailyLimit = 10;
+            int remaining = dailyLimit - todayDownloads.intValue();
+            
+            result.put("success", true);
+            result.put("hasQuota", remaining > 0);
+            result.put("remaining", remaining);
+            result.put("todayDownloads", todayDownloads);
+        } catch (Exception e) {
+            e.printStackTrace();
+            result.put("success", false);
+            result.put("message", "获取下载额度失败：" + e.getMessage());
+        }
+        return result;
+    }
+
+    // 验证下载权限
+    @PostMapping("/verify-download")
+    @ResponseBody
+    public Map<String, Object> verifyDownload(
+            @RequestHeader(value = "Authorization", required = false) String token,
+            @RequestBody Map<String, Object> request) {
+        Map<String, Object> result = new HashMap<>();
+        
+        try {
+            // 验证token
+            Map<String, Object> tokenResult = authService.validateToken(token);
+            if (!((Boolean) tokenResult.get("valid"))) {
+                result.put("success", false);
+                result.put("message", tokenResult.get("message").toString());
+                return result;
+            }
+            
+            Users user = (Users) tokenResult.get("user");
+            Long resourceId = Long.valueOf(request.get("resourceId").toString());
+            String resourceTitle = (String) request.get("resourceTitle");
+            
+            // 检查用户是否已经下载过该资源
+            boolean alreadyDownloaded = downloadRecordDao.existsByAccountAndResourceId(user.getAccount(), resourceId);
+            
+            if (alreadyDownloaded) {
+                result.put("success", true);
+                result.put("alreadyDownloaded", true);
+                result.put("message", "您已经下载过该资源");
+                return result;
+            }
+            
+            // 检查今日下载额度
+            LocalDateTime startOfDay = LocalDateTime.now().toLocalDate().atStartOfDay();
+            Long todayDownloads = downloadRecordDao.countTodayDownloads(user.getAccount(), startOfDay);
+            
+            int dailyLimit = 10;
+            if (todayDownloads >= dailyLimit) {
+                result.put("success", false);
+                result.put("quotaExceeded", true);
+                result.put("message", "今日下载额度已用完");
+                return result;
+            }
+            
+            // 记录下载记录
+            DownloadRecord record = new DownloadRecord();
+            record.setAccount(user.getAccount());
+            record.setResourceId(resourceId);
+            record.setResourceTitle(resourceTitle);
+            downloadRecordDao.save(record);
+            
+            result.put("success", true);
+            result.put("alreadyDownloaded", false);
+            result.put("remaining", dailyLimit - todayDownloads.intValue() - 1);
+            result.put("message", "下载成功");
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            result.put("success", false);
+            result.put("message", "验证下载权限失败：" + e.getMessage());
+        }
+        
+        return result;
     }
 }
