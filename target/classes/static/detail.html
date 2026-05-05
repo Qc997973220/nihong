@@ -2313,10 +2313,15 @@
             content: content
         };
 
+        const authToken = localStorage.getItem('authToken');
+
         try {
             const response = await fetch(`/api/resources/comment`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': authToken ? `Bearer ${authToken}` : ''
+                },
                 body: JSON.stringify(commentData)
             });
 
@@ -2325,16 +2330,20 @@
             }
 
             const result = await response.json();
-            console.log('评论提交成功:', result);
+            console.log('评论提交响应:', result);
 
-            // 清空输入框
-            contentInput.value = '';
+            if (result.success) {
+                // 清空输入框
+                contentInput.value = '';
 
-            // 刷新详情以显示新评论
-            await fetchDetail();
+                // 刷新详情以显示新评论
+                await fetchDetail();
 
-            // 显示美观的成功提示
-            showToast('评论发表成功！');
+                // 显示美观的成功提示
+                showToast('评论发表成功！');
+            } else {
+                showToast(result.message || '评论发表失败', 'error');
+            }
 
         } catch (error) {
             console.error('提交评论失败:', error);

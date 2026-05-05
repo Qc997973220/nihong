@@ -279,22 +279,29 @@ public class ResourceController {
             if (token != null && token.startsWith("Bearer ")) {
                 token = token.substring(7);
             }
+            System.out.println("=== 评论接口调试 ===");
+            System.out.println("收到的token: " + token);
             Users user = usersDao.findByToken(token);
+            System.out.println("查询到的用户: " + (user != null ? user.getUsername() : "null"));
             if (user == null) {
                 result.put("success", false);
                 result.put("message", "请先登录");
                 return result;
             }
-            
+
             // 检查是否为VIP会员（memberType > 0 表示会员）
+            System.out.println("用户memberType: " + user.getMemberType());
+            System.out.println("用户memberStatus: " + user.getMemberStatus());
             if (user.getMemberType() == null || user.getMemberType() == 0) {
                 result.put("success", false);
                 result.put("message", "权限不足，请加入霓虹之都会员后再试");
                 return result;
             }
-            
+
+            System.out.println("准备保存评论: resourceId=" + comment.getResourceId() + ", author=" + comment.getAuthor() + ", content=" + comment.getContent());
             comment.setCreatedAt(java.time.LocalDateTime.now());
             Comment savedComment = resourceService.saveComment(comment);
+            System.out.println("评论已保存, id=" + savedComment.getId());
             result.put("success", true);
             result.put("message", "评论发表成功");
             result.put("comment", savedComment);
