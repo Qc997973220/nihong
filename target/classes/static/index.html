@@ -1233,217 +1233,193 @@
         /* 霓虹引擎核心模块 */
         .neon-engine-core {
             position: relative;
-            margin: 30px 0 40px;
-            padding: 40px 50px;
-            background: linear-gradient(135deg, rgba(10, 20, 40, 0.9) 0%, rgba(20, 35, 60, 0.85) 50%, rgba(15, 25, 45, 0.9) 100%);
-            border-radius: 24px;
-            border: 1px solid rgba(0, 210, 255, 0.3);
-            box-shadow: 
-                0 0 60px rgba(0, 210, 255, 0.15),
-                0 0 100px rgba(0, 150, 255, 0.1),
-                inset 0 0 60px rgba(0, 210, 255, 0.05);
+            margin: 16px 0 20px;
+            padding: 14px 20px;
+            background: linear-gradient(90deg, rgba(5, 10, 20, 0.95) 0%, rgba(10, 20, 35, 0.9) 50%, rgba(5, 10, 20, 0.95) 100%);
+            border-radius: 10px;
+            border: 1px solid rgba(0, 240, 255, 0.4);
+            box-shadow:
+                0 0 30px rgba(0, 240, 255, 0.2),
+                0 0 60px rgba(0, 200, 255, 0.1),
+                inset 0 0 40px rgba(0, 240, 255, 0.03);
             overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
         }
         .neon-engine-core::before {
             content: '';
             position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(ellipse at center, rgba(0, 210, 255, 0.1) 0%, transparent 50%);
-            animation: engineRotate 20s linear infinite;
-        }
-        @keyframes engineRotate {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        .engine-particles {
-            position: absolute;
             top: 0;
-            left: 0;
+            left: -100%;
             width: 100%;
             height: 100%;
-            overflow: hidden;
-            pointer-events: none;
+            background: linear-gradient(90deg, transparent, rgba(0, 240, 255, 0.08), transparent);
+            animation: engineScan 3s linear infinite;
         }
-        .engine-particles::before,
-        .engine-particles::after {
+        @keyframes engineScan {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+        .neon-engine-core::after {
             content: '';
             position: absolute;
-            width: 4px;
-            height: 4px;
-            background: #00d2ff;
-            border-radius: 50%;
-            box-shadow: 0 0 10px #00d2ff, 0 0 20px #00d2ff;
-            animation: particleFloat 3s ease-in-out infinite;
-        }
-        .engine-particles::before {
-            top: 20%;
-            left: 10%;
-            animation-delay: 0s;
-        }
-        .engine-particles::after {
-            top: 60%;
-            right: 15%;
-            animation-delay: 1.5s;
-        }
-        @keyframes particleFloat {
-            0%, 100% { transform: translateY(0) scale(1); opacity: 0.8; }
-            50% { transform: translateY(-20px) scale(1.2); opacity: 1; }
-        }
-        .engine-grid {
-            position: absolute;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: 
-                linear-gradient(rgba(0, 210, 255, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 210, 255, 0.03) 1px, transparent 1px);
-            background-size: 30px 30px;
-            pointer-events: none;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(0, 240, 255, 0.8), transparent);
+            animation: borderGlow 2s ease-in-out infinite;
         }
-        .engine-content {
-            position: relative;
-            z-index: 2;
-            text-align: center;
+        @keyframes borderGlow {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+        .engine-core-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
         }
         .engine-badge {
-            display: inline-flex;
+            display: flex;
             align-items: center;
-            gap: 8px;
-            padding: 6px 16px;
-            background: rgba(0, 210, 255, 0.1);
-            border: 1px solid rgba(0, 210, 255, 0.4);
-            border-radius: 30px;
-            color: #00d2ff;
-            font-size: 0.75rem;
-            font-weight: 600;
-            letter-spacing: 2px;
-            margin-bottom: 20px;
-            animation: badgePulse 2s ease-in-out infinite;
+            gap: 5px;
+            padding: 3px 8px;
+            background: rgba(0, 240, 255, 0.1);
+            border: 1px solid rgba(0, 240, 255, 0.5);
+            border-radius: 4px;
+            color: #00f0ff;
+            font-size: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            font-family: 'Courier New', monospace;
+            animation: badgeBlink 1.5s ease-in-out infinite;
         }
-        @keyframes badgePulse {
-            0%, 100% { box-shadow: 0 0 10px rgba(0, 210, 255, 0.3); }
-            50% { box-shadow: 0 0 20px rgba(0, 210, 255, 0.6); }
+        @keyframes badgeBlink {
+            0%, 100% { text-shadow: 0 0 5px #00f0ff; box-shadow: 0 0 10px rgba(0, 240, 255, 0.3); }
+            50% { text-shadow: 0 0 15px #00f0ff, 0 0 25px #00f0ff; box-shadow: 0 0 20px rgba(0, 240, 255, 0.5); }
         }
         .engine-badge i {
-            animation: atomSpin 3s linear infinite;
+            animation: atomSpin 2s linear infinite;
         }
         @keyframes atomSpin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        .engine-title {
-            font-size: 1.6rem;
-            font-weight: 700;
-            color: #fff;
-            margin-bottom: 25px;
-            text-shadow: 0 0 30px rgba(0, 210, 255, 0.5);
-            letter-spacing: 4px;
+        .engine-title-small {
+            color: rgba(180, 220, 255, 0.9);
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 1px;
         }
-        .engine-running {
-            margin-bottom: 25px;
-        }
-        .running-label {
+        .engine-core-center {
             display: flex;
             align-items: center;
-            justify-content: center;
             gap: 8px;
-            color: rgba(180, 220, 255, 0.7);
-            font-size: 0.85rem;
-            margin-bottom: 15px;
         }
-        .running-label i {
-            color: #00d2ff;
-        }
-        .running-days-display {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 12px;
-        }
-        .days-counter {
+        .days-display-compact {
             display: flex;
             align-items: baseline;
-            gap: 8px;
+            gap: 4px;
         }
         .days-number {
-            font-size: 4.5rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, #00d2ff 0%, #00ff88 50%, #00d2ff 100%);
+            font-size: 1.6rem;
+            font-weight: 900;
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #00f0ff 0%, #00ff88 50%, #00f0ff 100%);
             background-size: 200% 200%;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            animation: gradientShift 3s ease-in-out infinite;
-            text-shadow: none;
-            filter: drop-shadow(0 0 20px rgba(0, 210, 255, 0.5));
+            animation: gradientShift 2s ease-in-out infinite;
+            filter: drop-shadow(0 0 10px rgba(0, 240, 255, 0.6));
         }
         @keyframes gradientShift {
             0%, 100% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
         }
         .days-unit {
-            font-size: 1.5rem;
+            font-size: 0.7rem;
             font-weight: 700;
-            color: #00d2ff;
-            letter-spacing: 3px;
+            color: #00f0ff;
+            letter-spacing: 1px;
+            font-family: 'Courier New', monospace;
         }
-        .running-progress {
-            width: 280px;
-            height: 4px;
-            background: rgba(0, 210, 255, 0.15);
-            border-radius: 4px;
-            overflow: hidden;
+        .days-label {
+            color: rgba(150, 190, 220, 0.7);
+            font-size: 0.6rem;
+            letter-spacing: 0.5px;
         }
-        .progress-bar {
-            height: 100%;
-            width: 0%;
-            background: linear-gradient(90deg, #00d2ff, #00ff88);
-            border-radius: 4px;
-            animation: progressGlow 2s ease-in-out infinite;
-            position: relative;
-        }
-        .progress-bar::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 30px;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, #fff);
-            opacity: 0.5;
-        }
-        @keyframes progressGlow {
-            0%, 100% { box-shadow: 0 0 10px rgba(0, 210, 255, 0.5); }
-            50% { box-shadow: 0 0 20px rgba(0, 210, 255, 0.8); }
-        }
-        .engine-features {
-            display: flex;
-            justify-content: center;
-            gap: 40px;
-        }
-        .feature-item {
+        .engine-core-right {
             display: flex;
             align-items: center;
-            gap: 8px;
-            color: rgba(180, 220, 255, 0.8);
-            font-size: 0.85rem;
-            padding: 8px 16px;
-            background: rgba(0, 210, 255, 0.05);
-            border: 1px solid rgba(0, 210, 255, 0.2);
-            border-radius: 20px;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+        .feature-tag {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            padding: 2px 6px;
+            background: rgba(0, 240, 255, 0.05);
+            border: 1px solid rgba(0, 240, 255, 0.25);
+            border-radius: 3px;
+            color: rgba(150, 220, 255, 0.8);
+            font-size: 0.6rem;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 0.5px;
             transition: all 0.3s ease;
         }
-        .feature-item:hover {
-            background: rgba(0, 210, 255, 0.15);
-            border-color: rgba(0, 210, 255, 0.5);
-            transform: translateY(-2px);
+        .feature-tag:hover {
+            background: rgba(0, 240, 255, 0.15);
+            border-color: rgba(0, 240, 255, 0.6);
+            color: #00f0ff;
+            transform: translateY(-1px);
         }
-        .feature-item i {
-            color: #00d2ff;
+        .feature-tag i {
+            color: #00f0ff;
+            font-size: 0.55rem;
+        }
+        .feature-tag::before {
+            content: '>';
+            color: #00ff88;
+            margin-right: 1px;
+        }
+        .engine-collapse-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            background: rgba(0, 240, 255, 0.1);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 4px;
+            color: #00f0ff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+        .engine-collapse-btn:hover {
+            background: rgba(0, 240, 255, 0.2);
+            border-color: rgba(0, 240, 255, 0.6);
+        }
+        .engine-collapse-btn i {
+            font-size: 0.7rem;
+            transition: transform 0.3s ease;
+        }
+        .neon-engine-core.collapsed {
+            margin: 0;
+            padding: 0;
+            height: 0;
+            opacity: 0;
+            overflow: hidden;
+            border: none;
+            box-shadow: none;
+        }
+        .neon-engine-core.collapsed .engine-collapse-btn i {
+            transform: rotate(180deg);
         }
 
         /* 今日推荐模块 */
@@ -2272,13 +2248,9 @@
             .publish-btn, .vip-btn { padding: 6px 12px; font-size: 0.85rem; }
             .music-player { width: 32px; height: 32px; }
             .member-status-bar { padding: 3px 8px; font-size: 0.7rem; }
-            .neon-engine-core { padding: 25px 20px; margin: 20px 0 30px; }
-            .engine-title { font-size: 1.1rem; letter-spacing: 2px; }
-            .days-number { font-size: 3rem; }
-            .days-unit { font-size: 1rem; }
-            .engine-features { gap: 15px; flex-wrap: wrap; }
-            .feature-item { padding: 6px 12px; font-size: 0.75rem; }
-            .running-progress { width: 200px; }
+            .neon-engine-core { 
+                display: none;
+            }
         }
 
         @media (max-width: 480px) {
@@ -2563,6 +2535,32 @@
     </nav>
 
     <div class="container">
+        <!-- 霓虹引擎核心模块 -->
+        <div class="neon-engine-core" id="neonEngineCore">
+            <div class="engine-core-left">
+                <div class="engine-badge">
+                    <i class="fas fa-atom"></i>
+                    <span>SYS::ACTIVE</span>
+                </div>
+                <div class="engine-title-small">霓虹引擎核心</div>
+            </div>
+            <div class="engine-core-center">
+                <div class="days-display-compact">
+                    <span class="days-number" id="daysNumber">842</span>
+                    <span class="days-unit">DAYS</span>
+                </div>
+                <span class="days-label">持续加速中</span>
+            </div>
+            <div class="engine-core-right">
+                <div class="feature-tag"><i class="fas fa-bolt"></i><span>量子</span></div>
+                <div class="feature-tag"><i class="fas fa-shield-alt"></i><span>防护</span></div>
+                <div class="feature-tag"><i class="fas fa-rocket"></i><span>互联</span></div>
+            </div>
+            <div class="engine-collapse-btn" id="engineCollapseBtn" title="折叠引擎模块">
+                <i class="fas fa-chevron-up"></i>
+            </div>
+        </div>
+
         <section class="hero">
 
             <h1 class="neon-title">
@@ -2571,53 +2569,12 @@
                 <span class="lightning-right"></span>
             </h1>
             <p>精选全网付费可实操课程,蓝海项目,最新风口资讯和各种黑科技</p>
+
             <div class="search-box">
-                <input type="text" id="searchInput" placeholder="资源灌注~齿轮转动~梦的开始~霓虹之都">
+                <input type="text" id="searchInput" placeholder="梦的开始·霓虹之都">
                 <button id="searchBtn"><i class="fa-solid fa-magnifying-glass"></i> 搜索</button>
             </div>
         </section>
-
-        <!-- 霓虹引擎核心模块 -->
-        <div class="neon-engine-core" id="neonEngineCore">
-            <div class="engine-particles"></div>
-            <div class="engine-grid"></div>
-            <div class="engine-content">
-                <div class="engine-badge">
-                    <i class="fas fa-atom"></i>
-                    <span>SYSTEM ACTIVE</span>
-                </div>
-                <div class="engine-title">霓虹自研虚拟引擎增幅</div>
-                <div class="engine-running">
-                    <div class="running-label">
-                        <i class="fas fa-server"></i>
-                        <span>核心系统持续运行</span>
-                    </div>
-                    <div class="running-days-display">
-                        <div class="days-counter" id="daysCounter">
-                            <span class="days-number" id="daysNumber">842</span>
-                            <span class="days-unit">DAYS</span>
-                        </div>
-                        <div class="running-progress">
-                            <div class="progress-bar" id="runningProgressBar"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="engine-features">
-                    <div class="feature-item">
-                        <i class="fas fa-bolt"></i>
-                        <span>量子加速</span>
-                    </div>
-                    <div class="feature-item">
-                        <i class="fas fa-shield-alt"></i>
-                        <span>智能防护</span>
-                    </div>
-                    <div class="feature-item">
-                        <i class="fas fa-rocket"></i>
-                        <span>全域互联</span>
-                    </div>
-                </div>
-            </div>
-        </div>
 
         <!-- 今日推荐模块 -->
         <div class="recommend-section" id="recommendSection">
@@ -4410,6 +4367,15 @@
         // 获取运行天数
         fetchRunningDays();
 
+        // 霓虹引擎核心模块折叠功能
+        const engineCollapseBtn = document.getElementById('engineCollapseBtn');
+        const neonEngineCore = document.getElementById('neonEngineCore');
+        if (engineCollapseBtn && neonEngineCore) {
+            engineCollapseBtn.addEventListener('click', () => {
+                neonEngineCore.classList.toggle('collapsed');
+            });
+        }
+
         // 获取资源列表
         fetchResources();
         fetchRecommendedResources();
@@ -4504,42 +4470,11 @@
                 const daysNumber = document.getElementById('daysNumber');
                 if (daysNumber) {
                     daysNumber.innerText = data.runningDays;
-                    animateDaysNumber(data.runningDays);
                 }
-                updateProgressBar(data.runningDays);
             }
         } catch (e) {
             console.log('获取运行天数失败，使用默认值');
         }
-    }
-
-    function animateDaysNumber(targetDays) {
-        const daysNumber = document.getElementById('daysNumber');
-        if (!daysNumber) return;
-        const currentDisplay = parseInt(daysNumber.innerText) || 0;
-        const increment = targetDays > currentDisplay ? 1 : -1;
-        const duration = 1500;
-        const steps = Math.abs(targetDays - currentDisplay);
-        const stepDuration = steps > 0 ? duration / steps : 0;
-        let current = currentDisplay;
-        
-        function step() {
-            current += increment;
-            daysNumber.innerText = current;
-            if (current !== targetDays) {
-                setTimeout(step, Math.min(stepDuration, 50));
-            }
-        }
-        if (steps > 0 && stepDuration < 100) {
-            step();
-        }
-    }
-
-    function updateProgressBar(days) {
-        const progressBar = document.getElementById('runningProgressBar');
-        if (!progressBar) return;
-        const progress = (days % 100) / 100 * 100;
-        progressBar.style.width = progress + '%';
     }
 
     async function fetchVisitorCount() {

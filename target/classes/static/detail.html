@@ -2621,7 +2621,11 @@
         savedUsername = null;
     }
 
-    fetchDetail();
+    async function init() {
+        await validateSession();
+        await fetchDetail();
+    }
+    init();
 
     // ========== 登录功能 ==========
     function showLogin() {
