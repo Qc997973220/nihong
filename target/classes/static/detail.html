@@ -1766,17 +1766,18 @@
     if (savedUserInfo) {
         try {
             const userInfo = JSON.parse(savedUserInfo);
-            savedUsername = userInfo.username;
-            document.getElementById('displayUsername').innerText = userInfo.username;
+            const displayName = userInfo.username || userInfo.userName || userInfo.account || '用户';
+            savedUsername = displayName;
+            document.getElementById('displayUsername').innerText = displayName;
             if (userInfo.avatar) {
                 document.getElementById('userAvatar').innerHTML = `<img src="${userInfo.avatar}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
             } else {
-                document.getElementById('userAvatar').innerText = userInfo.username.charAt(0).toUpperCase();
+                document.getElementById('userAvatar').innerText = displayName.charAt(0).toUpperCase();
             }
-            
+
             // 更新会员状态栏
             updateMemberBadge(userInfo);
-            
+
             // 获取未读消息数量
             getUnreadMessageCount(savedUsername);
         } catch (e) {
