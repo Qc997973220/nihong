@@ -77,7 +77,8 @@ public class SiteStatsService {
         LocalDateTime startDate = LocalDateTime.of(2024, 1, 1, 0, 0, 0);
         LocalDateTime now = LocalDateTime.now();
         
-        // 计算天数差
-        return java.time.Duration.between(startDate, now).toDaysPart() + 1;
+        // 计算天数差，转换为Integer类型
+        long days = java.time.Duration.between(startDate, now).toDaysPart() + 1;
+        return (int) days;
     }
 }
