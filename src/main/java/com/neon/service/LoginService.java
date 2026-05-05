@@ -5,6 +5,7 @@ import com.neon.pojo.Users;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -22,6 +23,7 @@ public class LoginService {
         if (user.getPassword().equals(password)){
             user.setToken(UUID.randomUUID().toString());
             user.setLastLoginTime(java.time.LocalDateTime.now());
+            user.setTokenExpiredAt(LocalDateTime.now().plusDays(7)); // 设置7天后过期
             usersDao.save(user);
             return 1;
         }else {

@@ -2518,6 +2518,8 @@
     (async () => {
         const token = localStorage.getItem('authToken');
         const storedUserInfo = localStorage.getItem('userInfo');
+        console.log('页面加载时 - authToken:', token);
+        console.log('页面加载时 - userInfo存在:', !!storedUserInfo);
         
         if (token && storedUserInfo) {
             try {
@@ -2631,10 +2633,16 @@
                     messageDiv.className = 'message success';
                     messageDiv.innerText = '登录成功！';
                     messageDiv.style.display = 'block';
+                    console.log('登录成功，result:', result);
+                    console.log('result.user:', result.user);
+                    console.log('result.user.token:', result.user?.token);
 
                     // 保存token
                     if (result.user && result.user.token) {
                         localStorage.setItem('authToken', result.user.token);
+                        console.log('保存authToken成功:', localStorage.getItem('authToken'));
+                    } else {
+                        console.log('登录成功，但token为空:', result.user);
                     }
 
                     const displayName = result.user.userName || result.user.account;
