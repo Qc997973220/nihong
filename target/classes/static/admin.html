@@ -550,6 +550,7 @@
             border-radius: 12px;
             padding: 16px;
             transition: all 0.2s;
+            position: relative;
         }
         .cardkey-card:hover {
             border-color: rgba(90, 160, 255, 0.5);
@@ -558,6 +559,28 @@
         .cardkey-card.used {
             opacity: 0.6;
             border-color: rgba(150, 150, 150, 0.3);
+        }
+        .cardkey-delete-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 28px;
+            height: 28px;
+            border: none;
+            border-radius: 6px;
+            background: rgba(255, 100, 100, 0.15);
+            color: #ff6464;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+        .cardkey-delete-btn:hover {
+            background: rgba(255, 100, 100, 0.3);
+            color: #ff4444;
+            transform: scale(1.1);
         }
         .cardkey-key {
             font-family: 'Orbitron', monospace;
@@ -727,6 +750,13 @@
                         </div>
                     </div>
                     <div class="cardkey-actions">
+                        <select id="memberTypeFilter" style="padding: 8px 12px; border: 1px solid #3d5a80; border-radius: 4px; background: #1a1a2e; color: #e8e8e8; margin-right: 10px;">
+                            <option value="0">全部类型</option>
+                            <option value="1">月度会员(30天)</option>
+                            <option value="2">季度会员(90天)</option>
+                            <option value="3">年度会员(360天)</option>
+                            <option value="4">永久会员</option>
+                        </select>
                         <button class="btn btn-generate" id="generateBtn">
                             <i class="fas fa-plus"></i> 生成卡密
                         </button>
@@ -975,7 +1005,32 @@
             document.getElementById('confirmGenerateBtn').addEventListener('click', generateCardKeys);
 
             document.getElementById('refreshCardKeyBtn').addEventListener('click', loadCardKeyList);
+            
+            document.getElementById('memberTypeFilter').addEventListener('change', loadCardKeyList);
         });
+
+        function deleteCardKey(id) {
+            if (!confirm('确定要删除这条卡密记录吗？')) {
+                return;
+            }
+
+            fetch(`/api/cardkey/delete/${id}`, {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('删除成功');
+                    loadCardKeyList();
+                } else {
+                    showToast('删除失败: ' + data.message, true);
+                }
+            })
+            .catch(error => {
+                console.error('删除卡密失败:', error);
+                showToast('网络错误', true);
+            });
+        }
 
         let currentTab = 'audit';
 
@@ -998,7 +1053,12 @@
             const listArea = document.getElementById('cardKeyListArea');
             listArea.innerHTML = '<div class="loading"><i class="fas fa-spinner"></i><p style="margin-top: 12px; color: #90b0d1;">加载中...</p></div>';
 
-            fetch('/api/cardkey/list')
+            const memberType = document.getElementById('memberTypeFilter').value;
+            const url = memberType && memberType != '0' 
+                ? `/api/cardkey/list?memberType=${memberType}` 
+                : '/api/cardkey/list';
+
+            fetch(url)
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
@@ -1047,6 +1107,9 @@
                             <span>${formatDate(key.createdAt)}</span>
                         </div>
                         ${isUsed && key.usedBy ? '<div class="cardkey-used-by">使用者: ' + key.usedBy + '</div>' : ''}
+                        <button class="cardkey-delete-btn" onclick="deleteCardKey(${key.id})" title="删除卡密">
+                            <i class="fas fa-trash"></i>
+                        </button>
                     </div>
                 `;
             });

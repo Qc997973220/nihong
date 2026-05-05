@@ -145,6 +145,17 @@ public class CardKeyService {
         }
     }
 
+    public List<CardKey> findByMemberType(int memberType) {
+        try {
+            List<CardKey> keys = cardKeyDao.findByMemberType(memberType);
+            log.info("按会员类型查询卡密: type={}, count={}", memberType, keys.size());
+            return keys;
+        } catch (Exception e) {
+            log.error("按会员类型查询卡密失败: {}", e.getMessage(), e);
+            throw e;
+        }
+    }
+
     @Transactional
     public void deleteById(Long id) {
         cardKeyDao.deleteById(id);

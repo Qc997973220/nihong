@@ -69,11 +69,17 @@ public class CardKeyController {
     }
 
     @GetMapping("/list")
-    public Map<String, Object> listCardKeys() {
-        log.info("收到查询卡密列表请求");
+    public Map<String, Object> listCardKeys(
+            @RequestParam(required = false) Integer memberType) {
+        log.info("收到查询卡密列表请求: memberType={}", memberType);
         Map<String, Object> result = new HashMap<>();
         try {
-            List<CardKey> keys = cardKeyService.findAll();
+            List<CardKey> keys;
+            if (memberType != null && memberType >= 1 && memberType <= 4) {
+                keys = cardKeyService.findByMemberType(memberType);
+            } else {
+                keys = cardKeyService.findAll();
+            }
             result.put("success", true);
             result.put("data", keys);
             result.put("total", keys.size());
