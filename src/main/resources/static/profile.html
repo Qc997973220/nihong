@@ -436,35 +436,36 @@
                     document.getElementById('infoUserName').textContent = user.userName;
                     document.getElementById('infoNickname').textContent = user.nickname || user.userName;
                     document.getElementById('infoGender').textContent = user.gender || '未知';
-
+                    document.getElementById('infoEmail').textContent = user.email || '未设置';
+                    document.getElementById('infoPhone').textContent = user.phone || '未设置';
+                    document.getElementById('infoLastLogin').textContent = user.lastLoginTime || '未知';
+                    
+                    // 检查是否是当前登录用户
                     const savedUserInfo = localStorage.getItem('userInfo');
-                    let currentUser = null;
                     if (savedUserInfo) {
                         try {
-                            currentUser = JSON.parse(savedUserInfo);
+                            const currentUser = JSON.parse(savedUserInfo);
+                            if (currentUser.username === userName) {
+                                // 显示更换头像按钮
+                                document.getElementById('avatarUploadSection').style.display = 'block';
+
+                                // 显示邀请码（仅限当前用户）
+                                if (currentUser.inviteCode) {
+                                    document.getElementById('inviteCodeSection').style.display = 'flex';
+                                    document.getElementById('infoInviteCode').textContent = currentUser.inviteCode;
+                                }
+
+                                // 显示会员状态（仅限当前用户）
+                                if (currentUser.memberStatus) {
+                                    document.getElementById('memberStatusSection').style.display = 'flex';
+                                    const statusText = currentUser.memberStatus === 'permanent' ? '永久会员' :
+                                                      currentUser.memberStatus === 'active' ? (currentUser.memberExpireText || '会员') :
+                                                      currentUser.memberStatus === 'expired' ? '已到期' : '非会员';
+                                    document.getElementById('infoMemberStatus').textContent = statusText;
+                                }
+                            }
                         } catch (e) {
                             console.error('解析用户信息失败:', e);
-                        }
-                    }
-                    document.getElementById('infoEmail').textContent = (user.email && user.email.trim() !== '') ? user.email : (currentUser && currentUser.email ? currentUser.email : '未设置');
-                    document.getElementById('infoPhone').textContent = (user.phone && user.phone.trim() !== '') ? user.phone : '未设置';
-                    document.getElementById('infoLastLogin').textContent = user.lastLoginTime || '未知';
-
-                    // 检查是否是当前登录用户
-                    if (currentUser && currentUser.username === userName) {
-                        document.getElementById('avatarUploadSection').style.display = 'block';
-
-                        if (currentUser.inviteCode) {
-                            document.getElementById('inviteCodeSection').style.display = 'flex';
-                            document.getElementById('infoInviteCode').textContent = currentUser.inviteCode;
-                        }
-
-                        if (currentUser.memberStatus) {
-                            document.getElementById('memberStatusSection').style.display = 'flex';
-                            const statusText = currentUser.memberStatus === 'permanent' ? '永久会员' :
-                                              currentUser.memberStatus === 'active' ? (currentUser.memberExpireText || '会员') :
-                                              currentUser.memberStatus === 'expired' ? '已到期' : '非会员';
-                            document.getElementById('infoMemberStatus').textContent = statusText;
                         }
                     }
                 } else {

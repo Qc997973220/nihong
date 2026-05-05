@@ -14,9 +14,7 @@ import java.time.LocalDateTime;
 public class SiteStatsService {
 
     private static final String VISITOR_COUNT_KEY = "site:visitor:count";
-    private static final String RUNNING_DAYS_KEY = "site:running:days";
     private static final Long INITIAL_COUNT = 92895L;
-    private static final Integer INITIAL_RUNNING_DAYS = 842;
 
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
@@ -37,20 +35,6 @@ public class SiteStatsService {
             return INITIAL_COUNT;
         }
         return Long.parseLong(count.toString());
-    }
-
-    public Integer getRunningDays() {
-        Object days = redisTemplate.opsForValue().get(RUNNING_DAYS_KEY);
-        if (days == null) {
-            SiteStats stats = siteStatsDao.findById(1L).orElse(null);
-            if (stats != null && stats.getRunningDays() != null) {
-                redisTemplate.opsForValue().set(RUNNING_DAYS_KEY, stats.getRunningDays());
-                return stats.getRunningDays();
-            }
-            redisTemplate.opsForValue().set(RUNNING_DAYS_KEY, INITIAL_RUNNING_DAYS);
-            return INITIAL_RUNNING_DAYS;
-        }
-        return Integer.parseInt(days.toString());
     }
 
     public Long incrementInRedis() {
@@ -78,27 +62,6 @@ public class SiteStatsService {
                 stats.setLastVisitTime(LocalDateTime.now());
                 siteStatsDao.save(stats);
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Transactional
-    @Scheduled(cron = "0 0 0 * * ?")
-    public void incrementRunningDays() {
-        try {
-            Integer currentDays = getRunningDays();
-            Integer newDays = currentDays + 1;
-            redisTemplate.opsForValue().set(RUNNING_DAYS_KEY, newDays);
-
-            SiteStats stats = siteStatsDao.findById(1L).orElse(null);
-            if (stats == null) {
-                stats = new SiteStats();
-                stats.setId(1L);
-            }
-            stats.setRunningDays(newDays);
-            stats.setLastVisitTime(LocalDateTime.now());
-            siteStatsDao.save(stats);
         } catch (Exception e) {
             e.printStackTrace();
         }

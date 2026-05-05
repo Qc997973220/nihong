@@ -114,9 +114,6 @@ public class AuthService {
     public Map<String, Object> validateToken(String token) {
         Map<String, Object> result = new HashMap<>();
 
-        System.out.println("=== AuthService.validateToken ===");
-        System.out.println("Received token: " + (token == null ? "null" : (token.length() > 20 ? token.substring(0, 20) + "..." : token)));
-
         if (token == null || token.trim().isEmpty()) {
             result.put("valid", false);
             result.put("message", "请先登录");
@@ -124,7 +121,6 @@ public class AuthService {
         }
 
         Users user = usersDao.findByToken(token);
-        System.out.println("Found user by token: " + (user == null ? "null" : user.getAccount()));
         if (user == null) {
             result.put("valid", false);
             result.put("message", "您的账号已在其他设备登录，请重新登录");

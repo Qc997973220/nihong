@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -17,63 +16,16 @@ public class LoginService {
     @Autowired
     CardKeyService cardKeyService;
 
-    @Autowired
-    AuthService authService;
-
-    public Map<String, Object> login(String account, String password){
-        Map<String, Object> result = new java.util.HashMap<>();
-        
-        // 检查登录失败次数
-        Map<String, Object> attemptCheck = authService.checkLoginAttempt(account);
-        if (!(Boolean) attemptCheck.get("allowed")) {
-            result.put("status", -2);
-            result.put("message", attemptCheck.get("message"));
-            return result;
-        }
-        
+    public int login(String account, String password){
         Users user = usersDao.findByAccount(account);
-        if (user == null) {
-            // 账号不存在，也记录失败次数
-            Map<String, Object> failedResult = authService.recordFailedAttempt(account);
-            result.put("status", -1);
-            result.put("message", "账号或密码错误");
-            result.put("failedCount", failedResult.get("failedCount"));
-            result.put("remainingAttempts", failedResult.get("remainingAttempts"));
-            if (failedResult.get("locked") != null && (Boolean) failedResult.get("locked")) {
-                result.put("status", -2);
-                result.put("message", "登录失败次数过多，账号已锁定。请在 " + failedResult.get("lockUntil") + " 后重试");
-            }
-            return result;
-        }
-        
+        if (user == null) return -1;
         if (user.getPassword().equals(password)){
-            // 检查是否有旧token（其他设备正在登录）
-            boolean wasLoggedInElsewhere = user.getToken() != null && !user.getToken().isEmpty();
-            String oldToken = user.getToken();
-            
-            // 登录成功，生成新token（这会自动使旧token失效）
-            String token = authService.generateToken(user);
+            user.setToken(UUID.randomUUID().toString());
             user.setLastLoginTime(java.time.LocalDateTime.now());
-            authService.clearFailedAttempt(account);
-            
-            result.put("status", 1);
-            result.put("token", token);
-            result.put("user", user);
-            result.put("wasLoggedInElsewhere", wasLoggedInElsewhere);
-            return result;
-        } else {
-            // 登录失败，记录
-            Map<String, Object> failedResult = authService.recordFailedAttempt(account);
-            if (failedResult.get("locked") != null && (Boolean) failedResult.get("locked")) {
-                result.put("status", -2);
-                result.put("message", "登录失败次数过多，账号已锁定。请在 " + failedResult.get("lockUntil") + " 后重试");
-            } else {
-                result.put("status", 0);
-                result.put("message", "账号或密码错误");
-                result.put("failedCount", failedResult.get("failedCount"));
-                result.put("remainingAttempts", failedResult.get("remainingAttempts"));
-            }
-            return result;
+            usersDao.save(user);
+            return 1;
+        }else {
+            return 0;
         }
     }
 

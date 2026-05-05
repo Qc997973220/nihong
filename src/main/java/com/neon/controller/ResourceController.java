@@ -6,14 +6,12 @@ import com.neon.pojo.Resource;
 import com.neon.pojo.Users;
 import com.neon.service.ResourceService;
 import com.neon.service.AsyncService;
-import com.neon.service.DownloadQuotaService;
 import com.neon.dao.MessageDao;
 import com.neon.dao.UsersDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -36,9 +34,6 @@ public class ResourceController {
     
     @Autowired
     private AsyncService asyncService;
-
-    @Autowired
-    private DownloadQuotaService downloadQuotaService;
 
     // 图片上传
     @PostMapping("/upload")
@@ -306,53 +301,5 @@ public class ResourceController {
     @ResponseBody
     public List<Resource> getResourcesByStatus(@PathVariable Integer status) {
         return resourceService.getResourcesByStatus(status);
-    }
-
-    // 验证下载额度并记录下载
-    @PostMapping("/verify-download")
-    @ResponseBody
-    public Map<String, Object> verifyDownload(HttpServletRequest request, @RequestBody Map<String, Object> body) {
-        Map<String, Object> result = new HashMap<>();
-        try {
-            // 从拦截器获取当前登录用户
-            Users currentUser = (Users) request.getAttribute("currentUser");
-            if (currentUser == null) {
-                result.put("success", false);
-                result.put("message", "请先登录");
-                return result;
-            }
-            
-            Long resourceId = Long.valueOf(body.get("resourceId").toString());
-            String resourceTitle = (String) body.get("resourceTitle");
-
-            if (resourceId == null) {
-                result.put("success", false);
-                result.put("message", "资源ID不能为空");
-                return result;
-            }
-
-            Map<String, Object> quotaResult = downloadQuotaService.recordDownload(currentUser.getAccount(), resourceId, resourceTitle);
-            return quotaResult;
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            result.put("success", false);
-            result.put("message", "验证下载额度失败：" + e.getMessage());
-            return result;
-        }
-    }
-
-    // 获取下载额度信息
-    @GetMapping("/download-quota")
-    @ResponseBody
-    public Map<String, Object> getDownloadQuota(@RequestParam String account) {
-        try {
-            return downloadQuotaService.getDownloadQuotaInfo(account);
-        } catch (Exception e) {
-            Map<String, Object> result = new HashMap<>();
-            result.put("success", false);
-            result.put("message", "获取下载额度信息失败：" + e.getMessage());
-            return result;
-        }
     }
 }

@@ -17,6 +17,4 @@ public class SiteStats {
     private Long visitorCount = 92895L;
 
     private LocalDateTime lastVisitTime;
-
-    private Integer runningDays = 842;
 }

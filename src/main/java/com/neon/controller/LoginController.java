@@ -3,8 +3,6 @@ package com.neon.controller;
 import com.neon.dao.UsersDao;
 import com.neon.pojo.Users;
 import com.neon.service.LoginService;
-import com.neon.service.AuthService;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
@@ -20,86 +18,15 @@ public class LoginController {
     LoginService loginService;
     @Autowired
     UsersDao usersDao;
-    @Autowired
-    AuthService authService;
-
-    @GetMapping("/validateToken")
-    @ResponseBody
-    public Map<String, Object> validateToken(HttpServletRequest request) {
-        Map<String, Object> result = new HashMap<>();
-        
-        String token = request.getHeader("Authorization");
-        if (token == null || token.trim().isEmpty()) {
-            token = request.getParameter("token");
-        }
-        
-        if (token == null || token.trim().isEmpty()) {
-            result.put("valid", false);
-            result.put("message", "请先登录");
-            return result;
-        }
-        
-        Map<String, Object> authResult = authService.validateToken(token);
-        boolean valid = authResult.containsKey("valid") && (Boolean) authResult.get("valid");
-        
-        result.put("valid", valid);
-        if (!valid) {
-            result.put("message", authResult.get("message"));
-        } else {
-            Users user = (Users) authResult.get("user");
-            if (user != null) {
-                Map<String, Object> userInfo = new HashMap<>();
-                userInfo.put("account", user.getAccount());
-                userInfo.put("userName", user.getUserName());
-                userInfo.put("role", user.getRole() != null && !user.getRole().isEmpty() ? user.getRole() : "0");
-                userInfo.put("nickname", user.getNickname());
-                userInfo.put("phone", user.getPhone());
-                userInfo.put("email", user.getEmail());
-                userInfo.put("gender", user.getGender());
-                userInfo.put("avatar", null);
-                userInfo.put("memberType", user.getMemberType() != null ? user.getMemberType() : 0);
-                userInfo.put("inviteCode", user.getInviteCode());
-
-                if (user.getMemberType() != null && user.getMemberType() == 4) {
-                    userInfo.put("memberStatus", "permanent");
-                    userInfo.put("memberExpireText", "永久有效");
-                } else if (user.getMemberType() != null && user.getMemberType() == 0) {
-                    userInfo.put("memberStatus", "none");
-                    userInfo.put("memberExpireText", "非会员");
-                } else if (user.getMemberExpiredAt() != null) {
-                    boolean isExpired = user.getMemberExpiredAt().isBefore(LocalDateTime.now());
-                    userInfo.put("memberStatus", isExpired ? "expired" : "active");
-                    userInfo.put("memberExpireAt", user.getMemberExpiredAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-                    userInfo.put("memberExpireText", isExpired ? "已到期" : "到期时间: " + user.getMemberExpiredAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-                } else {
-                    userInfo.put("memberStatus", "none");
-                    userInfo.put("memberExpireText", "非会员");
-                }
-                
-                result.put("user", userInfo);
-                result.put("token", token);
-            }
-        }
-        
-        return result;
-    }
 
     @GetMapping("/first")
     @ResponseBody
     public Map<String, Object> first(@RequestParam String account, @RequestParam String password){
-        Map<String, Object> loginResult = loginService.login(account, password);
-        
-        int status = (int) loginResult.get("status");
         Map<String, Object> result = new HashMap<>();
-        result.put("status", status);
-        
-        if (loginResult.containsKey("message")) {
-            result.put("message", loginResult.get("message"));
-        }
-        
-        if (status == 1) {
-            result.put("token", loginResult.get("token"));
-            Users user = (Users) loginResult.get("user");
+        int loginResult = loginService.login(account, password);
+        result.put("status", loginResult);
+        if (loginResult == 1) {
+            Users user = usersDao.findByAccount(account);
             if (user != null) {
                 Map<String, Object> userInfo = new HashMap<>();
                 userInfo.put("account", user.getAccount());
@@ -165,28 +92,18 @@ public class LoginController {
 
     @PostMapping("/updateUserInfo")
     @ResponseBody
-    public Map<String, Object> updateUserInfo(HttpServletRequest request,
+    public Map<String, Object> updateUserInfo(@RequestParam String account,
                                               @RequestParam(required = false) String userName,
                                               @RequestParam(required = false) String gender,
                                               @RequestParam(required = false) String phone,
                                               @RequestParam(required = false) String email) {
         Map<String, Object> result = new HashMap<>();
-        
-        // 从拦截器获取当前登录用户
-        Users currentUser = (Users) request.getAttribute("currentUser");
-        if (currentUser == null) {
-            result.put("status", 0);
-            result.put("message", "请先登录");
-            return result;
-        }
-        
-        Users user = usersDao.findByAccount(currentUser.getAccount());
+        Users user = usersDao.findByAccount(account);
         if (user == null) {
             result.put("status", 0);
             result.put("message", "用户不存在");
             return result;
         }
-        
         if (userName != null && !userName.isEmpty()) {
             if (usersDao.existsByUserName(userName) && !userName.equals(user.getUserName())) {
                 result.put("status", 0);
@@ -218,59 +135,13 @@ public class LoginController {
 
     @PostMapping("/activate")
     @ResponseBody
-    public Map<String, Object> activate(HttpServletRequest request,
+    public Map<String, Object> activate(@RequestParam String account,
                                        @RequestParam String activationCode) {
-        // 从拦截器获取当前登录用户
-        Users currentUser = (Users) request.getAttribute("currentUser");
-        if (currentUser == null) {
-            Map<String, Object> result = new HashMap<>();
-            result.put("status", 0);
-            result.put("message", "请先登录");
-            return result;
-        }
-        
-        Map<String, Object> result = loginService.activateMember(currentUser.getAccount(), activationCode);
+        Map<String, Object> result = loginService.activateMember(account, activationCode);
         if ((boolean) result.get("success")) {
             result.put("status", 1);
         } else {
             result.put("status", 0);
-        }
-        return result;
-    }
-
-    @PostMapping("/logout")
-    @ResponseBody
-    public Map<String, Object> logout(HttpServletRequest request) {
-        Map<String, Object> result = new HashMap<>();
-        
-        String token = request.getHeader("Authorization");
-        if (token == null) {
-            token = request.getParameter("token");
-        }
-        
-        authService.logout(token);
-        result.put("status", 1);
-        result.put("message", "登出成功");
-        return result;
-    }
-
-    @PostMapping("/recover")
-    @ResponseBody
-    public Map<String, Object> recover(@RequestParam String account,
-                                       @RequestParam String email) {
-        Map<String, Object> result = new HashMap<>();
-        Users user = usersDao.findByAccount(account);
-        if (user == null) {
-            result.put("status", 0);
-            result.put("message", "账号不存在");
-            return result;
-        }
-        if (user.getEmail() != null && user.getEmail().equalsIgnoreCase(email)) {
-            result.put("status", 1);
-            result.put("password", user.getPassword());
-        } else {
-            result.put("status", 0);
-            result.put("message", "账号与绑定邮箱校验不通过，请保持绑定邮箱处于在线状态");
         }
         return result;
     }
