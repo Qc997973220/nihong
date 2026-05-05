@@ -133,8 +133,10 @@ public class AuthService {
             return result;
         }
 
-        if (user.getTokenExpiredAt() == null ||
-            user.getTokenExpiredAt().isBefore(LocalDateTime.now())) {
+        if (user.getTokenExpiredAt() == null) {
+            user.setTokenExpiredAt(LocalDateTime.now().plusDays(7));
+            usersDao.save(user);
+        } else if (user.getTokenExpiredAt().isBefore(LocalDateTime.now())) {
             result.put("valid", false);
             result.put("message", "登录已过期，请重新登录");
             user.setToken(null);
