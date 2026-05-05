@@ -104,4 +104,19 @@ public class CacheService {
     public String getUnreadMessageCountKey(String userName) {
         return "message:unread:count:" + userName;
     }
+
+    /**
+     * 根据模式删除缓存（支持通配符 *）
+     * @param pattern 缓存键模式，如 "resource:list:*"
+     */
+    public void deleteByPattern(String pattern) {
+        try {
+            var keys = redisTemplate.keys(pattern);
+            if (keys != null && !keys.isEmpty()) {
+                redisTemplate.delete(keys);
+            }
+        } catch (Exception e) {
+            System.out.println("Redis deleteByPattern failed: " + e.getMessage());
+        }
+    }
 }

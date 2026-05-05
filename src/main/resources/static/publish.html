@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+    <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -703,6 +704,218 @@
             background: rgba(10, 15, 25, 0.3);
             z-index: 10;
         }
+        .editor-container {
+            background: rgba(8, 18, 32, 0.6);
+            border: 1.5px solid rgba(90, 160, 255, 0.25);
+            border-radius: 14px;
+            overflow: hidden;
+            transition: all 0.25s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        .editor-container:focus-within {
+            border-color: #3f9eff;
+            background: rgba(10, 25, 45, 0.8);
+            box-shadow: 0 0 20px #1e88e5, 0 5px 15px #00000050;
+        }
+        .ql-toolbar.ql-snow {
+            background: rgba(15, 28, 48, 0.8);
+            border: none;
+            border-bottom: 1px solid rgba(90, 160, 255, 0.2);
+            padding: 10px 12px;
+        }
+        .ql-container.ql-snow {
+            background: rgba(8, 18, 32, 0.4);
+            border: none;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            color: #e0f0ff;
+            min-height: 200px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .ql-editor {
+            color: #e0f0ff;
+            line-height: 1.7;
+            min-height: 200px;
+            padding: 16px 18px;
+        }
+        .ql-editor.ql-blank::before {
+            color: #6a8ab0;
+            font-style: normal;
+        }
+        .ql-snow .ql-stroke {
+            stroke: #90b0d1;
+        }
+        .ql-snow .ql-fill {
+            fill: #90b0d1;
+        }
+        .ql-snow .ql-picker {
+            color: #90b0d1;
+        }
+        .ql-snow .ql-picker-options {
+            background: rgba(15, 28, 48, 0.95);
+            border: 1px solid rgba(90, 160, 255, 0.3);
+            border-radius: 8px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.4);
+        }
+        .ql-snow.ql-toolbar button:hover,
+        .ql-snow .ql-toolbar button:hover,
+        .ql-snow.ql-toolbar button.ql-active,
+        .ql-snow .ql-toolbar button.ql-active {
+            color: #3f9eff;
+        }
+        .ql-snow.ql-toolbar button:hover .ql-stroke,
+        .ql-snow .ql-toolbar button:hover .ql-stroke,
+        .ql-snow.ql-toolbar button.ql-active .ql-stroke,
+        .ql-snow .ql-toolbar button.ql-active .ql-stroke {
+            stroke: #3f9eff;
+        }
+        .ql-snow.ql-toolbar button:hover .ql-fill,
+        .ql-snow .ql-toolbar button:hover .ql-fill,
+        .ql-snow.ql-toolbar button.ql-active .ql-fill,
+        .ql-snow .ql-toolbar button.ql-active .ql-fill {
+            fill: #3f9eff;
+        }
+        .ql-snow.ql-toolbar .ql-picker-label:hover,
+        .ql-snow .ql-toolbar .ql-picker-label:hover,
+        .ql-snow.ql-toolbar .ql-picker-label.ql-active,
+        .ql-snow .ql-toolbar .ql-picker-label.ql-active {
+            color: #3f9eff;
+        }
+        .ql-snow .ql-tooltip {
+            background: rgba(15, 28, 48, 0.95);
+            border: 1px solid rgba(90, 160, 255, 0.3);
+            border-radius: 8px;
+            color: #e0f0ff;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.4);
+        }
+        .ql-snow .ql-tooltip input[type="text"] {
+            background: rgba(8, 18, 32, 0.6);
+            border: 1px solid rgba(90, 160, 255, 0.25);
+            border-radius: 6px;
+            color: #e0f0ff;
+            padding: 6px 10px;
+        }
+        .ql-snow .ql-tooltip a.ql-action,
+        .ql-snow .ql-tooltip a.ql-action::after {
+            color: #3f9eff;
+        }
+        .ql-snow .ql-tooltip a.ql-remove {
+            color: #ff8a8a;
+        }
+        .ql-snow .ql-tooltip a.ql-remove::before {
+            color: #ff8a8a;
+        }
+        .ql-snow .ql-tooltip.ql-editing a.ql-remove,
+        .ql-snow .ql-tooltip.ql-editing a.ql-remove::before {
+            display: none;
+        }
+        .ql-editor blockquote {
+            border-left: 3px solid #3f9eff;
+            background: rgba(62, 158, 255, 0.1);
+            padding: 10px 16px;
+            margin: 10px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .ql-editor pre {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 8px;
+            padding: 12px 16px;
+            color: #a0f0a0;
+        }
+        .ql-editor code {
+            background: rgba(62, 158, 255, 0.15);
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #5fddff;
+            font-family: 'Courier New', monospace;
+        }
+        .emoji-picker-container {
+            position: relative;
+        }
+        .emoji-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 4px 8px;
+            color: #90b0d1;
+            transition: color 0.2s;
+        }
+        .emoji-btn:hover {
+            color: #ffcc00;
+        }
+        .emoji-list {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: rgba(15, 28, 48, 0.98);
+            border: 1px solid rgba(90, 160, 255, 0.3);
+            border-radius: 12px;
+            padding: 12px;
+            z-index: 1000;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+            grid-template-columns: repeat(8, 1fr);
+            gap: 4px;
+        }
+        .emoji-list.show {
+            display: grid;
+        }
+        .emoji-item {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.3rem;
+            border-radius: 6px;
+            transition: background 0.2s, transform 0.1s;
+        }
+        .emoji-item:hover {
+            background: rgba(90, 160, 255, 0.2);
+            transform: scale(1.2);
+        }
+        .editor-toolbar-wrapper {
+            border: 1.5px solid rgba(90, 160, 255, 0.25);
+            border-radius: 14px;
+            overflow: hidden;
+            background: rgba(8, 18, 32, 0.6);
+            transition: all 0.25s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        .editor-toolbar-wrapper:focus-within {
+            border-color: #3f9eff;
+            background: rgba(10, 25, 45, 0.8);
+            box-shadow: 0 0 20px #1e88e5, 0 5px 15px #00000050;
+        }
+        .editor-toolbar-wrapper > .ql-toolbar.ql-snow {
+            background: rgba(15, 28, 48, 0.9);
+            border: none;
+            border-bottom: 1px solid rgba(90, 160, 255, 0.2);
+            padding: 10px 12px;
+        }
+        .editor-toolbar-wrapper > .ql-container.ql-snow {
+            background: rgba(8, 18, 32, 0.4);
+            border: none;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            color: #e0f0ff;
+            min-height: 200px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .editor-toolbar-wrapper .ql-editor {
+            color: #e0f0ff;
+            line-height: 1.7;
+            min-height: 200px;
+            padding: 16px 18px;
+        }
+        .editor-toolbar-wrapper .ql-editor.ql-blank::before {
+            color: #6a8ab0;
+            font-style: normal;
+        }
     </style>
 </head>
 <body>
@@ -758,8 +971,15 @@
 
                     <div class="form-group">
                         <label><i class="fas fa-align-left"></i> 详细内容 <span class="required">*</span></label>
-                        <textarea id="resourceContent" class="form-input" placeholder="请输入资源详细内容" required></textarea>
-                        <div class="form-hint">详细描述资源的功能、使用方法、下载方式等</div>
+                        <div class="editor-toolbar-wrapper">
+                            <div id="editorToolbar"></div>
+                            <div id="editorContainer"></div>
+                            <div class="emoji-picker-container">
+                                <button type="button" class="emoji-btn" id="emojiBtn" title="插入表情">😀</button>
+                                <div class="emoji-list" id="emojiList"></div>
+                            </div>
+                        </div>
+                        <div class="form-hint">详细描述资源的功能、使用方法、下载方式等（支持富文本编辑）</div>
                     </div>
 
                     <div class="form-group">
@@ -876,6 +1096,99 @@
             const messageDiv = document.getElementById('publishMessage');
 
             let selectedFile = null;
+            let quillEditor = null;
+
+            const emojiList = [
+                '😀', '😃', '😄', '😁', '😆', '😅', '🤣', '😂',
+                '🙂', '😉', '😊', '😇', '🥰', '😍', '🤩', '😘',
+                '😗', '😚', '😋', '😛', '😜', '🤪', '😝', '🤑',
+                '🤗', '🤭', '🤫', '🤔', '🤐', '🤨', '😐', '😑',
+                '😶', '😏', '😒', '🙄', '😬', '🤥', '😌', '😔',
+                '😪', '🤤', '😴', '😷', '🤒', '🤕', '🤢', '🤮',
+                '🤧', '🥵', '🥶', '🥴', '😵', '🤯', '🤠', '🥳',
+                '😎', '🤓', '🧐', '😕', '😟', '🙁', '😮', '😯',
+                '😲', '😳', '🥺', '😦', '😧', '😨', '😰', '😥',
+                '😢', '😭', '😱', '😖', '😣', '😞', '😓', '😩',
+                '😫', '🥱', '😤', '😡', '😠', '🤬', '😈', '👿',
+                '💀', '☠️', '💩', '🤡', '👹', '👺', '👻', '👽',
+                '👍', '👎', '👌', '✌️', '🤞', '🤟', '🤘', '🤙',
+                '👈', '👉', '👆', '👇', '☝️', '✍️', '🙏', '💪',
+                '🔥', '⭐', '🌟', '💫', '✨', '⚡', '💥', '💢',
+                '❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍',
+                '💔', '❣️', '💕', '💞', '💓', '💗', '💖', '💘',
+                '💝', '🎉', '🎊', '🎈', '🎁', '🏆', '🥇', '🥈',
+                '🚀', '🚁', '🚂', '🚗', '🚲', '⛵', '✈️', '🛫',
+                '☀️', '🌙', '⭐', '🌈', '☁️', '⛅', '🌧️', '⛈️'
+            ];
+
+            function initQuillEditor() {
+                const Font = Quill.import('formats/font');
+                Font.whitelist = ['Inter', 'sans-serif', 'serif', 'monospace'];
+                Quill.register(Font, true);
+
+                const Size = Quill.import('formats/size');
+                Size.whitelist = ['small', 'medium', 'large', 'huge'];
+                Quill.register(Size, true);
+
+                quillEditor = new Quill('#editorContainer', {
+                    theme: 'snow',
+                    placeholder: '请输入资源详细内容...',
+                    modules: {
+                        toolbar: [
+                            ['bold', 'italic', 'underline', 'strike'],
+                            [{ 'header': [1, 2, 3, false] }],
+                            [{ 'color': [] }, { 'background': [] }],
+                            [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                            ['blockquote', 'code-block'],
+                            ['link', 'image'],
+                            [{ 'align': [] }],
+                            ['clean']
+                        ]
+                    }
+                });
+
+                quillEditor.root.innerHTML = '<p><br></p>';
+            }
+
+            function initEmojiPicker() {
+                const emojiBtn = document.getElementById('emojiBtn');
+                const emojiListEl = document.getElementById('emojiList');
+
+                if (!emojiBtn || !emojiListEl) return;
+
+                emojiList.forEach(emoji => {
+                    const emojiItem = document.createElement('span');
+                    emojiItem.className = 'emoji-item';
+                    emojiItem.textContent = emoji;
+                    emojiItem.addEventListener('click', () => {
+                        if (quillEditor) {
+                            const range = quillEditor.getSelection();
+                            if (range) {
+                                quillEditor.insertText(range.index, emoji);
+                                quillEditor.setSelection(range.index + emoji.length);
+                            } else {
+                                quillEditor.insertText(0, emoji);
+                            }
+                        }
+                        emojiListEl.classList.remove('show');
+                    });
+                    emojiListEl.appendChild(emojiItem);
+                });
+
+                emojiBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    emojiListEl.classList.toggle('show');
+                });
+
+                document.addEventListener('click', (e) => {
+                    if (!emojiListEl.contains(e.target) && e.target !== emojiBtn) {
+                        emojiListEl.classList.remove('show');
+                    }
+                });
+            }
+
+            initQuillEditor();
+            initEmojiPicker();
 
             const userInfo = localStorage.getItem('userInfo');
             if (!userInfo) {
@@ -1045,7 +1358,7 @@
             async function submitResource() {
                 const title = document.getElementById('resourceTitle').value.trim();
                 const summary = document.getElementById('resourceSummary').value.trim();
-                const content = document.getElementById('resourceContent').value.trim();
+                const content = quillEditor ? quillEditor.root.innerHTML.replace(/<p><br><\/p>/g, '').trim() : '';
                 const category = document.getElementById('resourceCategory').value;
                 const author = currentUser.username;
                 const downloadLink = document.getElementById('resourceDownloadLink').value.trim();
@@ -1247,5 +1560,6 @@
             </div>
         </div>
     </div>
+    <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
 </body>
 </html>

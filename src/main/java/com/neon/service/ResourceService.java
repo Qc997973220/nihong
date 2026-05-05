@@ -209,7 +209,7 @@ public class ResourceService {
             resource.setUpdatedAt(LocalDateTime.now());
             resourceRepository.save(resource);
             // 清除缓存
-            cacheService.delete(cacheService.getResourceListKey());
+            cacheService.deleteByPattern(cacheService.getResourceListKey() + ":*");
             cacheService.delete(cacheService.getResourceDetailKey(id));
         }
     }

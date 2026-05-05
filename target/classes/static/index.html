@@ -43,6 +43,121 @@
             pointer-events: none;
         }
 
+        /* ========== 加载动画 ========== */
+        #loadingOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0b0e14;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.8s ease, visibility 0.8s ease;
+        }
+        #loadingOverlay.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+        .loading-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: #fff;
+            margin-bottom: 50px;
+            text-shadow: 0 0 20px rgba(0, 210, 255, 0.5), 0 0 40px rgba(120, 80, 255, 0.3);
+            letter-spacing: 4px;
+            animation: titleGlow 2s ease-in-out infinite;
+        }
+        @keyframes titleGlow {
+            0%, 100% { text-shadow: 0 0 20px rgba(0, 210, 255, 0.5), 0 0 40px rgba(120, 80, 255, 0.3); }
+            50% { text-shadow: 0 0 30px rgba(0, 210, 255, 0.8), 0 0 60px rgba(120, 80, 255, 0.5), 0 0 80px rgba(0, 210, 255, 0.3); }
+        }
+        .loading-ring {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            margin-bottom: 40px;
+        }
+        .loading-ring span {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 3px solid transparent;
+        }
+        .loading-ring span:nth-child(1) {
+            border-top-color: #00d2ff;
+            animation: ringSpin 1.5s linear infinite;
+        }
+        .loading-ring span:nth-child(2) {
+            border-right-color: #7b2ff7;
+            animation: ringSpin 2s linear infinite reverse;
+            top: 10px;
+            left: 10px;
+            width: calc(100% - 20px);
+            height: calc(100% - 20px);
+        }
+        .loading-ring span:nth-child(3) {
+            border-bottom-color: #ff6b6b;
+            animation: ringSpin 2.5s linear infinite;
+            top: 20px;
+            left: 20px;
+            width: calc(100% - 40px);
+            height: calc(100% - 40px);
+        }
+        @keyframes ringSpin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .loading-dot {
+            display: flex;
+            gap: 8px;
+            margin-top: -10px;
+        }
+        .loading-dot span {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #00d2ff;
+            animation: dotBounce 1.4s ease-in-out infinite;
+        }
+        .loading-dot span:nth-child(2) { animation-delay: 0.2s; background: #7b2ff7; }
+        .loading-dot span:nth-child(3) { animation-delay: 0.4s; background: #ff6b6b; }
+        @keyframes dotBounce {
+            0%, 80%, 100% { transform: scale(0.6); opacity: 0.5; }
+            40% { transform: scale(1.2); opacity: 1; }
+        }
+        .loading-progress {
+            margin-top: 30px;
+            width: 200px;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .loading-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #00d2ff, #7b2ff7, #ff6b6b);
+            background-size: 200% 100%;
+            animation: progressGlow 2s linear infinite;
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+        @keyframes progressGlow {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 200% 50%; }
+        }
+        .loading-text {
+            margin-top: 15px;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+            letter-spacing: 2px;
+        }
+
         .login-wrapper, #mainContent, .float-btn, .modal-overlay, .toast-message {
             position: relative;
             z-index: 10;
@@ -1986,6 +2101,25 @@
 </head>
 
 <body>
+<!-- 加载动画 -->
+<div id="loadingOverlay">
+    <div class="loading-title">NEON</div>
+    <div class="loading-ring">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+    <div class="loading-dot">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+    <div class="loading-progress">
+        <div class="loading-progress-bar" id="loadingProgressBar" style="width: 0%;"></div>
+    </div>
+    <div class="loading-text" id="loadingText">正在初始化...</div>
+</div>
+
 <!-- 背景canvas -->
 <canvas id="bgCanvas"></canvas>
 
@@ -2130,7 +2264,7 @@
         <div class="customer-service-info">
             <i class="fa-solid fa-headset"></i>
             <h3>联系客服人工找回</h3>
-            <p>请联系官方客服，提交相关凭证进行人工验证找回密码</p>
+            <p>请联系官方客服，提交相关凭证进行人工验证找回密码,预计耗时1-3个工作日</p>
             <div class="contact-methods">
                 <div class="contact-item">
                     <i class="fa-brands fa-weixin"></i>
@@ -2145,7 +2279,7 @@
                     <span>邮箱: <strong>2858861803@qq.com</strong></span>
                 </div>
             </div>
-            <p class="service-tip">工作时间：周一至周五 9:00-18:00</p>
+            <p class="service-tip">工作时间：周一至周五 9:00-24:00</p>
         </div>
         <div class="switch-link" style="margin-top: 20px;">
             <span id="backToForgotChoice2">返回选择方式</span>
@@ -2260,35 +2394,35 @@
         <i class="fa-brands fa-weixin"></i>
         <div class="contact-popup wechat-popup">
             <img src="uploads/wechat_qr.png" alt="微信二维码">
-            <p>扫码添加微信</p>
+            <p>扫码添加微信(商务合作)</p>
         </div>
     </div>
     <div class="contact-btn" id="qqBtn">
         <i class="fa-brands fa-qq"></i>
         <div class="contact-popup qq-popup">
             <img src="uploads/qq_qr.png" alt="QQ二维码">
-            <p>扫码添加QQ</p>
+            <p>扫码添加QQ(商务合作)</p>
         </div>
     </div>
     <div class="contact-btn" id="emailBtn">
         <i class="fa-solid fa-envelope"></i>
         <div class="contact-popup email-popup">
-            <p>邮箱地址</p>
-            <p class="email-text">997973220@qq.com</p>
+            <p>邮箱地址(举报/BUG反馈/建议)</p>
+            <p class="email-text">2858861803@qq.com</p>
         </div>
     </div>
     <div class="contact-btn" id="officialAccountBtn">
         <i class="fa-solid fa-square-rss"></i>
         <div class="contact-popup official-popup">
             <img src="uploads/official_qr.png" alt="公众号二维码">
-            <p>扫码关注公众号</p>
+            <p>扫码关注公众号(防迷路)</p>
         </div>
     </div>
     <div class="contact-btn" id="douyinBtn">
         <i class="fa-brands fa-tiktok"></i>
         <div class="contact-popup douyin-popup">
             <img src="uploads/douyin_qr.png" alt="抖音二维码">
-            <p>扫码关注抖音</p>
+            <p>扫码关注抖音(商务合作)</p>
         </div>
     </div>
 </div>
@@ -2369,6 +2503,41 @@
 
     // ========== 发布资源功能 ==========
     document.addEventListener('DOMContentLoaded', function() {
+        // 加载动画控制
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const loadingProgressBar = document.getElementById('loadingProgressBar');
+        const loadingText = document.getElementById('loadingText');
+        let loadProgress = 0;
+        let loadInterval;
+
+        function setLoadingProgress(progress, text) {
+            loadProgress = Math.min(progress, 100);
+            if (loadingProgressBar) {
+                loadingProgressBar.style.width = loadProgress + '%';
+            }
+            if (text && loadingText) {
+                loadingText.textContent = text;
+            }
+        }
+
+        function hideLoading() {
+            setLoadingProgress(100, '加载完成!');
+            setTimeout(() => {
+                if (loadingOverlay) {
+                    loadingOverlay.classList.add('hidden');
+                }
+            }, 500);
+            if (loadInterval) clearInterval(loadInterval);
+        }
+
+        // 模拟加载进度
+        setLoadingProgress(10, '正在初始化...');
+        loadInterval = setInterval(() => {
+            if (loadProgress < 90) {
+                setLoadingProgress(loadProgress + Math.random() * 15, '正在加载资源...');
+            }
+        }, 300);
+
         // 检查URL参数，自动显示登录框或VIP弹窗
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('showLogin') === 'true') {
@@ -2454,7 +2623,7 @@
             localStorage.removeItem('userInfo');
             currentUser = { username: '未登录用户', role: '0' };
             document.getElementById('displayUsername').textContent = currentUser.username;
-            document.getElementById('userAvatar').textContent = currentUser.username.charAt(0).toUpperCase();
+            document.getElementById('userAvatar').innerText = 'U';
             document.getElementById('adminLink').style.display = 'none';
         }
 
@@ -2469,7 +2638,7 @@
                 if (!currentUser.account) {
                     currentUser = {
                         ...currentUser,
-                        username: userInfo.username,
+                        username: userInfo.username || userInfo.userName || '用户',
                         role: userInfo.role,
                         avatar: userInfo.avatar,
                         account: userInfo.account,
@@ -2492,9 +2661,10 @@
         }
 
         // 更新用户信息显示
-        document.getElementById('displayUsername').textContent = currentUser.username;
-        if (!document.getElementById('userAvatar').querySelector('img')) {
-            document.getElementById('userAvatar').textContent = currentUser.username.charAt(0).toUpperCase();
+        document.getElementById('displayUsername').textContent = currentUser.username || '用户';
+        const avatarEl = document.getElementById('userAvatar');
+        if (avatarEl && !avatarEl.querySelector('img')) {
+            avatarEl.textContent = (currentUser.username || 'U').charAt(0).toUpperCase();
         }
 
         // 检查是否为管理员，显示审核管理入口
@@ -2793,6 +2963,7 @@
 
         initSearch();
         fetchResources();
+        hideLoading();
     });
 
     // 查看资源详情
@@ -3913,15 +4084,16 @@
         if (savedUserInfo) {
             try {
                 const userInfo = JSON.parse(savedUserInfo);
-                document.getElementById('displayUsername').innerText = userInfo.username;
+                const displayName = userInfo.username || userInfo.userName || '用户';
+                document.getElementById('displayUsername').innerText = displayName;
                 if (userInfo.avatar) {
                     document.getElementById('userAvatar').innerHTML = `<img src="${userInfo.avatar}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
                 } else {
-                    document.getElementById('userAvatar').innerText = userInfo.username.charAt(0).toUpperCase();
+                    document.getElementById('userAvatar').innerText = displayName.charAt(0).toUpperCase();
                 }
-                
+
                 // 从数据库中获取最新的用户信息
-                fetch(`/api/user?userName=${encodeURIComponent(userInfo.username)}`)
+                fetch(`/api/user?userName=${encodeURIComponent(userInfo.username || userInfo.userName)}`)
                     .then(response => response.json())
                     .then(data => {
                         if (data.status) {
@@ -3936,7 +4108,8 @@
                             if (user.avatar) {
                                 document.getElementById('userAvatar').innerHTML = `<img src="${user.avatar}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
                             } else {
-                                document.getElementById('userAvatar').innerText = user.userName.charAt(0).toUpperCase();
+                                const userName = user.userName || user.username || displayName;
+                                document.getElementById('userAvatar').innerText = userName.charAt(0).toUpperCase();
                             }
                         }
                     })

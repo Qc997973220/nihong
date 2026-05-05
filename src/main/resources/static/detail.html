@@ -415,6 +415,79 @@
             font-size: 1.1rem;
             margin-bottom: 40px;
         }
+        .article-content h1, .article-content h2, .article-content h3,
+        .article-content h4, .article-content h5, .article-content h6 {
+            color: #b8dcff;
+            margin: 16px 0 10px 0;
+            line-height: 1.4;
+        }
+        .article-content h1 { font-size: 1.8rem; }
+        .article-content h2 { font-size: 1.5rem; }
+        .article-content h3 { font-size: 1.25rem; }
+        .article-content p { margin: 10px 0; }
+        .article-content ul, .article-content ol {
+            margin: 10px 0;
+            padding-left: 24px;
+        }
+        .article-content li { margin: 6px 0; }
+        .article-content blockquote {
+            border-left: 3px solid #3f9eff;
+            background: rgba(62, 158, 255, 0.1);
+            padding: 12px 18px;
+            margin: 14px 0;
+            border-radius: 0 10px 10px 0;
+            color: #c0d8f0;
+        }
+        .article-content pre {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 10px;
+            padding: 14px 18px;
+            margin: 14px 0;
+            overflow-x: auto;
+        }
+        .article-content code {
+            font-family: 'Courier New', monospace;
+            color: #5fddff;
+        }
+        .article-content pre code {
+            background: none;
+            padding: 0;
+            color: #a0f0a0;
+        }
+        .article-content a {
+            color: #5ba5ff;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .article-content a:hover {
+            color: #8ac4ff;
+            text-decoration: underline;
+        }
+        .article-content img {
+            max-width: 100%;
+            border-radius: 10px;
+            margin: 14px 0;
+            border: 1px solid rgba(90, 160, 255, 0.2);
+        }
+        .article-content hr {
+            border: none;
+            border-top: 1px solid rgba(90, 160, 255, 0.2);
+            margin: 20px 0;
+        }
+        .article-content table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 14px 0;
+        }
+        .article-content th, .article-content td {
+            border: 1px solid rgba(90, 160, 255, 0.3);
+            padding: 10px 14px;
+            text-align: left;
+        }
+        .article-content th {
+            background: rgba(62, 158, 255, 0.15);
+            color: #b8dcff;
+        }
         .comment-section {
             background: rgba(15, 25, 40, 0.5);
             backdrop-filter: blur(10px);
@@ -2109,7 +2182,7 @@
                     <span>再好的蓝海项目，参与的人多了，收益也会大幅缩水。为保障霓虹之都全体会员的权益，本站资源链接严禁向站外分享传播，任何侵权外传行为都将面临账号封禁，甚至更严重的后果！！！</span>
                 </div>
                 <div class="article-content">
-                    ${content ? escapeHtml(content).replace(/\n/g, '<br>') : '暂无内容'}
+                    ${content ? sanitizeHtml(content) : '暂无内容'}
                 </div>
                 <div class="comment-section">
                     <h3 style="margin-bottom:20px;">评论 (${comments.length})</h3>
@@ -2301,6 +2374,53 @@
             .replace(/>/g, "&gt;")
             .replace(/"/g, "&quot;")
             .replace(/'/g, "&#039;");
+    }
+
+    function sanitizeHtml(html) {
+        if (!html) return html;
+        const temp = document.createElement('div');
+        temp.innerHTML = html;
+        const allowedTags = ['p', 'br', 'strong', 'b', 'em', 'i', 'u', 's', 'strike',
+            'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+            'ul', 'ol', 'li',
+            'blockquote', 'pre', 'code',
+            'a', 'img',
+            'span', 'div',
+            'table', 'thead', 'tbody', 'tr', 'th', 'td',
+            'hr', 'br'];
+        const allowedAttrs = ['href', 'src', 'alt', 'title', 'class', 'style',
+            'target', 'rel', 'align', 'valign'];
+        const traverse = (node) => {
+            if (node.nodeType === Node.ELEMENT_NODE) {
+                const tagName = node.tagName.toLowerCase();
+                if (!allowedTags.includes(tagName)) {
+                    return document.createTextNode(node.textContent);
+                }
+                const newNode = document.createElement(tagName);
+                Array.from(node.attributes).forEach(attr => {
+                    if (allowedAttrs.includes(attr.name.toLowerCase())) {
+                        if (attr.name.toLowerCase() === 'href' || attr.name.toLowerCase() === 'src') {
+                            if (attr.value.startsWith('javascript:') || attr.value.startsWith('data:')) {
+                                return;
+                            }
+                        }
+                        newNode.setAttribute(attr.name.toLowerCase(), attr.value);
+                    }
+                });
+                Array.from(node.childNodes).forEach(child => {
+                    newNode.appendChild(traverse(child));
+                });
+                return newNode;
+            } else if (node.nodeType === Node.TEXT_NODE) {
+                return document.createTextNode(node.textContent);
+            }
+            return document.createDocumentFragment();
+        };
+        Array.from(temp.childNodes).forEach(child => {
+            const processed = traverse(child);
+            if (processed) temp.replaceChild(processed, child);
+        });
+        return temp.innerHTML;
     }
 
     // ========== 点赞功能 ==========
