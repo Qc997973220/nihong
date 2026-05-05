@@ -974,6 +974,8 @@
                         <div class="editor-toolbar-wrapper">
                             <div id="editorToolbar"></div>
                             <div id="editorContainer"></div>
+                        </div>
+                        <div style="display: flex; justify-content: flex-end; margin-top: 8px;">
                             <div class="emoji-picker-container">
                                 <button type="button" class="emoji-btn" id="emojiBtn" title="插入表情">😀</button>
                                 <div class="emoji-list" id="emojiList"></div>
@@ -984,7 +986,7 @@
 
                     <div class="form-group">
                         <label><i class="fas fa-link"></i> 资源下载链接（可选）</label>
-                        <input type="url" id="resourceDownloadLink" class="form-input" placeholder="请输入资源下载页面链接，例如：https://example.com/download">
+                        <input type="text" id="resourceDownloadLink" class="form-input" placeholder="请输入资源下载页面链接，例如：https://example.com/download">
                         <div class="form-hint">提供资源下载页面的直链，方便用户获取资源</div>
                     </div>
 
@@ -1098,7 +1100,7 @@
             let selectedFile = null;
             let quillEditor = null;
 
-            const emojiList = [
+            const emojis = [
                 '😀', '😃', '😄', '😁', '😆', '😅', '🤣', '😂',
                 '🙂', '😉', '😊', '😇', '🥰', '😍', '🤩', '😘',
                 '😗', '😚', '😋', '😛', '😜', '🤪', '😝', '🤑',
@@ -1140,7 +1142,7 @@
                             [{ 'color': [] }, { 'background': [] }],
                             [{ 'list': 'ordered' }, { 'list': 'bullet' }],
                             ['blockquote', 'code-block'],
-                            ['link', 'image'],
+                            ['link'],
                             [{ 'align': [] }],
                             ['clean']
                         ]
@@ -1156,19 +1158,16 @@
 
                 if (!emojiBtn || !emojiListEl) return;
 
-                emojiList.forEach(emoji => {
+                emojis.forEach(emoji => {
                     const emojiItem = document.createElement('span');
                     emojiItem.className = 'emoji-item';
                     emojiItem.textContent = emoji;
                     emojiItem.addEventListener('click', () => {
                         if (quillEditor) {
-                            const range = quillEditor.getSelection();
-                            if (range) {
-                                quillEditor.insertText(range.index, emoji);
-                                quillEditor.setSelection(range.index + emoji.length);
-                            } else {
-                                quillEditor.insertText(0, emoji);
-                            }
+                            quillEditor.focus();
+                            const length = quillEditor.getLength();
+                            quillEditor.insertText(length - 1, emoji);
+                            quillEditor.setSelection(length - 1 + emoji.length, 0);
                         }
                         emojiListEl.classList.remove('show');
                     });
@@ -1209,9 +1208,10 @@
             }
 
             // 设置作者信息
-            if (currentUser && currentUser.username) {
-                document.getElementById('authorName').textContent = currentUser.username;
-                document.getElementById('authorAvatar').textContent = currentUser.username.charAt(0).toUpperCase();
+            if (currentUser) {
+                const displayName = currentUser.username || currentUser.userName || '用户';
+                document.getElementById('authorName').textContent = displayName;
+                document.getElementById('authorAvatar').textContent = displayName.charAt(0).toUpperCase();
             }
 
             const publishForm = document.getElementById('publishForm');
@@ -1361,8 +1361,19 @@
                 const content = quillEditor ? quillEditor.root.innerHTML.replace(/<p><br><\/p>/g, '').trim() : '';
                 const category = document.getElementById('resourceCategory').value;
                 const author = currentUser.username;
-                const downloadLink = document.getElementById('resourceDownloadLink').value.trim();
+                let downloadLink = document.getElementById('resourceDownloadLink').value.trim();
                 const downloadPassword = document.getElementById('resourceDownloadPassword').value.trim();
+
+                if (downloadLink) {
+                    if (!downloadLink.startsWith('http://') && !downloadLink.startsWith('https://')) {
+                        downloadLink = 'https://' + downloadLink;
+                    }
+                    const urlRegex = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w.-]*)*\/?$/;
+                    if (!urlRegex.test(downloadLink)) {
+                        showMessage('URL格式错误，请输入正确的网址', true);
+                        return;
+                    }
+                }
 
                 if (!title) {
                     showMessage('请输入资源标题', true);

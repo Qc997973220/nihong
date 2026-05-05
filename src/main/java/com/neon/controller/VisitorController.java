@@ -42,4 +42,19 @@ public class VisitorController {
         }
         return result;
     }
+
+    @GetMapping("/running-days")
+    public Map<String, Object> getRunningDays() {
+        Map<String, Object> result = new HashMap<>();
+        try {
+            Integer runningDays = siteStatsService.getRunningDays();
+            result.put("success", true);
+            result.put("runningDays", runningDays);
+        } catch (Exception e) {
+            result.put("success", false);
+            result.put("runningDays", 842);
+            result.put("error", e.getMessage());
+        }
+        return result;
+    }
 }
