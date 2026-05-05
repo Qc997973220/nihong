@@ -2,6 +2,7 @@ package com.neon.controller;
 
 import com.neon.dao.UsersDao;
 import com.neon.pojo.Users;
+import com.neon.service.AuthService;
 import com.neon.service.LoginService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +19,8 @@ public class LoginController {
     LoginService loginService;
     @Autowired
     UsersDao usersDao;
+    @Autowired
+    AuthService authService;
 
     @GetMapping("/first")
     @ResponseBody
@@ -28,40 +31,59 @@ public class LoginController {
         if (loginResult == 1) {
             Users user = usersDao.findByAccount(account);
             if (user != null) {
-                Map<String, Object> userInfo = new HashMap<>();
-                userInfo.put("account", user.getAccount());
-                userInfo.put("userName", user.getUserName());
-                userInfo.put("role", user.getRole() != null && !user.getRole().isEmpty() ? user.getRole() : "0");
-                userInfo.put("nickname", user.getNickname());
-                userInfo.put("phone", user.getPhone());
-                userInfo.put("email", user.getEmail());
-                userInfo.put("gender", user.getGender());
-                userInfo.put("token", user.getToken());
-                userInfo.put("avatar", null);
-                userInfo.put("lastLoginTime", user.getLastLoginTime());
-                userInfo.put("memberType", user.getMemberType() != null ? user.getMemberType() : 0);
-                userInfo.put("inviteCode", user.getInviteCode());
-
-                if (user.getMemberType() != null && user.getMemberType() == 4) {
-                    userInfo.put("memberStatus", "permanent");
-                    userInfo.put("memberExpireText", "永久有效");
-                } else if (user.getMemberType() != null && user.getMemberType() == 0) {
-                    userInfo.put("memberStatus", "none");
-                    userInfo.put("memberExpireText", "非会员");
-                } else if (user.getMemberExpiredAt() != null) {
-                    boolean isExpired = user.getMemberExpiredAt().isBefore(LocalDateTime.now());
-                    userInfo.put("memberStatus", isExpired ? "expired" : "active");
-                    userInfo.put("memberExpireAt", user.getMemberExpiredAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-                    userInfo.put("memberExpireText", isExpired ? "已到期" : "到期时间: " + user.getMemberExpiredAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-                } else {
-                    userInfo.put("memberStatus", "none");
-                    userInfo.put("memberExpireText", "非会员");
-                }
-
+                Map<String, Object> userInfo = buildUserInfo(user);
                 result.put("user", userInfo);
             }
         }
         return result;
+    }
+
+    @GetMapping("/validateToken")
+    @ResponseBody
+    public Map<String, Object> validateToken(@RequestParam String token) {
+        Map<String, Object> result = authService.validateToken(token);
+        
+        if ((Boolean) result.get("valid") && result.get("user") != null) {
+            Users user = (Users) result.get("user");
+            Map<String, Object> userInfo = buildUserInfo(user);
+            result.put("user", userInfo);
+        }
+        
+        return result;
+    }
+
+    private Map<String, Object> buildUserInfo(Users user) {
+        Map<String, Object> userInfo = new HashMap<>();
+        userInfo.put("account", user.getAccount());
+        userInfo.put("userName", user.getUserName());
+        userInfo.put("role", user.getRole() != null && !user.getRole().isEmpty() ? user.getRole() : "0");
+        userInfo.put("nickname", user.getNickname());
+        userInfo.put("phone", user.getPhone());
+        userInfo.put("email", user.getEmail());
+        userInfo.put("gender", user.getGender());
+        userInfo.put("token", user.getToken());
+        userInfo.put("avatar", null);
+        userInfo.put("lastLoginTime", user.getLastLoginTime());
+        userInfo.put("memberType", user.getMemberType() != null ? user.getMemberType() : 0);
+        userInfo.put("inviteCode", user.getInviteCode());
+
+        if (user.getMemberType() != null && user.getMemberType() == 4) {
+            userInfo.put("memberStatus", "permanent");
+            userInfo.put("memberExpireText", "永久有效");
+        } else if (user.getMemberType() != null && user.getMemberType() == 0) {
+            userInfo.put("memberStatus", "none");
+            userInfo.put("memberExpireText", "非会员");
+        } else if (user.getMemberExpiredAt() != null) {
+            boolean isExpired = user.getMemberExpiredAt().isBefore(LocalDateTime.now());
+            userInfo.put("memberStatus", isExpired ? "expired" : "active");
+            userInfo.put("memberExpireAt", user.getMemberExpiredAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+            userInfo.put("memberExpireText", isExpired ? "已到期" : "到期时间: " + user.getMemberExpiredAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        } else {
+            userInfo.put("memberStatus", "none");
+            userInfo.put("memberExpireText", "非会员");
+        }
+        
+        return userInfo;
     }
 
     @PostMapping("/registered")

@@ -2849,18 +2849,18 @@
             document.getElementById('adminLink').style.display = 'none';
         }
 
-        // 页面加载时验证会话
-        validateSession();
-
-        // 尝试从localStorage获取用户信息
-        const storedUserInfo = localStorage.getItem('userInfo');
-        if (storedUserInfo) {
-            try {
-                const userInfo = JSON.parse(storedUserInfo);
-                if (!currentUser.account) {
+        // 页面加载时验证会话（立即从localStorage读取，然后异步验证更新）
+        async function initUserSession() {
+            // 首先从localStorage读取用户信息，立即更新UI
+            const storedUserInfo = localStorage.getItem('userInfo');
+            const token = localStorage.getItem('authToken');
+            
+            if (storedUserInfo && token) {
+                try {
+                    const userInfo = JSON.parse(storedUserInfo);
                     currentUser = {
                         ...currentUser,
-                        username: userInfo.username || userInfo.userName || '用户',
+                        username: userInfo.username || userInfo.userName || userInfo.account || '用户',
                         role: userInfo.role,
                         avatar: userInfo.avatar,
                         account: userInfo.account,
@@ -2868,31 +2868,67 @@
                         memberStatus: userInfo.memberStatus,
                         memberExpireText: userInfo.memberExpireText
                     };
+                    
+                    // 立即更新UI显示
+                    updateUserDisplay();
+                } catch (e) {
+                    console.error('解析用户信息失败:', e);
+                    clearUserSession();
                 }
-                // 更新用户头像
-                if (userInfo.avatar && !document.getElementById('userAvatar').querySelector('img')) {
-                    document.getElementById('userAvatar').innerHTML = `<img src="${userInfo.avatar}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+            } else {
+                // 如果没有用户信息，显示未登录状态
+                updateUserDisplay();
+            }
+            
+            // 然后异步验证Token有效性
+            await validateSession();
+        }
+
+        function updateUserDisplay() {
+            const displayUsername = document.getElementById('displayUsername');
+            const userAvatar = document.getElementById('userAvatar');
+            const memberStatusBar = document.getElementById('memberStatusBar');
+            const adminLink = document.getElementById('adminLink');
+            const vipBtn = document.getElementById('vipUpgradeBtn');
+            
+            // 更新用户名显示
+            if (displayUsername) {
+                displayUsername.textContent = currentUser.username || '未登录用户';
+            }
+            
+            // 更新头像显示
+            if (userAvatar) {
+                if (currentUser.avatar) {
+                    userAvatar.innerHTML = `<img src="${currentUser.avatar}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+                } else {
+                    const displayName = currentUser.username || '未登录用户';
+                    userAvatar.textContent = displayName.charAt(0).toUpperCase();
                 }
-                // 更新会员徽章
-                if (document.getElementById('memberStatusBar')) {
-                    updateMemberBadge(userInfo);
+            }
+            
+            // 更新会员徽章 - 只要有用户信息就显示
+            if (memberStatusBar && (currentUser.account || currentUser.memberStatus)) {
+                updateMemberBadge(currentUser);
+            }
+            
+            // 更新VIP按钮状态
+            if (vipBtn) {
+                const status = currentUser.memberStatus;
+                if (status === 'active' || status === 'permanent') {
+                    vipBtn.style.display = 'none';
+                } else {
+                    vipBtn.style.display = 'flex';
                 }
-            } catch (e) {
-                console.error('解析用户信息失败:', e);
+            }
+            
+            // 检查是否为管理员
+            if (adminLink && currentUser.role === '1') {
+                adminLink.style.display = 'block';
             }
         }
 
-        // 更新用户信息显示
-        document.getElementById('displayUsername').textContent = currentUser.username || '用户';
-        const avatarEl = document.getElementById('userAvatar');
-        if (avatarEl && !avatarEl.querySelector('img')) {
-            avatarEl.textContent = (currentUser.username || 'U').charAt(0).toUpperCase();
-        }
-
-        // 检查是否为管理员，显示审核管理入口
-        if (currentUser.role === '1') {
-            document.getElementById('adminLink').style.display = 'block';
-        }
+        // 初始化用户会话
+        initUserSession();
 
         // 点击发布资源按钮
         if (publishResourceBtn) {
