@@ -43,6 +43,10 @@ public class ResourceService {
         return resources;
     }
 
+    public List<Resource> getAllResourcesIncludingPending() {
+        return resourceRepository.findByStatusInOrderByCreatedAtDesc(Arrays.asList(0, 1, 2));
+    }
+
     public Map<String, Object> getResourcesByPage(int page, int size) {
         size = Math.min(size, MAX_PAGE_SIZE);
         if (size <= 0) size = DEFAULT_PAGE_SIZE;
@@ -212,5 +216,61 @@ public class ResourceService {
             cacheService.delete(cacheService.getResourceListKey());
             cacheService.delete(cacheService.getResourceDetailKey(id));
         }
+    }
+
+    // 根据ID获取资源
+    public Resource getResourceById(Long id) {
+        return resourceRepository.findById(id).orElse(null);
+    }
+
+    // 更新资源
+    public Resource updateResource(Resource resource) {
+        Resource existingResource = resourceRepository.findById(resource.getId()).orElse(null);
+        if (existingResource == null) {
+            return null;
+        }
+        
+        // 更新字段
+        if (resource.getTitle() != null) {
+            existingResource.setTitle(resource.getTitle());
+        }
+        if (resource.getSummary() != null) {
+            existingResource.setSummary(resource.getSummary());
+        }
+        if (resource.getContent() != null) {
+            existingResource.setContent(resource.getContent());
+        }
+        if (resource.getImage() != null) {
+            existingResource.setImage(resource.getImage());
+        }
+        if (resource.getCategory() != null) {
+            existingResource.setCategory(resource.getCategory());
+        }
+        if (resource.getDownloadLink() != null) {
+            existingResource.setDownloadLink(resource.getDownloadLink());
+        }
+        if (resource.getDownloadPassword() != null) {
+            existingResource.setDownloadPassword(resource.getDownloadPassword());
+        }
+        if (resource.getStatus() != null) {
+            existingResource.setStatus(resource.getStatus());
+        }
+        
+        existingResource.setUpdatedAt(LocalDateTime.now());
+        Resource savedResource = resourceRepository.save(existingResource);
+        
+        // 清除缓存
+        cacheService.delete(cacheService.getResourceListKey());
+        cacheService.delete(cacheService.getResourceDetailKey(resource.getId()));
+        
+        return savedResource;
+    }
+
+    // 删除资源
+    public void deleteResource(Long id) {
+        resourceRepository.deleteById(id);
+        // 清除缓存
+        cacheService.delete(cacheService.getResourceListKey());
+        cacheService.delete(cacheService.getResourceDetailKey(id));
     }
 }

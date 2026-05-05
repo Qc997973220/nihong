@@ -196,6 +196,75 @@ public class ResourceController {
         return result;
     }
 
+    // 更新资源
+    @PostMapping("/update")
+    @ResponseBody
+    public Map<String, Object> updateResource(@RequestBody Resource resource) {
+        Map<String, Object> result = new HashMap<>();
+        try {
+            if (resource.getId() == null) {
+                result.put("success", false);
+                result.put("message", "资源ID不能为空");
+                return result;
+            }
+            
+            Resource existingResource = resourceService.getResourceById(resource.getId());
+            if (existingResource == null) {
+                result.put("success", false);
+                result.put("message", "资源不存在");
+                return result;
+            }
+            
+            Resource updatedResource = resourceService.updateResource(resource);
+            result.put("success", true);
+            result.put("message", "资源更新成功");
+            result.put("resource", updatedResource);
+        } catch (Exception e) {
+            result.put("success", false);
+            result.put("message", "资源更新失败：" + e.getMessage());
+        }
+        return result;
+    }
+
+    // 获取所有资源列表（管理员用，包含所有状态）
+    @GetMapping("/all")
+    @ResponseBody
+    public Map<String, Object> getAllResources() {
+        Map<String, Object> result = new HashMap<>();
+        try {
+            List<Resource> resources = resourceService.getAllResourcesIncludingPending();
+            result.put("success", true);
+            result.put("resources", resources);
+            result.put("count", resources.size());
+        } catch (Exception e) {
+            result.put("success", false);
+            result.put("message", "获取资源列表失败：" + e.getMessage());
+        }
+        return result;
+    }
+
+    // 删除资源
+    @DeleteMapping("/delete/{id}")
+    @ResponseBody
+    public Map<String, Object> deleteResource(@PathVariable Long id) {
+        Map<String, Object> result = new HashMap<>();
+        try {
+            Resource resource = resourceService.getResourceById(id);
+            if (resource == null) {
+                result.put("success", false);
+                result.put("message", "资源不存在");
+                return result;
+            }
+            resourceService.deleteResource(id);
+            result.put("success", true);
+            result.put("message", "资源删除成功");
+        } catch (Exception e) {
+            result.put("success", false);
+            result.put("message", "删除资源失败：" + e.getMessage());
+        }
+        return result;
+    }
+
     // 发表评论
     @PostMapping("/comment")
     @ResponseBody

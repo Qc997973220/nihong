@@ -723,6 +723,9 @@
             <button class="tab-btn" id="tabCardKey" onclick="switchTab('cardkey')">
                 <i class="fas fa-key"></i> 卡密管理
             </button>
+            <button class="tab-btn" id="tabResource" onclick="switchTab('resource')">
+                <i class="fas fa-edit"></i> 资源管理
+            </button>
         </div>
 
         <div id="contentArea">
@@ -794,6 +797,107 @@
                         <p style="margin-top: 12px; color: #90b0d1;">加载中...</p>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <div id="resourceArea" style="display: none;">
+            <div class="cardkey-panel">
+                <div class="cardkey-header">
+                    <div class="cardkey-stats">
+                        <div class="stat-item">
+                            <span class="stat-label">资源总数</span>
+                            <span class="stat-value" id="resourceTotalCount">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">已发布</span>
+                            <span class="stat-value" id="resourcePublishedCount">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">待审核</span>
+                            <span class="stat-value" id="resourcePendingCount">0</span>
+                        </div>
+                    </div>
+                    <div class="cardkey-actions">
+                        <select id="resourceStatusFilter" style="padding: 8px 12px; border: 1px solid #3d5a80; border-radius: 4px; background: #1a1a2e; color: #e8e8e8; margin-right: 10px;">
+                            <option value="all">全部状态</option>
+                            <option value="0">待审核</option>
+                            <option value="1">已发布</option>
+                            <option value="2">已拒绝</option>
+                        </select>
+                        <button class="btn btn-refresh" id="refreshResourceBtn">
+                            <i class="fas fa-sync-alt"></i> 刷新列表
+                        </button>
+                    </div>
+                </div>
+
+                <div id="resourceListArea">
+                    <div class="loading">
+                        <i class="fas fa-spinner"></i>
+                        <p style="margin-top: 12px; color: #90b0d1;">加载中...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="resourceEditModal" class="modal" style="display: none;">
+            <div class="modal-content" style="max-width: 700px;">
+                <div class="modal-header">
+                    <h3><i class="fas fa-edit"></i> 编辑资源</h3>
+                    <span class="modal-close" onclick="closeResourceEditModal()">&times;</span>
+                </div>
+                <form id="resourceEditForm">
+                    <input type="hidden" id="editResourceId">
+                    <div class="form-row">
+                        <label>标题：</label>
+                        <input type="text" id="editResourceTitle" style="flex: 1;" required>
+                    </div>
+                    <div class="form-row">
+                        <label>分类：</label>
+                        <select id="editResourceCategory" style="padding: 8px 12px; border: 1px solid #3d5a80; border-radius: 4px; background: #1a1a2e; color: #e8e8e8; flex: 1;">
+                            <option value="资源">资源</option>
+                            <option value="游戏">游戏</option>
+                            <option value="软件">软件</option>
+                            <option value="教程">教程</option>
+                            <option value="资讯">资讯</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <label>简介：</label>
+                        <input type="text" id="editResourceSummary" style="flex: 1;">
+                    </div>
+                    <div class="form-row">
+                        <label>封面图片：</label>
+                        <input type="text" id="editResourceImage" style="flex: 1;" placeholder="图片URL">
+                    </div>
+                    <div class="form-row">
+                        <label>下载链接：</label>
+                        <input type="text" id="editResourceDownloadLink" style="flex: 1;">
+                    </div>
+                    <div class="form-row">
+                        <label>下载密码：</label>
+                        <input type="text" id="editResourceDownloadPassword" style="flex: 1;">
+                    </div>
+                    <div class="form-row">
+                        <label>状态：</label>
+                        <select id="editResourceStatus" style="padding: 8px 12px; border: 1px solid #3d5a80; border-radius: 4px; background: #1a1a2e; color: #e8e8e8; flex: 1;">
+                            <option value="0">待审核</option>
+                            <option value="1">已发布</option>
+                            <option value="2">已拒绝</option>
+                        </select>
+                    </div>
+                    <div class="form-row" style="flex-direction: column;">
+                        <label>内容：</label>
+                        <textarea id="editResourceContent" rows="6" style="width: 100%; padding: 8px 12px; border: 1px solid #3d5a80; border-radius: 4px; background: #1a1a2e; color: #e8e8e8; resize: vertical;"></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-confirm" onclick="saveResourceEdit()">
+                            <i class="fas fa-check"></i> 保存修改
+                        </button>
+                        <button type="button" class="btn btn-cancel" onclick="closeResourceEditModal()">
+                            <i class="fas fa-times"></i> 取消
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -1037,17 +1141,196 @@
         function switchTab(tab) {
             currentTab = tab;
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.getElementById('tab' + (tab === 'audit' ? 'Audit' : 'CardKey')).classList.add('active');
-
+            
             if (tab === 'audit') {
+                document.getElementById('tabAudit').classList.add('active');
                 document.getElementById('contentArea').style.display = 'block';
                 document.getElementById('cardKeyArea').style.display = 'none';
-            } else {
+                document.getElementById('resourceArea').style.display = 'none';
+            } else if (tab === 'cardkey') {
+                document.getElementById('tabCardKey').classList.add('active');
                 document.getElementById('contentArea').style.display = 'none';
                 document.getElementById('cardKeyArea').style.display = 'block';
+                document.getElementById('resourceArea').style.display = 'none';
                 loadCardKeyList();
+            } else if (tab === 'resource') {
+                document.getElementById('tabResource').classList.add('active');
+                document.getElementById('contentArea').style.display = 'none';
+                document.getElementById('cardKeyArea').style.display = 'none';
+                document.getElementById('resourceArea').style.display = 'block';
+                loadResourceList();
             }
         }
+
+        function loadResourceList() {
+            const listArea = document.getElementById('resourceListArea');
+            listArea.innerHTML = '<div class="loading"><i class="fas fa-spinner"></i><p style="margin-top: 12px; color: #90b0d1;">加载中...</p></div>';
+
+            const statusFilter = document.getElementById('resourceStatusFilter').value;
+
+            fetch('/api/resources/all')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        let resources = data.resources || [];
+                        
+                        if (statusFilter !== 'all') {
+                            resources = resources.filter(r => r.status === parseInt(statusFilter));
+                        }
+                        
+                        updateResourceStats(data.resources || []);
+                        renderResourceList(resources);
+                    } else {
+                        showToast('加载资源列表失败', true);
+                    }
+                })
+                .catch(error => {
+                    console.error('加载资源列表失败:', error);
+                    showToast('网络错误', true);
+                });
+        }
+
+        function updateResourceStats(resources) {
+            const total = resources.length;
+            const published = resources.filter(r => r.status === 1).length;
+            const pending = resources.filter(r => r.status === 0).length;
+
+            document.getElementById('resourceTotalCount').textContent = total;
+            document.getElementById('resourcePublishedCount').textContent = published;
+            document.getElementById('resourcePendingCount').textContent = pending;
+        }
+
+        function renderResourceList(resources) {
+            const listArea = document.getElementById('resourceListArea');
+
+            if (resources.length === 0) {
+                listArea.innerHTML = '<div class="cardkey-empty"><i class="fas fa-folder-open" style="font-size: 2rem; margin-bottom: 12px;"></i><p>暂无资源记录</p></div>';
+                return;
+            }
+
+            let html = '<div class="cardkey-list">';
+            resources.forEach(resource => {
+                const statusClass = resource.status === 1 ? 'published' : (resource.status === 0 ? 'pending' : 'rejected');
+                const statusText = resource.status === 1 ? '已发布' : (resource.status === 0 ? '待审核' : '已拒绝');
+                html += `
+                    <div class="cardkey-card">
+                        <div class="cardkey-key" style="font-size: 0.95rem;">${resource.title}</div>
+                        <div class="cardkey-meta">
+                            <span class="cardkey-type">${resource.category || '未分类'}</span>
+                            <span class="cardkey-status ${statusClass}">${statusText}</span>
+                            <span>${formatDate(resource.createdAt)}</span>
+                        </div>
+                        ${resource.summary ? '<div style="color: #90b0d1; font-size: 0.8rem; margin-top: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">' + resource.summary + '</div>' : ''}
+                        <button class="cardkey-delete-btn" onclick="openResourceEditModal(${resource.id})" title="编辑资源" style="background: rgba(100, 180, 255, 0.15); color: #64b5f6; right: 36px;">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="cardkey-delete-btn" onclick="deleteResource(${resource.id})" title="删除资源">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            listArea.innerHTML = html;
+        }
+
+        function openResourceEditModal(resourceId) {
+            fetch('/api/resources/' + resourceId)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const resource = data.resource;
+                        document.getElementById('editResourceId').value = resource.id;
+                        document.getElementById('editResourceTitle').value = resource.title || '';
+                        document.getElementById('editResourceCategory').value = resource.category || '资源';
+                        document.getElementById('editResourceSummary').value = resource.summary || '';
+                        document.getElementById('editResourceImage').value = resource.image || '';
+                        document.getElementById('editResourceDownloadLink').value = resource.downloadLink || '';
+                        document.getElementById('editResourceDownloadPassword').value = resource.downloadPassword || '';
+                        document.getElementById('editResourceStatus').value = resource.status;
+                        document.getElementById('editResourceContent').value = resource.content || '';
+                        document.getElementById('resourceEditModal').style.display = 'flex';
+                    } else {
+                        showToast('获取资源信息失败', true);
+                    }
+                })
+                .catch(error => {
+                    console.error('获取资源信息失败:', error);
+                    showToast('网络错误', true);
+                });
+        }
+
+        function closeResourceEditModal() {
+            document.getElementById('resourceEditModal').style.display = 'none';
+        }
+
+        function saveResourceEdit() {
+            const id = document.getElementById('editResourceId').value;
+            if (!id) {
+                showToast('资源ID不能为空', true);
+                return;
+            }
+
+            const resource = {
+                id: parseInt(id),
+                title: document.getElementById('editResourceTitle').value,
+                category: document.getElementById('editResourceCategory').value,
+                summary: document.getElementById('editResourceSummary').value,
+                image: document.getElementById('editResourceImage').value,
+                downloadLink: document.getElementById('editResourceDownloadLink').value,
+                downloadPassword: document.getElementById('editResourceDownloadPassword').value,
+                status: parseInt(document.getElementById('editResourceStatus').value),
+                content: document.getElementById('editResourceContent').value
+            };
+
+            fetch('/api/resources/update', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(resource)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('资源更新成功');
+                    closeResourceEditModal();
+                    loadResourceList();
+                } else {
+                    showToast('更新失败: ' + data.message, true);
+                }
+            })
+            .catch(error => {
+                console.error('更新资源失败:', error);
+                showToast('网络错误', true);
+            });
+        }
+
+        function deleteResource(id) {
+            if (!confirm('确定要删除这条资源吗？')) {
+                return;
+            }
+
+            fetch(`/api/resources/delete/${id}`, {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('删除成功');
+                    loadResourceList();
+                } else {
+                    showToast('删除失败: ' + data.message, true);
+                }
+            })
+            .catch(error => {
+                console.error('删除资源失败:', error);
+                showToast('网络错误', true);
+            });
+        }
+
+        document.getElementById('refreshResourceBtn').addEventListener('click', loadResourceList);
+        document.getElementById('resourceStatusFilter').addEventListener('change', loadResourceList);
 
         function loadCardKeyList() {
             const listArea = document.getElementById('cardKeyListArea');
