@@ -56,4 +56,7 @@ public class Users {
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     LocalDateTime lastLoginTime;// 最近登录时间
+
+    String registeredIp;       // 注册IP
+    LocalDateTime registeredDate; // 注册日期
 }

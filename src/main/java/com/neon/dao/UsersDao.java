@@ -19,4 +19,8 @@ public interface UsersDao extends JpaRepository<Users, String> {
     Users findByEmail(String email);
     boolean existsByEmail(String email);
     Users findByToken(String token);
+    
+    List<Users> findByRegisteredIpAndRegisteredDate(String registeredIp, LocalDateTime registeredDate);
+    
+    boolean existsByRegisteredIpAndRegisteredDate(String registeredIp, LocalDateTime registeredDate);
 }

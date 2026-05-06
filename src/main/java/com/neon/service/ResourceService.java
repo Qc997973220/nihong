@@ -165,7 +165,8 @@ public class ResourceService {
 
         Page<Comment> topLevelPage = commentRepository.findTopLevelCommentsByLikesAndCreatedAt(resourceId, PageRequest.of(page - 1, size));
 
-        List<Comment> topLevelComments = topLevelPage.getContent();
+        // 创建可修改的列表（Page.getContent()返回的是不可修改的列表）
+        List<Comment> topLevelComments = new ArrayList<>(topLevelPage.getContent());
 
         if (topLevelComments.isEmpty()) {
             Map<String, Object> result = new HashMap<>();

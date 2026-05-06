@@ -91,13 +91,26 @@ public class LoginController {
 
     @PostMapping("/registered")
     @ResponseBody
-    public Map<String, Object> registered(Users users){
+    public Map<String, Object> registered(Users users, HttpServletRequest request){
         Map<String, Object> result = new HashMap<>();
+        
+        String clientIp = getClientIp(request);
+        LocalDateTime todayStart = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
+        
+        if (usersDao.existsByRegisteredIpAndRegisteredDate(clientIp, todayStart)) {
+            result.put("status", 0);
+            result.put("message", "该IP今日已注册过一个账号，请明日再试");
+            return result;
+        }
+        
         int regResult = loginService.registered(users);
-        result.put("status", regResult);
         if (regResult == 1) {
             Users user = usersDao.findByAccount(users.getAccount());
             if (user != null) {
+                user.setRegisteredIp(clientIp);
+                user.setRegisteredDate(LocalDateTime.now());
+                usersDao.save(user);
+                
                 String memberTypeName = "未知";
                 if (user.getMemberType() != null) {
                     switch (user.getMemberType()) {
@@ -112,6 +125,7 @@ public class LoginController {
                 result.put("memberTypeName", memberTypeName);
             }
         }
+        result.put("status", regResult);
         return result;
     }
 

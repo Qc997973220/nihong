@@ -135,7 +135,7 @@ public class ResourceController {
     public Map<String, Object> detail(
             @PathVariable Long id,
             @RequestParam(defaultValue = "1") int commentPage,
-            @RequestParam(defaultValue = "10") int commentSize,
+            @RequestParam(defaultValue = "5") int commentSize,
             @RequestHeader(value = "Authorization", required = false) String token,
             HttpServletRequest request) {
         Map<String, Object> result = new HashMap<>();
