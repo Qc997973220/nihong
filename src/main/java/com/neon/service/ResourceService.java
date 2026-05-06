@@ -119,9 +119,9 @@ public class ResourceService {
         // 从数据库获取
         resource = resourceRepository.findById(id).orElse(null);
         
-        // 缓存结果，过期时间30分钟
+        // 缓存结果，过期时间3分钟
         if (resource != null) {
-            cacheService.set(cacheKey, resource, 1800);
+            cacheService.set(cacheKey, resource, 180);
         }
         
         return resource;
