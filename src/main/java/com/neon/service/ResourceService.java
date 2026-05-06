@@ -185,17 +185,18 @@ public class ResourceService {
         }
 
         for (Comment topComment : topLevelComments) {
+            topComment.setLikes(getCommentLikes(topComment.getId()));
+            
             List<Comment> replies = repliesMap.get(topComment.getId());
             if (replies != null) {
-                replies.sort((a, b) -> {
-                    if (!b.getLikes().equals(a.getLikes())) {
-                        return b.getLikes().compareTo(a.getLikes());
-                    }
-                    return b.getCreatedAt().compareTo(a.getCreatedAt());
-                });
                 for (Comment reply : replies) {
+                    reply.setLikes(getCommentLikes(reply.getId()));
+                    
                     List<Comment> nestedReplies = repliesMap.get(reply.getId());
                     if (nestedReplies != null) {
+                        for (Comment nestedReply : nestedReplies) {
+                            nestedReply.setLikes(getCommentLikes(nestedReply.getId()));
+                        }
                         nestedReplies.sort((a, b) -> {
                             if (!b.getLikes().equals(a.getLikes())) {
                                 return b.getLikes().compareTo(a.getLikes());
@@ -207,6 +208,12 @@ public class ResourceService {
                         reply.setReplies(new ArrayList<>());
                     }
                 }
+                replies.sort((a, b) -> {
+                    if (!b.getLikes().equals(a.getLikes())) {
+                        return b.getLikes().compareTo(a.getLikes());
+                    }
+                    return b.getCreatedAt().compareTo(a.getCreatedAt());
+                });
                 topComment.setReplies(replies);
             } else {
                 topComment.setReplies(new ArrayList<>());
