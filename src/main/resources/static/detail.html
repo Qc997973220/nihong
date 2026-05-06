@@ -415,6 +415,12 @@
             font-size: 1.1rem;
             margin-bottom: 40px;
         }
+        .article-content p {
+            margin-bottom: 12px; /* 默认间距 */
+        }
+        .article-content p:last-child {
+            margin-bottom: 0;
+        }
         .comment-section {
             background: rgba(15, 25, 40, 0.5);
             backdrop-filter: blur(10px);
@@ -1947,6 +1953,54 @@
         }
     });
 
+    // ========== 格式化内容 ==========
+    function formatContent(content) {
+        if (!content) return '';
+        
+        // 首先处理HTML标签的情况（已经有<p>标签等）
+        if (content.includes('<p>') || content.includes('<P>')) {
+            return content;
+        }
+        
+        // 按空行分割（空行定义为两个或更多换行符）
+        // \n\n = 1个空行, \n\n\n = 2个空行, 以此类推
+        const paragraphBlocks = content.split(/(\n{2,})/);
+        const result = [];
+        
+        for (let i = 0; i < paragraphBlocks.length; i += 2) {
+            const text = paragraphBlocks[i];
+            if (!text || !text.trim()) continue;
+            
+            // 获取后面的空行数量
+            let emptyLineCount = 0;
+            if (i + 1 < paragraphBlocks.length) {
+                const emptyLines = paragraphBlocks[i + 1];
+                // 空行数 = 换行数 - 1（因为\n\n是1个空行）
+                emptyLineCount = emptyLines.length - 1;
+            }
+            
+            // 根据空行数确定间距
+            // 0个空行(1次回车)=12px, 1个空行(2次回车)=16px, 2个空行(3次回车)=24px, 3个以上空行=32px
+            let marginBottom = 12;
+            if (emptyLineCount >= 1) {
+                marginBottom = 16;
+            }
+            if (emptyLineCount >= 2) {
+                marginBottom = 24;
+            }
+            if (emptyLineCount >= 3) {
+                marginBottom = 32;
+            }
+            
+            // 处理段落内的换行
+            const formattedText = text.replace(/\n/g, '<br>');
+            
+            result.push(`<p style="margin-bottom: ${marginBottom}px !important;">${formattedText}</p>`);
+        }
+        
+        return result.join('');
+    }
+
     // ========== 获取详情 ==========
     async function fetchDetail() {
         console.log('开始获取详情，资源ID:', id);
@@ -2125,7 +2179,7 @@
                     <span>为保障霓虹之都全体会员的权益，本站资源链接严禁向站外分享传播，任何侵权外传行为被检测都将面临账号封禁，甚至更严重的后果！</span>
                 </div>
                 <div class="article-content">
-                    ${content ? escapeHtml(content).replace(/\n/g, '<br>') : '暂无内容'}
+                    ${content ? formatContent(content) : '暂无内容'}
                 </div>
                 <div class="comment-section">
                     <h3 style="margin-bottom:20px;">评论 (${comments.length})</h3>

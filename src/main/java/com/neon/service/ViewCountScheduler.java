@@ -96,9 +96,9 @@ public class ViewCountScheduler {
             System.out.println("资源 " + resourceId + " 生成新的停止阈值: " + threshold);
         }
 
-        // 启动定时任务，每10分钟执行一次（随机增加0~30）
+        // 启动定时任务，每10分钟执行一次（随机增加0~9）
         ScheduledFuture<?> future10min = taskScheduler.scheduleAtFixedRate(
-                () -> executeAutoIncrement(resourceId, 30), // 0~30
+                () -> executeAutoIncrement(resourceId, 9), // 0~9
                 java.time.Instant.now().atZone(ZoneId.systemDefault()).toInstant(),
                 java.time.Duration.ofMinutes(10)
         );
@@ -128,8 +128,19 @@ public class ViewCountScheduler {
                 return;
             }
 
-            // 随机增加访问量（0~maxIncrement）
-            int increment = random.nextInt(maxIncrement + 1);
+            // 随机增加访问量
+            int increment;
+            if (maxIncrement == 3) {
+                // 高频任务：50%概率为0，50%概率在1~3之间均匀分布
+                if (random.nextDouble() < 0.5) {
+                    increment = 0;
+                } else {
+                    increment = random.nextInt(3) + 1; // 1~3
+                }
+            } else {
+                // 其他任务：0~maxIncrement 均匀分布
+                increment = random.nextInt(maxIncrement + 1);
+            }
             
             if (increment > 0) {
                 // 使用 Redis 原子递增，记录增量

@@ -28,6 +28,7 @@ public class Resource {
     private Integer commentEnabled = 0;  // 评论开关：0-关闭，1-开启
     private Integer viewCount = 0;       // 访问量
     private Integer stopThreshold;       // 自动增加停止阈值（50-300随机）
+    private Integer top = 0;             // 是否置顶：0-否，1-是
     private LocalDateTime createdAt; // 创建时间
     private LocalDateTime updatedAt; // 修改时间
 

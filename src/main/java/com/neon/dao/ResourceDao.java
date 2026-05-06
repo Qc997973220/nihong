@@ -10,10 +10,14 @@ import java.util.List;
 
 @Repository
 public interface ResourceDao extends JpaRepository<Resource, Long> {
-    List<Resource> findByStatusOrderByCreatedAtDesc(Integer status);
-    List<Resource> findByStatusInOrderByCreatedAtDesc(List<Integer> statuses);
-    List<Resource> findByTitleContainingIgnoreCaseAndStatusIn(String title, List<Integer> statuses);
-    Page<Resource> findByStatusInOrderByCreatedAtDesc(List<Integer> statuses, Pageable pageable);
-    Page<Resource> findByTitleContainingIgnoreCaseAndStatusInOrderByCreatedAtDesc(String title, List<Integer> statuses, Pageable pageable);
+    // 按置顶优先排序，然后按创建时间降序
+    List<Resource> findByStatusOrderByTopDescCreatedAtDesc(Integer status);
+    List<Resource> findByStatusInOrderByTopDescCreatedAtDesc(List<Integer> statuses);
+    List<Resource> findByTitleContainingIgnoreCaseAndStatusInOrderByTopDescCreatedAtDesc(String title, List<Integer> statuses);
+    Page<Resource> findByStatusInOrderByTopDescCreatedAtDesc(List<Integer> statuses, Pageable pageable);
+    Page<Resource> findByTitleContainingIgnoreCaseAndStatusInOrderByTopDescCreatedAtDesc(String title, List<Integer> statuses, Pageable pageable);
     long countByStatusIn(List<Integer> statuses);
+    
+    // 保留旧方法用于兼容
+    List<Resource> findByStatusOrderByCreatedAtDesc(Integer status);
 }

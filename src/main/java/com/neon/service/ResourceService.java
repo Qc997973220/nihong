@@ -37,14 +37,14 @@ public class ResourceService {
             return resources;
         }
 
-        resources = resourceRepository.findByStatusInOrderByCreatedAtDesc(Arrays.asList(1, 2));
+        resources = resourceRepository.findByStatusInOrderByTopDescCreatedAtDesc(Arrays.asList(1, 2));
         cacheService.set(cacheKey, resources, 180);
 
         return resources;
     }
 
     public List<Resource> getAllResourcesIncludingPending() {
-        return resourceRepository.findByStatusInOrderByCreatedAtDesc(Arrays.asList(0, 1, 2));
+        return resourceRepository.findByStatusInOrderByTopDescCreatedAtDesc(Arrays.asList(0, 1, 2));
     }
 
     public Map<String, Object> getAllResourcesForAdmin(int page, int pageSize, String keyword) {
@@ -56,10 +56,10 @@ public class ResourceService {
         Page<Resource> resourcePage;
 
         if (keyword != null && !keyword.trim().isEmpty()) {
-            resourcePage = resourceRepository.findByTitleContainingIgnoreCaseAndStatusInOrderByCreatedAtDesc(
+            resourcePage = resourceRepository.findByTitleContainingIgnoreCaseAndStatusInOrderByTopDescCreatedAtDesc(
                     keyword.trim(), Arrays.asList(0, 1, 2), pageable);
         } else {
-            resourcePage = resourceRepository.findByStatusInOrderByCreatedAtDesc(Arrays.asList(0, 1, 2), pageable);
+            resourcePage = resourceRepository.findByStatusInOrderByTopDescCreatedAtDesc(Arrays.asList(0, 1, 2), pageable);
         }
 
         Map<String, Object> result = new HashMap<>();
@@ -94,7 +94,7 @@ public class ResourceService {
         }
 
         Pageable pageable = PageRequest.of(page - 1, size);
-        Page<Resource> resourcePage = resourceRepository.findByStatusInOrderByCreatedAtDesc(Arrays.asList(1, 2), pageable);
+        Page<Resource> resourcePage = resourceRepository.findByStatusInOrderByTopDescCreatedAtDesc(Arrays.asList(1, 2), pageable);
 
         // 更新每个资源的访问量（包含Redis增量）
         List<Resource> resources = resourcePage.getContent();
@@ -117,7 +117,7 @@ public class ResourceService {
     }
 
     public List<Resource> searchResources(String keyword) {
-        List<Resource> resources = resourceRepository.findByTitleContainingIgnoreCaseAndStatusIn(keyword, Arrays.asList(1, 2));
+        List<Resource> resources = resourceRepository.findByTitleContainingIgnoreCaseAndStatusInOrderByTopDescCreatedAtDesc(keyword, Arrays.asList(1, 2));
         // 更新每个资源的访问量（包含Redis增量）
         resources.forEach(resource -> {
             resource.setViewCount(getViewCount(resource.getId()));
