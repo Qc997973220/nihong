@@ -355,6 +355,10 @@
                     <div class="info-label">性别：</div>
                     <div class="info-value" id="infoGender"></div>
                 </div>
+                <div class="info-item" id="introductionSection" style="display: none;">
+                    <div class="info-label">个人简介：</div>
+                    <div class="info-value" id="infoIntroduction" style="color: #90b0d1; font-style: italic;"></div>
+                </div>
                 <div class="info-item private-info">
                     <div class="info-label">邮箱：</div>
                     <div class="info-value" id="infoEmail"></div>
@@ -436,6 +440,13 @@
                     document.getElementById('infoUserName').textContent = user.userName;
                     document.getElementById('infoNickname').textContent = user.nickname || user.userName;
                     document.getElementById('infoGender').textContent = user.gender || '未知';
+                    
+                    // 显示个人简介
+                    if (user.introduction) {
+                        document.getElementById('infoIntroduction').textContent = user.introduction;
+                        document.getElementById('introductionSection').style.display = 'flex';
+                    }
+                    
                     document.getElementById('infoEmail').textContent = user.email || '未设置';
                     document.getElementById('infoPhone').textContent = user.phone || '未设置';
                     document.getElementById('infoLastLogin').textContent = user.lastLoginTime || '未知';

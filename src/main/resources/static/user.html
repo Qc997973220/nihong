@@ -522,6 +522,11 @@
                 <input type="email" id="editEmail" placeholder="请输入邮箱">
                 <div class="edit-form-hint">用于账号密码找回</div>
             </div>
+            <div class="edit-form-group">
+                <label><i class="fas fa-comment"></i> 个人简介</label>
+                <textarea id="editIntroduction" placeholder="介绍一下自己吧" maxlength="80" rows="3" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(90, 160, 255, 0.3); background: rgba(8, 18, 32, 0.6); color: #eef3fc; resize: none; font-size: 0.95rem;"></textarea>
+                <div class="edit-form-hint">最多80字</div>
+            </div>
             <div class="edit-message" id="editMessage"></div>
         </div>
         <div class="edit-modal-footer">
@@ -665,10 +670,33 @@
 <script>
     document.getElementById('editUserInfoBtn').addEventListener('click', function() {
         const modal = document.getElementById('editModal');
-        document.getElementById('editUserName').value = userData.username || '';
-        document.getElementById('editGender').value = userData.gender || '';
-        document.getElementById('editPhone').value = userData.phone || '';
-        document.getElementById('editEmail').value = userData.email || '';
+        
+        // 每次打开编辑弹窗时，从 localStorage 重新读取最新的用户数据
+        const latestUserInfo = localStorage.getItem('userInfo');
+        if (latestUserInfo) {
+            try {
+                const latestData = JSON.parse(latestUserInfo);
+                document.getElementById('editUserName').value = latestData.username || '';
+                document.getElementById('editGender').value = latestData.gender || '';
+                document.getElementById('editPhone').value = latestData.phone || '';
+                document.getElementById('editEmail').value = latestData.email || '';
+                document.getElementById('editIntroduction').value = latestData.introduction || '';
+            } catch (e) {
+                console.error('解析用户信息失败:', e);
+                document.getElementById('editUserName').value = userData.username || '';
+                document.getElementById('editGender').value = userData.gender || '';
+                document.getElementById('editPhone').value = userData.phone || '';
+                document.getElementById('editEmail').value = userData.email || '';
+                document.getElementById('editIntroduction').value = userData.introduction || '';
+            }
+        } else {
+            document.getElementById('editUserName').value = userData.username || '';
+            document.getElementById('editGender').value = userData.gender || '';
+            document.getElementById('editPhone').value = userData.phone || '';
+            document.getElementById('editEmail').value = userData.email || '';
+            document.getElementById('editIntroduction').value = userData.introduction || '';
+        }
+        
         document.getElementById('editMessage').style.display = 'none';
         modal.classList.add('active');
     });
@@ -692,6 +720,7 @@
         const gender = document.getElementById('editGender').value;
         const phone = document.getElementById('editPhone').value.trim();
         const email = document.getElementById('editEmail').value.trim();
+        const introduction = document.getElementById('editIntroduction').value.trim();
         const messageDiv = document.getElementById('editMessage');
         const btn = this;
 
@@ -726,6 +755,7 @@
         if (email) formData.append('email', email);
 
         try {
+            // 先保存基本信息
             const response = await fetch('/api/login/updateUserInfo', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -738,6 +768,21 @@
                 if (gender) userData.gender = gender;
                 if (phone) userData.phone = phone;
                 if (email) userData.email = email;
+            }
+
+            // 再保存个人简介
+            const introResponse = await fetch('/api/user/introduction', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                },
+                body: JSON.stringify({ introduction: introduction })
+            });
+            const introResult = await introResponse.json();
+
+            if (introResult.status || result.status === 1) {
+                userData.introduction = introduction;
                 localStorage.setItem('userInfo', JSON.stringify(userData));
 
                 document.getElementById('nickname').innerText = userData.username;
@@ -754,7 +799,7 @@
                 }, 1000);
             } else {
                 messageDiv.className = 'edit-message error';
-                messageDiv.innerText = result.message || '保存失败';
+                messageDiv.innerText = introResult.message || result.message || '保存失败';
                 messageDiv.style.display = 'block';
             }
         } catch (error) {

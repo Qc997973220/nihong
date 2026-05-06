@@ -3,6 +3,7 @@ package com.neon.controller;
 import com.neon.dao.UsersDao;
 import com.neon.pojo.Users;
 import com.neon.service.AuthService;
+import com.neon.service.CacheService;
 import com.neon.service.LoginService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +22,8 @@ public class LoginController {
     UsersDao usersDao;
     @Autowired
     AuthService authService;
+    @Autowired
+    CacheService cacheService;
 
     @GetMapping("/first")
     @ResponseBody
@@ -126,6 +129,10 @@ public class LoginController {
             result.put("message", "用户不存在");
             return result;
         }
+        
+        // 保存旧用户名，用于后续清除缓存
+        String oldUserName = user.getUserName();
+        
         if (userName != null && !userName.isEmpty()) {
             if (usersDao.existsByUserName(userName) && !userName.equals(user.getUserName())) {
                 result.put("status", 0);
@@ -150,6 +157,17 @@ public class LoginController {
         }
         user.setOperatingTime(LocalDateTime.now());
         usersDao.save(user);
+        
+        // 清除用户信息缓存
+        if (userName != null && !userName.isEmpty() && !userName.equals(oldUserName)) {
+            // 如果用户名被修改，清除旧用户名的缓存
+            cacheService.delete(cacheService.getUserInfoKey(oldUserName) + ":own");
+            cacheService.delete(cacheService.getUserInfoKey(oldUserName) + ":other");
+        }
+        // 清除新用户名的缓存
+        cacheService.delete(cacheService.getUserInfoKey(user.getUserName()) + ":own");
+        cacheService.delete(cacheService.getUserInfoKey(user.getUserName()) + ":other");
+        
         result.put("status", 1);
         result.put("message", "更新成功");
         return result;
