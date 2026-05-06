@@ -22,6 +22,9 @@ public interface UsersDao extends JpaRepository<Users, String> {
     Users findByToken(String token);
     
     List<Users> findByRegisteredIpAndRegisteredDate(String registeredIp, LocalDateTime registeredDate);
-    
+
     boolean existsByRegisteredIpAndRegisteredDate(String registeredIp, LocalDateTime registeredDate);
+
+    @org.springframework.data.jpa.repository.Query("SELECT COUNT(u) > 0 FROM Users u WHERE u.registeredIp = :ip AND u.registeredDate >= :start AND u.registeredDate < :end")
+    boolean existsByRegisteredIpToday(@org.springframework.data.repository.query.Param("ip") String ip, @org.springframework.data.repository.query.Param("start") LocalDateTime start, @org.springframework.data.repository.query.Param("end") LocalDateTime end);
 }

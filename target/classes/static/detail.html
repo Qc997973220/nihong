@@ -1795,6 +1795,10 @@
 
     // ========== 用户信息 ==========
     let savedUsername = null;
+    let currentCommentPage = 1;
+    let totalCommentPages = 1;
+    let totalComments = 0;
+    let currentResourceId = null;
     const savedUserInfo = localStorage.getItem('userInfo');
     if (savedUserInfo) {
         try {
@@ -2196,7 +2200,7 @@
                     ${content ? formatContent(content) : '暂无内容'}
                 </div>
                 <div class="comment-section">
-                    <h3 style="margin-bottom:20px;">评论 (${comments.length})</h3>
+                    <h3 id="commentHeader" style="margin-bottom:20px;">评论</h3>
                     <!-- 新增评论输入区域 -->
                     <div class="comment-input-area" id="commentInputArea">
                         <textarea id="commentContent" placeholder="写下你的评论..."></textarea>
@@ -2209,6 +2213,11 @@
                     </div>
                     <div id="commentList">
                         ${renderComments(comments)}
+                    </div>
+                    <div id="commentPagination" class="comment-pagination" style="display: none; margin-top: 20px; text-align: center;">
+                        <button id="prevPageBtn" class="btn btn-secondary" onclick="prevCommentPage()" style="margin-right: 10px;">上一页</button>
+                        <span id="pageInfo" style="color: #90b0d1;"></span>
+                        <button id="nextPageBtn" class="btn btn-secondary" onclick="nextCommentPage()" style="margin-left: 10px;">下一页</button>
                     </div>
                 </div>
                 <div class="disclaimer-container">
@@ -2237,11 +2246,97 @@
         // 绑定评论提交事件
         bindCommentSubmit(commentEnabled);
 
+        // 更新评论分页信息
+        if (data.commentPageInfo) {
+            totalComments = data.commentPageInfo.totalElements || 0;
+            totalCommentPages = data.commentPageInfo.totalPages || 1;
+            currentCommentPage = data.commentPageInfo.currentPage || 1;
+            currentResourceId = resource.id;
+            updateCommentPagination();
+
+            // 更新评论总数显示
+            const commentHeader = document.querySelector('.comment-section h3');
+            if (commentHeader) {
+                commentHeader.textContent = `评论 (${totalComments})`;
+            }
+        }
+
         // 检查每个评论的点赞状态
         if (savedUsername && comments && comments.length > 0) {
             comments.forEach(comment => {
                 checkUserLikedStatus(comment.id);
             });
+        }
+    }
+
+    // 更新评论分页按钮状态
+    function updateCommentPagination() {
+        const paginationDiv = document.getElementById('commentPagination');
+        const pageInfo = document.getElementById('pageInfo');
+        const prevBtn = document.getElementById('prevPageBtn');
+        const nextBtn = document.getElementById('nextPageBtn');
+
+        if (!paginationDiv || !pageInfo) return;
+
+        if (totalCommentPages > 1) {
+            paginationDiv.style.display = 'block';
+            pageInfo.textContent = `第 ${currentCommentPage} / ${totalCommentPages} 页，共 ${totalComments} 条评论`;
+            prevBtn.disabled = currentCommentPage <= 1;
+            nextBtn.disabled = currentCommentPage >= totalCommentPages;
+        } else {
+            paginationDiv.style.display = 'none';
+        }
+    }
+
+    // 上一页
+    async function prevCommentPage() {
+        if (currentCommentPage <= 1) return;
+        currentCommentPage--;
+        await loadCommentsForPage(currentCommentPage);
+    }
+
+    // 下一页
+    async function nextCommentPage() {
+        if (currentCommentPage >= totalCommentPages) return;
+        currentCommentPage++;
+        await loadCommentsForPage(currentCommentPage);
+    }
+
+    // 加载指定页的评论
+    async function loadCommentsForPage(page) {
+        try {
+            const response = await fetch(`/api/resources/${currentResourceId}?commentPage=${page}&commentSize=5`);
+            if (!response.ok) throw new Error('获取评论失败');
+
+            const data = await response.json();
+            if (data.success && data.comments) {
+                const commentList = document.getElementById('commentList');
+                if (commentList) {
+                    commentList.innerHTML = renderComments(data.comments);
+                }
+
+                if (data.commentPageInfo) {
+                    totalComments = data.commentPageInfo.totalElements || 0;
+                    totalCommentPages = data.commentPageInfo.totalPages || 1;
+                    currentCommentPage = data.commentPageInfo.currentPage || 1;
+                    updateCommentPagination();
+                }
+
+                // 更新评论计数
+                const commentHeader = document.querySelector('.comment-section h3');
+                if (commentHeader) {
+                    commentHeader.textContent = `评论 (${totalComments})`;
+                }
+
+                // 检查点赞状态
+                if (savedUsername && data.comments && data.comments.length > 0) {
+                    data.comments.forEach(comment => {
+                        checkUserLikedStatus(comment.id);
+                    });
+                }
+            }
+        } catch (error) {
+            console.error('加载评论失败:', error);
         }
     }
 

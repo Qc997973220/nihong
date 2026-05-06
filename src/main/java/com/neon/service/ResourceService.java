@@ -227,10 +227,16 @@ public class ResourceService {
 
         // 如果有当前用户，将当前用户的评论优先展示在最前面
         if (currentUser != null && !currentUser.isEmpty()) {
+            // 从 currentUser 中提取实际的用户名（格式为 "user:username" 或 "ip:xxx"）
+            String actualUserName = currentUser;
+            if (currentUser.startsWith("user:")) {
+                actualUserName = currentUser.substring(5);
+            }
+
             topLevelComments.sort((a, b) -> {
-                boolean aIsCurrentUser = currentUser.equals(a.getAuthor());
-                boolean bIsCurrentUser = currentUser.equals(b.getAuthor());
-                
+                boolean aIsCurrentUser = actualUserName.equals(a.getAuthor());
+                boolean bIsCurrentUser = actualUserName.equals(b.getAuthor());
+
                 if (aIsCurrentUser && !bIsCurrentUser) {
                     return -1; // a排在前面
                 } else if (!aIsCurrentUser && bIsCurrentUser) {

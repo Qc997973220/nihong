@@ -97,8 +97,9 @@ public class LoginController {
         
         String clientIp = getClientIp(request);
         LocalDateTime todayStart = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
-        
-        if (usersDao.existsByRegisteredIpAndRegisteredDate(clientIp, todayStart)) {
+        LocalDateTime tomorrowStart = todayStart.plusDays(1);
+
+        if (usersDao.existsByRegisteredIpToday(clientIp, todayStart, tomorrowStart)) {
             result.put("status", 0);
             result.put("message", "该IP今日已注册过一个账号，请明日再试");
             return result;
