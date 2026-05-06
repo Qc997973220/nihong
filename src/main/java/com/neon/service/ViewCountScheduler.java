@@ -44,6 +44,29 @@ public class ViewCountScheduler {
         
         // 检查是否有已审核通过且未达到阈值的资源，恢复定时任务
         resumeScheduledTasks();
+        
+        // 启动定期持久化任务（每5分钟执行一次）
+        startFlushTask();
+    }
+
+    /**
+     * 启动定期将缓存访问量持久化到数据库的任务
+     */
+    private void startFlushTask() {
+        taskScheduler.scheduleAtFixedRate(
+                () -> {
+                    try {
+                        resourceService.flushViewCountsToDatabase();
+                        System.out.println("View count flush task executed successfully");
+                    } catch (Exception e) {
+                        System.out.println("View count flush task failed: " + e.getMessage());
+                        e.printStackTrace();
+                    }
+                },
+                java.time.Instant.now().atZone(ZoneId.systemDefault()).toInstant(),
+                java.time.Duration.ofMinutes(5)
+        );
+        System.out.println("View count flush task started (every 5 minutes)");
     }
 
     /**
@@ -72,7 +95,7 @@ public class ViewCountScheduler {
     }
 
     /**
-     * 执行自动增加访问量
+     * 执行自动增加访问量（使用 Redis 缓存）
      * @param resourceId 资源ID
      */
     private void executeAutoIncrement(Long resourceId) {
@@ -87,27 +110,16 @@ public class ViewCountScheduler {
             int increment = random.nextInt(31); // 0~30
             
             if (increment > 0) {
-                Resource resource = resourceDao.findById(resourceId).orElse(null);
-                if (resource != null) {
-                    int currentCount = resource.getViewCount() != null ? resource.getViewCount() : 0;
-                    int newCount = currentCount + increment;
-                    
-                    // 检查是否超过阈值
-                    Integer threshold = resource.getStopThreshold();
-                    if (threshold != null && newCount >= threshold) {
-                        newCount = threshold;
-                    }
-                    
-                    resource.setViewCount(newCount);
-                    resource.setUpdatedAt(LocalDateTime.now());
-                    resourceDao.save(resource);
-                    
-                    // 清除缓存
-                    String cacheKey = cacheService.getResourceDetailKey(resourceId);
-                    cacheService.delete(cacheKey);
-                    
-                    System.out.println("资源 " + resourceId + " 自动增加访问量: " + increment + ", 当前访问量: " + newCount);
-                }
+                // 使用 Redis 原子递增，记录增量
+                String deltaKey = cacheService.getResourceViewCountDeltaKey(resourceId);
+                cacheService.increment(deltaKey, increment);
+                
+                // 清除资源详情缓存
+                cacheService.delete(cacheService.getResourceDetailKey(resourceId));
+                
+                // 获取当前总访问量（包含缓存增量）
+                int currentCount = resourceService.getViewCount(resourceId);
+                System.out.println("资源 " + resourceId + " 自动增加访问量: " + increment + ", 当前访问量: " + currentCount);
             }
 
             // 再次检查是否达到阈值

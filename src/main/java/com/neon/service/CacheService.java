@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -71,6 +73,60 @@ public class CacheService {
     }
 
     /**
+     * 原子性递增
+     * @param key 缓存键
+     * @param delta 增量值
+     * @return 递增后的值
+     */
+    public Long increment(String key, long delta) {
+        try {
+            return redisTemplate.opsForValue().increment(key, delta);
+        } catch (Exception e) {
+            // Redis不可用时，返回null，回退到数据库
+            System.out.println("Redis increment failed: " + e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * 原子性递增（默认+1）
+     * @param key 缓存键
+     * @return 递增后的值
+     */
+    public Long increment(String key) {
+        return increment(key, 1);
+    }
+
+    /**
+     * 获取整数值
+     * @param key 缓存键
+     * @return 整数值，如果不存在返回0
+     */
+    public int getInt(String key) {
+        Object value = get(key);
+        if (value instanceof Integer) {
+            return (Integer) value;
+        } else if (value instanceof Long) {
+            return ((Long) value).intValue();
+        }
+        return 0;
+    }
+
+    /**
+     * 获取所有匹配pattern的key
+     * @param pattern 匹配模式
+     * @return key列表
+     */
+    public Set<String> keys(String pattern) {
+        try {
+            return redisTemplate.keys(pattern);
+        } catch (Exception e) {
+            System.out.println("Redis keys failed: " + e.getMessage());
+            return null;
+        }
+    }
+
+    /**
      * 生成资源列表缓存键
      * @return 缓存键
      */
@@ -85,6 +141,24 @@ public class CacheService {
      */
     public String getResourceDetailKey(Long id) {
         return "resource:detail:" + id;
+    }
+
+    /**
+     * 生成资源访问量缓存键
+     * @param id 资源ID
+     * @return 缓存键
+     */
+    public String getResourceViewCountKey(Long id) {
+        return "resource:viewcount:" + id;
+    }
+
+    /**
+     * 生成访问量增量缓存键（用于批量持久化）
+     * @param id 资源ID
+     * @return 缓存键
+     */
+    public String getResourceViewCountDeltaKey(Long id) {
+        return "resource:viewcount:delta:" + id;
     }
 
     /**

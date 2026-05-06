@@ -83,14 +83,27 @@ public class ResourceService {
         Map<String, Object> cachedData = (Map<String, Object>) cacheService.get(cacheKey);
 
         if (cachedData != null) {
+            // 更新缓存数据中的访问量（包含Redis增量）
+            List<Resource> cachedResources = (List<Resource>) cachedData.get("content");
+            if (cachedResources != null) {
+                cachedResources.forEach(resource -> {
+                    resource.setViewCount(getViewCount(resource.getId()));
+                });
+            }
             return cachedData;
         }
 
         Pageable pageable = PageRequest.of(page - 1, size);
         Page<Resource> resourcePage = resourceRepository.findByStatusInOrderByCreatedAtDesc(Arrays.asList(1, 2), pageable);
 
+        // 更新每个资源的访问量（包含Redis增量）
+        List<Resource> resources = resourcePage.getContent();
+        resources.forEach(resource -> {
+            resource.setViewCount(getViewCount(resource.getId()));
+        });
+
         Map<String, Object> result = new HashMap<>();
-        result.put("content", resourcePage.getContent());
+        result.put("content", resources);
         result.put("currentPage", page);
         result.put("pageSize", size);
         result.put("totalElements", resourcePage.getTotalElements());
@@ -104,7 +117,12 @@ public class ResourceService {
     }
 
     public List<Resource> searchResources(String keyword) {
-        return resourceRepository.findByTitleContainingIgnoreCaseAndStatusIn(keyword, Arrays.asList(1, 2));
+        List<Resource> resources = resourceRepository.findByTitleContainingIgnoreCaseAndStatusIn(keyword, Arrays.asList(1, 2));
+        // 更新每个资源的访问量（包含Redis增量）
+        resources.forEach(resource -> {
+            resource.setViewCount(getViewCount(resource.getId()));
+        });
+        return resources;
     }
 
     public Resource getResourceDetail(Long id) {
@@ -301,23 +319,71 @@ public class ResourceService {
         cacheService.delete(cacheService.getResourceDetailKey(id));
     }
 
-    // 增加访问量（用户访问时调用）
+    // 增加访问量（用户访问时调用）- 使用 Redis 缓存
     public void incrementViewCount(Long resourceId) {
+        // 使用 Redis 原子递增，记录增量
+        String deltaKey = cacheService.getResourceViewCountDeltaKey(resourceId);
+        cacheService.increment(deltaKey);
+        
+        // 清除该资源详情缓存
+        cacheService.delete(cacheService.getResourceDetailKey(resourceId));
+    }
+
+    // 获取资源访问量（从缓存或数据库）
+    public Integer getViewCount(Long resourceId) {
+        // 先从缓存获取增量
+        String deltaKey = cacheService.getResourceViewCountDeltaKey(resourceId);
+        int delta = cacheService.getInt(deltaKey);
+        
+        // 从数据库获取基础访问量
         Resource resource = resourceRepository.findById(resourceId).orElse(null);
-        if (resource != null) {
-            if (resource.getViewCount() == null) {
-                resource.setViewCount(0);
+        int baseCount = resource != null && resource.getViewCount() != null ? resource.getViewCount() : 0;
+        
+        // 返回总和
+        return baseCount + delta;
+    }
+
+    // 批量将缓存的访问量增量持久化到数据库
+    public void flushViewCountsToDatabase() {
+        String pattern = cacheService.getResourceViewCountDeltaKey(0L).replace(":0", ":*");
+        Set<String> deltaKeys = cacheService.keys(pattern);
+        
+        if (deltaKeys == null || deltaKeys.isEmpty()) {
+            return;
+        }
+        
+        for (String deltaKey : deltaKeys) {
+            try {
+                // 解析资源ID
+                Long resourceId = Long.parseLong(deltaKey.split(":")[3]);
+                int delta = cacheService.getInt(deltaKey);
+                
+                if (delta > 0) {
+                    Resource resource = resourceRepository.findById(resourceId).orElse(null);
+                    if (resource != null) {
+                        int currentCount = resource.getViewCount() != null ? resource.getViewCount() : 0;
+                        resource.setViewCount(currentCount + delta);
+                        resource.setUpdatedAt(LocalDateTime.now());
+                        resourceRepository.save(resource);
+                        
+                        // 清除增量缓存
+                        cacheService.delete(deltaKey);
+                        
+                        // 清除资源详情缓存
+                        cacheService.delete(cacheService.getResourceDetailKey(resourceId));
+                    }
+                } else {
+                    // 增量为0或负数，直接删除缓存
+                    cacheService.delete(deltaKey);
+                }
+            } catch (Exception e) {
+                System.out.println("Flush view count failed for key " + deltaKey + ": " + e.getMessage());
             }
-            resource.setViewCount(resource.getViewCount() + 1);
-            resource.setUpdatedAt(LocalDateTime.now());
-            resourceRepository.save(resource);
-            // 清除该资源详情缓存
-            cacheService.delete(cacheService.getResourceDetailKey(resourceId));
         }
     }
 
-    // 获取资源访问量
-    public Integer getViewCount(Long resourceId) {
+    // 获取资源的真实访问量（仅数据库值，不包含缓存增量）
+    public Integer getViewCountFromDatabase(Long resourceId) {
         Resource resource = resourceRepository.findById(resourceId).orElse(null);
         if (resource != null && resource.getViewCount() != null) {
             return resource.getViewCount();
@@ -352,10 +418,11 @@ public class ResourceService {
             return false;
         }
         Integer threshold = resource.getStopThreshold();
-        Integer viewCount = resource.getViewCount();
-        if (threshold == null || viewCount == null) {
+        if (threshold == null) {
             return false;
         }
-        return viewCount < threshold;
+        // 使用包含缓存增量的总访问量
+        int totalViewCount = getViewCount(resourceId);
+        return totalViewCount < threshold;
     }
 }
