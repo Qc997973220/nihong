@@ -193,6 +193,20 @@ public class ResourceService {
                     }
                     return b.getCreatedAt().compareTo(a.getCreatedAt());
                 });
+                for (Comment reply : replies) {
+                    List<Comment> nestedReplies = repliesMap.get(reply.getId());
+                    if (nestedReplies != null) {
+                        nestedReplies.sort((a, b) -> {
+                            if (!b.getLikes().equals(a.getLikes())) {
+                                return b.getLikes().compareTo(a.getLikes());
+                            }
+                            return b.getCreatedAt().compareTo(a.getCreatedAt());
+                        });
+                        reply.setReplies(nestedReplies);
+                    } else {
+                        reply.setReplies(new ArrayList<>());
+                    }
+                }
                 topComment.setReplies(replies);
             } else {
                 topComment.setReplies(new ArrayList<>());
