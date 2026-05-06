@@ -243,7 +243,14 @@ public class ResourceService {
     }
 
     public Comment saveComment(Comment comment) {
+        System.out.println("=== saveComment 调试 ===");
+        System.out.println("resourceId: " + comment.getResourceId());
+        System.out.println("author: " + comment.getAuthor());
+        System.out.println("content: " + comment.getContent());
+        System.out.println("parentId: " + comment.getParentId());
         Comment savedComment = commentRepository.save(comment);
+        System.out.println("保存后的评论ID: " + savedComment.getId());
+        System.out.println("保存后的parentId: " + savedComment.getParentId());
         cacheService.delete(cacheService.getResourceDetailKey(comment.getResourceId()));
         return savedComment;
     }
