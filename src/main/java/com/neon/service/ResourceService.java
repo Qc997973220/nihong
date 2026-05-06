@@ -323,7 +323,27 @@ public class ResourceService {
         cacheService.delete(cacheService.getResourceDetailKey(id));
     }
 
-    // 增加访问量（用户访问时调用）- 使用 Redis 缓存
+    // 增加访问量（用户访问时调用）- 使用 Redis 缓存，带去重
+    public boolean incrementViewCount(Long resourceId, String userIdentifier) {
+        // 检查用户是否已访问过该资源
+        if (cacheService.hasUserViewedResource(userIdentifier, resourceId)) {
+            return false; // 已访问过，不增加
+        }
+        
+        // 使用 Redis 原子递增，记录增量
+        String deltaKey = cacheService.getResourceViewCountDeltaKey(resourceId);
+        cacheService.increment(deltaKey);
+        
+        // 标记用户已访问
+        cacheService.markUserViewedResource(userIdentifier, resourceId);
+        
+        // 清除该资源详情缓存
+        cacheService.delete(cacheService.getResourceDetailKey(resourceId));
+        
+        return true; // 增加成功
+    }
+
+    // 增加访问量（无去重，用于自动增加等场景）
     public void incrementViewCount(Long resourceId) {
         // 使用 Redis 原子递增，记录增量
         String deltaKey = cacheService.getResourceViewCountDeltaKey(resourceId);

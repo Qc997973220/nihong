@@ -162,6 +162,38 @@ public class CacheService {
     }
 
     /**
+     * 生成用户资源访问记录缓存键
+     * @param userIdentifier 用户标识（用户名或IP）
+     * @param resourceId 资源ID
+     * @return 缓存键
+     */
+    public String getUserResourceViewKey(String userIdentifier, Long resourceId) {
+        return "user:view:" + userIdentifier + ":resource:" + resourceId;
+    }
+
+    /**
+     * 检查用户是否已访问过某资源
+     * @param userIdentifier 用户标识（用户名或IP）
+     * @param resourceId 资源ID
+     * @return 是否已访问
+     */
+    public boolean hasUserViewedResource(String userIdentifier, Long resourceId) {
+        String key = getUserResourceViewKey(userIdentifier, resourceId);
+        return exists(key);
+    }
+
+    /**
+     * 标记用户已访问某资源
+     * @param userIdentifier 用户标识（用户名或IP）
+     * @param resourceId 资源ID
+     */
+    public void markUserViewedResource(String userIdentifier, Long resourceId) {
+        String key = getUserResourceViewKey(userIdentifier, resourceId);
+        // 设置过期时间为1小时（3600秒）
+        set(key, "1", 3600);
+    }
+
+    /**
      * 生成用户信息缓存键
      * @param userName 用户名
      * @return 缓存键

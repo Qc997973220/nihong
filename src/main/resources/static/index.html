@@ -1743,12 +1743,18 @@
             flex-shrink: 0;
         }
         .card-view-count {
-            color: #90b0d1;
-            font-size: 0.85rem;
-            flex-shrink: 0;
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            background: rgba(0, 0, 0, 0.6);
+            color: #ffffff;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.75rem;
             display: flex;
             align-items: center;
             gap: 4px;
+            z-index: 2;
         }
         .card-link {
             color: #ffffff;
@@ -3172,13 +3178,15 @@
         function createResourceCard(resource) {
             const card = document.createElement('div');
             card.className = 'resource-card';
+            const viewCountHtml = `<div class="card-view-count"><i class="fa-regular fa-eye"></i> ${resource.viewCount || 0}</div>`;
             const imageHtml = resource.image
                 ? `<div class="card-image-wrapper" onclick="viewResource(${resource.id})">
                        <img class="card-image" src="${resource.image}" alt="${resource.title}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                        <div class="card-image-placeholder" style="display:none;"><i class="fas fa-image"></i></div>
                        <div class="card-image-overlay"><i class="fas fa-search-plus"></i></div>
+                       ${viewCountHtml}
                    </div>`
-                : `<div class="card-image-wrapper"><div class="card-image-placeholder"><i class="fas fa-image"></i></div></div>`;
+                : `<div class="card-image-wrapper"><div class="card-image-placeholder"><i class="fas fa-image"></i></div>${viewCountHtml}</div>`;
             card.innerHTML = `
                     ${imageHtml}
                     <h3 class="card-title">${resource.title}</h3>
@@ -3186,7 +3194,6 @@
                     <div class="card-meta">
                         <span class="card-type">${resource.category}</span>
                         <span class="card-date">${formatDate(resource.createdAt)}</span>
-                        <span class="card-view-count"><i class="fa-regular fa-eye"></i> ${resource.viewCount || 0}</span>
                         <a href="javascript:void(0)" class="card-link" onclick="viewResource(${resource.id});">
                             查看详情 <i class="fa-solid fa-arrow-right"></i>
                         </a>
@@ -3396,13 +3403,15 @@
             const date = r.createdAt ? new Date(r.createdAt).toLocaleDateString('zh-CN', {
                 year: 'numeric', month: '2-digit', day: '2-digit'
             }) : '未知';
+            const viewCountHtml = `<div class="card-view-count"><i class="fa-regular fa-eye"></i> ${r.viewCount || 0}</div>`;
             const imageHtml = r.image
                 ? `<div class="card-image-wrapper" onclick="viewResource(${r.id})">
                        <img class="card-image" src="${r.image}" alt="${r.title}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                        <div class="card-image-placeholder" style="display:none;"><i class="fas fa-image"></i></div>
                        <div class="card-image-overlay"><i class="fas fa-search-plus"></i></div>
+                       ${viewCountHtml}
                    </div>`
-                : `<div class="card-image-wrapper"><div class="card-image-placeholder"><i class="fas fa-image"></i></div></div>`;
+                : `<div class="card-image-wrapper"><div class="card-image-placeholder"><i class="fas fa-image"></i></div>${viewCountHtml}</div>`;
             return `
                 <div class="resource-card">
                     ${imageHtml}
@@ -3411,7 +3420,6 @@
                     <div class="card-meta">
                         <span class="card-type">${r.category || '未分类'}</span>
                         <span class="card-date">${date}</span>
-                        <span class="card-view-count"><i class="fa-regular fa-eye"></i> ${r.viewCount || 0}</span>
                         <a href="javascript:void(0)" class="card-link" onclick="viewResource(${r.id});">查看详情 <i class="fa-solid fa-arrow-right"></i></a>
                     </div>
                 </div>

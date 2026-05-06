@@ -12,6 +12,7 @@ import com.neon.service.ViewCountScheduler;
 import com.neon.dao.DownloadRecordDao;
 import com.neon.dao.MessageDao;
 import com.neon.dao.UsersDao;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -131,11 +132,17 @@ public class ResourceController {
     // 获取资源详情（包含评论）
     @GetMapping("/{id}")
     @ResponseBody
-    public Map<String, Object> detail(@PathVariable Long id) {
+    public Map<String, Object> detail(
+            @PathVariable Long id,
+            @RequestHeader(value = "Authorization", required = false) String token,
+            HttpServletRequest request) {
         Map<String, Object> result = new HashMap<>();
         try {
-            // 增加访问量
-            resourceService.incrementViewCount(id);
+            // 获取用户标识（已登录用户使用用户名，未登录用户使用IP）
+            String userIdentifier = getUserIdentifier(token, request);
+            
+            // 增加访问量（带去重）
+            resourceService.incrementViewCount(id, userIdentifier);
             
             Resource resource = resourceService.getResourceDetail(id);
             if (resource == null) {
@@ -567,5 +574,54 @@ public class ResourceController {
             default: // 非会员或其他
                 return 0;
         }
+    }
+    
+    /**
+     * 获取用户标识（用于访问量去重）
+     * 已登录用户使用用户名，未登录用户使用IP地址
+     */
+    private String getUserIdentifier(String token, HttpServletRequest request) {
+        // 尝试从token获取用户
+        if (token != null && token.startsWith("Bearer ")) {
+            token = token.substring(7);
+        }
+        
+        if (token != null && !token.isEmpty()) {
+            Users user = usersDao.findByToken(token);
+            if (user != null && user.getUserName() != null) {
+                return "user:" + user.getUserName();
+            }
+        }
+        
+        // 未登录用户使用IP地址
+        String ip = getClientIp(request);
+        return "ip:" + ip;
+    }
+    
+    /**
+     * 获取客户端真实IP地址
+     */
+    private String getClientIp(HttpServletRequest request) {
+        String ip = request.getHeader("X-Forwarded-For");
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("Proxy-Client-IP");
+        }
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("WL-Proxy-Client-IP");
+        }
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("HTTP_CLIENT_IP");
+        }
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("HTTP_X_FORWARDED_FOR");
+        }
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getRemoteAddr();
+        }
+        // 对于多个代理的情况，取第一个IP
+        if (ip != null && ip.contains(",")) {
+            ip = ip.split(",")[0].trim();
+        }
+        return ip != null ? ip : "unknown";
     }
 }
