@@ -3128,7 +3128,9 @@
             const cachedResources = localStorage.getItem('cachedResources');
             if (cachedResources) {
                 try {
-                    const resources = JSON.parse(cachedResources);
+                    const data = JSON.parse(cachedResources);
+                    // 从content字段获取资源列表
+                    const resources = data.content || data;
                     const resourceGrid = document.getElementById('resourceGrid');
                     if (resourceGrid) {
                         resourceGrid.innerHTML = '';
@@ -3145,9 +3147,11 @@
             // 从服务器获取最新资源列表
             fetch(`/api/resources/list`)
                 .then(response => response.json())
-                .then(resources => {
+                .then(data => {
+                    // 从content字段获取资源列表
+                    const resources = data.content || data;
                     // 缓存资源列表到localStorage，过期时间10分钟
-                    localStorage.setItem('cachedResources', JSON.stringify(resources));
+                    localStorage.setItem('cachedResources', JSON.stringify(data));
                     localStorage.setItem('cachedResourcesTimestamp', Date.now().toString());
                     
                     const resourceGrid = document.getElementById('resourceGrid');
@@ -3407,6 +3411,7 @@
                     <div class="card-meta">
                         <span class="card-type">${r.category || '未分类'}</span>
                         <span class="card-date">${date}</span>
+                        <span class="card-view-count"><i class="fa-regular fa-eye"></i> ${r.viewCount || 0}</span>
                         <a href="javascript:void(0)" class="card-link" onclick="viewResource(${r.id});">查看详情 <i class="fa-solid fa-arrow-right"></i></a>
                     </div>
                 </div>

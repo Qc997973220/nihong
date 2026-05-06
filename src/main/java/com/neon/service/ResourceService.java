@@ -131,6 +131,8 @@ public class ResourceService {
         Resource resource = (Resource) cacheService.get(cacheKey);
         
         if (resource != null) {
+            // 更新访问量（包含Redis增量）
+            resource.setViewCount(getViewCount(id));
             return resource;
         }
         
@@ -139,6 +141,8 @@ public class ResourceService {
         
         // 缓存结果，过期时间3分钟
         if (resource != null) {
+            // 更新访问量（包含Redis增量）
+            resource.setViewCount(getViewCount(id));
             cacheService.set(cacheKey, resource, 180);
         }
         
