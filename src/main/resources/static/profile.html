@@ -355,15 +355,15 @@
                     <div class="info-label">性别：</div>
                     <div class="info-value" id="infoGender"></div>
                 </div>
-                <div class="info-item">
+                <div class="info-item private-info">
                     <div class="info-label">邮箱：</div>
                     <div class="info-value" id="infoEmail"></div>
                 </div>
-                <div class="info-item">
+                <div class="info-item private-info">
                     <div class="info-label">电话：</div>
                     <div class="info-value" id="infoPhone"></div>
                 </div>
-                <div class="info-item">
+                <div class="info-item private-info">
                     <div class="info-label">最近登录：</div>
                     <div class="info-value" id="infoLastLogin"></div>
                 </div>
@@ -442,10 +442,12 @@
                     
                     // 检查是否是当前登录用户
                     const savedUserInfo = localStorage.getItem('userInfo');
+                    let isCurrentUser = false;
                     if (savedUserInfo) {
                         try {
                             const currentUser = JSON.parse(savedUserInfo);
                             if (currentUser.username === userName) {
+                                isCurrentUser = true;
                                 // 显示更换头像按钮
                                 document.getElementById('avatarUploadSection').style.display = 'block';
 
@@ -467,6 +469,14 @@
                         } catch (e) {
                             console.error('解析用户信息失败:', e);
                         }
+                    }
+                    
+                    // 如果不是当前用户，隐藏敏感信息
+                    if (!isCurrentUser) {
+                        const privateInfos = document.querySelectorAll('.private-info');
+                        privateInfos.forEach(item => {
+                            item.style.display = 'none';
+                        });
                     }
                 } else {
                     alert('用户不存在');
