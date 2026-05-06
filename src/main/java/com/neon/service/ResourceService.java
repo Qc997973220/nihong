@@ -300,4 +300,62 @@ public class ResourceService {
         cacheService.delete(cacheService.getResourceListKey());
         cacheService.delete(cacheService.getResourceDetailKey(id));
     }
+
+    // 增加访问量（用户访问时调用）
+    public void incrementViewCount(Long resourceId) {
+        Resource resource = resourceRepository.findById(resourceId).orElse(null);
+        if (resource != null) {
+            if (resource.getViewCount() == null) {
+                resource.setViewCount(0);
+            }
+            resource.setViewCount(resource.getViewCount() + 1);
+            resource.setUpdatedAt(LocalDateTime.now());
+            resourceRepository.save(resource);
+            // 清除该资源详情缓存
+            cacheService.delete(cacheService.getResourceDetailKey(resourceId));
+        }
+    }
+
+    // 获取资源访问量
+    public Integer getViewCount(Long resourceId) {
+        Resource resource = resourceRepository.findById(resourceId).orElse(null);
+        if (resource != null && resource.getViewCount() != null) {
+            return resource.getViewCount();
+        }
+        return 0;
+    }
+
+    // 设置停止阈值
+    public void setStopThreshold(Long resourceId, Integer threshold) {
+        Resource resource = resourceRepository.findById(resourceId).orElse(null);
+        if (resource != null) {
+            resource.setStopThreshold(threshold);
+            resource.setUpdatedAt(LocalDateTime.now());
+            resourceRepository.save(resource);
+            cacheService.delete(cacheService.getResourceDetailKey(resourceId));
+        }
+    }
+
+    // 获取停止阈值
+    public Integer getStopThreshold(Long resourceId) {
+        Resource resource = resourceRepository.findById(resourceId).orElse(null);
+        if (resource != null && resource.getStopThreshold() != null) {
+            return resource.getStopThreshold();
+        }
+        return null;
+    }
+
+    // 检查是否需要继续自动增加（访问量是否小于阈值）
+    public boolean shouldContinueAutoIncrement(Long resourceId) {
+        Resource resource = resourceRepository.findById(resourceId).orElse(null);
+        if (resource == null) {
+            return false;
+        }
+        Integer threshold = resource.getStopThreshold();
+        Integer viewCount = resource.getViewCount();
+        if (threshold == null || viewCount == null) {
+            return false;
+        }
+        return viewCount < threshold;
+    }
 }

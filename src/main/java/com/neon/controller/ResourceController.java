@@ -8,6 +8,7 @@ import com.neon.pojo.Users;
 import com.neon.service.ResourceService;
 import com.neon.service.AsyncService;
 import com.neon.service.AuthService;
+import com.neon.service.ViewCountScheduler;
 import com.neon.dao.DownloadRecordDao;
 import com.neon.dao.MessageDao;
 import com.neon.dao.UsersDao;
@@ -44,6 +45,9 @@ public class ResourceController {
     
     @Autowired
     private DownloadRecordDao downloadRecordDao;
+    
+    @Autowired
+    private ViewCountScheduler viewCountScheduler;
 
     // 图片上传
     @PostMapping("/upload")
@@ -130,6 +134,9 @@ public class ResourceController {
     public Map<String, Object> detail(@PathVariable Long id) {
         Map<String, Object> result = new HashMap<>();
         try {
+            // 增加访问量
+            resourceService.incrementViewCount(id);
+            
             Resource resource = resourceService.getResourceDetail(id);
             if (resource == null) {
                 result.put("success", false);
@@ -408,6 +415,12 @@ public class ResourceController {
             Long id = Long.valueOf(request.get("id").toString());
             Integer status = Integer.valueOf(request.get("status").toString());
             resourceService.updateResourceStatus(id, status);
+            
+            // 如果审核通过（status=1），启动访问量自动增加任务
+            if (status == 1) {
+                viewCountScheduler.startAutoIncrement(id);
+            }
+            
             result.put("success", true);
             result.put("message", status == 1 ? "资源已通过审核" : "资源已拒绝");
         } catch (Exception e) {

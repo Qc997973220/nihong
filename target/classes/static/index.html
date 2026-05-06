@@ -1742,6 +1742,14 @@
             font-size: 0.85rem;
             flex-shrink: 0;
         }
+        .card-view-count {
+            color: #90b0d1;
+            font-size: 0.85rem;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
         .card-link {
             color: #ffffff;
             text-decoration: none;
@@ -3174,6 +3182,7 @@
                     <div class="card-meta">
                         <span class="card-type">${resource.category}</span>
                         <span class="card-date">${formatDate(resource.createdAt)}</span>
+                        <span class="card-view-count"><i class="fa-regular fa-eye"></i> ${resource.viewCount || 0}</span>
                         <a href="javascript:void(0)" class="card-link" onclick="viewResource(${resource.id});">
                             查看详情 <i class="fa-solid fa-arrow-right"></i>
                         </a>

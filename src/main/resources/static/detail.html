@@ -2011,6 +2011,7 @@
         const downloadLink = resource.downloadLink || '';
         const downloadPassword = resource.downloadPassword || '';
         const commentEnabled = resource.commentEnabled;
+        const viewCount = resource.viewCount;
 
         // 安全格式化日期
         let createdDate = '未知';
@@ -2114,7 +2115,8 @@
                 <div class="article-meta">
                     <span>作者：${escapeHtml(author)}</span> ·
                     <span>发布于：${createdDate}</span> ·
-                    <span>分类：${escapeHtml(category)}</span>
+                    <span>分类：${escapeHtml(category)}</span> ·
+                    <span id="viewCountDisplay"><i class="fa-regular fa-eye"></i> 访问量：${viewCount || 0}</span>
                 </div>
                 ${coverImageHtml}
                 ${downloadSectionHtml}
