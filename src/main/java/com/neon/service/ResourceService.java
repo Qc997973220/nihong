@@ -229,7 +229,9 @@ public class ResourceService {
     }
 
     public Comment saveComment(Comment comment) {
-        return commentRepository.save(comment);
+        Comment savedComment = commentRepository.save(comment);
+        cacheService.delete(cacheService.getResourceDetailKey(comment.getResourceId()));
+        return savedComment;
     }
 
     public Map<String, Object> likeComment(String userId, Long commentId) {

@@ -19,6 +19,6 @@ public interface CommentDao  extends JpaRepository<Comment, Long> {
     @Query("SELECT c FROM Comment c WHERE c.resourceId = :resourceId AND c.parentId = 0 ORDER BY c.likes DESC, c.createdAt DESC")
     Page<Comment> findTopLevelCommentsByLikesAndCreatedAt(@Param("resourceId") Long resourceId, Pageable pageable);
 
-    @Query("SELECT c FROM Comment c WHERE c.resourceId = :resourceId AND c.parentId > 0 ORDER BY c.createdAt DESC")
+    @Query("SELECT c FROM Comment c WHERE c.resourceId = :resourceId AND c.parentId > 0 ORDER BY c.likes DESC, c.createdAt DESC")
     List<Comment> findRepliesByResourceId(@Param("resourceId") Long resourceId);
 }
