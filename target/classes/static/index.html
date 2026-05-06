@@ -4268,7 +4268,7 @@
                 }
             } else if (result.status === 0) {
                 messageDiv.className = 'message error';
-                messageDiv.innerText = '注册失败，账号已存在';
+                messageDiv.innerText = result.message || '注册失败，账号已存在';
                 messageDiv.style.display = 'block';
             } else if (result.status === 2) {
                 messageDiv.className = 'message error';

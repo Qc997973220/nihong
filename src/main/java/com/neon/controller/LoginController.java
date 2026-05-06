@@ -101,7 +101,7 @@ public class LoginController {
 
         if (usersDao.existsByRegisteredIpToday(clientIp, todayStart, tomorrowStart)) {
             result.put("status", 0);
-            result.put("message", "该IP今日已注册过一个账号，请明日再试");
+            result.put("message", "[霓虹引擎云防护]检测到您已注册过一个账号,请明日再试!");
             return result;
         }
         
