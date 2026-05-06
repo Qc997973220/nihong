@@ -151,7 +151,9 @@ public class ResourceService {
     }
 
     public List<Comment> getCommentsByResourceId(Long resourceId) {
-        return getCommentsByResourceId(resourceId, 1, 10).get("comments");
+        @SuppressWarnings("unchecked")
+        List<Comment> comments = (List<Comment>) getCommentsByResourceId(resourceId, 1, 10).get("comments");
+        return comments;
     }
 
     public Map<String, Object> getCommentsByResourceId(Long resourceId, int page, int size) {
