@@ -25,6 +25,7 @@ public class Resource {
     private String downloadLink;       // 下载链接
     private String downloadPassword;  // 下载密码
     private Integer status = 0;      // 审核状态：0-待审核，1-审核通过
+    private Integer commentEnabled = 0;  // 评论开关：0-关闭，1-开启
     private LocalDateTime createdAt; // 创建时间
     private LocalDateTime updatedAt; // 修改时间
 

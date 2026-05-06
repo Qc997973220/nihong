@@ -298,6 +298,19 @@ public class ResourceController {
                 return result;
             }
 
+            // 检查资源的评论开关状态
+            Resource targetResource = resourceService.getResourceById(comment.getResourceId());
+            if (targetResource == null) {
+                result.put("success", false);
+                result.put("message", "资源不存在");
+                return result;
+            }
+            if (targetResource.getCommentEnabled() == null || targetResource.getCommentEnabled() != 1) {
+                result.put("success", false);
+                result.put("message", "该资源作者未开启评论功能哦~");
+                return result;
+            }
+
             System.out.println("准备保存评论: resourceId=" + comment.getResourceId() + ", author=" + comment.getAuthor() + ", content=" + comment.getContent());
             comment.setCreatedAt(java.time.LocalDateTime.now());
             Comment savedComment = resourceService.saveComment(comment);

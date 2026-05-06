@@ -2010,6 +2010,7 @@
         const image = resource.image || '';
         const downloadLink = resource.downloadLink || '';
         const downloadPassword = resource.downloadPassword || '';
+        const commentEnabled = resource.commentEnabled;
 
         // 安全格式化日期
         let createdDate = '未知';
@@ -2164,7 +2165,7 @@
         console.log('渲染完成');
 
         // 绑定评论提交事件
-        bindCommentSubmit();
+        bindCommentSubmit(commentEnabled);
 
         // 检查每个评论的点赞状态
         if (savedUsername && comments && comments.length > 0) {
@@ -2251,28 +2252,36 @@
         }).join('');
     }
 
-    function bindCommentSubmit() {
+    function bindCommentSubmit(commentEnabled) {
         const submitBtn = document.getElementById('submitCommentBtn');
         if (submitBtn) {
             submitBtn.replaceWith(submitBtn.cloneNode(true));
             const newBtn = document.getElementById('submitCommentBtn');
             newBtn.addEventListener('click', submitComment);
         }
-        updateCommentInputVisibility();
+        updateCommentInputVisibility(commentEnabled);
     }
 
-    function updateCommentInputVisibility() {
+    function updateCommentInputVisibility(commentEnabled) {
         const inputArea = document.getElementById('commentInputArea');
         const vipNotice = document.getElementById('commentVipNotice');
         if (!inputArea || !vipNotice) return;
 
-        if (!savedUsername) {
+        const commentClosed = commentEnabled !== 1;
+
+        if (commentClosed) {
+            inputArea.style.display = 'none';
+            vipNotice.style.display = 'block';
+            vipNotice.querySelector('span').textContent = '该资源作者未开启评论功能哦~';
+            vipNotice.querySelector('a').style.display = 'none';
+        } else if (!savedUsername) {
             inputArea.style.display = 'none';
             vipNotice.style.display = 'block';
             vipNotice.querySelector('span').textContent = '登录后可发表评论';
             vipNotice.querySelector('a').href = 'javascript:void(0)';
             vipNotice.querySelector('a').onclick = () => showLogin();
             vipNotice.querySelector('a').textContent = '登录 →';
+            vipNotice.querySelector('a').style.display = 'inline';
         } else if (!isVIP()) {
             inputArea.style.display = 'none';
             vipNotice.style.display = 'block';
@@ -2280,6 +2289,7 @@
             vipNotice.querySelector('a').href = 'index.html';
             vipNotice.querySelector('a').onclick = null;
             vipNotice.querySelector('a').textContent = '加入会员 →';
+            vipNotice.querySelector('a').style.display = 'inline';
         } else {
             inputArea.style.display = 'flex';
             vipNotice.style.display = 'none';
