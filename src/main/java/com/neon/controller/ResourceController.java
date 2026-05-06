@@ -496,9 +496,9 @@ public class ResourceController {
                 return result;
             }
             
-            // 检查今日下载额度
+            // 检查今日下载额度（使用悲观锁防止并发超限）
             LocalDateTime startOfDay = LocalDateTime.now().toLocalDate().atStartOfDay();
-            Long todayDownloads = downloadRecordDao.countTodayDownloads(user.getAccount(), startOfDay);
+            Long todayDownloads = downloadRecordDao.countTodayDownloadsWithLock(user.getAccount(), startOfDay);
             
             // 根据会员类型设置每日下载限制
             // 月度会员(1): 2次/天, 季度会员(2): 3次/天, 年度会员(3)/永久会员(4): 无限制
