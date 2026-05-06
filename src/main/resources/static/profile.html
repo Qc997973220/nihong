@@ -442,10 +442,9 @@
                     document.getElementById('infoGender').textContent = user.gender || '未知';
                     
                     // 显示个人简介
-                    if (user.introduction) {
-                        document.getElementById('infoIntroduction').textContent = user.introduction;
-                        document.getElementById('introductionSection').style.display = 'flex';
-                    }
+                    const introText = user.introduction || '这个人很懒，什么也没写';
+                    document.getElementById('infoIntroduction').textContent = introText;
+                    document.getElementById('introductionSection').style.display = 'flex';
                     
                     document.getElementById('infoEmail').textContent = user.email || '未设置';
                     document.getElementById('infoPhone').textContent = user.phone || '未设置';

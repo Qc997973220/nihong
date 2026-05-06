@@ -133,7 +133,7 @@ public class UserProfileController {
         return result;
     }
 
-    @PostMapping("/api/user/introduction")
+    @PostMapping("/user/introduction")
     public Map<String, Object> updateIntroduction(
             @RequestHeader("Authorization") String token,
             @RequestBody Map<String, String> request) {

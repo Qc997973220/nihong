@@ -2863,6 +2863,7 @@
                         ...userInfo,
                         // 确保关键字段不会被null或undefined覆盖
                         account: userInfo.account || existingInfo.account || currentUser.account,
+                        username: (userInfo.userName || userInfo.username) || existingInfo.username || currentUser.username,
                         memberType: userInfo.memberType ?? existingInfo.memberType ?? currentUser.memberType,
                         memberStatus: userInfo.memberStatus || existingInfo.memberStatus || currentUser.memberStatus,
                         memberExpireText: userInfo.memberExpireText || existingInfo.memberExpireText || currentUser.memberExpireText

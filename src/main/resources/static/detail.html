@@ -2629,10 +2629,16 @@
             // Token有效，更新用户信息
             if (result.user) {
                 const userInfo = result.user;
-                localStorage.setItem('userInfo', JSON.stringify(userInfo));
+                const existingInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+                const mergedUserInfo = {
+                    ...existingInfo,
+                    ...userInfo,
+                    username: (userInfo.userName || userInfo.username) || existingInfo.username
+                };
+                localStorage.setItem('userInfo', JSON.stringify(mergedUserInfo));
                 
-                savedUsername = userInfo.userName || userInfo.username;
-                updateMemberBadge(userInfo);
+                savedUsername = mergedUserInfo.username || userInfo.userName || userInfo.username;
+                updateMemberBadge(mergedUserInfo);
                 updateCommentInputVisibility();
             }
             return true;
@@ -2663,14 +2669,19 @@
                 const result = await response.json();
                 
                 if (result.valid && result.user) {
-                    // Token有效，更新本地用户信息
-                    localStorage.setItem('userInfo', JSON.stringify(result.user));
-                    savedUsername = result.user.userName || result.user.username;
-                    updateMemberBadge(result.user);
+                    const userInfo = result.user;
+                    const existingInfo = JSON.parse(storedUserInfo || '{}');
+                    const mergedUserInfo = {
+                        ...existingInfo,
+                        ...userInfo,
+                        username: (userInfo.userName || userInfo.username) || existingInfo.username
+                    };
+                    localStorage.setItem('userInfo', JSON.stringify(mergedUserInfo));
+                    savedUsername = mergedUserInfo.username || userInfo.userName || userInfo.username;
+                    updateMemberBadge(mergedUserInfo);
                 }
             } catch (error) {
                 console.error('验证会话失败:', error);
-                // 验证失败时不清除本地数据，保持现状
             }
         }
         
