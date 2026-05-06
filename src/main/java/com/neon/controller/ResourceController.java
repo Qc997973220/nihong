@@ -134,6 +134,8 @@ public class ResourceController {
     @ResponseBody
     public Map<String, Object> detail(
             @PathVariable Long id,
+            @RequestParam(defaultValue = "1") int commentPage,
+            @RequestParam(defaultValue = "10") int commentSize,
             @RequestHeader(value = "Authorization", required = false) String token,
             HttpServletRequest request) {
         Map<String, Object> result = new HashMap<>();
@@ -150,7 +152,9 @@ public class ResourceController {
                 result.put("message", "资源不存在");
                 return result;
             }
-            List<Comment> comments = resourceService.getCommentsByResourceId(id);
+            Map<String, Object> commentResult = resourceService.getCommentsByResourceId(id, commentPage, commentSize);
+        
+            List<Comment> comments = (List<Comment>) commentResult.get("comments");
         
             // 简化评论数据，不再包含Base64头像（头像数据量太大）
             List<Map<String, Object>> simplifiedComments = new ArrayList<>();
@@ -186,6 +190,7 @@ public class ResourceController {
             result.put("success", true);
             result.put("resource", resource);
             result.put("comments", simplifiedComments);
+            result.put("commentPageInfo", commentResult);
         } catch (Exception e) {
             e.printStackTrace();
             result.put("success", false);

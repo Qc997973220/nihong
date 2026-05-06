@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class ResourceService {
@@ -150,33 +151,61 @@ public class ResourceService {
     }
 
     public List<Comment> getCommentsByResourceId(Long resourceId) {
-        // 获取所有评论（包括回复）
-        List<Comment> allComments = commentRepository.findByResourceIdOrderByCreatedAtDesc(resourceId);
-        
-        // 分离顶级评论和回复
-        List<Comment> topLevelComments = new ArrayList<>();
+        return getCommentsByResourceId(resourceId, 1, 10).get("comments");
+    }
+
+    public Map<String, Object> getCommentsByResourceId(Long resourceId, int page, int size) {
+        size = Math.min(size, 10);
+
+        Page<Comment> topLevelPage = commentRepository.findTopLevelCommentsByLikesAndCreatedAt(resourceId, PageRequest.of(page - 1, size));
+
+        List<Comment> topLevelComments = topLevelPage.getContent();
+
+        if (topLevelComments.isEmpty()) {
+            Map<String, Object> result = new HashMap<>();
+            result.put("comments", new ArrayList<>());
+            result.put("currentPage", page);
+            result.put("pageSize", size);
+            result.put("totalElements", 0);
+            result.put("totalPages", 0);
+            result.put("hasNext", false);
+            return result;
+        }
+
+        List<Long> topLevelIds = topLevelComments.stream().map(Comment::getId).collect(Collectors.toList());
+        List<Comment> allReplies = commentRepository.findRepliesByResourceId(resourceId);
         Map<Long, List<Comment>> repliesMap = new HashMap<>();
-        
-        for (Comment comment : allComments) {
-            if (comment.getParentId() == null || comment.getParentId() == 0) {
-                // 顶级评论
-                topLevelComments.add(comment);
-            } else {
-                // 回复
-                Long parentId = comment.getParentId();
-                repliesMap.computeIfAbsent(parentId, k -> new ArrayList<>()).add(comment);
+
+        for (Comment reply : allReplies) {
+            if (reply.getParentId() != null && reply.getParentId() > 0) {
+                repliesMap.computeIfAbsent(reply.getParentId(), k -> new ArrayList<>()).add(reply);
             }
         }
-        
-        // 将回复关联到对应的顶级评论
+
         for (Comment topComment : topLevelComments) {
             List<Comment> replies = repliesMap.get(topComment.getId());
             if (replies != null) {
+                replies.sort((a, b) -> {
+                    if (!b.getLikes().equals(a.getLikes())) {
+                        return b.getLikes().compareTo(a.getLikes());
+                    }
+                    return b.getCreatedAt().compareTo(a.getCreatedAt());
+                });
                 topComment.setReplies(replies);
+            } else {
+                topComment.setReplies(new ArrayList<>());
             }
         }
-        
-        return topLevelComments;
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("comments", topLevelComments);
+        result.put("currentPage", page);
+        result.put("pageSize", size);
+        result.put("totalElements", topLevelPage.getTotalElements());
+        result.put("totalPages", topLevelPage.getTotalPages());
+        result.put("hasNext", topLevelPage.hasNext());
+
+        return result;
     }
 
     public Resource saveResource(Resource resource) {
