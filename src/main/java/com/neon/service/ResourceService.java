@@ -185,17 +185,17 @@ public class ResourceService {
         }
 
         for (Comment topComment : topLevelComments) {
-            topComment.setLikes(getCommentLikes(topComment.getId()));
+            topComment.setLikes(getCommentLikes(topComment.getId()).intValue());
             
             List<Comment> replies = repliesMap.get(topComment.getId());
             if (replies != null) {
                 for (Comment reply : replies) {
-                    reply.setLikes(getCommentLikes(reply.getId()));
+                    reply.setLikes(getCommentLikes(reply.getId()).intValue());
                     
                     List<Comment> nestedReplies = repliesMap.get(reply.getId());
                     if (nestedReplies != null) {
                         for (Comment nestedReply : nestedReplies) {
-                            nestedReply.setLikes(getCommentLikes(nestedReply.getId()));
+                            nestedReply.setLikes(getCommentLikes(nestedReply.getId()).intValue());
                         }
                         nestedReplies.sort((a, b) -> {
                             if (!b.getLikes().equals(a.getLikes())) {
