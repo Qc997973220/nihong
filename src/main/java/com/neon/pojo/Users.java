@@ -30,6 +30,8 @@ public class Users {
     String phone;               // 手机
     String email;               // 邮箱
     String gender;              //性别
+    @Column(length = 80)
+    String introduction;       //个人简介（最多80字）
     String token;              //令牌
     LocalDateTime tokenExpiredAt;  //令牌过期时间
     Integer tokenVersion;        //令牌版本（用于控制多设备登录）

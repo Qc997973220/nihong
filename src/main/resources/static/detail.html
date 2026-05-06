@@ -1103,12 +1103,22 @@
             font-size: 1.1rem;
             color: #70ffb0;
             font-weight: 700;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
         }
         .vip-card-price s {
             color: #888;
             font-size: 0.75rem;
             font-weight: 400;
+        }
+        .vip-card-discount {
+            display: inline-block;
+            background: linear-gradient(135deg, #ff6b6b, #ff8e53);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-bottom: 6px;
+            font-weight: 600;
         }
         .vip-card-rights {
             font-size: 0.78rem;
@@ -1343,26 +1353,30 @@
             <div class="vip-price-cards">
                 <div class="vip-price-card">
                     <div class="vip-card-name">月卡</div>
-                    <div class="vip-card-price">¥29.9 <s>¥89.7</s></div>
+                    <div class="vip-card-price">¥39.9 <s>¥49.9</s></div>
+                    <div class="vip-card-discount">8折</div>
                     <div class="vip-card-rights">每日2篇</div>
                     <div class="vip-card-cycle">30天</div>
                 </div>
                 <div class="vip-price-card">
                     <div class="vip-card-name">季卡</div>
-                    <div class="vip-card-price">¥49.9 <s>¥149.7</s></div>
+                    <div class="vip-card-price">¥69.9 <s>¥89.9</s></div>
+                    <div class="vip-card-discount">75折</div>
                     <div class="vip-card-rights">每日3篇</div>
                     <div class="vip-card-cycle">90天</div>
                 </div>
                 <div class="vip-price-card">
                     <div class="vip-card-name">年卡</div>
-                    <div class="vip-card-price">¥79.9 <s>¥358.8</s></div>
+                    <div class="vip-card-price">¥109.9 <s>¥139.9</s></div>
+                    <div class="vip-card-discount">7折</div>
                     <div class="vip-card-rights">无限制</div>
                     <div class="vip-card-cycle">360天</div>
                 </div>
                 <div class="vip-price-card vip-price-card-hot">
                     <div class="vip-card-hot-tag">推荐</div>
                     <div class="vip-card-name">永久</div>
-                    <div class="vip-card-price">¥189.9 <s>¥888</s></div>
+                    <div class="vip-card-price">¥189.9 <s>¥369.9</s></div>
+                    <div class="vip-card-discount">5折</div>
                     <div class="vip-card-rights">无限制</div>
                     <div class="vip-card-cycle">永久有效</div>
                 </div>
@@ -2191,7 +2205,7 @@
                     <div id="commentVipNotice" class="comment-vip-notice" style="display: none; text-align: center; padding: 20px; background: rgba(255, 200, 0, 0.1); border: 1px solid rgba(255, 200, 0, 0.3); border-radius: 8px; margin-bottom: 15px;">
                         <i class="fas fa-crown" style="color: #FFD700; margin-right: 8px;"></i>
                         <span style="color: #90b0d1;">评论功能仅对会员开放</span>
-                        <a href="index.html" style="color: #64b5f6; text-decoration: none; margin-left: 8px;">加入会员 →</a>
+                        <a href="javascript:void(0)" onclick="showUpgradePrompt()" style="color: #64b5f6; text-decoration: none; margin-left: 8px;">加入会员 →</a>
                     </div>
                     <div id="commentList">
                         ${renderComments(comments)}
@@ -2342,8 +2356,8 @@
             inputArea.style.display = 'none';
             vipNotice.style.display = 'block';
             vipNotice.querySelector('span').textContent = '评论功能仅对会员开放';
-            vipNotice.querySelector('a').href = 'index.html';
-            vipNotice.querySelector('a').onclick = null;
+            vipNotice.querySelector('a').href = 'javascript:void(0)';
+            vipNotice.querySelector('a').onclick = showUpgradePrompt;
             vipNotice.querySelector('a').textContent = '加入会员 →';
             vipNotice.querySelector('a').style.display = 'inline';
         } else {
@@ -2552,15 +2566,21 @@
             });
 
             if (response.ok) {
-                // 隐藏回复表单
-                replyForm.style.display = 'none';
-                textarea.value = '';
+                const result = await response.json();
+                if (result.success) {
+                    // 隐藏回复表单
+                    replyForm.style.display = 'none';
+                    textarea.value = '';
 
-                // 刷新页面显示新回复
-                await fetchDetail();
+                    // 刷新页面显示新回复
+                    await fetchDetail();
 
-                // 显示美观的成功提示
-                showToast('回复发表成功！');
+                    // 显示美观的成功提示
+                    showToast('回复发表成功！');
+                } else {
+                    // 显示后端返回的错误消息
+                    showToast(result.message || '回复发表失败', 'error');
+                }
             } else {
                 showToast('回复发表失败，请重试', 'error');
             }
@@ -2691,7 +2711,22 @@
     }
 
     // 切换面板
+    function updatePromotionDate() {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = now.getMonth();
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0);
+        const startMonth = String(firstDay.getMonth() + 1).padStart(2, '0');
+        const endMonth = String(lastDay.getMonth() + 1).padStart(2, '0');
+        document.getElementById('vipPromotionDate').textContent =
+            `${year}-${startMonth}-01 ~ ${year}-${endMonth}-30 限时特惠`;
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
+        // 更新限时特惠日期
+        updatePromotionDate();
+
         // 回车登录
         document.getElementById('loginPassword').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') document.getElementById('loginBtn').click();

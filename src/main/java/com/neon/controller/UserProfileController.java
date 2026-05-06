@@ -7,6 +7,8 @@ import com.neon.service.CacheService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -75,6 +77,9 @@ public class UserProfileController {
                 userInfo.put("userName", user.getUserName());
                 userInfo.put("nickname", user.getNickname());
                 userInfo.put("gender", user.getGender());
+                // 个人简介，默认显示"这个人很懒，什么也没写"
+                userInfo.put("introduction", user.getIntroduction() != null && !user.getIntroduction().trim().isEmpty() 
+                    ? user.getIntroduction() : "这个人很懒，什么也没写");
                 
                 // 只有查看自己的资料时才返回敏感信息
                 if (isOwnProfile) {
@@ -97,6 +102,9 @@ public class UserProfileController {
                     userInfo.put("userName", user.getUserName());
                     userInfo.put("nickname", user.getNickname());
                     userInfo.put("gender", user.getGender());
+                    // 个人简介，默认显示"这个人很懒，什么也没写"
+                    userInfo.put("introduction", user.getIntroduction() != null && !user.getIntroduction().trim().isEmpty() 
+                        ? user.getIntroduction() : "这个人很懒，什么也没写");
                     
                     // 只有查看自己的资料时才返回敏感信息
                     if (isOwnProfile) {
@@ -120,6 +128,66 @@ public class UserProfileController {
             e.printStackTrace();
             result.put("status", false);
             result.put("message", "获取用户信息失败: " + e.getMessage());
+        }
+
+        return result;
+    }
+
+    @PostMapping("/api/user/introduction")
+    public Map<String, Object> updateIntroduction(
+            @RequestHeader("Authorization") String token,
+            @RequestBody Map<String, String> request) {
+        Map<String, Object> result = new HashMap<>();
+
+        try {
+            if (token == null || !token.startsWith("Bearer ")) {
+                result.put("status", false);
+                result.put("message", "请先登录");
+                return result;
+            }
+
+            token = token.substring(7);
+            Map<String, Object> tokenResult = authService.validateToken(token);
+            if (!(Boolean) tokenResult.get("valid")) {
+                result.put("status", false);
+                result.put("message", "登录已失效，请重新登录");
+                return result;
+            }
+
+            Users currentUser = (Users) tokenResult.get("user");
+            if (currentUser == null) {
+                result.put("status", false);
+                result.put("message", "用户不存在");
+                return result;
+            }
+
+            String introduction = request.get("introduction");
+            if (introduction != null) {
+                // 限制最多80字
+                if (introduction.length() > 80) {
+                    introduction = introduction.substring(0, 80);
+                }
+                // 去除首尾空格
+                introduction = introduction.trim();
+            }
+
+            currentUser.setIntroduction(introduction);
+            usersDao.save(currentUser);
+
+            // 清除缓存
+            String ownCacheKey = cacheService.getUserInfoKey(currentUser.getUserName()) + ":own";
+            String otherCacheKey = cacheService.getUserInfoKey(currentUser.getUserName()) + ":other";
+            cacheService.delete(ownCacheKey);
+            cacheService.delete(otherCacheKey);
+
+            result.put("status", true);
+            result.put("message", "个人简介修改成功");
+            result.put("introduction", introduction != null && !introduction.isEmpty() ? introduction : "这个人很懒，什么也没写");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            result.put("status", false);
+            result.put("message", "修改失败: " + e.getMessage());
         }
 
         return result;
