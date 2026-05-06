@@ -14,6 +14,9 @@ public interface DownloadRecordDao extends JpaRepository<DownloadRecord, Long> {
 
     boolean existsByAccountAndResourceId(String account, Long resourceId);
 
+    @Query("SELECT COUNT(dr) FROM DownloadRecord dr WHERE dr.account = :account AND dr.downloadedAt >= :startOfDay")
+    Long countTodayDownloads(@Param("account") String account, @Param("startOfDay") LocalDateTime startOfDay);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT COUNT(dr) FROM DownloadRecord dr WHERE dr.account = :account AND dr.downloadedAt >= :startOfDay")
     Long countTodayDownloadsWithLock(@Param("account") String account, @Param("startOfDay") LocalDateTime startOfDay);
