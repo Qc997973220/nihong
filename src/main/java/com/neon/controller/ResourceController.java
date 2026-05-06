@@ -152,7 +152,7 @@ public class ResourceController {
                 result.put("message", "资源不存在");
                 return result;
             }
-            Map<String, Object> commentResult = resourceService.getCommentsByResourceId(id, commentPage, commentSize);
+            Map<String, Object> commentResult = resourceService.getCommentsByResourceId(id, commentPage, commentSize, userIdentifier);
         
             List<Comment> comments = (List<Comment>) commentResult.get("comments");
         

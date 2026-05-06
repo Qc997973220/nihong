@@ -348,10 +348,6 @@
                     <div class="info-value" id="infoUserName"></div>
                 </div>
                 <div class="info-item">
-                    <div class="info-label">昵称：</div>
-                    <div class="info-value" id="infoNickname"></div>
-                </div>
-                <div class="info-item">
                     <div class="info-label">性别：</div>
                     <div class="info-value" id="infoGender"></div>
                 </div>
@@ -435,10 +431,9 @@
                         document.getElementById('avatarPlaceholder').style.display = 'flex';
                         document.getElementById('avatar').style.display = 'none';
                     }
-                    document.getElementById('nickname').textContent = user.nickname || user.userName;
+                    document.getElementById('nickname').textContent = user.userName;
                     document.getElementById('userName').textContent = '@' + user.userName;
                     document.getElementById('infoUserName').textContent = user.userName;
-                    document.getElementById('infoNickname').textContent = user.nickname || user.userName;
                     document.getElementById('infoGender').textContent = user.gender || '未知';
                     
                     // 显示个人简介

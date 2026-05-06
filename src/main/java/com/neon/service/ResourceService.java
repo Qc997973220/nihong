@@ -157,6 +157,10 @@ public class ResourceService {
     }
 
     public Map<String, Object> getCommentsByResourceId(Long resourceId, int page, int size) {
+        return getCommentsByResourceId(resourceId, page, size, null);
+    }
+    
+    public Map<String, Object> getCommentsByResourceId(Long resourceId, int page, int size, String currentUser) {
         size = Math.min(size, 10);
 
         Page<Comment> topLevelPage = commentRepository.findTopLevelCommentsByLikesAndCreatedAt(resourceId, PageRequest.of(page - 1, size));
@@ -218,6 +222,26 @@ public class ResourceService {
             } else {
                 topComment.setReplies(new ArrayList<>());
             }
+        }
+
+        // 如果有当前用户，将当前用户的评论优先展示在最前面
+        if (currentUser != null && !currentUser.isEmpty()) {
+            topLevelComments.sort((a, b) -> {
+                boolean aIsCurrentUser = currentUser.equals(a.getAuthor());
+                boolean bIsCurrentUser = currentUser.equals(b.getAuthor());
+                
+                if (aIsCurrentUser && !bIsCurrentUser) {
+                    return -1; // a排在前面
+                } else if (!aIsCurrentUser && bIsCurrentUser) {
+                    return 1; // b排在前面
+                } else {
+                    // 保持原有的点赞数+日期排序
+                    if (!b.getLikes().equals(a.getLikes())) {
+                        return b.getLikes().compareTo(a.getLikes());
+                    }
+                    return b.getCreatedAt().compareTo(a.getCreatedAt());
+                }
+            });
         }
 
         Map<String, Object> result = new HashMap<>();

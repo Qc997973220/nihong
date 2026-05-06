@@ -383,6 +383,10 @@
                     <div class="info-label">会员状态：</div>
                     <div class="info-value" id="infoMemberStatus">非会员</div>
                 </div>
+                <div class="info-item">
+                    <div class="info-label">个人简介：</div>
+                    <div class="info-value" id="infoIntroduction" style="white-space: pre-wrap;"></div>
+                </div>
             </div>
 
             <div class="action-buttons">
@@ -440,6 +444,10 @@
             }
             document.getElementById('memberTypeDisplay').innerText = memberStatusDisplay;
             document.getElementById('infoMemberStatus').innerText = memberStatusDisplay;
+            
+            // 显示个人简介
+            const introText = userData.introduction || '这个人很懒，什么也没写';
+            document.getElementById('infoIntroduction').innerText = introText;
         } catch (e) {
             console.error('解析用户信息失败:', e);
             window.location.href = '/';
@@ -789,6 +797,7 @@
                 document.getElementById('infoUserName').innerText = userData.username;
                 document.getElementById('userPhone').innerText = userData.phone || '未绑定';
                 document.getElementById('userEmail').innerText = userData.email || '未设置';
+                document.getElementById('infoIntroduction').innerText = userData.introduction || '这个人很懒，什么也没写';
 
                 messageDiv.className = 'edit-message success';
                 messageDiv.innerText = '保存成功！';
