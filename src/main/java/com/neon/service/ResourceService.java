@@ -191,12 +191,12 @@ public class ResourceService {
 
         for (Comment topComment : topLevelComments) {
             topComment.setLikes(getCommentLikes(topComment.getId()).intValue());
-            
+
             List<Comment> replies = repliesMap.get(topComment.getId());
             if (replies != null) {
                 for (Comment reply : replies) {
                     reply.setLikes(getCommentLikes(reply.getId()).intValue());
-                    
+
                     List<Comment> nestedReplies = repliesMap.get(reply.getId());
                     if (nestedReplies != null) {
                         for (Comment nestedReply : nestedReplies) {
@@ -224,6 +224,14 @@ public class ResourceService {
                 topComment.setReplies(new ArrayList<>());
             }
         }
+
+        // 更新完所有点赞数后，需要按点赞数重新排序（因为Redis中的点赞数可能与数据库不同）
+        topLevelComments.sort((a, b) -> {
+            if (!b.getLikes().equals(a.getLikes())) {
+                return b.getLikes().compareTo(a.getLikes());
+            }
+            return b.getCreatedAt().compareTo(a.getCreatedAt());
+        });
 
         // 如果有当前用户，将当前用户的评论优先展示在最前面
         if (currentUser != null && !currentUser.isEmpty()) {
