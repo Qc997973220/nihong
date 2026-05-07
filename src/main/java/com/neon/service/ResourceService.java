@@ -163,12 +163,11 @@ public class ResourceService {
     public Map<String, Object> getCommentsByResourceId(Long resourceId, int page, int size, String currentUser) {
         size = Math.min(size, 10);
 
-        Page<Comment> topLevelPage = commentRepository.findTopLevelCommentsByLikesAndCreatedAt(resourceId, PageRequest.of(page - 1, size));
+        // 先获取所有顶层评论（不分页），用于按实际点赞数排序后分页
+        List<Comment> allTopLevelComments = commentRepository.findAllTopLevelCommentsByLikesAndCreatedAt(resourceId);
+        int totalElements = allTopLevelComments.size();
 
-        // 创建可修改的列表（Page.getContent()返回的是不可修改的列表）
-        List<Comment> topLevelComments = new ArrayList<>(topLevelPage.getContent());
-
-        if (topLevelComments.isEmpty()) {
+        if (allTopLevelComments.isEmpty()) {
             Map<String, Object> result = new HashMap<>();
             result.put("comments", new ArrayList<>());
             result.put("currentPage", page);
@@ -179,7 +178,6 @@ public class ResourceService {
             return result;
         }
 
-        List<Long> topLevelIds = topLevelComments.stream().map(Comment::getId).collect(Collectors.toList());
         List<Comment> allReplies = commentRepository.findRepliesByResourceId(resourceId);
         Map<Long, List<Comment>> repliesMap = new HashMap<>();
 
@@ -189,7 +187,8 @@ public class ResourceService {
             }
         }
 
-        for (Comment topComment : topLevelComments) {
+        // 更新所有评论的点赞数
+        for (Comment topComment : allTopLevelComments) {
             topComment.setLikes(getCommentLikes(topComment.getId()).intValue());
 
             List<Comment> replies = repliesMap.get(topComment.getId());
@@ -225,8 +224,8 @@ public class ResourceService {
             }
         }
 
-        // 更新完所有点赞数后，需要按点赞数重新排序（因为Redis中的点赞数可能与数据库不同）
-        topLevelComments.sort((a, b) -> {
+        // 按点赞数重新排序（因为Redis中的点赞数可能与数据库不同）
+        allTopLevelComments.sort((a, b) -> {
             if (!b.getLikes().equals(a.getLikes())) {
                 return b.getLikes().compareTo(a.getLikes());
             }
@@ -240,7 +239,7 @@ public class ResourceService {
                     ? currentUser.substring(5)
                     : currentUser;
 
-            topLevelComments.sort((a, b) -> {
+            allTopLevelComments.sort((a, b) -> {
                 boolean aIsCurrentUser = actualUserName.equals(a.getAuthor());
                 boolean bIsCurrentUser = actualUserName.equals(b.getAuthor());
 
@@ -258,13 +257,26 @@ public class ResourceService {
             });
         }
 
+        // 计算分页信息
+        int totalPages = (int) Math.ceil((double) totalElements / size);
+        int fromIndex = (page - 1) * size;
+        int toIndex = Math.min(fromIndex + size, totalElements);
+
+        // 分页获取当前页的评论
+        List<Comment> topLevelComments;
+        if (fromIndex >= totalElements) {
+            topLevelComments = new ArrayList<>();
+        } else {
+            topLevelComments = allTopLevelComments.subList(fromIndex, toIndex);
+        }
+
         Map<String, Object> result = new HashMap<>();
         result.put("comments", topLevelComments);
         result.put("currentPage", page);
         result.put("pageSize", size);
-        result.put("totalElements", topLevelPage.getTotalElements());
-        result.put("totalPages", topLevelPage.getTotalPages());
-        result.put("hasNext", topLevelPage.hasNext());
+        result.put("totalElements", totalElements);
+        result.put("totalPages", totalPages);
+        result.put("hasNext", page < totalPages);
 
         return result;
     }
