@@ -156,9 +156,9 @@ public class ResourceController {
             // 检查用户是否为VIP会员
             boolean isVipMember = checkVipMember(token);
             
-            // 如果不是VIP会员，清除下载链接和密码
+            // 如果不是VIP会员，设置下载链接为空字符串（不设置为null，以便前端渲染下载区域）
             if (!isVipMember) {
-                resource.setDownloadLink(null);
+                resource.setDownloadLink("");
                 resource.setDownloadPassword(null);
             }
             

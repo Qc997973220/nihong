@@ -2813,7 +2813,15 @@
             }
             
             try {
-                const response = await fetch(`/api/login/validateToken?token=${encodeURIComponent(token)}`);
+                const response = await fetch('/api/login/validateToken', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        token: token
+                    })
+                });
                 
                 // 检查HTTP状态码
                 if (!response.ok) {
