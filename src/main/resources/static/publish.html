@@ -1367,7 +1367,7 @@
                     if (!downloadLink.startsWith('http://') && !downloadLink.startsWith('https://')) {
                         downloadLink = 'https://' + downloadLink;
                     }
-                    const urlRegex = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w.?=#&-]*)*\/?$/;
+                    const urlRegex = /^(https?:\/\/)?[\da-z.-]+\.[a-z.]{2,6}([/\w.?=#&-]+)*\/?$/;
                     if (!urlRegex.test(downloadLink)) {
                         showMessage('URL格式错误，请输入正确的网址', true);
                         return;
@@ -1445,6 +1445,10 @@
 
             async function uploadImage(file) {
                 return new Promise((resolve, reject) => {
+                    const timeout = setTimeout(() => {
+                        reject(new Error('图片上传超时'));
+                    }, 30000);
+
                     const formData = new FormData();
                     formData.append('file', file);
 
@@ -1454,6 +1458,7 @@
                     })
                     .then(response => response.json())
                     .then(data => {
+                        clearTimeout(timeout);
                         if (data.success && data.url) {
                             resolve(data.url);
                         } else {
@@ -1461,6 +1466,7 @@
                         }
                     })
                     .catch(error => {
+                        clearTimeout(timeout);
                         reject(error);
                     });
                 });
