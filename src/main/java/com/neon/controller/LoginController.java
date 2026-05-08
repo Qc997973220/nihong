@@ -26,10 +26,19 @@ public class LoginController {
     @Autowired
     CacheService cacheService;
 
-    @GetMapping("/first")
+    @PostMapping("/first")
     @ResponseBody
-    public Map<String, Object> first(@RequestParam String account, @RequestParam String password){
+    public Map<String, Object> first(@RequestBody Map<String, String> request){
         Map<String, Object> result = new HashMap<>();
+        String account = request.get("account");
+        String password = request.get("password");
+        
+        if (account == null || account.trim().isEmpty() || password == null || password.trim().isEmpty()) {
+            result.put("status", 0);
+            result.put("message", "账号和密码不能为空");
+            return result;
+        }
+        
         int loginResult = loginService.login(account, password);
         result.put("status", loginResult);
         if (loginResult == 1) {
@@ -42,9 +51,10 @@ public class LoginController {
         return result;
     }
 
-    @GetMapping("/validateToken")
+    @PostMapping("/validateToken")
     @ResponseBody
-    public Map<String, Object> validateToken(@RequestParam String token) {
+    public Map<String, Object> validateToken(@RequestBody Map<String, String> request) {
+        String token = request.get("token");
         Map<String, Object> result = authService.validateToken(token);
         
         if ((Boolean) result.get("valid") && result.get("user") != null) {

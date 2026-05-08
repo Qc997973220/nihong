@@ -3984,8 +3984,16 @@
         messageDiv.style.display = 'none';
 
         try {
-            const url = `/api/login/first?account=${encodeURIComponent(account)}&password=${encodeURIComponent(password)}`;
-            const response = await fetch(url);
+            const response = await fetch('/api/login/first', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    account: account,
+                    password: password
+                })
+            });
             const result = await response.json();
 
             if (result.status === 1) {
@@ -4200,8 +4208,16 @@
                 messageDiv.innerText = `注册成功！正在自动登录...`;
                 messageDiv.style.display = 'block';
 
-                const loginUrl = `/api/login/first?account=${encodeURIComponent(account)}&password=${encodeURIComponent(password)}`;
-                const loginResponse = await fetch(loginUrl);
+                const loginResponse = await fetch('/api/login/first', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        account: account,
+                        password: password
+                    })
+                });
                 const loginResult = await loginResponse.json();
 
                 if (loginResult.status === 1) {

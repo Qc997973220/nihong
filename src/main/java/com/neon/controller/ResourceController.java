@@ -152,6 +152,16 @@ public class ResourceController {
                 result.put("message", "资源不存在");
                 return result;
             }
+            
+            // 检查用户是否为VIP会员
+            boolean isVipMember = checkVipMember(token);
+            
+            // 如果不是VIP会员，清除下载链接和密码
+            if (!isVipMember) {
+                resource.setDownloadLink(null);
+                resource.setDownloadPassword(null);
+            }
+            
             Map<String, Object> commentResult = resourceService.getCommentsByResourceId(id, commentPage, commentSize, userIdentifier);
         
             List<Comment> comments = (List<Comment>) commentResult.get("comments");
@@ -197,6 +207,27 @@ public class ResourceController {
             result.put("message", "获取资源详情失败: " + e.getMessage());
         }
         return result;
+    }
+    
+    /**
+     * 检查用户是否为VIP会员
+     */
+    private boolean checkVipMember(String token) {
+        if (token == null || token.trim().isEmpty()) {
+            return false;
+        }
+        
+        if (token.startsWith("Bearer ")) {
+            token = token.substring(7);
+        }
+        
+        Users user = usersDao.findByToken(token);
+        if (user == null) {
+            return false;
+        }
+        
+        // memberType > 0 表示会员（1:月度, 2:季度, 3:年度, 4:永久）
+        return user.getMemberType() != null && user.getMemberType() > 0;
     }
 
     // 发布资源
