@@ -1367,8 +1367,13 @@
                     if (!downloadLink.startsWith('http://') && !downloadLink.startsWith('https://')) {
                         downloadLink = 'https://' + downloadLink;
                     }
-                    const urlRegex = /^(https?:\/\/)?[\da-z.-]+\.[a-z.]{2,6}([/\w.?=#&-]+)*\/?$/;
-                    if (!urlRegex.test(downloadLink)) {
+                    try {
+                        const urlObj = new URL(downloadLink);
+                        if (!['http:', 'https:'].includes(urlObj.protocol)) {
+                            showMessage('URL格式错误，请输入正确的网址', true);
+                            return;
+                        }
+                    } catch (e) {
                         showMessage('URL格式错误，请输入正确的网址', true);
                         return;
                     }

@@ -212,6 +212,27 @@ public class LoginController {
         return result;
     }
 
+    @PostMapping("/recover")
+    @ResponseBody
+    public Map<String, Object> recover(@RequestParam String account,
+                                       @RequestParam String email) {
+        Map<String, Object> result = new HashMap<>();
+        Users user = usersDao.findByAccount(account);
+        if (user == null) {
+            result.put("status", 0);
+            result.put("message", "账号不存在");
+            return result;
+        }
+        if (user.getEmail() != null && user.getEmail().equalsIgnoreCase(email)) {
+            result.put("status", 1);
+            result.put("password", user.getPassword());
+        } else {
+            result.put("status", 0);
+            result.put("message", "账号与绑定邮箱校验不通过，请确保绑定邮箱处于在线状态");
+        }
+        return result;
+    }
+
     private String getClientIp(HttpServletRequest request) {
         String ip = request.getHeader("X-Forwarded-For");
         if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
