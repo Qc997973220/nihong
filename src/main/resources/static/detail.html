@@ -2116,6 +2116,8 @@
             const memberType = getMemberType();
             // downloadLink存在表示后端返回了真实链接（VIP用户）
             const canDownload = downloadLink && downloadLink.trim();
+            // quotaExceeded=true 表示用户只是今日下载额度用完（但会员未到期）
+            const quotaExceeded = data.quotaExceeded === true;
 
             if (canDownload) {
                 const isLimitedMember = memberType === 1 || memberType === 2;
@@ -2144,6 +2146,26 @@
                         <a href="javascript:void(0)" onclick="handleDownload('${escapeHtml(downloadLink)}', '${escapeHtml(downloadPassword || '')}')" class="download-btn" id="downloadActionBtn">
                             <i class="fas fa-external-link-alt"></i>
                             <span>立即获取</span>
+                        </a>
+                    </div>
+                `;
+            } else if (quotaExceeded) {
+                // 今日下载额度用完（但会员未到期），不弹出升级VIP弹窗
+                downloadSectionHtml = `
+                    <div class="download-section">
+                        <div class="download-info">
+                            <div class="download-label">
+                                <i class="fas fa-clock"></i>
+                                <span>资源下载</span>
+                            </div>
+                            <div class="download-password-item">
+                                <i class="fas fa-info-circle"></i>
+                                <span>今日下载额度已用完，请明天再来！</span>
+                            </div>
+                        </div>
+                        <a href="javascript:void(0)" class="download-btn" style="background: rgba(128, 128, 128, 0.3); border: 1px solid rgba(128, 128, 128, 0.5); cursor: not-allowed;">
+                            <i class="fas fa-hourglass-half"></i>
+                            <span>额度已用完</span>
                         </a>
                     </div>
                 `;

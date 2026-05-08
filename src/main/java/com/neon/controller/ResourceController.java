@@ -161,14 +161,34 @@ public class ResourceController {
             boolean resourceHasDownload = originalDownloadLink != null && !originalDownloadLink.isEmpty();
             
             // 如果用户没有下载权限（非VIP或下载额度用完），隐藏下载链接和密码
+            boolean quotaExceeded = false;
             if (user == null) {
                 resource.setDownloadLink(null);
                 resource.setDownloadPassword(null);
+                
+                // 检查是因为下载额度用完还是会员已到期
+                if (token != null && !token.trim().isEmpty()) {
+                    String tokenValue = token.startsWith("Bearer ") ? token.substring(7) : token;
+                    Users tokenUser = usersDao.findByToken(tokenValue);
+                    if (tokenUser != null && tokenUser.getMemberType() != null && tokenUser.getMemberType() > 0) {
+                        // 用户是VIP，检查是否只是下载额度用完
+                        int dailyLimit = getDailyLimitByMemberType(tokenUser.getMemberType());
+                        if (dailyLimit != -1) {
+                            LocalDateTime startOfDay = LocalDateTime.now().toLocalDate().atStartOfDay();
+                            Long todayDownloads = downloadRecordDao.countTodayDownloads(tokenUser.getAccount(), startOfDay);
+                            if (todayDownloads >= dailyLimit) {
+                                quotaExceeded = true; // 只是下载额度用完
+                            }
+                        }
+                    }
+                }
             }
             
             // 添加 hasAccess 字段，表示资源是否有下载链接（不管用户是否能访问）
             // 用于前端判断是否渲染下载区域
             result.put("hasAccess", resourceHasDownload);
+            // 添加 quotaExceeded 字段，表示用户是否只是下载额度用完（但会员未到期）
+            result.put("quotaExceeded", quotaExceeded);
             
             Map<String, Object> commentResult = resourceService.getCommentsByResourceId(id, commentPage, commentSize, userIdentifier);
         
