@@ -2109,16 +2109,15 @@
 
         // 构建下载区域 HTML
         let downloadSectionHtml = '';
-        // hasAccess=true 表示资源有下载链接（后端判断过）
-        // downloadLink存在表示后端返回了真实链接（VIP用户）
-        const hasDownloadResource = data.hasAccess === true || (downloadLink && downloadLink.trim());
-        if (hasDownloadResource) {
+        // hasAccess=true 表示资源本身有下载链接
+        if (data.hasAccess === true) {
             const vip = isVIP();
             const memberStatusText = getMemberStatusText();
             const memberType = getMemberType();
-            const hasAccess = data.hasAccess === true;
+            // downloadLink存在表示后端返回了真实链接（VIP用户）
+            const canDownload = downloadLink && downloadLink.trim();
 
-            if (hasAccess) {
+            if (canDownload) {
                 const isLimitedMember = memberType === 1 || memberType === 2;
                 const dailyLimit = memberType === 1 ? 2 : (memberType === 2 ? 3 : '∞');
                 downloadSectionHtml = `

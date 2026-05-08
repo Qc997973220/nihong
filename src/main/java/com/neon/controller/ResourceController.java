@@ -153,15 +153,15 @@ public class ResourceController {
                 return result;
             }
             
-            // 检查用户是否为VIP会员
-            boolean isVipMember = checkVipMember(token);
+            // 检查用户是否有下载权限（VIP会员且有下载额度）
+            Users user = checkDownloadPermission(token);
             
             // 保存原始下载链接，用于后续判断
             String originalDownloadLink = resource.getDownloadLink();
             boolean resourceHasDownload = originalDownloadLink != null && !originalDownloadLink.isEmpty();
             
-            // 如果不是VIP会员，隐藏下载链接和密码
-            if (!isVipMember) {
+            // 如果用户没有下载权限（非VIP或下载额度用完），隐藏下载链接和密码
+            if (user == null) {
                 resource.setDownloadLink(null);
                 resource.setDownloadPassword(null);
             }
@@ -218,11 +218,12 @@ public class ResourceController {
     }
     
     /**
-     * 检查用户是否为VIP会员
+     * 检查用户是否为VIP会员且有下载权限
+     * @return 如果用户有下载权限，返回用户信息；否则返回null
      */
-    private boolean checkVipMember(String token) {
+    private Users checkDownloadPermission(String token) {
         if (token == null || token.trim().isEmpty()) {
-            return false;
+            return null;
         }
         
         if (token.startsWith("Bearer ")) {
@@ -231,11 +232,25 @@ public class ResourceController {
         
         Users user = usersDao.findByToken(token);
         if (user == null) {
-            return false;
+            return null;
         }
         
         // memberType > 0 表示会员（1:月度, 2:季度, 3:年度, 4:永久）
-        return user.getMemberType() != null && user.getMemberType() > 0;
+        if (user.getMemberType() == null || user.getMemberType() <= 0) {
+            return null;
+        }
+        
+        // 检查每日下载额度
+        int dailyLimit = getDailyLimitByMemberType(user.getMemberType());
+        if (dailyLimit != -1) {
+            LocalDateTime startOfDay = LocalDateTime.now().toLocalDate().atStartOfDay();
+            Long todayDownloads = downloadRecordDao.countTodayDownloads(user.getAccount(), startOfDay);
+            if (todayDownloads >= dailyLimit) {
+                return null; // 下载额度用完
+            }
+        }
+        
+        return user;
     }
 
     // 发布资源
