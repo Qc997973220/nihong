@@ -2033,8 +2033,13 @@
         // 直接从服务器获取资源详情（不缓存，因为数据较大包含Base64头像）
         try {
             const url = `/api/resources/${id}`;
+            const authToken = localStorage.getItem('authToken');
             console.log('请求URL:', url);
-            const response = await fetch(url);
+            const response = await fetch(url, {
+                headers: {
+                    'Authorization': authToken ? `Bearer ${authToken}` : ''
+                }
+            });
             console.log('响应状态:', response.status);
 
             if (!response.ok) {
@@ -2104,12 +2109,16 @@
 
         // 构建下载区域 HTML
         let downloadSectionHtml = '';
-        if (downloadLink) {
+        // hasAccess=true 表示资源有下载链接（后端判断过）
+        // downloadLink存在表示后端返回了真实链接（VIP用户）
+        const hasDownloadResource = data.hasAccess === true || (downloadLink && downloadLink.trim());
+        if (hasDownloadResource) {
             const vip = isVIP();
             const memberStatusText = getMemberStatusText();
             const memberType = getMemberType();
+            const hasAccess = data.hasAccess === true;
 
-            if (vip) {
+            if (hasAccess) {
                 const isLimitedMember = memberType === 1 || memberType === 2;
                 const dailyLimit = memberType === 1 ? 2 : (memberType === 2 ? 3 : '∞');
                 downloadSectionHtml = `
@@ -2898,8 +2907,16 @@
             formData.append('password', password);
 
             try {
-                const url = `/api/login/first?account=${encodeURIComponent(account)}&password=${encodeURIComponent(password)}`;
-                const response = await fetch(url);
+                const response = await fetch('/api/login/first', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        account: account,
+                        password: password
+                    })
+                });
                 const result = await response.json();
 
                 if (result.status === 1) {
@@ -3080,8 +3097,16 @@
                     messageDiv.innerText = `注册成功！正在自动登录...`;
                     messageDiv.style.display = 'block';
 
-                    const loginUrl = `/api/login/first?account=${encodeURIComponent(account)}&password=${encodeURIComponent(password)}`;
-                    const loginResponse = await fetch(loginUrl);
+                    const loginResponse = await fetch('/api/login/first', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            account: account,
+                            password: password
+                        })
+                    });
                     const loginResult = await loginResponse.json();
 
                     if (loginResult.status === 1) {

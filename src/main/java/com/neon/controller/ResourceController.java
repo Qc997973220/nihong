@@ -156,11 +156,19 @@ public class ResourceController {
             // 检查用户是否为VIP会员
             boolean isVipMember = checkVipMember(token);
             
-            // 如果不是VIP会员，设置下载链接为空字符串（不设置为null，以便前端渲染下载区域）
+            // 保存原始下载链接，用于后续判断
+            String originalDownloadLink = resource.getDownloadLink();
+            boolean resourceHasDownload = originalDownloadLink != null && !originalDownloadLink.isEmpty();
+            
+            // 如果不是VIP会员，隐藏下载链接和密码
             if (!isVipMember) {
-                resource.setDownloadLink("");
+                resource.setDownloadLink(null);
                 resource.setDownloadPassword(null);
             }
+            
+            // 添加 hasAccess 字段，表示资源是否有下载链接（不管用户是否能访问）
+            // 用于前端判断是否渲染下载区域
+            result.put("hasAccess", resourceHasDownload);
             
             Map<String, Object> commentResult = resourceService.getCommentsByResourceId(id, commentPage, commentSize, userIdentifier);
         
