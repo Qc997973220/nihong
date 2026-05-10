@@ -883,10 +883,10 @@
                     <div class="form-row">
                         <label>分类：</label>
                         <select id="editResourceCategory" style="padding: 8px 12px; border: 1px solid #3d5a80; border-radius: 4px; background: #1a1a2e; color: #e8e8e8; flex: 1;">
-                            <option value="资源">资源</option>
-                            <option value="游戏">游戏</option>
+                            <option value="免费">免费</option>
+                            <option value="网创">网创</option>
                             <option value="软件">软件</option>
-                            <option value="教程">教程</option>
+                            <option value="游戏">游戏</option>
                             <option value="资讯">资讯</option>
                         </select>
                     </div>
@@ -1321,7 +1321,7 @@
                         const resource = data.resource;
                         document.getElementById('editResourceId').value = resource.id;
                         document.getElementById('editResourceTitle').value = resource.title || '';
-                        document.getElementById('editResourceCategory').value = resource.category || '资源';
+                        document.getElementById('editResourceCategory').value = resource.category || '网创';
                         document.getElementById('editResourceSummary').value = resource.summary || '';
                         document.getElementById('editResourceImage').value = resource.image || '';
                         document.getElementById('editResourceDownloadLink').value = resource.downloadLink || '';

@@ -1622,10 +1622,18 @@
         }
     }
 
-    async function handleDownload(downloadLink, downloadPassword) {
+    async function handleDownload(downloadLink, downloadPassword, freeResource = false) {
         const userInfo = localStorage.getItem('userInfo');
         if (!userInfo) {
             showLogin();
+            return;
+        }
+
+        if (freeResource) {
+            if (downloadPassword) {
+                document.getElementById('downloadPasswordDisplay').textContent = downloadPassword;
+            }
+            window.open(downloadLink, '_blank');
             return;
         }
 
@@ -2111,10 +2119,11 @@
         let downloadSectionHtml = '';
         // hasAccess=true 表示资源本身有下载链接
         if (data.hasAccess === true) {
-            const vip = isVIP();
+            const isFreeResource = data.freeResource === true || category === '免费';
+            const loginRequired = data.loginRequired === true;
             const memberStatusText = getMemberStatusText();
             const memberType = getMemberType();
-            // downloadLink存在表示后端返回了真实链接（VIP用户）
+            // downloadLink存在表示后端返回了真实链接（VIP用户或已登录用户查看免费资源）
             const canDownload = downloadLink && downloadLink.trim();
             // quotaExceeded=true 表示用户只是今日下载额度用完（但会员未到期）
             const quotaExceeded = data.quotaExceeded === true;
@@ -2127,7 +2136,7 @@
                         <div class="download-info">
                             <div class="download-label">
                                 <i class="fas fa-download"></i>
-                                <span>解锁资源</span>
+                                <span>${isFreeResource ? '免费资源' : '解锁资源'}</span>
                             </div>
                             ${downloadPassword ? `
                             <div class="download-password-item">
@@ -2136,16 +2145,35 @@
                                 <span class="download-password" id="downloadPasswordDisplay">******</span>
                             </div>
                             ` : ''}
-                            ${isLimitedMember ? `
+                            ${!isFreeResource && isLimitedMember ? `
                             <div class="download-quota-info" id="downloadQuotaInfo">
                                 <i class="fas fa-chart-line"></i>
                                 <span>今日剩余下载次数：<span id="quotaRemaining">加载中...</span> / ${dailyLimit}</span>
                             </div>
                             ` : ''}
                         </div>
-                        <a href="javascript:void(0)" onclick="handleDownload('${escapeHtml(downloadLink)}', '${escapeHtml(downloadPassword || '')}')" class="download-btn" id="downloadActionBtn">
+                        <a href="javascript:void(0)" onclick="handleDownload('${escapeHtml(downloadLink)}', '${escapeHtml(downloadPassword || '')}', ${isFreeResource})" class="download-btn" id="downloadActionBtn">
                             <i class="fas fa-external-link-alt"></i>
                             <span>立即获取</span>
+                        </a>
+                    </div>
+                `;
+            } else if (loginRequired) {
+                downloadSectionHtml = `
+                    <div class="download-section">
+                        <div class="download-info">
+                            <div class="download-label">
+                                <i class="fas fa-lock-open"></i>
+                                <span>免费资源</span>
+                            </div>
+                            <div class="download-password-item">
+                                <i class="fas fa-info-circle"></i>
+                                <span>登录后可免费查看下载链接</span>
+                            </div>
+                        </div>
+                        <a href="javascript:void(0)" onclick="showLogin()" class="download-btn">
+                            <i class="fas fa-sign-in-alt"></i>
+                            <span>登录获取</span>
                         </a>
                     </div>
                 `;
@@ -3132,8 +3160,8 @@
 
                     if (loginResult.status === 1) {
                         // 保存token
-                        if (loginResult.token) {
-                            localStorage.setItem('authToken', loginResult.token);
+                        if (loginResult.user && loginResult.user.token) {
+                            localStorage.setItem('authToken', loginResult.user.token);
                         }
 
                         const displayName = loginResult.user.userName || loginResult.user.account;

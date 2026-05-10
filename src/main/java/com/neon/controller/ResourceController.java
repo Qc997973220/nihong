@@ -13,6 +13,7 @@ import com.neon.dao.DownloadRecordDao;
 import com.neon.dao.MessageDao;
 import com.neon.dao.UsersDao;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -235,40 +236,34 @@ public class ResourceController {
                 return result;
             }
             
-            // 检查用户是否有下载权限（VIP会员且有下载额度）
-            Users user = checkDownloadPermission(token);
-            
             // 保存原始下载链接，用于后续判断
             String originalDownloadLink = resource.getDownloadLink();
             boolean resourceHasDownload = originalDownloadLink != null && !originalDownloadLink.isEmpty();
-            
-            // 如果用户没有下载权限（非VIP或下载额度用完），隐藏下载链接和密码
+
+            boolean freeResource = isFreeResource(resource);
+            boolean loginRequired = false;
+            Users tokenUser = getValidTokenUser(token);
+            Users user = freeResource ? tokenUser : checkDownloadPermission(tokenUser);
+            Resource responseResource = copyResourceForResponse(resource);
+
+            // 如果用户没有下载权限，隐藏下载链接和密码
             boolean quotaExceeded = false;
             if (user == null) {
-                resource.setDownloadLink(null);
-                resource.setDownloadPassword(null);
-                
-                // 检查是因为下载额度用完还是会员已到期
-                if (token != null && !token.trim().isEmpty()) {
-                    String tokenValue = token.startsWith("Bearer ") ? token.substring(7) : token;
-                    Users tokenUser = usersDao.findByToken(tokenValue);
-                    if (tokenUser != null && tokenUser.getMemberType() != null && tokenUser.getMemberType() > 0) {
-                        // 用户是VIP，检查是否只是下载额度用完
-                        int dailyLimit = getDailyLimitByMemberType(tokenUser.getMemberType());
-                        if (dailyLimit != -1) {
-                            LocalDateTime startOfDay = LocalDateTime.now().toLocalDate().atStartOfDay();
-                            Long todayDownloads = downloadRecordDao.countTodayDownloads(tokenUser.getAccount(), startOfDay);
-                            if (todayDownloads >= dailyLimit) {
-                                quotaExceeded = true; // 只是下载额度用完
-                            }
-                        }
-                    }
+                responseResource.setDownloadLink(null);
+                responseResource.setDownloadPassword(null);
+
+                if (freeResource) {
+                    loginRequired = resourceHasDownload;
+                } else if (isDownloadQuotaExceeded(tokenUser)) {
+                    quotaExceeded = true; // 只是下载额度用完
                 }
             }
             
             // 添加 hasAccess 字段，表示资源是否有下载链接（不管用户是否能访问）
             // 用于前端判断是否渲染下载区域
             result.put("hasAccess", resourceHasDownload);
+            result.put("freeResource", freeResource);
+            result.put("loginRequired", loginRequired);
             // 添加 quotaExceeded 字段，表示用户是否只是下载额度用完（但会员未到期）
             result.put("quotaExceeded", quotaExceeded);
             
@@ -308,7 +303,7 @@ public class ResourceController {
             }
             
             result.put("success", true);
-            result.put("resource", resource);
+            result.put("resource", responseResource);
             result.put("comments", simplifiedComments);
             result.put("commentPageInfo", commentResult);
         } catch (Exception e) {
@@ -324,24 +319,19 @@ public class ResourceController {
      * @return 如果用户有下载权限，返回用户信息；否则返回null
      */
     private Users checkDownloadPermission(String token) {
-        if (token == null || token.trim().isEmpty()) {
-            return null;
-        }
-        
-        if (token.startsWith("Bearer ")) {
-            token = token.substring(7);
-        }
-        
-        Users user = usersDao.findByToken(token);
+        Users user = getValidTokenUser(token);
+        return checkDownloadPermission(user);
+    }
+
+    private Users checkDownloadPermission(Users user) {
         if (user == null) {
             return null;
         }
-        
-        // memberType > 0 表示会员（1:月度, 2:季度, 3:年度, 4:永久）
-        if (user.getMemberType() == null || user.getMemberType() <= 0) {
+
+        if (!hasActiveVip(user)) {
             return null;
         }
-        
+
         // 检查每日下载额度
         int dailyLimit = getDailyLimitByMemberType(user.getMemberType());
         if (dailyLimit != -1) {
@@ -353,6 +343,49 @@ public class ResourceController {
         }
         
         return user;
+    }
+
+    private Users getValidTokenUser(String token) {
+        Map<String, Object> tokenResult = authService.validateToken(token);
+        if (!Boolean.TRUE.equals(tokenResult.get("valid"))) {
+            return null;
+        }
+        return (Users) tokenResult.get("user");
+    }
+
+    private boolean hasActiveVip(Users user) {
+        if (user == null || user.getMemberType() == null || user.getMemberType() <= 0) {
+            return false;
+        }
+        if (user.getMemberType() == 4) {
+            return true;
+        }
+        return user.getMemberExpiredAt() != null && user.getMemberExpiredAt().isAfter(LocalDateTime.now());
+    }
+
+    private boolean isDownloadQuotaExceeded(Users user) {
+        if (!hasActiveVip(user)) {
+            return false;
+        }
+        int dailyLimit = getDailyLimitByMemberType(user.getMemberType());
+        if (dailyLimit == -1) {
+            return false;
+        }
+        LocalDateTime startOfDay = LocalDateTime.now().toLocalDate().atStartOfDay();
+        Long todayDownloads = downloadRecordDao.countTodayDownloads(user.getAccount(), startOfDay);
+        return todayDownloads >= dailyLimit;
+    }
+
+    private boolean isFreeResource(Resource resource) {
+        return resource != null
+                && resource.getCategory() != null
+                && "免费".equals(resource.getCategory().trim());
+    }
+
+    private Resource copyResourceForResponse(Resource resource) {
+        Resource responseResource = new Resource();
+        BeanUtils.copyProperties(resource, responseResource);
+        return responseResource;
     }
 
     // 发布资源
@@ -673,6 +706,29 @@ public class ResourceController {
             Users user = (Users) tokenResult.get("user");
             Long resourceId = Long.valueOf(request.get("resourceId").toString());
             String resourceTitle = (String) request.get("resourceTitle");
+
+            Resource resource = resourceService.getResourceById(resourceId);
+            if (resource == null) {
+                result.put("success", false);
+                result.put("message", "资源不存在");
+                return result;
+            }
+
+            if (isFreeResource(resource)) {
+                result.put("success", true);
+                result.put("alreadyDownloaded", false);
+                result.put("freeResource", true);
+                result.put("remaining", -1);
+                result.put("unlimited", true);
+                result.put("message", "免费资源获取成功");
+                return result;
+            }
+
+            if (!hasActiveVip(user)) {
+                result.put("success", false);
+                result.put("message", "权限不足，请加入霓虹之都会员后再试");
+                return result;
+            }
             
             // 检查用户是否已经下载过该资源
             boolean alreadyDownloaded = downloadRecordDao.existsByAccountAndResourceId(user.getAccount(), resourceId);
