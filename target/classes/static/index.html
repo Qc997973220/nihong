@@ -1423,7 +1423,7 @@
             transform: rotate(180deg);
         }
 
-        /* 今日推荐模块 */
+        /* 本周推荐榜模块 */
         .recommend-section {
             background: rgba(14, 26, 44, 0.5);
             backdrop-filter: blur(16px);
@@ -2210,6 +2210,13 @@
             font-size: 0.9rem;
             margin: 0 8px;
         }
+        .page-note {
+            color: #6b8cb8;
+            font-size: 0.78rem;
+            line-height: 1.5;
+            margin-left: 8px;
+            max-width: 520px;
+        }
 
         /* 响应式 */
         @media (max-width: 768px) {
@@ -2596,10 +2603,10 @@
             </div>
         </section>
 
-        <!-- 今日推荐模块 -->
+        <!-- 本周推荐榜模块 -->
         <div class="recommend-section" id="recommendSection">
             <div class="recommend-header">
-                <h3><i class="fas fa-fire"></i> 今日推荐</h3>
+                <h3><i class="fas fa-fire"></i> 本周推荐榜</h3>
             </div>
             <div class="recommend-content">
                 <div class="recommend-list" id="recommendLeft"></div>
@@ -3455,7 +3462,8 @@
         }
 
         html += `<button class="page-btn" onclick="goToPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}><i class="fas fa-chevron-right"></i></button>`;
-        html += `<span class="page-info">第${currentPage}/${totalPages}页 共${totalElements}条</span>`;
+        html += `<span class="page-info">第${currentPage}/${totalPages}页</span>`;
+        html += `<span class="page-note">本站只收录近期可做的蓝海项目，过时收益少的项目会被自动删除</span>`;
 
         pagination.innerHTML = html;
     }
@@ -3519,7 +3527,7 @@
         });
     });
 
-    // 获取今日推荐资源
+    // 获取本周推荐榜资源
     async function fetchRecommendedResources() {
         try {
             const response = await fetch('/api/resources/status/2');

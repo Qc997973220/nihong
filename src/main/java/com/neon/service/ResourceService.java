@@ -10,11 +10,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class ResourceService {
@@ -29,6 +30,8 @@ public class ResourceService {
 
     private static final int DEFAULT_PAGE_SIZE = 12;
     private static final int MAX_PAGE_SIZE = 50;
+    private static final int WEEKLY_RECOMMEND_LIMIT = 8;
+    private static final int WEEKLY_RECOMMEND_DAYS = 7;
 
     public List<Resource> getAllResources() {
         String cacheKey = cacheService.getResourceListKey();
@@ -391,7 +394,65 @@ public class ResourceService {
 
     // 根据状态获取资源列表
     public List<Resource> getResourcesByStatus(Integer status) {
+        if (status != null && status == 2) {
+            List<Resource> recommended = resourceRepository.findByStatusOrderByViewCountDescCreatedAtDesc(status);
+            return recommended.size() > WEEKLY_RECOMMEND_LIMIT
+                    ? recommended.subList(0, WEEKLY_RECOMMEND_LIMIT)
+                    : recommended;
+        }
         return resourceRepository.findByStatusOrderByCreatedAtDesc(status);
+    }
+
+    // 每天凌晨自动刷新本周推荐榜：最近7天资源按访问量取前8名设为status=2
+    @Scheduled(cron = "0 5 0 * * *", zone = "Asia/Shanghai")
+    @Transactional
+    public void refreshWeeklyRecommendations() {
+        flushViewCountsToDatabase();
+
+        LocalDateTime startTime = LocalDateTime.now()
+                .toLocalDate()
+                .minusDays(WEEKLY_RECOMMEND_DAYS - 1L)
+                .atStartOfDay();
+        Pageable topEight = PageRequest.of(0, WEEKLY_RECOMMEND_LIMIT);
+        List<Resource> newRecommended = resourceRepository
+                .findByCreatedAtGreaterThanEqualAndStatusInOrderByViewCountDescCreatedAtDesc(
+                        startTime, Arrays.asList(1, 2), topEight);
+
+        Set<Long> newRecommendedIds = new HashSet<>();
+        for (Resource resource : newRecommended) {
+            if (resource.getId() != null) {
+                newRecommendedIds.add(resource.getId());
+            }
+        }
+
+        List<Resource> currentRecommended = resourceRepository.findByStatusOrderByViewCountDescCreatedAtDesc(2);
+        List<Resource> changedResources = new ArrayList<>();
+
+        for (Resource resource : currentRecommended) {
+            if (resource.getId() != null && !newRecommendedIds.contains(resource.getId())) {
+                resource.setStatus(1);
+                resource.setUpdatedAt(LocalDateTime.now());
+                changedResources.add(resource);
+            }
+        }
+
+        for (Resource resource : newRecommended) {
+            if (resource.getStatus() == null || resource.getStatus() != 2) {
+                resource.setStatus(2);
+                resource.setUpdatedAt(LocalDateTime.now());
+                changedResources.add(resource);
+            }
+        }
+
+        if (!changedResources.isEmpty()) {
+            resourceRepository.saveAll(changedResources);
+            clearResourceListCache();
+            for (Resource resource : changedResources) {
+                if (resource.getId() != null) {
+                    cacheService.delete(cacheService.getResourceDetailKey(resource.getId()));
+                }
+            }
+        }
     }
 
     // 更新资源审核状态
