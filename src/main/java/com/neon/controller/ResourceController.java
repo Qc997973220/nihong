@@ -18,10 +18,22 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.IIOImage;
+import javax.imageio.ImageIO;
+import javax.imageio.ImageWriteParam;
+import javax.imageio.ImageWriter;
+import javax.imageio.stream.ImageOutputStream;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -29,6 +41,10 @@ import java.util.Map;
 @RequestMapping("/resources")
 @CrossOrigin(origins = "*")  // 允许跨域
 public class ResourceController {
+    private static final long MAX_UPLOAD_IMAGE_SIZE = 3L * 1024 * 1024;
+    private static final int MAX_IMAGE_DIMENSION = 1600;
+    private static final float JPEG_QUALITY = 0.82f;
+
     @Autowired
     private ResourceService resourceService;
     
@@ -63,34 +79,37 @@ public class ResourceController {
             }
 
             String contentType = file.getContentType();
-            if (contentType == null || !contentType.startsWith("image/")) {
+            if (!isAllowedImageType(contentType)) {
                 result.put("success", false);
-                result.put("message", "只支持上传图片文件");
+                result.put("message", "只支持 JPG、PNG、WebP 格式的图片");
                 return result;
             }
 
-            long maxSize = 5 * 1024 * 1024;
-            if (file.getSize() > maxSize) {
+            if (file.getSize() > MAX_UPLOAD_IMAGE_SIZE) {
                 result.put("success", false);
-                result.put("message", "图片大小不能超过 5MB");
+                result.put("message", "图片大小不能超过 3MB");
                 return result;
             }
 
-            String originalFilename = file.getOriginalFilename();
-            String extension = "";
-            if (originalFilename != null && originalFilename.contains(".")) {
-                extension = originalFilename.substring(originalFilename.lastIndexOf("."));
-            }
-            String newFilename = System.currentTimeMillis() + "_" + (int)(Math.random() * 10000) + extension;
+            String filenameBase = System.currentTimeMillis() + "_" + (int)(Math.random() * 10000);
+            String newFilename = filenameBase + ".jpg";
 
             String uploadPath = System.getProperty("user.dir") + "/uploads";
-            java.io.File uploadDir = new java.io.File(uploadPath);
+            File uploadDir = new File(uploadPath);
             if (!uploadDir.exists()) {
                 uploadDir.mkdirs();
             }
 
-            java.io.File destFile = new java.io.File(uploadPath, newFilename);
-            file.transferTo(destFile);
+            File destFile = new File(uploadPath, newFilename);
+            boolean compressed = compressAndSaveImage(file, destFile);
+            if (!compressed) {
+                if (!"image/webp".equals(contentType)) {
+                    throw new IOException("无法解析图片，请上传标准 JPG、PNG 或 WebP 图片");
+                }
+                newFilename = filenameBase + ".webp";
+                destFile = new File(uploadPath, newFilename);
+                file.transferTo(destFile);
+            }
 
             String imageUrl = "/uploads/" + newFilename;
             result.put("success", true);
@@ -102,6 +121,67 @@ public class ResourceController {
             result.put("message", "图片上传失败：" + e.getMessage());
         }
         return result;
+    }
+
+    private boolean isAllowedImageType(String contentType) {
+        return "image/jpeg".equals(contentType)
+                || "image/png".equals(contentType)
+                || "image/webp".equals(contentType);
+    }
+
+    private boolean compressAndSaveImage(MultipartFile file, File destFile) throws IOException {
+        BufferedImage sourceImage;
+        try (InputStream input = file.getInputStream()) {
+            sourceImage = ImageIO.read(input);
+        }
+        if (sourceImage == null) {
+            return false;
+        }
+
+        int sourceWidth = sourceImage.getWidth();
+        int sourceHeight = sourceImage.getHeight();
+        double scale = Math.min(
+                1.0,
+                (double) MAX_IMAGE_DIMENSION / Math.max(sourceWidth, sourceHeight)
+        );
+        int targetWidth = Math.max(1, (int) Math.round(sourceWidth * scale));
+        int targetHeight = Math.max(1, (int) Math.round(sourceHeight * scale));
+
+        BufferedImage outputImage = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_RGB);
+        Graphics2D graphics = outputImage.createGraphics();
+        try {
+            graphics.setColor(Color.WHITE);
+            graphics.fillRect(0, 0, targetWidth, targetHeight);
+            graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+            graphics.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+            graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            graphics.drawImage(sourceImage, 0, 0, targetWidth, targetHeight, null);
+        } finally {
+            graphics.dispose();
+        }
+
+        writeJpeg(outputImage, destFile, JPEG_QUALITY);
+        return true;
+    }
+
+    private void writeJpeg(BufferedImage image, File destFile, float quality) throws IOException {
+        Iterator<ImageWriter> writers = ImageIO.getImageWritersByFormatName("jpg");
+        if (!writers.hasNext()) {
+            throw new IOException("当前运行环境不支持 JPG 图片压缩");
+        }
+
+        ImageWriter writer = writers.next();
+        try (ImageOutputStream output = ImageIO.createImageOutputStream(destFile)) {
+            ImageWriteParam params = writer.getDefaultWriteParam();
+            if (params.canWriteCompressed()) {
+                params.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+                params.setCompressionQuality(quality);
+            }
+            writer.setOutput(output);
+            writer.write(null, new IIOImage(image, null, null), params);
+        } finally {
+            writer.dispose();
+        }
     }
 
     // 获取资源列表（只返回卡片所需字段，也可直接返回完整Resource，前端自行提取）

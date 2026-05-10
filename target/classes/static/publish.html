@@ -1003,7 +1003,7 @@
                                     <i class="fas fa-cloud-upload-alt"></i>
                                 </div>
                                 <div class="upload-text">点击或拖拽图片到此处上传</div>
-                                <div class="upload-hint">支持 JPG、PNG、WebP 格式，最大 5MB</div>
+                                <div class="upload-hint">支持 JPG、PNG、WebP 格式，最大 3MB，上传后优化存储</div>
                             </div>
                             <div class="upload-preview" id="uploadPreview">
                                 <img id="previewImage" src="" alt="预览">
@@ -1322,9 +1322,9 @@
                     return;
                 }
 
-                // 验证文件大小（5MB）
-                if (file.size > 5 * 1024 * 1024) {
-                    showMessage('图片大小不能超过 5MB', true);
+                // 验证文件大小（3MB）
+                if (file.size > 3 * 1024 * 1024) {
+                    showMessage('图片大小不能超过 3MB', true);
                     return;
                 }
 
