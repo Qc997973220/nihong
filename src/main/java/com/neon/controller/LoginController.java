@@ -199,6 +199,64 @@ public class LoginController {
         return result;
     }
 
+    @PostMapping("/changePassword")
+    @ResponseBody
+    public Map<String, Object> changePassword(
+            @RequestHeader(value = "Authorization", required = false) String token,
+            @RequestBody Map<String, String> request) {
+        Map<String, Object> result = new HashMap<>();
+
+        Map<String, Object> tokenResult = authService.validateToken(token);
+        if (!((Boolean) tokenResult.get("valid"))) {
+            result.put("status", 0);
+            result.put("message", tokenResult.get("message"));
+            return result;
+        }
+
+        Users user = (Users) tokenResult.get("user");
+        if (user == null) {
+            result.put("status", 0);
+            result.put("message", "用户不存在");
+            return result;
+        }
+
+        String oldPassword = request.get("oldPassword");
+        String newPassword = request.get("newPassword");
+
+        if (oldPassword == null || oldPassword.trim().isEmpty()
+                || newPassword == null || newPassword.trim().isEmpty()) {
+            result.put("status", 0);
+            result.put("message", "旧密码和新密码不能为空");
+            return result;
+        }
+
+        if (!oldPassword.equals(user.getPassword())) {
+            result.put("status", 0);
+            result.put("message", "旧密码不正确");
+            return result;
+        }
+
+        if (!newPassword.matches("^[A-Za-z0-9]{6,16}$")) {
+            result.put("status", 0);
+            result.put("message", "新密码只能包含字母和数字，长度为6-16位");
+            return result;
+        }
+
+        if (oldPassword.equals(newPassword)) {
+            result.put("status", 0);
+            result.put("message", "新密码不能和旧密码相同");
+            return result;
+        }
+
+        user.setPassword(newPassword);
+        user.setOperatingTime(LocalDateTime.now());
+        authService.invalidateCurrentToken(user);
+
+        result.put("status", 1);
+        result.put("message", "密码修改成功");
+        return result;
+    }
+
     @PostMapping("/activate")
     @ResponseBody
     public Map<String, Object> activate(@RequestParam String account,

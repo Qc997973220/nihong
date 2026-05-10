@@ -390,6 +390,10 @@
             </div>
 
             <div class="action-buttons">
+                <button class="btn btn-primary" id="changePasswordBtn">
+                    <i class="fas fa-key"></i>
+                    修改密码
+                </button>
                 <button class="btn btn-secondary" id="logoutBtn">
                     <i class="fas fa-sign-out-alt"></i>
                     退出登录
@@ -540,6 +544,35 @@
         <div class="edit-modal-footer">
             <button class="btn btn-secondary" id="cancelEditBtn">取消</button>
             <button class="btn btn-primary" id="saveEditBtn"><i class="fas fa-check"></i> 保存</button>
+        </div>
+    </div>
+</div>
+
+<div class="edit-modal-overlay" id="passwordModal">
+    <div class="edit-modal">
+        <div class="edit-modal-header">
+            <h2><i class="fas fa-key"></i> 修改密码</h2>
+            <button class="edit-close-btn" id="closePasswordModal"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="edit-modal-body">
+            <div class="edit-form-group">
+                <label><i class="fas fa-lock"></i> 旧密码</label>
+                <input type="password" id="oldPassword" placeholder="请输入旧密码" maxlength="16" autocomplete="current-password">
+            </div>
+            <div class="edit-form-group">
+                <label><i class="fas fa-shield-alt"></i> 新密码</label>
+                <input type="password" id="newPassword" placeholder="请输入新密码" maxlength="16" autocomplete="new-password">
+                <div class="edit-form-hint">只能包含字母和数字，长度6-16位</div>
+            </div>
+            <div class="edit-form-group">
+                <label><i class="fas fa-check-circle"></i> 确认新密码</label>
+                <input type="password" id="confirmPassword" placeholder="请再次输入新密码" maxlength="16" autocomplete="new-password">
+            </div>
+            <div class="edit-message" id="passwordMessage"></div>
+        </div>
+        <div class="edit-modal-footer">
+            <button class="btn btn-secondary" id="cancelPasswordBtn">取消</button>
+            <button class="btn btn-primary" id="savePasswordBtn"><i class="fas fa-check"></i> 确认修改</button>
         </div>
     </div>
 </div>
@@ -720,6 +753,109 @@
     document.getElementById('editModal').addEventListener('click', function(e) {
         if (e.target === this) {
             this.classList.remove('active');
+        }
+    });
+
+    const passwordModal = document.getElementById('passwordModal');
+    const passwordMessage = document.getElementById('passwordMessage');
+    const savePasswordBtn = document.getElementById('savePasswordBtn');
+
+    function showPasswordMessage(type, text) {
+        passwordMessage.className = `edit-message ${type}`;
+        passwordMessage.innerText = text;
+        passwordMessage.style.display = 'block';
+    }
+
+    function resetPasswordForm() {
+        document.getElementById('oldPassword').value = '';
+        document.getElementById('newPassword').value = '';
+        document.getElementById('confirmPassword').value = '';
+        passwordMessage.style.display = 'none';
+        savePasswordBtn.disabled = false;
+        savePasswordBtn.innerHTML = '<i class="fas fa-check"></i> 确认修改';
+    }
+
+    function closePasswordModal() {
+        passwordModal.classList.remove('active');
+        resetPasswordForm();
+    }
+
+    document.getElementById('changePasswordBtn').addEventListener('click', function() {
+        resetPasswordForm();
+        passwordModal.classList.add('active');
+        document.getElementById('oldPassword').focus();
+    });
+
+    document.getElementById('closePasswordModal').addEventListener('click', closePasswordModal);
+    document.getElementById('cancelPasswordBtn').addEventListener('click', closePasswordModal);
+
+    passwordModal.addEventListener('click', function(e) {
+        if (e.target === this) {
+            closePasswordModal();
+        }
+    });
+
+    savePasswordBtn.addEventListener('click', async function() {
+        const oldPassword = document.getElementById('oldPassword').value;
+        const newPassword = document.getElementById('newPassword').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        const token = localStorage.getItem('authToken');
+        const passwordRegex = /^[A-Za-z0-9]{6,16}$/;
+
+        if (!oldPassword.trim()) {
+            showPasswordMessage('error', '请输入旧密码');
+            return;
+        }
+        if (!passwordRegex.test(newPassword)) {
+            showPasswordMessage('error', '新密码只能包含字母和数字，长度为6-16位');
+            return;
+        }
+        if (newPassword !== confirmPassword) {
+            showPasswordMessage('error', '两次输入的新密码不一致');
+            return;
+        }
+        if (oldPassword === newPassword) {
+            showPasswordMessage('error', '新密码不能和旧密码相同');
+            return;
+        }
+        if (!token) {
+            showPasswordMessage('error', '登录状态已失效，请重新登录');
+            return;
+        }
+
+        let success = false;
+        savePasswordBtn.disabled = true;
+        savePasswordBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 修改中...';
+
+        try {
+            const response = await fetch('/api/login/changePassword', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ oldPassword, newPassword })
+            });
+            const result = await response.json();
+
+            if (response.ok && Number(result.status) === 1) {
+                success = true;
+                showPasswordMessage('success', '密码修改成功，请使用新密码重新登录');
+                localStorage.removeItem('userInfo');
+                localStorage.removeItem('authToken');
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 1200);
+            } else {
+                showPasswordMessage('error', result.message || '密码修改失败');
+            }
+        } catch (error) {
+            showPasswordMessage('error', '网络错误，请稍后重试');
+        } finally {
+            if (!success) {
+                savePasswordBtn.disabled = false;
+                savePasswordBtn.innerHTML = '<i class="fas fa-check"></i> 确认修改';
+            }
         }
     });
 
