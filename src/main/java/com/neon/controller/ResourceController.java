@@ -189,9 +189,11 @@ public class ResourceController {
     @ResponseBody
     public Map<String, Object> list(
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "12") int pageSize) {
+            @RequestParam(defaultValue = "12") int pageSize,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String keyword) {
         try {
-            return resourceService.getResourcesByPage(page, pageSize);
+            return resourceService.getResourcesByPage(page, pageSize, category, keyword);
         } catch (Exception e) {
             Map<String, Object> result = new HashMap<>();
             result.put("success", false);

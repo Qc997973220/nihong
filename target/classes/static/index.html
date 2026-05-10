@@ -3264,7 +3264,9 @@
                 if (keyword) {
                     searchResources(keyword);
                 } else {
-                    fetchResources();
+                    currentSearchKeyword = '';
+                    localStorage.removeItem('searchKeyword');
+                    fetchResources(1);
                 }
             }
 
@@ -3281,37 +3283,10 @@
             }
         }
 
-        let currentSearchKeyword = '';
-        let currentSearchResults = [];
-
         function searchResources(keyword) {
             currentSearchKeyword = keyword;
-            fetch(`/api/resources/search?keyword=${encodeURIComponent(keyword)}`)
-                .then(response => response.json())
-                .then(resources => {
-                    currentSearchResults = resources;
-                    const resourceGrid = document.getElementById('resourceGrid');
-                    if (resourceGrid) {
-                        if (resources.length === 0) {
-                            resourceGrid.innerHTML = `
-                                <div style="text-align: center; padding: 60px 20px; color: #7f9bc0; grid-column: 1/-1;">
-                                    <i class="fas fa-search" style="font-size: 3rem; margin-bottom: 16px; opacity: 0.5;"></i>
-                                    <p style="font-size: 1.1rem;">未找到与"${keyword}"相关的资源</p>
-                                    <p style="font-size: 0.9rem; margin-top: 8px; opacity: 0.7;">试试其他关键词吧~</p>
-                                </div>
-                            `;
-                        } else {
-                            const activeChip = document.querySelector('.category-chip.active');
-                            const currentCategory = activeChip ? activeChip.textContent.trim() : '全部';
-                            renderCards(resources, currentCategory);
-                        }
-                    }
-                    localStorage.setItem('searchKeyword', keyword);
-                })
-                .catch(error => {
-                    console.error('搜索失败:', error);
-                    showErrorToast('搜索失败，请稍后重试');
-                });
+            localStorage.setItem('searchKeyword', keyword);
+            fetchResources(1);
         }
 
         initSearch();
@@ -3393,26 +3368,33 @@
         }
     }
 
-    // 全局变量存储资源列表
+    // 全局变量存储当前资源分页状态
     let allResources = [];
     const PAGE_SIZE = 12;
     let currentPage = 1;
-    let currentFilteredResources = [];
+    let totalResourcePages = 1;
+    let totalResourceElements = 0;
+    let currentSearchKeyword = '';
+    let currentCategory = '全部';
 
     // 渲染卡片
-    function renderCards(resources, filterCategory = '全部') {
+    function renderCards(resources) {
         const grid = document.getElementById('resourceGrid');
-        const filtered = filterCategory === '全部'
-            ? resources
-            : resources.filter(r => r.category === filterCategory);
+        if (!grid) return;
 
-        currentFilteredResources = filtered;
-        const totalPages = Math.ceil(filtered.length / PAGE_SIZE) || 1;
-        if (currentPage > totalPages) currentPage = totalPages;
-
-        const start = (currentPage - 1) * PAGE_SIZE;
-        const end = start + PAGE_SIZE;
-        const pageResources = filtered.slice(start, end);
+        const pageResources = resources || [];
+        if (pageResources.length === 0) {
+            const categoryText = currentCategory !== '全部' ? `${currentCategory}分类下` : '';
+            const keywordText = currentSearchKeyword ? `与"${currentSearchKeyword}"相关的` : '';
+            grid.innerHTML = `
+                <div style="text-align: center; padding: 60px 20px; color: #7f9bc0; grid-column: 1/-1;">
+                    <i class="fas fa-search" style="font-size: 3rem; margin-bottom: 16px; opacity: 0.5;"></i>
+                    <p style="font-size: 1.1rem;">未找到${categoryText}${keywordText}资源</p>
+                    <p style="font-size: 0.9rem; margin-top: 8px; opacity: 0.7;">试试其他关键词或分类吧~</p>
+                </div>
+            `;
+            return;
+        }
 
         grid.innerHTML = pageResources.map(r => {
             const date = r.createdAt ? new Date(r.createdAt).toLocaleDateString('zh-CN', {
@@ -3439,11 +3421,9 @@
                     </div>
                 </div>
             `}).join('');
-
-        renderPagination(totalPages);
     }
 
-    function renderPagination(totalPages) {
+    function renderPagination(totalPages, totalElements) {
         const pagination = document.getElementById('pagination');
         if (totalPages <= 1) {
             pagination.innerHTML = '';
@@ -3475,63 +3455,57 @@
         }
 
         html += `<button class="page-btn" onclick="goToPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}><i class="fas fa-chevron-right"></i></button>`;
-        html += `<span class="page-info">第${currentPage}/${totalPages}页 共${currentFilteredResources.length}条</span>`;
+        html += `<span class="page-info">第${currentPage}/${totalPages}页 共${totalElements}条</span>`;
 
         pagination.innerHTML = html;
     }
 
     function goToPage(page) {
-        const totalPages = Math.ceil(currentFilteredResources.length / PAGE_SIZE) || 1;
-        if (page < 1 || page > totalPages) return;
-        currentPage = page;
-        const activeChip = document.querySelector('.category-chip.active');
-        const currentCategory = activeChip ? activeChip.textContent.trim() : '全部';
-        renderCards(currentFilteredResources, currentCategory);
+        if (page < 1 || page > totalResourcePages) return;
+        fetchResources(page);
+        const grid = document.getElementById('resourceGrid');
+        if (grid) {
+            grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
     }
 
     // 获取资源列表
-    async function fetchResources() {
-        currentSearchKeyword = '';
-        currentSearchResults = [];
-        const searchInput = document.getElementById('searchInput');
-        if (searchInput) searchInput.value = '';
-        const cachedResources = localStorage.getItem('cachedResources');
-        const cachedTimestamp = localStorage.getItem('cachedResourcesTimestamp');
-        const now = Date.now();
-        
-        // 如果缓存存在且未过期（10分钟），使用缓存
-        if (cachedResources && cachedTimestamp && (now - parseInt(cachedTimestamp)) < 10 * 60 * 1000) {
-            try {
-                const resources = JSON.parse(cachedResources);
-                allResources = resources;
-                const activeChip = document.querySelector('.category-chip.active');
-                const currentCategory = activeChip ? activeChip.textContent.trim() : '全部';
-                renderCards(allResources, currentCategory);
-            } catch (e) {
-                console.error('解析缓存资源失败:', e);
-            }
+    async function fetchResources(page = 1) {
+        currentPage = page;
+        localStorage.removeItem('cachedResources');
+        localStorage.removeItem('cachedResourcesTimestamp');
+
+        const grid = document.getElementById('resourceGrid');
+        if (grid) {
+            grid.innerHTML = '<p style="color:#7f9bc0; grid-column:1/-1; text-align:center; padding: 40px 0;">资源加载中...</p>';
         }
-        
-        // 从服务器获取最新资源列表
+
         try {
-            const response = await fetch(`/api/resources/list`);
+            const params = new URLSearchParams({
+                page: String(page),
+                pageSize: String(PAGE_SIZE)
+            });
+            if (currentCategory && currentCategory !== '全部') {
+                params.set('category', currentCategory);
+            }
+            if (currentSearchKeyword) {
+                params.set('keyword', currentSearchKeyword);
+            }
+
+            const response = await fetch(`/api/resources/list?${params.toString()}`);
             if (!response.ok) throw new Error('网络错误');
             const data = await response.json();
-            allResources = data.content || data;
-            
-            // 缓存资源列表到localStorage，过期时间10分钟
-            localStorage.setItem('cachedResources', JSON.stringify(allResources));
-            localStorage.setItem('cachedResourcesTimestamp', Date.now().toString());
-            
-            const activeChip = document.querySelector('.category-chip.active');
-            const currentCategory = activeChip ? activeChip.textContent.trim() : '全部';
-            renderCards(allResources, currentCategory);
+            allResources = data.content || [];
+            currentPage = data.currentPage || page;
+            totalResourcePages = data.totalPages || 0;
+            totalResourceElements = data.totalElements || allResources.length;
+
+            renderCards(allResources);
+            renderPagination(totalResourcePages, totalResourceElements);
         } catch (error) {
             console.error('获取资源列表失败', error);
-            // 如果没有缓存，显示错误信息
-            if (!cachedResources) {
-                document.getElementById('resourceGrid').innerHTML = '<p style="color:#ff8a8a;">加载失败，请刷新重试</p>';
-            }
+            document.getElementById('resourceGrid').innerHTML = '<p style="color:#ff8a8a; grid-column:1/-1; text-align:center;">加载失败，请刷新重试</p>';
+            renderPagination(0, 0);
         }
     }
 
@@ -3540,12 +3514,8 @@
         chip.addEventListener('click', function() {
             document.querySelectorAll('.category-chip').forEach(c => c.classList.remove('active'));
             this.classList.add('active');
-            const category = this.textContent.trim();
-            if (currentSearchKeyword && currentSearchResults.length > 0) {
-                renderCards(currentSearchResults, category);
-            } else {
-                renderCards(allResources, category);
-            }
+            currentCategory = this.textContent.trim();
+            fetchResources(1);
         });
     });
 
@@ -4072,12 +4042,8 @@
 
                 hideLogin();
 
-                const activeChip = document.querySelector('.category-chip.active');
-                if (activeChip) {
-                    const currentCategory = activeChip.textContent.trim();
-                    renderCards(allResources, currentCategory);
-                    fetchRecommendedResources();
-                }
+                fetchResources(currentPage);
+                fetchRecommendedResources();
             } else if (result.status === 0) {
                 let message = '账号或密码错误';
                 if (result.remainingAttempts !== undefined && result.remainingAttempts !== null) {
@@ -4286,9 +4252,7 @@
                     }
 
                     hideLogin();
-                    const activeChip = document.querySelector('.category-chip.active');
-                    const currentCategory = activeChip ? activeChip.textContent.trim() : '全部';
-                    renderCards(allResources, currentCategory);
+                    fetchResources(currentPage);
                     fetchRecommendedResources();
                 } else {
                     messageDiv.innerText = '注册成功，但自动登录失败，请手动登录';
