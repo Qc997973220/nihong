@@ -263,6 +263,54 @@
             margin-top: 8px;
             font-family: 'Courier New', monospace;
         }
+        .vip-toolbox-btn {
+            color: #FFD700 !important;
+            border-color: rgba(255, 215, 0, 0.55);
+            box-shadow: 0 0 25px rgba(255, 190, 40, 0.28), 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+        .vip-toolbox-btn.active {
+            display: flex !important;
+        }
+        .vip-toolbox-btn:hover {
+            border-color: #FFD700;
+            box-shadow: 0 0 35px rgba(255, 215, 0, 0.45), 0 6px 15px rgba(0, 0, 0, 0.5);
+        }
+        .vip-toolbox-btn.locked,
+        .vip-toolbox-btn.locked:hover {
+            color: #8d98a8 !important;
+            border-color: rgba(150, 160, 175, 0.42);
+            box-shadow: 0 0 18px rgba(130, 140, 155, 0.18), 0 4px 12px rgba(0, 0, 0, 0.4);
+            cursor: not-allowed;
+            filter: grayscale(0.85);
+        }
+        .toolbox-badge {
+            position: absolute;
+            top: -6px;
+            right: -8px;
+            background: linear-gradient(135deg, #ff6b6b, #ffb347);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.45);
+            border-radius: 999px;
+            padding: 2px 6px;
+            font-size: 0.62rem;
+            font-weight: 800;
+            line-height: 1;
+            box-shadow: 0 0 12px rgba(255, 180, 60, 0.45);
+        }
+        .vip-toolbox-btn.locked .toolbox-badge {
+            background: linear-gradient(135deg, #6f7a88, #9aa4b2);
+            color: #edf2f8;
+            box-shadow: none;
+        }
+        .contact-popup .toolbox-text {
+            color: #FFD700;
+            font-size: 1rem;
+            font-weight: 700;
+            margin-top: 8px;
+        }
+        .vip-toolbox-btn.locked .toolbox-text {
+            color: #b0bac8;
+        }
 
         /* 页脚 */
         .footer {
@@ -1125,6 +1173,13 @@
             color: #a0a0a0;
             margin-bottom: 4px;
         }
+        .vip-card-toolbox {
+            font-size: 0.68rem;
+            color: #8fd8ff;
+            line-height: 1.25;
+            min-height: 28px;
+            margin-bottom: 5px;
+        }
         .vip-card-cycle {
             font-size: 0.75rem;
             color: #808080;
@@ -1348,43 +1403,48 @@
         <div class="vip-modal-body">
             <div class="vip-promotion-bar">
                 <div class="vip-promotion-date" id="vipPromotionDate">2026-05-04 12:00:00</div>
-                <div class="vip-promotion-title">限时特惠 · 全场低至3折</div>
+                <div class="vip-promotion-title">限时特惠 · 年卡7折 永久5折</div>
             </div>
             <div class="vip-price-cards">
                 <div class="vip-price-card">
                     <div class="vip-card-name">月卡</div>
-                    <div class="vip-card-price">¥39.9 <s>¥49.9</s></div>
-                    <div class="vip-card-discount">8折</div>
+                    <div class="vip-card-price">¥49.9</div>
+                    <div class="vip-card-discount">无折扣</div>
                     <div class="vip-card-rights">每日2篇</div>
+                    <div class="vip-card-toolbox">享VIP专属网创工具箱</div>
                     <div class="vip-card-cycle">30天</div>
                 </div>
                 <div class="vip-price-card">
                     <div class="vip-card-name">季卡</div>
-                    <div class="vip-card-price">¥69.9 <s>¥89.9</s></div>
-                    <div class="vip-card-discount">75折</div>
+                    <div class="vip-card-price">¥69.9</div>
+                    <div class="vip-card-discount">无折扣</div>
                     <div class="vip-card-rights">每日3篇</div>
+                    <div class="vip-card-toolbox">享VIP专属网创工具箱</div>
                     <div class="vip-card-cycle">90天</div>
                 </div>
                 <div class="vip-price-card">
                     <div class="vip-card-name">年卡</div>
-                    <div class="vip-card-price">¥109.9 <s>¥139.9</s></div>
+                    <div class="vip-card-price">¥139.9 <s>¥199.9</s></div>
                     <div class="vip-card-discount">7折</div>
                     <div class="vip-card-rights">无限制</div>
+                    <div class="vip-card-toolbox">享VIP专属网创工具箱</div>
                     <div class="vip-card-cycle">360天</div>
                 </div>
                 <div class="vip-price-card vip-price-card-hot">
                     <div class="vip-card-hot-tag">推荐</div>
                     <div class="vip-card-name">永久</div>
-                    <div class="vip-card-price">¥189.9 <s>¥369.9</s></div>
+                    <div class="vip-card-price">¥199.9 <s>¥399.9</s></div>
                     <div class="vip-card-discount">5折</div>
                     <div class="vip-card-rights">无限制</div>
+                    <div class="vip-card-toolbox">享VIP专属网创工具箱</div>
                     <div class="vip-card-cycle">永久有效</div>
                 </div>
             </div>
             <div class="vip-get-code">
                 <div class="vip-get-code-title"><i class="fas fa-info-circle"></i> 激活码卡密获取方式</div>
                 <div class="vip-get-code-content">
-                    <p>咸鱼/淘宝搜索：<span style="color: #FFD700;">霓虹之都激活码</span> 或 <span style="color: #FFD700;">neonvip</span></p>
+                    <p>1. 咸鱼/淘宝搜索：<span style="color: #FFD700;">霓虹之都激活码</span> 或 <span style="color: #FFD700;">neonvip激活码</span></p>
+                    <p>2. 通过代理商购买</p>
                 </div>
             </div>
             <div class="vip-form-group">
@@ -1472,6 +1532,14 @@
             <p>扫码关注抖音</p>
         </div>
     </div>
+    <div class="contact-btn vip-toolbox-btn" id="vipToolboxBtn" title="VIP专属网创工具箱" style="display: none;">
+        <i class="fa-solid fa-toolbox"></i>
+        <span class="toolbox-badge">VIP</span>
+        <div class="contact-popup vip-toolbox-popup">
+            <p>VIP专属</p>
+            <p class="toolbox-text">网创工具箱</p>
+        </div>
+    </div>
 </div>
 
 <footer class="footer">
@@ -1485,6 +1553,50 @@
     function getHost() {
             return '';
         }
+    const VIP_TOOLBOX_URL = 'https://my.feishu.cn/docx/UhMJdp3WQo3Z6JxPQPWcey6Lnkd?from=from_copylink';
+
+    function isVipUser(user) {
+        return user && (user.memberStatus === 'active' || user.memberStatus === 'permanent');
+    }
+
+    function isLoggedToolboxUser(user) {
+        const identity = user && (user.account || user.username || user.userName);
+        return !!identity && identity !== '未登录' && identity !== '未登录用户';
+    }
+
+    function updateVipToolboxVisibility(user) {
+        const toolboxBtn = document.getElementById('vipToolboxBtn');
+        if (!toolboxBtn) return;
+
+        let storedUserInfo = null;
+        try {
+            storedUserInfo = JSON.parse(localStorage.getItem('userInfo') || 'null');
+        } catch (e) {
+            storedUserInfo = null;
+        }
+        const userInfo = user ? { ...(storedUserInfo || {}), ...user } : storedUserInfo;
+
+        const loggedIn = isLoggedToolboxUser(userInfo);
+        const vip = isVipUser(userInfo);
+        toolboxBtn.classList.toggle('active', loggedIn);
+        toolboxBtn.classList.toggle('locked', loggedIn && !vip);
+    }
+
+    function openVipToolbox() {
+        let userInfo = null;
+        try {
+            userInfo = JSON.parse(localStorage.getItem('userInfo') || 'null');
+        } catch (e) {
+            userInfo = null;
+        }
+
+        if (!isVipUser(userInfo)) {
+            alert('权限不足,请先激活VIP');
+            updateVipToolboxVisibility(userInfo);
+            return;
+        }
+        window.open(VIP_TOOLBOX_URL, '_blank', 'noopener,noreferrer');
+    }
 
     // 显示美观的提示
     function showToast(message, type = 'success') {
@@ -1788,6 +1900,7 @@
             expireText.textContent = '';
         } else {
             statusBar.style.display = 'none';
+            updateVipToolboxVisibility(user);
             return;
         }
 
@@ -1799,6 +1912,7 @@
         statusText.style.color = textColor;
         const icon = document.querySelector('.member-status-icon');
         if (icon) icon.style.color = iconColor;
+        updateVipToolboxVisibility(user);
     }
 
     // ========== 用户信息 ==========
@@ -2814,11 +2928,18 @@
         localStorage.removeItem('authToken');
         localStorage.removeItem('userInfo');
         savedUsername = null;
+        updateVipToolboxVisibility(null);
         updateCommentInputVisibility();
     }
 
     // 页面加载时静默验证会话有效性，如果有效则更新用户信息，如果无效也不清除本地数据
     (async () => {
+        const toolboxBtn = document.getElementById('vipToolboxBtn');
+        if (toolboxBtn) {
+            toolboxBtn.addEventListener('click', openVipToolbox);
+            updateVipToolboxVisibility();
+        }
+
         const token = localStorage.getItem('authToken');
         const storedUserInfo = localStorage.getItem('userInfo');
         console.log('页面加载时 - authToken:', token);

@@ -1481,9 +1481,32 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            flex: 1;
+            min-width: 0;
         }
         .recommend-item:hover a {
             color: #8ac8ff;
+        }
+        .recommend-access-badge {
+            flex-shrink: 0;
+            min-width: 38px;
+            padding: 3px 8px;
+            border-radius: 7px;
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.28);
+            font-size: 0.68rem;
+            font-weight: 800;
+            line-height: 1;
+            text-align: center;
+            letter-spacing: 0.2px;
+        }
+        .recommend-free-badge {
+            background: linear-gradient(135deg, rgba(24, 201, 139, 0.95), rgba(47, 183, 255, 0.95));
+            box-shadow: 0 0 14px rgba(0, 190, 150, 0.25);
+        }
+        .recommend-vip-badge {
+            background: linear-gradient(135deg, rgba(242, 201, 76, 0.95), rgba(255, 122, 69, 0.95));
+            box-shadow: 0 0 14px rgba(242, 170, 40, 0.25);
         }
 
         /* 外部链接模块（新增） */
@@ -1756,6 +1779,28 @@
             gap: 4px;
             z-index: 2;
         }
+        .access-badge {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            z-index: 3;
+            padding: 4px 10px;
+            border-radius: 8px;
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            font-size: 0.78rem;
+            font-weight: 700;
+            line-height: 1;
+            pointer-events: none;
+        }
+        .free-badge {
+            background: linear-gradient(135deg, #18c98b, #2fb7ff);
+            box-shadow: 0 8px 18px rgba(0, 180, 130, 0.35);
+        }
+        .vip-badge {
+            background: linear-gradient(135deg, #f2c94c, #ff7a45);
+            box-shadow: 0 8px 18px rgba(242, 170, 40, 0.35);
+        }
         .card-link {
             color: #ffffff;
             text-decoration: none;
@@ -1900,6 +1945,54 @@
             font-weight: 500;
             margin-top: 8px;
             font-family: 'Courier New', monospace;
+        }
+        .vip-toolbox-btn {
+            color: #FFD700 !important;
+            border-color: rgba(255, 215, 0, 0.55);
+            box-shadow: 0 0 25px rgba(255, 190, 40, 0.28), 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+        .vip-toolbox-btn.active {
+            display: flex !important;
+        }
+        .vip-toolbox-btn:hover {
+            border-color: #FFD700;
+            box-shadow: 0 0 35px rgba(255, 215, 0, 0.45), 0 6px 15px rgba(0, 0, 0, 0.5);
+        }
+        .vip-toolbox-btn.locked,
+        .vip-toolbox-btn.locked:hover {
+            color: #8d98a8 !important;
+            border-color: rgba(150, 160, 175, 0.42);
+            box-shadow: 0 0 18px rgba(130, 140, 155, 0.18), 0 4px 12px rgba(0, 0, 0, 0.4);
+            cursor: not-allowed;
+            filter: grayscale(0.85);
+        }
+        .toolbox-badge {
+            position: absolute;
+            top: -6px;
+            right: -8px;
+            background: linear-gradient(135deg, #ff6b6b, #ffb347);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.45);
+            border-radius: 999px;
+            padding: 2px 6px;
+            font-size: 0.62rem;
+            font-weight: 800;
+            line-height: 1;
+            box-shadow: 0 0 12px rgba(255, 180, 60, 0.45);
+        }
+        .vip-toolbox-btn.locked .toolbox-badge {
+            background: linear-gradient(135deg, #6f7a88, #9aa4b2);
+            color: #edf2f8;
+            box-shadow: none;
+        }
+        .contact-popup .toolbox-text {
+            color: #FFD700;
+            font-size: 1rem;
+            font-weight: 700;
+            margin-top: 8px;
+        }
+        .vip-toolbox-btn.locked .toolbox-text {
+            color: #b0bac8;
         }
 
         /* 模态框 */
@@ -2674,6 +2767,14 @@
             <p>扫码关注抖音(商务合作)</p>
         </div>
     </div>
+    <div class="contact-btn vip-toolbox-btn" id="vipToolboxBtn" title="VIP专属网创工具箱" style="display: none;">
+        <i class="fa-solid fa-toolbox"></i>
+        <span class="toolbox-badge">VIP</span>
+        <div class="contact-popup vip-toolbox-popup">
+            <p>VIP专属</p>
+            <p class="toolbox-text">网创工具箱</p>
+        </div>
+    </div>
 </div>
 
 <!-- 今日资讯弹窗 -->
@@ -2750,9 +2851,59 @@
         username: '未登录',
         role: '0' // 0: 普通用户, 1: 有权限用户
     };
+    const VIP_TOOLBOX_URL = 'https://my.feishu.cn/docx/UhMJdp3WQo3Z6JxPQPWcey6Lnkd?from=from_copylink';
+
+    function isVipUser(user) {
+        return user && (user.memberStatus === 'active' || user.memberStatus === 'permanent');
+    }
+
+    function isLoggedToolboxUser(user) {
+        const identity = user && (user.account || user.username || user.userName);
+        return !!identity && identity !== '未登录' && identity !== '未登录用户';
+    }
+
+    function updateVipToolboxVisibility(user) {
+        const toolboxBtn = document.getElementById('vipToolboxBtn');
+        if (!toolboxBtn) return;
+
+        let storedUserInfo = null;
+        try {
+            storedUserInfo = JSON.parse(localStorage.getItem('userInfo') || 'null');
+        } catch (e) {
+            storedUserInfo = null;
+        }
+        const userInfo = user ? { ...(storedUserInfo || {}), ...user } : storedUserInfo;
+
+        const loggedIn = isLoggedToolboxUser(userInfo);
+        const vip = isVipUser(userInfo);
+        toolboxBtn.classList.toggle('active', loggedIn);
+        toolboxBtn.classList.toggle('locked', loggedIn && !vip);
+    }
+
+    function openVipToolbox() {
+        let userInfo = null;
+        try {
+            userInfo = JSON.parse(localStorage.getItem('userInfo') || 'null');
+        } catch (e) {
+            userInfo = null;
+        }
+
+        if (!isVipUser(userInfo)) {
+            alert('权限不足,请先激活VIP');
+            updateVipToolboxVisibility(userInfo);
+            return;
+        }
+        window.open(VIP_TOOLBOX_URL, '_blank', 'noopener,noreferrer');
+    }
 
     // ========== 发布资源功能 ==========
     document.addEventListener('DOMContentLoaded', function() {
+        const toolboxBtn = document.getElementById('vipToolboxBtn');
+        if (toolboxBtn) {
+            toolboxBtn.addEventListener('click', openVipToolbox);
+            updateVipToolboxVisibility();
+        }
+
         // 加载动画控制
         const loadingOverlay = document.getElementById('loadingOverlay');
         const loadingProgressBar = document.getElementById('loadingProgressBar');
@@ -2918,6 +3069,7 @@
             document.getElementById('displayUsername').textContent = currentUser.username;
             document.getElementById('userAvatar').innerText = 'U';
             document.getElementById('adminLink').style.display = 'none';
+            updateVipToolboxVisibility(null);
         }
 
         // 页面加载时验证会话（立即从localStorage读取，然后异步验证更新）
@@ -3016,6 +3168,7 @@
                     vipBtn.style.display = 'flex';
                 }
             }
+            updateVipToolboxVisibility(currentUser);
             
             // 检查是否为管理员
             if (adminLink && currentUser.role === '1') {
@@ -3201,14 +3354,18 @@
             const card = document.createElement('div');
             card.className = 'resource-card';
             const viewCountHtml = `<div class="card-view-count"><i class="fa-regular fa-eye"></i> ${resource.viewCount || 0}</div>`;
+            const accessBadgeHtml = resource.category === '免费'
+                ? '<div class="access-badge free-badge">免费</div>'
+                : '<div class="access-badge vip-badge">VIP</div>';
             const imageHtml = resource.image
                 ? `<div class="card-image-wrapper" onclick="viewResource(${resource.id})">
                        <img class="card-image" src="${resource.image}" alt="${resource.title}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                        <div class="card-image-placeholder" style="display:none;"><i class="fas fa-image"></i></div>
                        <div class="card-image-overlay"><i class="fas fa-search-plus"></i></div>
+                       ${accessBadgeHtml}
                        ${viewCountHtml}
                    </div>`
-                : `<div class="card-image-wrapper"><div class="card-image-placeholder"><i class="fas fa-image"></i></div>${viewCountHtml}</div>`;
+                : `<div class="card-image-wrapper"><div class="card-image-placeholder"><i class="fas fa-image"></i></div>${accessBadgeHtml}${viewCountHtml}</div>`;
             card.innerHTML = `
                     ${imageHtml}
                     <h3 class="card-title">${resource.title}</h3>
@@ -3408,14 +3565,18 @@
                 year: 'numeric', month: '2-digit', day: '2-digit'
             }) : '未知';
             const viewCountHtml = `<div class="card-view-count"><i class="fa-regular fa-eye"></i> ${r.viewCount || 0}</div>`;
+            const accessBadgeHtml = r.category === '免费'
+                ? '<div class="access-badge free-badge">免费</div>'
+                : '<div class="access-badge vip-badge">VIP</div>';
             const imageHtml = r.image
                 ? `<div class="card-image-wrapper" onclick="viewResource(${r.id})">
                        <img class="card-image" src="${r.image}" alt="${r.title}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                        <div class="card-image-placeholder" style="display:none;"><i class="fas fa-image"></i></div>
                        <div class="card-image-overlay"><i class="fas fa-search-plus"></i></div>
+                       ${accessBadgeHtml}
                        ${viewCountHtml}
                    </div>`
-                : `<div class="card-image-wrapper"><div class="card-image-placeholder"><i class="fas fa-image"></i></div>${viewCountHtml}</div>`;
+                : `<div class="card-image-wrapper"><div class="card-image-placeholder"><i class="fas fa-image"></i></div>${accessBadgeHtml}${viewCountHtml}</div>`;
             return `
                 <div class="resource-card">
                     ${imageHtml}
@@ -3553,19 +3714,21 @@
         const leftItems = resources.slice(0, midpoint);
         const rightItems = resources.slice(midpoint);
 
-        leftContainer.innerHTML = leftItems.map(r => `
+        const renderRecommendItem = (r) => {
+            const isFree = r.category === '免费';
+            const badgeClass = isFree ? 'recommend-free-badge' : 'recommend-vip-badge';
+            const badgeText = isFree ? '免费' : 'VIP';
+            return `
             <div class="recommend-item" onclick="window.open('detail.html?id=${r.id}', '_blank')">
                 <i class="fas fa-chevron-right" style="color:#5a85c0;font-size:0.7rem;"></i>
                 <a href="detail.html?id=${r.id}" target="_blank">${r.title}</a>
+                <span class="recommend-access-badge ${badgeClass}">${badgeText}</span>
             </div>
-        `).join('');
+        `;
+        };
 
-        rightContainer.innerHTML = rightItems.map(r => `
-            <div class="recommend-item" onclick="window.open('detail.html?id=${r.id}', '_blank')">
-                <i class="fas fa-chevron-right" style="color:#5a85c0;font-size:0.7rem;"></i>
-                <a href="detail.html?id=${r.id}" target="_blank">${r.title}</a>
-            </div>
-        `).join('');
+        leftContainer.innerHTML = leftItems.map(renderRecommendItem).join('');
+        rightContainer.innerHTML = rightItems.map(renderRecommendItem).join('');
     }
     // 登录/注册相关
     function showLogin() {
@@ -3652,6 +3815,7 @@
             expireText.textContent = '';
         } else {
             statusBar.style.display = 'none';
+            updateVipToolboxVisibility(user);
             return;
         }
 
@@ -3672,6 +3836,7 @@
                 vipBtn.style.display = 'flex';
             }
         }
+        updateVipToolboxVisibility(user);
     }
 
     function updateMemberStatusBar(user) {
@@ -4469,6 +4634,7 @@
                         vipBtn.style.display = 'flex';
                     }
                 }
+                updateVipToolboxVisibility(userInfo);
 
                 // 获取未读消息数量
                 getUnreadMessageCount(userInfo.username);
@@ -4480,6 +4646,7 @@
         } else {
             document.getElementById('displayUsername').innerText = '未登录';
             document.getElementById('userAvatar').innerText = 'U';
+            updateVipToolboxVisibility(null);
         }
 
         // 渲染外部链接
@@ -4660,6 +4827,10 @@
     const ctx = canvas.getContext('2d');
     let mouseX = -1000, mouseY = -1000;
     let width, height;
+    const CANVAS_TARGET_FPS = 30;
+    const CANVAS_FRAME_INTERVAL = 1000 / CANVAS_TARGET_FPS;
+    let canvasAnimationId = null;
+    let lastCanvasFrameTime = 0;
 
     function resizeCanvas() {
         width = window.innerWidth;
@@ -4686,8 +4857,19 @@
         });
     }
 
-    function draw() {
+    function draw(timestamp) {
         if (!ctx) return;
+        if (document.hidden) {
+            canvasAnimationId = null;
+            return;
+        }
+
+        canvasAnimationId = requestAnimationFrame(draw);
+        if (timestamp - lastCanvasFrameTime < CANVAS_FRAME_INTERVAL) {
+            return;
+        }
+        lastCanvasFrameTime = timestamp - ((timestamp - lastCanvasFrameTime) % CANVAS_FRAME_INTERVAL);
+
         ctx.clearRect(0, 0, width, height);
         ctx.fillStyle = '#0b0e14';
         ctx.fillRect(0, 0, width, height);
@@ -4721,10 +4903,32 @@
 
         ctx.fillStyle = 'rgba(255,255,255,0.01)';
         ctx.fillRect(0, 0, width, height);
-
-        requestAnimationFrame(draw);
     }
-    draw();
+
+    function startCanvasAnimation() {
+        if (canvasAnimationId !== null || document.hidden) {
+            return;
+        }
+        lastCanvasFrameTime = 0;
+        canvasAnimationId = requestAnimationFrame(draw);
+    }
+
+    function stopCanvasAnimation() {
+        if (canvasAnimationId !== null) {
+            cancelAnimationFrame(canvasAnimationId);
+            canvasAnimationId = null;
+        }
+    }
+
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            stopCanvasAnimation();
+        } else {
+            startCanvasAnimation();
+        }
+    });
+
+    startCanvasAnimation();
 
     document.addEventListener('mouseleave', () => {
         mouseX = -1000; mouseY = -1000;
@@ -4741,43 +4945,48 @@
         <div class="vip-modal-body">
             <div class="vip-promotion-bar">
                 <div class="vip-promotion-date" id="vipPromotionDate">2026-05-04 12:00:00</div>
-                <div class="vip-promotion-title">限时特惠 · 全场低至3折</div>
+                <div class="vip-promotion-title">限时特惠 · 年卡7折 永久5折</div>
             </div>
             <div class="vip-price-cards">
                 <div class="vip-price-card">
                     <div class="vip-card-name">月卡</div>
-                    <div class="vip-card-price">¥39.9 <s>¥49.9</s></div>
-                    <div class="vip-card-discount">8折</div>
+                    <div class="vip-card-price">¥49.9</div>
+                    <div class="vip-card-discount">无折扣</div>
                     <div class="vip-card-rights">每日2篇</div>
+                    <div class="vip-card-toolbox">享VIP专属网创工具箱</div>
                     <div class="vip-card-cycle">30天</div>
                 </div>
                 <div class="vip-price-card">
                     <div class="vip-card-name">季卡</div>
-                    <div class="vip-card-price">¥69.9 <s>¥89.9</s></div>
-                    <div class="vip-card-discount">75折</div>
+                    <div class="vip-card-price">¥69.9</div>
+                    <div class="vip-card-discount">无折扣</div>
                     <div class="vip-card-rights">每日3篇</div>
+                    <div class="vip-card-toolbox">享VIP专属网创工具箱</div>
                     <div class="vip-card-cycle">90天</div>
                 </div>
                 <div class="vip-price-card">
                     <div class="vip-card-name">年卡</div>
-                    <div class="vip-card-price">¥109.9 <s>¥139.9</s></div>
+                    <div class="vip-card-price">¥139.9 <s>¥199.9</s></div>
                     <div class="vip-card-discount">7折</div>
                     <div class="vip-card-rights">无限制</div>
+                    <div class="vip-card-toolbox">享VIP专属网创工具箱</div>
                     <div class="vip-card-cycle">360天</div>
                 </div>
                 <div class="vip-price-card vip-price-card-hot">
                     <div class="vip-card-hot-tag">推荐</div>
                     <div class="vip-card-name">永久</div>
-                    <div class="vip-card-price">¥189.9 <s>¥369.9</s></div>
+                    <div class="vip-card-price">¥199.9 <s>¥399.9</s></div>
                     <div class="vip-card-discount">5折</div>
                     <div class="vip-card-rights">无限制</div>
+                    <div class="vip-card-toolbox">享VIP专属网创工具箱</div>
                     <div class="vip-card-cycle">永久有效</div>
                 </div>
             </div>
             <div class="vip-get-code">
                 <div class="vip-get-code-title"><i class="fas fa-info-circle"></i> 激活码卡密获取方式</div>
                 <div class="vip-get-code-content">
-                    <p>咸鱼/淘宝搜索：<span style="color: #FFD700;">霓虹之都激活码</span> 或 <span style="color: #FFD700;">neonvip</span></p>
+                    <p>1. 咸鱼/淘宝搜索：<span style="color: #FFD700;">霓虹之都激活码</span> 或 <span style="color: #FFD700;">neonvip激活码</span></p>
+                    <p>2. 通过代理商购买</p>
                 </div>
             </div>
             <div class="vip-form-group">
@@ -4947,6 +5156,13 @@
         font-size: 0.78rem;
         color: #a0a0a0;
         margin-bottom: 4px;
+    }
+    .vip-card-toolbox {
+        font-size: 0.68rem;
+        color: #8fd8ff;
+        line-height: 1.25;
+        min-height: 28px;
+        margin-bottom: 5px;
     }
     .vip-card-cycle {
         font-size: 0.75rem;

@@ -10,12 +10,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class ResourceService {
@@ -30,8 +29,6 @@ public class ResourceService {
 
     private static final int DEFAULT_PAGE_SIZE = 12;
     private static final int MAX_PAGE_SIZE = 50;
-    private static final int WEEKLY_RECOMMEND_LIMIT = 8;
-    private static final int WEEKLY_RECOMMEND_DAYS = 7;
 
     public List<Resource> getAllResources() {
         String cacheKey = cacheService.getResourceListKey();
@@ -79,20 +76,11 @@ public class ResourceService {
     }
 
     public Map<String, Object> getResourcesByPage(int page, int size) {
-        return getResourcesByPage(page, size, null, null);
-    }
-
-    public Map<String, Object> getResourcesByPage(int page, int size, String category, String keyword) {
         size = Math.min(size, MAX_PAGE_SIZE);
         if (size <= 0) size = DEFAULT_PAGE_SIZE;
         if (page <= 0) page = 1;
 
-        String normalizedCategory = normalizeCategory(category);
-        String normalizedKeyword = keyword != null && !keyword.trim().isEmpty() ? keyword.trim() : null;
-
-        String cacheKey = cacheService.getResourceListKey() + ":page:" + page + ":" + size
-                + ":category:" + (normalizedCategory != null ? normalizedCategory : "all")
-                + ":keyword:" + (normalizedKeyword != null ? normalizedKeyword : "none");
+        String cacheKey = cacheService.getResourceListKey() + ":page:" + page + ":" + size;
         Map<String, Object> cachedData = (Map<String, Object>) cacheService.get(cacheKey);
 
         if (cachedData != null) {
@@ -107,21 +95,7 @@ public class ResourceService {
         }
 
         Pageable pageable = PageRequest.of(page - 1, size);
-        List<Integer> visibleStatuses = Arrays.asList(1, 2);
-        Page<Resource> resourcePage;
-
-        if (normalizedKeyword != null && normalizedCategory != null) {
-            resourcePage = resourceRepository.findByTitleContainingIgnoreCaseAndCategoryAndStatusInOrderByTopDescCreatedAtDesc(
-                    normalizedKeyword, normalizedCategory, visibleStatuses, pageable);
-        } else if (normalizedKeyword != null) {
-            resourcePage = resourceRepository.findByTitleContainingIgnoreCaseAndStatusInOrderByTopDescCreatedAtDesc(
-                    normalizedKeyword, visibleStatuses, pageable);
-        } else if (normalizedCategory != null) {
-            resourcePage = resourceRepository.findByCategoryAndStatusInOrderByTopDescCreatedAtDesc(
-                    normalizedCategory, visibleStatuses, pageable);
-        } else {
-            resourcePage = resourceRepository.findByStatusInOrderByTopDescCreatedAtDesc(visibleStatuses, pageable);
-        }
+        Page<Resource> resourcePage = resourceRepository.findByStatusInOrderByTopDescCreatedAtDesc(Arrays.asList(1, 2), pageable);
 
         // 更新每个资源的访问量（包含Redis增量）
         List<Resource> resources = resourcePage.getContent();
@@ -141,13 +115,6 @@ public class ResourceService {
         cacheService.set(cacheKey, result, 180);
 
         return result;
-    }
-
-    private String normalizeCategory(String category) {
-        if (category == null || category.trim().isEmpty() || "全部".equals(category.trim())) {
-            return null;
-        }
-        return category.trim();
     }
 
     public List<Resource> searchResources(String keyword) {
@@ -320,7 +287,8 @@ public class ResourceService {
         Resource savedResource = resourceRepository.save(resource);
         
         // 清除资源列表缓存
-        clearResourceListCache();
+        String listCacheKey = cacheService.getResourceListKey();
+        cacheService.delete(listCacheKey);
         
         // 清除该资源详情缓存
         if (savedResource.getId() != null) {
@@ -394,65 +362,7 @@ public class ResourceService {
 
     // 根据状态获取资源列表
     public List<Resource> getResourcesByStatus(Integer status) {
-        if (status != null && status == 2) {
-            List<Resource> recommended = resourceRepository.findByStatusOrderByViewCountDescCreatedAtDesc(status);
-            return recommended.size() > WEEKLY_RECOMMEND_LIMIT
-                    ? recommended.subList(0, WEEKLY_RECOMMEND_LIMIT)
-                    : recommended;
-        }
         return resourceRepository.findByStatusOrderByCreatedAtDesc(status);
-    }
-
-    // 每天凌晨自动刷新本周推荐榜：最近7天资源按访问量取前8名设为status=2
-    @Scheduled(cron = "0 5 0 * * *", zone = "Asia/Shanghai")
-    @Transactional
-    public void refreshWeeklyRecommendations() {
-        flushViewCountsToDatabase();
-
-        LocalDateTime startTime = LocalDateTime.now()
-                .toLocalDate()
-                .minusDays(WEEKLY_RECOMMEND_DAYS - 1L)
-                .atStartOfDay();
-        Pageable topEight = PageRequest.of(0, WEEKLY_RECOMMEND_LIMIT);
-        List<Resource> newRecommended = resourceRepository
-                .findByCreatedAtGreaterThanEqualAndStatusInOrderByViewCountDescCreatedAtDesc(
-                        startTime, Arrays.asList(1, 2), topEight);
-
-        Set<Long> newRecommendedIds = new HashSet<>();
-        for (Resource resource : newRecommended) {
-            if (resource.getId() != null) {
-                newRecommendedIds.add(resource.getId());
-            }
-        }
-
-        List<Resource> currentRecommended = resourceRepository.findByStatusOrderByViewCountDescCreatedAtDesc(2);
-        List<Resource> changedResources = new ArrayList<>();
-
-        for (Resource resource : currentRecommended) {
-            if (resource.getId() != null && !newRecommendedIds.contains(resource.getId())) {
-                resource.setStatus(1);
-                resource.setUpdatedAt(LocalDateTime.now());
-                changedResources.add(resource);
-            }
-        }
-
-        for (Resource resource : newRecommended) {
-            if (resource.getStatus() == null || resource.getStatus() != 2) {
-                resource.setStatus(2);
-                resource.setUpdatedAt(LocalDateTime.now());
-                changedResources.add(resource);
-            }
-        }
-
-        if (!changedResources.isEmpty()) {
-            resourceRepository.saveAll(changedResources);
-            clearResourceListCache();
-            for (Resource resource : changedResources) {
-                if (resource.getId() != null) {
-                    cacheService.delete(cacheService.getResourceDetailKey(resource.getId()));
-                }
-            }
-        }
     }
 
     // 更新资源审核状态
@@ -463,7 +373,7 @@ public class ResourceService {
             resource.setUpdatedAt(LocalDateTime.now());
             resourceRepository.save(resource);
             // 清除缓存
-            clearResourceListCache();
+            cacheService.delete(cacheService.getResourceListKey());
             cacheService.delete(cacheService.getResourceDetailKey(id));
         }
     }
@@ -510,7 +420,7 @@ public class ResourceService {
         Resource savedResource = resourceRepository.save(existingResource);
         
         // 清除缓存
-        clearResourceListCache();
+        cacheService.delete(cacheService.getResourceListKey());
         cacheService.delete(cacheService.getResourceDetailKey(resource.getId()));
         
         return savedResource;
@@ -520,19 +430,8 @@ public class ResourceService {
     public void deleteResource(Long id) {
         resourceRepository.deleteById(id);
         // 清除缓存
-        clearResourceListCache();
+        cacheService.delete(cacheService.getResourceListKey());
         cacheService.delete(cacheService.getResourceDetailKey(id));
-    }
-
-    private void clearResourceListCache() {
-        String listCacheKey = cacheService.getResourceListKey();
-        cacheService.delete(listCacheKey);
-        Set<String> pageKeys = cacheService.keys(listCacheKey + ":*");
-        if (pageKeys != null) {
-            for (String key : pageKeys) {
-                cacheService.delete(key);
-            }
-        }
     }
 
     // 增加访问量（用户访问时调用）- 使用 Redis 缓存，带去重
