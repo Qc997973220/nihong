@@ -1935,6 +1935,8 @@
             background: rgba(20, 28, 45, 0.95) !important;
             border: 1px solid rgba(255, 180, 80, 0.4) !important;
             max-width: 500px !important;
+            max-height: calc(100vh - 32px);
+            overflow-y: auto;
             border-radius: 20px !important;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5) !important;
         }
@@ -1989,6 +1991,9 @@
             color: #e0e8f0;
             line-height: 1.8;
             text-align: justify;
+        }
+        .news-content p + p {
+            margin-top: 12px;
         }
         .news-confirm-btn {
             width: 100%;
@@ -2673,7 +2678,9 @@
             <span class="news-date" id="newsDate"></span>
         </div>
         <div class="news-content">
-            <p>AI短视频赛道的项目目前做的人接近饱和,新人不建议入坑,有剪辑能力依然可以考虑</p>
+            <p>我们的定位：一个小众的互联网创业互助社区。希望每一位有缘来到霓虹之都的人，都能真正拿到结果。</p>
+            <p>一个真相：互联网上能赚钱的项目，唯一的共性就是“小众风口”。一旦你在社交媒体上随处能刷到，说明它已经烂大街了——赚钱的人觉得赚不到钱了，才会疯狂宣传，让小白入场接盘。</p>
+            <p>为了细水长流，霓虹之都承诺：永不登搜索引擎。我们会持续收集全网付费项目，帮大家试错踩坑，内部共享，一起稳稳前行。</p>
         </div>
         <button class="news-confirm-btn" id="confirmNewsModal">
             我知道了
@@ -2687,7 +2694,7 @@
         <h3>发布</h3>
         <div class="input-group">
             <label><i class="fa-solid fa-heading" style="margin-right: 6px;"></i> 标题 <span style="color:#ff8a8a;">*</span></label>
-            <input type="text" id="resourceTitle" placeholder="请输入资源标题">
+            <input type="text" id="resourceTitle" placeholder="请输入资源标题（最多50字）" maxlength="50">
         </div>
         <div class="input-group">
             <label><i class="fa-solid fa-file-text" style="margin-right: 6px;"></i> 简介 <span style="color:#ff8a8a;">*</span></label>

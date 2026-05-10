@@ -279,6 +279,11 @@ public class ResourceController {
     public Map<String, Object> publish(@RequestBody Resource resource) {
         Map<String, Object> result = new HashMap<>();
         try {
+            if (resource.getTitle() != null && resource.getTitle().length() > 50) {
+                result.put("success", false);
+                result.put("message", "资源标题不能超过50个字符");
+                return result;
+            }
             Resource savedResource = resourceService.saveResource(resource);
             result.put("success", true);
             result.put("message", "资源发布成功");
