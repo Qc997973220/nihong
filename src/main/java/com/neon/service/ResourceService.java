@@ -76,11 +76,20 @@ public class ResourceService {
     }
 
     public Map<String, Object> getResourcesByPage(int page, int size) {
+        return getResourcesByPage(page, size, null, null);
+    }
+
+    public Map<String, Object> getResourcesByPage(int page, int size, String category, String keyword) {
         size = Math.min(size, MAX_PAGE_SIZE);
         if (size <= 0) size = DEFAULT_PAGE_SIZE;
         if (page <= 0) page = 1;
 
-        String cacheKey = cacheService.getResourceListKey() + ":page:" + page + ":" + size;
+        String normalizedCategory = normalizeCategory(category);
+        String normalizedKeyword = keyword != null && !keyword.trim().isEmpty() ? keyword.trim() : null;
+
+        String cacheKey = cacheService.getResourceListKey() + ":page:" + page + ":" + size
+                + ":category:" + (normalizedCategory != null ? normalizedCategory : "all")
+                + ":keyword:" + (normalizedKeyword != null ? normalizedKeyword : "none");
         Map<String, Object> cachedData = (Map<String, Object>) cacheService.get(cacheKey);
 
         if (cachedData != null) {
@@ -95,7 +104,21 @@ public class ResourceService {
         }
 
         Pageable pageable = PageRequest.of(page - 1, size);
-        Page<Resource> resourcePage = resourceRepository.findByStatusInOrderByTopDescCreatedAtDesc(Arrays.asList(1, 2), pageable);
+        List<Integer> visibleStatuses = Arrays.asList(1, 2);
+        Page<Resource> resourcePage;
+
+        if (normalizedKeyword != null && normalizedCategory != null) {
+            resourcePage = resourceRepository.findByTitleContainingIgnoreCaseAndCategoryAndStatusInOrderByTopDescCreatedAtDesc(
+                    normalizedKeyword, normalizedCategory, visibleStatuses, pageable);
+        } else if (normalizedKeyword != null) {
+            resourcePage = resourceRepository.findByTitleContainingIgnoreCaseAndStatusInOrderByTopDescCreatedAtDesc(
+                    normalizedKeyword, visibleStatuses, pageable);
+        } else if (normalizedCategory != null) {
+            resourcePage = resourceRepository.findByCategoryAndStatusInOrderByTopDescCreatedAtDesc(
+                    normalizedCategory, visibleStatuses, pageable);
+        } else {
+            resourcePage = resourceRepository.findByStatusInOrderByTopDescCreatedAtDesc(visibleStatuses, pageable);
+        }
 
         // 更新每个资源的访问量（包含Redis增量）
         List<Resource> resources = resourcePage.getContent();
@@ -115,6 +138,13 @@ public class ResourceService {
         cacheService.set(cacheKey, result, 180);
 
         return result;
+    }
+
+    private String normalizeCategory(String category) {
+        if (category == null || category.trim().isEmpty() || "全部".equals(category.trim())) {
+            return null;
+        }
+        return category.trim();
     }
 
     public List<Resource> searchResources(String keyword) {
