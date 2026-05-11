@@ -66,11 +66,16 @@ public class LoginService {
         }
 
         users.setId(UUID.randomUUID().toString());
-        if (users.getRole() == null || users.getRole().isEmpty()) {
-            users.setRole("0");
-        }
+        users.setRole("0");
+        users.setRoleIds(null);
+        users.setToken(null);
+        users.setTokenExpiredAt(null);
+        users.setTokenVersion(null);
+        users.setActivationCode(null);
         users.setCreateTime(java.time.LocalDateTime.now());
         users.setMemberType(0);
+        users.setMemberStatus("none");
+        users.setMemberExpiredAt(null);
         users.setNCoinBalance(0);
         users.setNCoinFrozen(0);
 

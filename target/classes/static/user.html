@@ -429,6 +429,17 @@
             display: block;
             margin-bottom: 12px;
         }
+        .poster-loading {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+            color: #9fc7ff;
+            font-size: 0.9rem;
+        }
+        .poster-loading i {
+            color: #70ffb0;
+        }
         .wallet-card {
             margin-top: 28px;
             padding: 22px;
@@ -733,6 +744,10 @@
                     </button>
                 </div>
                 <div class="invite-message" id="inviteShareMessage"></div>
+                <div class="poster-loading" id="posterLoading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <span>正在生成海报...</span>
+                </div>
                 <div class="invite-poster-preview" id="posterPreview">
                     <canvas id="invitePosterCanvas" width="900" height="1280"></canvas>
                     <button class="invite-action-btn primary" id="downloadPosterBtn">
@@ -1028,6 +1043,24 @@
         }, 2200);
     }
 
+    function setPosterLoading(loading) {
+        const loadingEl = document.getElementById('posterLoading');
+        const posterBtn = document.getElementById('generatePosterBtn');
+        if (loadingEl) {
+            loadingEl.style.display = loading ? 'flex' : 'none';
+        }
+        if (posterBtn) {
+            posterBtn.disabled = loading;
+            posterBtn.innerHTML = loading
+                ? '<i class="fas fa-spinner fa-spin"></i> 生成中...'
+                : '<i class="fas fa-image"></i> 生成海报';
+        }
+    }
+
+    function waitForUiPaint() {
+        return new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    }
+
     function copyText(text, successText) {
         if (!text) {
             showInviteMessage('暂无可复制内容', 'error');
@@ -1239,12 +1272,18 @@
     }
 
     async function drawInvitePoster() {
+        let started = false;
         try {
             const inviteCode = normalizeInviteCode(userData && userData.inviteCode);
             if (!inviteCode) {
                 showInviteMessage('暂无邀请码，无法生成海报', 'error');
                 return;
             }
+
+            started = true;
+            setPosterLoading(true);
+            showInviteMessage('正在生成海报，请稍候...');
+            await waitForUiPaint();
 
             const inviteLink = buildInviteLink(inviteCode);
             const canvas = document.getElementById('invitePosterCanvas');
@@ -1301,6 +1340,10 @@
         } catch (error) {
             console.error('生成邀请海报失败:', error);
             showInviteMessage('生成海报失败，请重试', 'error');
+        } finally {
+            if (started) {
+                setPosterLoading(false);
+            }
         }
     }
 
