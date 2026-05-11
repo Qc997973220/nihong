@@ -5,6 +5,7 @@ import com.neon.pojo.Users;
 import com.neon.service.AuthService;
 import com.neon.service.CacheService;
 import com.neon.service.LoginService;
+import com.neon.service.WalletService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,6 +26,8 @@ public class LoginController {
     AuthService authService;
     @Autowired
     CacheService cacheService;
+    @Autowired
+    WalletService walletService;
 
     @PostMapping("/first")
     @ResponseBody
@@ -81,6 +84,7 @@ public class LoginController {
         userInfo.put("memberType", user.getMemberType() != null ? user.getMemberType() : 0);
         userInfo.put("inviteCode", ensureInviteCode(user));
         userInfo.put("invitedBy", user.getInvitedBy());
+        userInfo.putAll(walletService.buildWalletSummary(user));
 
         if (user.getMemberType() != null && user.getMemberType() == 4) {
             userInfo.put("memberStatus", "permanent");
@@ -168,16 +172,22 @@ public class LoginController {
 
     @PostMapping("/updateUserInfo")
     @ResponseBody
-    public Map<String, Object> updateUserInfo(@RequestParam String account,
+    public Map<String, Object> updateUserInfo(@RequestHeader(value = "Authorization", required = false) String token,
+                                              @RequestParam(required = false) String account,
                                               @RequestParam(required = false) String userName,
                                               @RequestParam(required = false) String gender,
                                               @RequestParam(required = false) String phone,
                                               @RequestParam(required = false) String email) {
         Map<String, Object> result = new HashMap<>();
-        Users user = usersDao.findByAccount(account);
+        Users user = authService.getAuthenticatedUser(token);
         if (user == null) {
             result.put("status", 0);
-            result.put("message", "用户不存在");
+            result.put("message", "请先登录");
+            return result;
+        }
+        if (account != null && !account.trim().isEmpty() && !account.equals(user.getAccount())) {
+            result.put("status", 0);
+            result.put("message", "无权修改其他用户资料");
             return result;
         }
         
@@ -284,9 +294,26 @@ public class LoginController {
 
     @PostMapping("/activate")
     @ResponseBody
-    public Map<String, Object> activate(@RequestParam String account,
+    public Map<String, Object> activate(@RequestHeader(value = "Authorization", required = false) String token,
+                                       @RequestParam(required = false) String account,
                                        @RequestParam String activationCode) {
-        Map<String, Object> result = loginService.activateMember(account, activationCode);
+        Users user = authService.getAuthenticatedUser(token);
+        if (user == null) {
+            Map<String, Object> result = new HashMap<>();
+            result.put("success", false);
+            result.put("status", 0);
+            result.put("message", "请先登录");
+            return result;
+        }
+        if (account != null && !account.trim().isEmpty() && !account.equals(user.getAccount())) {
+            Map<String, Object> result = new HashMap<>();
+            result.put("success", false);
+            result.put("status", 0);
+            result.put("message", "无权为其他账号激活会员");
+            return result;
+        }
+
+        Map<String, Object> result = loginService.activateMember(user.getAccount(), activationCode);
         if ((boolean) result.get("success")) {
             result.put("status", 1);
         } else {

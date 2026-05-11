@@ -3235,6 +3235,12 @@
 
         // 提交资源
         function submitResource() {
+            const authToken = localStorage.getItem('authToken');
+            if (!authToken) {
+                showPublishMessage('请先登录后再发布资源', true);
+                return;
+            }
+
             const title = document.getElementById('resourceTitle').value.trim();
             const summary = document.getElementById('resourceSummary').value.trim();
             const content = document.getElementById('resourceContent').value.trim();
@@ -3276,7 +3282,8 @@
             fetch(`/api/resources/publish`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`
                 },
                 body: JSON.stringify(resource)
             })
@@ -4553,7 +4560,10 @@
     // 获取未读消息数量
     async function getUnreadMessageCount(username) {
         try {
-            const response = await fetch(`/api/messages/unread/count/${username}`);
+            const authToken = localStorage.getItem('authToken');
+            const response = await fetch(`/api/messages/unread/count/${username}`, {
+                headers: { 'Authorization': authToken ? `Bearer ${authToken}` : '' }
+            });
             if (response.ok) {
                 const result = await response.json();
                 if (result.success) {
@@ -4575,7 +4585,10 @@
     // 获取未读消息列表
     async function getUnreadMessages(username) {
         try {
-            const response = await fetch(`/api/messages/unread/${username}`);
+            const authToken = localStorage.getItem('authToken');
+            const response = await fetch(`/api/messages/unread/${username}`, {
+                headers: { 'Authorization': authToken ? `Bearer ${authToken}` : '' }
+            });
             if (response.ok) {
                 const result = await response.json();
                 if (result.success) {
@@ -4631,8 +4644,10 @@
     // 标记消息为已读
     async function markMessageAsRead(messageId) {
         try {
+            const authToken = localStorage.getItem('authToken');
             const response = await fetch(`/api/messages/read/${messageId}`, {
-                method: 'POST'
+                method: 'POST',
+                headers: { 'Authorization': authToken ? `Bearer ${authToken}` : '' }
             });
             if (response.ok) {
                 // 重新获取未读消息数量

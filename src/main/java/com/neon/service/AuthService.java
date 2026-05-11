@@ -150,6 +150,23 @@ public class AuthService {
         return result;
     }
 
+    public Users getAuthenticatedUser(String token) {
+        Map<String, Object> tokenResult = validateToken(token);
+        if (!Boolean.TRUE.equals(tokenResult.get("valid"))) {
+            return null;
+        }
+        return (Users) tokenResult.get("user");
+    }
+
+    public boolean isAdminUser(Users user) {
+        return user != null && "1".equals(user.getRole());
+    }
+
+    public Users getAdminUser(String token) {
+        Users user = getAuthenticatedUser(token);
+        return isAdminUser(user) ? user : null;
+    }
+
     @Transactional
     public void invalidateCurrentToken(Users user) {
         user.setToken(null);

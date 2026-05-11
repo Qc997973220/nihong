@@ -1132,6 +1132,19 @@
             return '';
         }
 
+        function getAuthToken() {
+            return localStorage.getItem('authToken') || '';
+        }
+
+        function authHeaders(extraHeaders = {}) {
+            const token = getAuthToken();
+            const headers = { ...extraHeaders };
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+            return headers;
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             const submitBtn = document.getElementById('submitBtn');
             const cancelBtn = document.getElementById('cancelBtn');
@@ -1236,7 +1249,7 @@
             initEmojiPicker();
 
             const userInfo = localStorage.getItem('userInfo');
-            if (!userInfo) {
+            if (!userInfo || !getAuthToken()) {
                 showMessage('请先登录后再发布资源', true);
                 setTimeout(() => {
                     window.location.href = '/';
@@ -1467,9 +1480,9 @@
 
                     const response = await fetch(`/api/resources/publish`, {
                         method: 'POST',
-                        headers: {
+                        headers: authHeaders({
                             'Content-Type': 'application/json'
-                        },
+                        }),
                         body: JSON.stringify(resource)
                     });
 
@@ -1506,6 +1519,7 @@
 
                     fetch(`/api/resources/upload`, {
                         method: 'POST',
+                        headers: authHeaders(),
                         body: formData
                     })
                     .then(response => response.json())

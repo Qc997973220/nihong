@@ -45,7 +45,7 @@ public class ResourceService {
     }
 
     public List<Resource> getAllResourcesIncludingPending() {
-        return resourceRepository.findByStatusInOrderByTopDescCreatedAtDesc(Arrays.asList(0, 1, 2));
+        return resourceRepository.findByStatusInOrderByTopDescCreatedAtDesc(Arrays.asList(-1, 0, 1, 2));
     }
 
     public Map<String, Object> getAllResourcesForAdmin(int page, int pageSize, String keyword) {
@@ -58,9 +58,9 @@ public class ResourceService {
 
         if (keyword != null && !keyword.trim().isEmpty()) {
             resourcePage = resourceRepository.findByTitleContainingIgnoreCaseAndStatusInOrderByTopDescCreatedAtDesc(
-                    keyword.trim(), Arrays.asList(0, 1, 2), pageable);
+                    keyword.trim(), Arrays.asList(-1, 0, 1, 2), pageable);
         } else {
-            resourcePage = resourceRepository.findByStatusInOrderByTopDescCreatedAtDesc(Arrays.asList(0, 1, 2), pageable);
+            resourcePage = resourceRepository.findByStatusInOrderByTopDescCreatedAtDesc(Arrays.asList(-1, 0, 1, 2), pageable);
         }
 
         Map<String, Object> result = new HashMap<>();

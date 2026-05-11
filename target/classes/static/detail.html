@@ -1895,7 +1895,10 @@
 
         try {
             const info = JSON.parse(userInfo);
-            const response = await fetch(`/api/resources/download-quota?account=${encodeURIComponent(info.account)}`);
+            const authToken = localStorage.getItem('authToken');
+            const response = await fetch(`/api/resources/download-quota?account=${encodeURIComponent(info.account)}`, {
+                headers: { 'Authorization': authToken ? `Bearer ${authToken}` : '' }
+            });
             const result = await response.json();
 
             if (result.success) {
@@ -2014,7 +2017,10 @@
     // 获取未读消息数量
     async function getUnreadMessageCount(username) {
         try {
-            const response = await fetch(`/api/messages/unread/count/${username}`);
+            const authToken = localStorage.getItem('authToken');
+            const response = await fetch(`/api/messages/unread/count/${username}`, {
+                headers: { 'Authorization': authToken ? `Bearer ${authToken}` : '' }
+            });
             if (response.ok) {
                 const result = await response.json();
                 if (result.success) {
@@ -2036,7 +2042,10 @@
     // 获取未读消息列表
     async function getUnreadMessages(username) {
         try {
-            const response = await fetch(`/api/messages/unread/${username}`);
+            const authToken = localStorage.getItem('authToken');
+            const response = await fetch(`/api/messages/unread/${username}`, {
+                headers: { 'Authorization': authToken ? `Bearer ${authToken}` : '' }
+            });
             if (response.ok) {
                 const result = await response.json();
                 if (result.success) {
@@ -2092,8 +2101,10 @@
     // 标记消息为已读
     async function markMessageAsRead(messageId) {
         try {
+            const authToken = localStorage.getItem('authToken');
             const response = await fetch(`/api/messages/read/${messageId}`, {
-                method: 'POST'
+                method: 'POST',
+                headers: { 'Authorization': authToken ? `Bearer ${authToken}` : '' }
             });
             if (response.ok) {
                 // 重新获取未读消息数量
@@ -2778,9 +2789,13 @@
         }
 
         try {
+            const authToken = localStorage.getItem('authToken');
             const response = await fetch(`/api/resources/comment/${commentId}/like`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': authToken ? `Bearer ${authToken}` : ''
+                },
                 body: JSON.stringify({ userId: savedUsername })
             });
 
@@ -2818,7 +2833,10 @@
         if (!savedUsername) return;
 
         try {
-            const response = await fetch(`/api/resources/comment/${commentId}/user/${savedUsername}/liked`);
+            const authToken = localStorage.getItem('authToken');
+            const response = await fetch(`/api/resources/comment/${commentId}/user/${savedUsername}/liked`, {
+                headers: { 'Authorization': authToken ? `Bearer ${authToken}` : '' }
+            });
             if (response.ok) {
                 const result = await response.json();
                 if (result.success) {

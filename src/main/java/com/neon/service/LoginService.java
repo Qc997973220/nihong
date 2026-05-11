@@ -17,6 +17,9 @@ public class LoginService {
     @Autowired
     CardKeyService cardKeyService;
 
+    @Autowired
+    WalletService walletService;
+
     public int login(String account, String password){
         Users user = usersDao.findByAccount(account);
         if (user == null) return -1;
@@ -68,6 +71,8 @@ public class LoginService {
         }
         users.setCreateTime(java.time.LocalDateTime.now());
         users.setMemberType(0);
+        users.setNCoinBalance(0);
+        users.setNCoinFrozen(0);
 
         String inviteCode = generateInviteCode();
         while (usersDao.existsByInviteCode(inviteCode)) {
@@ -173,10 +178,16 @@ public class LoginService {
             user.setMemberStatus("permanent");
         } else {
             user.setMemberExpiredAt(java.time.LocalDateTime.now().plusDays(expireDays));
-            user.setMemberStatus("active");
+        user.setMemberStatus("active");
         }
         user.setOperatingTime(java.time.LocalDateTime.now());
         usersDao.save(user);
+
+        try {
+            walletService.grantInviteRewardIfNeeded(user);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         result.put("success", true);
         result.put("memberType", memberType);

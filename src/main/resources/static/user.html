@@ -429,6 +429,138 @@
             display: block;
             margin-bottom: 12px;
         }
+        .wallet-card {
+            margin-top: 28px;
+            padding: 22px;
+            border: 1px solid rgba(90, 160, 255, 0.22);
+            background: rgba(10, 22, 40, 0.55);
+            border-radius: 18px;
+        }
+        .wallet-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            color: #dbeeff;
+            font-weight: 700;
+            flex-wrap: wrap;
+        }
+        .wallet-header span {
+            color: #8fb4d8;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        .wallet-stats {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+        }
+        .wallet-stat {
+            padding: 14px;
+            border: 1px solid rgba(90, 160, 255, 0.2);
+            border-radius: 12px;
+            background: rgba(8, 18, 32, 0.58);
+        }
+        .wallet-label {
+            color: #90b0d1;
+            font-size: 0.82rem;
+            margin-bottom: 6px;
+        }
+        .wallet-value {
+            color: #70ffb0;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.35rem;
+            font-weight: 700;
+        }
+        .withdraw-form {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+        .withdraw-input {
+            flex: 1;
+            min-width: 220px;
+            padding: 11px 14px;
+            border-radius: 10px;
+            border: 1px solid rgba(90, 160, 255, 0.32);
+            background: rgba(8, 18, 32, 0.72);
+            color: #eef3fc;
+            font-size: 0.95rem;
+        }
+        .wallet-message {
+            display: none;
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+        .invitee-list,
+        .withdrawal-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .invitee-row,
+        .withdrawal-row {
+            display: grid;
+            grid-template-columns: minmax(0, 1.1fr) auto;
+            gap: 12px;
+            align-items: center;
+            padding: 12px 14px;
+            border: 1px solid rgba(90, 160, 255, 0.18);
+            border-radius: 12px;
+            background: rgba(8, 18, 32, 0.52);
+        }
+        .invitee-main,
+        .withdrawal-main {
+            min-width: 0;
+        }
+        .invitee-name,
+        .withdrawal-title {
+            color: #eef3fc;
+            font-weight: 700;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .invitee-meta,
+        .withdrawal-meta {
+            color: #90b0d1;
+            font-size: 0.82rem;
+            margin-top: 4px;
+        }
+        .status-badge {
+            border-radius: 999px;
+            padding: 5px 10px;
+            font-size: 0.78rem;
+            border: 1px solid rgba(90, 160, 255, 0.3);
+            color: #9fc7ff;
+            background: rgba(90, 160, 255, 0.12);
+            white-space: nowrap;
+        }
+        .status-badge.active,
+        .status-badge.permanent,
+        .status-badge.paid {
+            color: #70ffb0;
+            border-color: rgba(112, 255, 176, 0.35);
+            background: rgba(0, 180, 120, 0.12);
+        }
+        .status-badge.pending {
+            color: #ffd36a;
+            border-color: rgba(255, 200, 80, 0.35);
+            background: rgba(255, 190, 70, 0.12);
+        }
+        .status-badge.rejected,
+        .status-badge.expired {
+            color: #ff8a8a;
+            border-color: rgba(255, 100, 100, 0.35);
+            background: rgba(255, 80, 80, 0.12);
+        }
+        .empty-muted {
+            color: #90b0d1;
+            padding: 18px 0;
+            text-align: center;
+        }
         #qrHost {
             position: absolute;
             left: -9999px;
@@ -529,7 +661,7 @@
                     <div class="info-value" id="registerTime">2026-02-25</div>
                 </div>
                 <div class="info-item">
-                    <div class="info-label">积分：</div>
+                    <div class="info-label">N币：</div>
                     <div class="info-value" id="userPoints">0</div>
                 </div>
                 <div class="info-item">
@@ -544,6 +676,38 @@
                     <div class="info-label">个人简介：</div>
                     <div class="info-value" id="infoIntroduction" style="white-space: pre-wrap;"></div>
                 </div>
+            </div>
+
+            <div class="wallet-card">
+                <div class="wallet-header">
+                    <div><i class="fas fa-coins"></i> 我的资产</div>
+                    <span>1 N币 ≈ 0.9 元，仅用于提现结算</span>
+                </div>
+                <div class="wallet-stats">
+                    <div class="wallet-stat">
+                        <div class="wallet-label">可用N币</div>
+                        <div class="wallet-value" id="nCoinBalanceValue">0</div>
+                    </div>
+                    <div class="wallet-stat">
+                        <div class="wallet-label">冻结中</div>
+                        <div class="wallet-value" id="nCoinFrozenValue">0</div>
+                    </div>
+                    <div class="wallet-stat">
+                        <div class="wallet-label">可提现金额</div>
+                        <div class="wallet-value" id="nCoinCashValue">¥0.00</div>
+                    </div>
+                    <div class="wallet-stat">
+                        <div class="wallet-label">累计邀请奖励</div>
+                        <div class="wallet-value" id="inviteRewardTotalValue">0</div>
+                    </div>
+                </div>
+                <div class="withdraw-form">
+                    <input class="withdraw-input" id="withdrawAlipayInput" type="text" maxlength="128" placeholder="请输入支付宝账号">
+                    <button class="invite-action-btn primary" id="withdrawBtn">
+                        <i class="fas fa-wallet"></i> 发起提现
+                    </button>
+                </div>
+                <div class="wallet-message" id="walletMessage"></div>
             </div>
 
             <div class="invite-share-card">
@@ -578,6 +742,26 @@
                 <div id="qrHost" aria-hidden="true"></div>
             </div>
 
+            <div class="wallet-card">
+                <div class="wallet-header">
+                    <div><i class="fas fa-user-group"></i> 我的邀请</div>
+                    <span id="inviteCountText">已邀请 0 人</span>
+                </div>
+                <div class="invitee-list" id="inviteeList">
+                    <div class="empty-muted">加载中...</div>
+                </div>
+            </div>
+
+            <div class="wallet-card">
+                <div class="wallet-header">
+                    <div><i class="fas fa-receipt"></i> 提现记录</div>
+                    <span>申请后冻结N币，审核拒绝会自动退回</span>
+                </div>
+                <div class="withdrawal-list" id="withdrawalList">
+                    <div class="empty-muted">加载中...</div>
+                </div>
+            </div>
+
             <div class="action-buttons">
                 <button class="btn btn-primary" id="changePasswordBtn">
                     <i class="fas fa-key"></i>
@@ -596,6 +780,231 @@
     let username = null;
     let userData = null;
     const userInfo = localStorage.getItem('userInfo');
+    let walletSummary = {
+        nCoinBalance: 0,
+        nCoinFrozen: 0,
+        cashEquivalent: '0.00',
+        inviteRewardTotal: 0
+    };
+
+    function getAuthToken() {
+        return localStorage.getItem('authToken') || '';
+    }
+
+    function authHeaders(extraHeaders = {}) {
+        const token = getAuthToken();
+        return {
+            ...extraHeaders,
+            'Authorization': token ? `Bearer ${token}` : ''
+        };
+    }
+
+    function showWalletMessage(text, type = 'success') {
+        const message = document.getElementById('walletMessage');
+        if (!message) return;
+        message.innerText = text;
+        message.style.color = type === 'error' ? '#ff8a8a' : '#70ffb0';
+        message.style.display = 'block';
+        clearTimeout(showWalletMessage.timer);
+        showWalletMessage.timer = setTimeout(() => {
+            message.style.display = 'none';
+        }, 3600);
+    }
+
+    function formatDateTime(value) {
+        if (!value) return '--';
+        let date;
+        if (Array.isArray(value)) {
+            date = new Date(value[0], (value[1] || 1) - 1, value[2] || 1, value[3] || 0, value[4] || 0, value[5] || 0);
+        } else {
+            date = new Date(value);
+        }
+        if (Number.isNaN(date.getTime())) return '--';
+        return date.toLocaleString('zh-CN', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    }
+
+    function updateWalletSummary(summary) {
+        walletSummary = {
+            ...walletSummary,
+            ...(summary || {})
+        };
+        const balance = Number(walletSummary.nCoinBalance || 0);
+        const frozen = Number(walletSummary.nCoinFrozen || 0);
+        const rewardTotal = Number(walletSummary.inviteRewardTotal || 0);
+        const cashEquivalent = walletSummary.cashEquivalent || (balance * 0.9).toFixed(2);
+
+        document.getElementById('nCoinBalanceValue').innerText = balance;
+        document.getElementById('nCoinFrozenValue').innerText = frozen;
+        document.getElementById('nCoinCashValue').innerText = `¥${cashEquivalent}`;
+        document.getElementById('inviteRewardTotalValue').innerText = rewardTotal;
+        document.getElementById('userPoints').innerText = `${balance} N币`;
+    }
+
+    function getInviteStatusText(invitee) {
+        if (!invitee) return '未开通VIP';
+        if (invitee.memberStatus === 'permanent') return '永久VIP';
+        if (invitee.memberStatus === 'active') return invitee.memberTypeName || 'VIP会员';
+        if (invitee.memberStatus === 'expired') return 'VIP已到期';
+        return '未开通VIP';
+    }
+
+    function getWithdrawalStatusClass(status) {
+        if (status === 0) return 'pending';
+        if (status === 1) return 'paid';
+        if (status === 2) return 'rejected';
+        return '';
+    }
+
+    async function loadWalletSummary() {
+        try {
+            const response = await fetch('/api/wallet/summary', {
+                headers: authHeaders()
+            });
+            const data = await response.json();
+            if (data.success) {
+                updateWalletSummary(data);
+            }
+        } catch (error) {
+            console.error('加载钱包信息失败:', error);
+        }
+    }
+
+    async function loadInvitees() {
+        const list = document.getElementById('inviteeList');
+        try {
+            const response = await fetch('/api/wallet/invites', {
+                headers: authHeaders()
+            });
+            const data = await response.json();
+            if (!data.success) {
+                list.innerHTML = `<div class="empty-muted">${data.message || '邀请列表加载失败'}</div>`;
+                return;
+            }
+
+            const invitees = data.invitees || [];
+            document.getElementById('inviteCountText').innerText = `已邀请 ${data.inviteCount || invitees.length} 人`;
+            if (data.inviteRewardTotal !== undefined) {
+                document.getElementById('inviteRewardTotalValue').innerText = data.inviteRewardTotal || 0;
+            }
+            if (invitees.length === 0) {
+                list.innerHTML = '<div class="empty-muted">暂无邀请用户</div>';
+                return;
+            }
+
+            list.innerHTML = invitees.map(invitee => {
+                const statusText = getInviteStatusText(invitee);
+                const statusClass = invitee.memberStatus || '';
+                const displayName = invitee.userName || invitee.account || '用户';
+                const registerTime = formatDateTime(invitee.registeredDate || invitee.createTime);
+                return `
+                    <div class="invitee-row">
+                        <div class="invitee-main">
+                            <div class="invitee-name">${displayName}</div>
+                            <div class="invitee-meta">账号：${invitee.account || '--'} · 注册：${registerTime}</div>
+                        </div>
+                        <span class="status-badge ${statusClass}">${statusText}</span>
+                    </div>
+                `;
+            }).join('');
+        } catch (error) {
+            console.error('加载邀请列表失败:', error);
+            list.innerHTML = '<div class="empty-muted">邀请列表加载失败</div>';
+        }
+    }
+
+    async function loadWithdrawals() {
+        const list = document.getElementById('withdrawalList');
+        try {
+            const response = await fetch('/api/wallet/withdrawals/me', {
+                headers: authHeaders()
+            });
+            const data = await response.json();
+            if (!data.success) {
+                list.innerHTML = `<div class="empty-muted">${data.message || '提现记录加载失败'}</div>`;
+                return;
+            }
+
+            const withdrawals = data.withdrawals || [];
+            if (withdrawals.length === 0) {
+                list.innerHTML = '<div class="empty-muted">暂无提现记录</div>';
+                return;
+            }
+
+            list.innerHTML = withdrawals.map(item => {
+                const statusClass = getWithdrawalStatusClass(item.status);
+                return `
+                    <div class="withdrawal-row">
+                        <div class="withdrawal-main">
+                            <div class="withdrawal-title">${item.nCoinAmount || 0} N币 · ¥${item.cashAmount || '0.00'}</div>
+                            <div class="withdrawal-meta">支付宝：${item.alipayAccount || '--'} · ${formatDateTime(item.createdAt || item.requestAt)}</div>
+                        </div>
+                        <span class="status-badge ${statusClass}">${item.statusText || '待处理'}</span>
+                    </div>
+                `;
+            }).join('');
+        } catch (error) {
+            console.error('加载提现记录失败:', error);
+            list.innerHTML = '<div class="empty-muted">提现记录加载失败</div>';
+        }
+    }
+
+    async function loadWalletData() {
+        await Promise.all([
+            loadWalletSummary(),
+            loadInvitees(),
+            loadWithdrawals()
+        ]);
+    }
+
+    async function submitWithdrawal() {
+        const input = document.getElementById('withdrawAlipayInput');
+        const btn = document.getElementById('withdrawBtn');
+        const alipayAccount = input.value.trim();
+        const balance = Number(walletSummary.nCoinBalance || 0);
+
+        if (!alipayAccount) {
+            showWalletMessage('请输入支付宝账号', 'error');
+            return;
+        }
+        if (balance < 100) {
+            showWalletMessage('N币余额不足100，暂不能提现', 'error');
+            return;
+        }
+
+        const cashAmount = (balance * 0.9).toFixed(2);
+        const confirmed = window.confirm(`确认提现账户无误？\n\n支付宝账号：${alipayAccount}\n提现N币：${balance}\n预计到账：¥${cashAmount}`);
+        if (!confirmed) return;
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 提交中...';
+        try {
+            const response = await fetch('/api/wallet/withdrawals', {
+                method: 'POST',
+                headers: authHeaders({ 'Content-Type': 'application/json' }),
+                body: JSON.stringify({ alipayAccount })
+            });
+            const data = await response.json();
+            if (data.success) {
+                showWalletMessage(data.message || '提现申请成功，预计1~3个工作日到账');
+                input.value = '';
+                await loadWalletData();
+            } else {
+                showWalletMessage(data.message || '提现申请失败', 'error');
+            }
+        } catch (error) {
+            console.error('提现申请失败:', error);
+            showWalletMessage('网络错误，请稍后重试', 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-wallet"></i> 发起提现';
+        }
+    }
 
     function normalizeInviteCode(value) {
         return (value || '').trim().replace(/[^A-Za-z0-9]/g, '').toUpperCase();
@@ -688,6 +1097,7 @@
                 document.getElementById('nickname').innerText = displayName;
                 document.getElementById('infoUserName').innerText = displayName;
                 document.getElementById('infoInviteCode').innerText = userData.inviteCode || '暂无';
+                updateWalletSummary(userData);
                 renderInviteShare();
             }
         } catch (e) {
@@ -715,14 +1125,13 @@
     }
 
     const INVITE_POSTER_BACKGROUND_URLS = [
-        '/images/invite-poster-bg.png',
-        '/uploads/invite-poster-bg.png',
-        '/invite-poster-bg.png'
+        '/uploads/invite-poster-bg.png'
     ];
 
     function loadImage(url) {
         return new Promise(resolve => {
             const img = new Image();
+            img.crossOrigin = 'anonymous';
             img.onload = () => resolve(img);
             img.onerror = () => resolve(null);
             img.src = url;
@@ -830,64 +1239,69 @@
     }
 
     async function drawInvitePoster() {
-        const inviteCode = normalizeInviteCode(userData && userData.inviteCode);
-        if (!inviteCode) {
-            showInviteMessage('暂无邀请码，无法生成海报', 'error');
-            return;
-        }
+        try {
+            const inviteCode = normalizeInviteCode(userData && userData.inviteCode);
+            if (!inviteCode) {
+                showInviteMessage('暂无邀请码，无法生成海报', 'error');
+                return;
+            }
 
-        const inviteLink = buildInviteLink(inviteCode);
-        const canvas = document.getElementById('invitePosterCanvas');
-        const preview = document.getElementById('posterPreview');
-        const ctx = canvas.getContext('2d');
-        const displayName = userData.username || userData.userName || userData.account || '霓虹会员';
+            const inviteLink = buildInviteLink(inviteCode);
+            const canvas = document.getElementById('invitePosterCanvas');
+            const preview = document.getElementById('posterPreview');
+            const ctx = canvas.getContext('2d');
+            const displayName = userData.username || userData.userName || userData.account || '霓虹会员';
 
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        const posterBackground = await loadInvitePosterBackground();
-        if (posterBackground) {
-            drawImageCover(ctx, posterBackground, canvas.width, canvas.height);
-        } else {
-            drawFallbackPosterBackground(ctx, canvas, displayName, inviteCode, inviteLink);
-        }
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const posterBackground = await loadInvitePosterBackground();
+            if (posterBackground) {
+                drawImageCover(ctx, posterBackground, canvas.width, canvas.height);
+            } else {
+                drawFallbackPosterBackground(ctx, canvas, displayName, inviteCode, inviteLink);
+            }
 
-        const qrSource = await getQrCanvas(inviteLink);
-        const cardSize = 340;
-        const qrSize = 250;
-        const cardX = (canvas.width - cardSize) / 2;
-        const cardY = (canvas.height - cardSize) / 2;
-        const qrX = (canvas.width - qrSize) / 2;
-        const qrY = cardY + 34;
+            const qrSource = await getQrCanvas(inviteLink);
+            const cardSize = 340;
+            const qrSize = 250;
+            const cardX = (canvas.width - cardSize) / 2;
+            const cardY = (canvas.height - cardSize) / 2;
+            const qrX = (canvas.width - qrSize) / 2;
+            const qrY = cardY + 34;
 
-        ctx.save();
-        ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
-        ctx.shadowBlur = 32;
-        ctx.shadowOffsetY = 14;
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.98)';
-        roundRect(ctx, cardX, cardY, cardSize, cardSize, 36, true, false);
-        ctx.restore();
+            ctx.save();
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
+            ctx.shadowBlur = 32;
+            ctx.shadowOffsetY = 14;
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.98)';
+            roundRect(ctx, cardX, cardY, cardSize, cardSize, 36, true, false);
+            ctx.restore();
 
-        ctx.strokeStyle = 'rgba(0, 210, 255, 0.55)';
-        ctx.lineWidth = 4;
-        roundRect(ctx, cardX + 6, cardY + 6, cardSize - 12, cardSize - 12, 30, false, true);
+            ctx.strokeStyle = 'rgba(0, 210, 255, 0.55)';
+            ctx.lineWidth = 4;
+            roundRect(ctx, cardX + 6, cardY + 6, cardSize - 12, cardSize - 12, 30, false, true);
 
-        if (qrSource) {
-            ctx.drawImage(qrSource, qrX, qrY, qrSize, qrSize);
-        } else {
-            ctx.fillStyle = '#101827';
-            ctx.font = '500 24px Inter, Microsoft YaHei, sans-serif';
+            if (qrSource) {
+                ctx.drawImage(qrSource, qrX, qrY, qrSize, qrSize);
+            } else {
+                ctx.fillStyle = '#101827';
+                ctx.font = '500 24px Inter, Microsoft YaHei, sans-serif';
+                ctx.textAlign = 'center';
+                wrapCanvasText(ctx, inviteLink, canvas.width / 2, cardY + 132, cardSize - 72, 34, 4);
+                ctx.textAlign = 'left';
+            }
+
+            ctx.fillStyle = '#111827';
+            ctx.font = '700 26px Inter, Microsoft YaHei, sans-serif';
             ctx.textAlign = 'center';
-            wrapCanvasText(ctx, inviteLink, canvas.width / 2, cardY + 132, cardSize - 72, 34, 4);
+            ctx.fillText('扫码注册', canvas.width / 2, cardY + cardSize - 32);
             ctx.textAlign = 'left';
+
+            preview.style.display = 'block';
+            showInviteMessage('邀请海报已生成');
+        } catch (error) {
+            console.error('生成邀请海报失败:', error);
+            showInviteMessage('生成海报失败，请重试', 'error');
         }
-
-        ctx.fillStyle = '#111827';
-        ctx.font = '700 26px Inter, Microsoft YaHei, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText('扫码注册', canvas.width / 2, cardY + cardSize - 32);
-        ctx.textAlign = 'left';
-
-        preview.style.display = 'block';
-        showInviteMessage('邀请海报已生成');
     }
 
     function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
@@ -944,6 +1358,7 @@
             } else {
                 document.getElementById('infoInviteCode').innerText = '暂无';
             }
+            updateWalletSummary(userData);
 
             // 显示会员状态（头部和详情两处）
             let memberStatusDisplay = '';
@@ -978,11 +1393,13 @@
     }
 
     initInviteShare();
-    refreshUserInfoFromToken();
+    document.getElementById('withdrawBtn').addEventListener('click', submitWithdrawal);
+    refreshUserInfoFromToken().finally(loadWalletData);
 
     // 退出登录
     document.getElementById('logoutBtn').addEventListener('click', function() {
         localStorage.removeItem('userInfo');
+        localStorage.removeItem('authToken');
         window.location.href = '/';
     });
 </script>
@@ -1462,7 +1879,10 @@
             // 先保存基本信息
             const response = await fetch('/api/login/updateUserInfo', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`
+                },
                 body: formData
             });
             const result = await response.json();

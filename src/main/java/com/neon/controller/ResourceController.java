@@ -70,9 +70,18 @@ public class ResourceController {
     // 图片上传
     @PostMapping("/upload")
     @ResponseBody
-    public Map<String, Object> uploadImage(@RequestParam("file") MultipartFile file) {
+    public Map<String, Object> uploadImage(
+            @RequestHeader(value = "Authorization", required = false) String token,
+            @RequestParam("file") MultipartFile file) {
         Map<String, Object> result = new HashMap<>();
         try {
+            Users user = authService.getAuthenticatedUser(token);
+            if (user == null) {
+                result.put("success", false);
+                result.put("message", "请先登录后再上传图片");
+                return result;
+            }
+
             if (file.isEmpty()) {
                 result.put("success", false);
                 result.put("message", "请选择要上传的图片");
@@ -226,9 +235,6 @@ public class ResourceController {
             // 获取用户标识（已登录用户使用用户名，未登录用户使用IP）
             String userIdentifier = getUserIdentifier(token, request);
             
-            // 增加访问量（带去重）
-            resourceService.incrementViewCount(id, userIdentifier);
-            
             Resource resource = resourceService.getResourceDetail(id);
             if (resource == null) {
                 result.put("success", false);
@@ -243,6 +249,12 @@ public class ResourceController {
             boolean freeResource = isFreeResource(resource);
             boolean loginRequired = false;
             Users tokenUser = getValidTokenUser(token);
+            if (!isVisibleResource(resource) && !authService.isAdminUser(tokenUser)) {
+                result.put("success", false);
+                result.put("message", "资源不存在");
+                return result;
+            }
+            resourceService.incrementViewCount(id, userIdentifier);
             Users user = freeResource ? tokenUser : checkDownloadPermission(tokenUser);
             Resource responseResource = copyResourceForResponse(resource);
 
@@ -382,6 +394,17 @@ public class ResourceController {
                 && "免费".equals(resource.getCategory().trim());
     }
 
+    private boolean isVisibleResource(Resource resource) {
+        if (resource == null || resource.getStatus() == null) {
+            return false;
+        }
+        return resource.getStatus() == 1 || resource.getStatus() == 2;
+    }
+
+    private boolean isVisibleStatus(Integer status) {
+        return status != null && (status == 1 || status == 2);
+    }
+
     private Resource copyResourceForResponse(Resource resource) {
         Resource responseResource = new Resource();
         BeanUtils.copyProperties(resource, responseResource);
@@ -391,14 +414,26 @@ public class ResourceController {
     // 发布资源
     @PostMapping("/publish")
     @ResponseBody
-    public Map<String, Object> publish(@RequestBody Resource resource) {
+    public Map<String, Object> publish(
+            @RequestHeader(value = "Authorization", required = false) String token,
+            @RequestBody Resource resource) {
         Map<String, Object> result = new HashMap<>();
         try {
+            Users user = authService.getAuthenticatedUser(token);
+            if (user == null) {
+                result.put("success", false);
+                result.put("message", "请先登录后再发布资源");
+                return result;
+            }
+
             if (resource.getTitle() != null && resource.getTitle().length() > 50) {
                 result.put("success", false);
                 result.put("message", "资源标题不能超过50个字符");
                 return result;
             }
+            resource.setId(null);
+            resource.setAuthor(resolveUserDisplayName(user));
+            resource.setStatus(0);
             Resource savedResource = resourceService.saveResource(resource);
             result.put("success", true);
             result.put("message", "资源发布成功");
@@ -413,8 +448,13 @@ public class ResourceController {
     // 更新资源
     @PostMapping("/update")
     @ResponseBody
-    public Map<String, Object> updateResource(@RequestBody Resource resource) {
+    public Map<String, Object> updateResource(
+            @RequestHeader(value = "Authorization", required = false) String token,
+            @RequestBody Resource resource) {
         Map<String, Object> result = new HashMap<>();
+        if (!requireAdmin(token, result)) {
+            return result;
+        }
         try {
             if (resource.getId() == null) {
                 result.put("success", false);
@@ -444,10 +484,14 @@ public class ResourceController {
     @GetMapping("/all")
     @ResponseBody
     public Map<String, Object> getAllResources(
+            @RequestHeader(value = "Authorization", required = false) String token,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(required = false) String keyword) {
         Map<String, Object> result = new HashMap<>();
+        if (!requireAdmin(token, result)) {
+            return result;
+        }
         try {
             Map<String, Object> data = resourceService.getAllResourcesForAdmin(page, pageSize, keyword);
             result.put("success", true);
@@ -462,8 +506,13 @@ public class ResourceController {
     // 删除资源
     @DeleteMapping("/delete/{id}")
     @ResponseBody
-    public Map<String, Object> deleteResource(@PathVariable Long id) {
+    public Map<String, Object> deleteResource(
+            @RequestHeader(value = "Authorization", required = false) String token,
+            @PathVariable Long id) {
         Map<String, Object> result = new HashMap<>();
+        if (!requireAdmin(token, result)) {
+            return result;
+        }
         try {
             Resource resource = resourceService.getResourceById(id);
             if (resource == null) {
@@ -511,6 +560,7 @@ public class ResourceController {
                 result.put("message", "权限不足，请加入霓虹之都会员后再试");
                 return result;
             }
+            comment.setAuthor(resolveUserDisplayName(user));
 
             // 检查资源的评论开关状态
             Resource targetResource = resourceService.getResourceById(comment.getResourceId());
@@ -557,10 +607,19 @@ public class ResourceController {
     // 点赞评论
     @PostMapping("/comment/{id}/like")
     @ResponseBody
-    public Map<String, Object> likeComment(@PathVariable Long id, @RequestBody Map<String, String> request) {
+    public Map<String, Object> likeComment(
+            @RequestHeader(value = "Authorization", required = false) String token,
+            @PathVariable Long id,
+            @RequestBody Map<String, String> request) {
         Map<String, Object> result = new HashMap<>();
         try {
-            String userId = request.get("userId");
+            Users user = authService.getAuthenticatedUser(token);
+            if (user == null) {
+                result.put("success", false);
+                result.put("message", "请先登录");
+                return result;
+            }
+            String userId = resolveUserDisplayName(user);
             if (userId == null || userId.trim().isEmpty()) {
                 result.put("success", false);
                 result.put("message", "用户ID不能为空");
@@ -580,10 +639,19 @@ public class ResourceController {
     // 检查用户是否点赞过某个评论
     @GetMapping("/comment/{id}/user/{userId}/liked")
     @ResponseBody
-    public Map<String, Object> checkUserLiked(@PathVariable Long id, @PathVariable String userId) {
+    public Map<String, Object> checkUserLiked(
+            @RequestHeader(value = "Authorization", required = false) String token,
+            @PathVariable Long id,
+            @PathVariable String userId) {
         Map<String, Object> result = new HashMap<>();
         try {
-            boolean hasLiked = resourceService.hasUserLikedComment(userId, id);
+            Users user = authService.getAuthenticatedUser(token);
+            if (user == null) {
+                result.put("success", false);
+                result.put("message", "请先登录");
+                return result;
+            }
+            boolean hasLiked = resourceService.hasUserLikedComment(resolveUserDisplayName(user), id);
             Long likes = resourceService.getCommentLikes(id);
             result.put("success", true);
             result.put("hasLiked", hasLiked);
@@ -598,8 +666,12 @@ public class ResourceController {
     // 获取待审核资源列表（status=0）
     @GetMapping("/pending")
     @ResponseBody
-    public Map<String, Object> getPendingResources() {
+    public Map<String, Object> getPendingResources(
+            @RequestHeader(value = "Authorization", required = false) String token) {
         Map<String, Object> result = new HashMap<>();
+        if (!requireAdmin(token, result)) {
+            return result;
+        }
         try {
             List<Resource> pendingResources = resourceService.getPendingResources();
             result.put("success", true);
@@ -615,8 +687,13 @@ public class ResourceController {
     // 审核资源（通过或不通过）
     @PostMapping("/audit")
     @ResponseBody
-    public Map<String, Object> auditResource(@RequestBody Map<String, Object> request) {
+    public Map<String, Object> auditResource(
+            @RequestHeader(value = "Authorization", required = false) String token,
+            @RequestBody Map<String, Object> request) {
         Map<String, Object> result = new HashMap<>();
+        if (!requireAdmin(token, result)) {
+            return result;
+        }
         try {
             Long id = Long.valueOf(request.get("id").toString());
             Integer status = Integer.valueOf(request.get("status").toString());
@@ -639,22 +716,42 @@ public class ResourceController {
     // 根据状态获取资源列表
     @GetMapping("/status/{status}")
     @ResponseBody
-    public List<Resource> getResourcesByStatus(@PathVariable Integer status) {
-        return resourceService.getResourcesByStatus(status);
+    public Object getResourcesByStatus(
+            @RequestHeader(value = "Authorization", required = false) String token,
+            @PathVariable Integer status) {
+        if (isVisibleStatus(status)) {
+            return resourceService.getResourcesByStatus(status);
+        }
+
+        Map<String, Object> result = new HashMap<>();
+        if (!requireAdmin(token, result)) {
+            return result;
+        }
+        result.put("success", true);
+        result.put("resources", resourceService.getResourcesByStatus(status));
+        return result;
     }
 
     // 获取下载额度
     @GetMapping("/download-quota")
     @ResponseBody
-    public Map<String, Object> getDownloadQuota(@RequestParam String account) {
+    public Map<String, Object> getDownloadQuota(
+            @RequestHeader(value = "Authorization", required = false) String token,
+            @RequestParam(required = false) String account) {
         Map<String, Object> result = new HashMap<>();
         try {
-            Users user = usersDao.findByAccount(account);
+            Users user = authService.getAuthenticatedUser(token);
             if (user == null) {
                 result.put("success", false);
-                result.put("message", "用户不存在");
+                result.put("message", "请先登录");
                 return result;
             }
+            if (account != null && !account.trim().isEmpty() && !account.equals(user.getAccount())) {
+                result.put("success", false);
+                result.put("message", "无权查看其他用户下载额度");
+                return result;
+            }
+            account = user.getAccount();
             
             LocalDateTime startOfDay = LocalDateTime.now().toLocalDate().atStartOfDay();
             Long todayDownloads = downloadRecordDao.countTodayDownloads(account, startOfDay);
@@ -796,6 +893,25 @@ public class ResourceController {
             default: // 非会员或其他
                 return 0;
         }
+    }
+
+    private boolean requireAdmin(String token, Map<String, Object> result) {
+        Users admin = authService.getAdminUser(token);
+        if (admin == null) {
+            result.put("success", false);
+            result.put("message", "管理员权限不足");
+            return false;
+        }
+        return true;
+    }
+
+    private String resolveUserDisplayName(Users user) {
+        if (user == null) {
+            return "";
+        }
+        return user.getUserName() != null && !user.getUserName().trim().isEmpty()
+                ? user.getUserName()
+                : user.getAccount();
     }
     
     /**

@@ -2,8 +2,10 @@ package com.neon.controller;
 
 import com.neon.pojo.Message;
 import com.neon.pojo.Comment;
+import com.neon.pojo.Users;
 import com.neon.dao.MessageDao;
 import com.neon.dao.CommentDao;
+import com.neon.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,14 +24,25 @@ public class MessageController {
     
     @Autowired
     private CommentDao commentDao;
+
+    @Autowired
+    private AuthService authService;
     
     // 获取用户未读消息数量
     @GetMapping("/unread/count/{userId}")
     @ResponseBody
-    public Map<String, Object> getUnreadCount(@PathVariable String userId) {
+    public Map<String, Object> getUnreadCount(
+            @RequestHeader(value = "Authorization", required = false) String token,
+            @PathVariable String userId) {
         Map<String, Object> result = new HashMap<>();
         try {
-            Long count = messageDao.countUnreadByUserId(userId);
+            Users user = authService.getAuthenticatedUser(token);
+            if (user == null) {
+                result.put("success", false);
+                result.put("message", "请先登录");
+                return result;
+            }
+            Long count = messageDao.countUnreadByUserId(resolveMessageUserId(user));
             result.put("success", true);
             result.put("count", count);
         } catch (Exception e) {
@@ -42,10 +55,18 @@ public class MessageController {
     // 获取用户未读消息列表
     @GetMapping("/unread/{userId}")
     @ResponseBody
-    public Map<String, Object> getUnreadMessages(@PathVariable String userId) {
+    public Map<String, Object> getUnreadMessages(
+            @RequestHeader(value = "Authorization", required = false) String token,
+            @PathVariable String userId) {
         Map<String, Object> result = new HashMap<>();
         try {
-            List<Message> messages = messageDao.findByUserIdAndIsReadFalse(userId);
+            Users user = authService.getAuthenticatedUser(token);
+            if (user == null) {
+                result.put("success", false);
+                result.put("message", "请先登录");
+                return result;
+            }
+            List<Message> messages = messageDao.findByUserIdAndIsReadFalse(resolveMessageUserId(user));
             
             // 处理消息列表，添加资源ID信息
             List<Map<String, Object>> messageList = new ArrayList<>();
@@ -83,9 +104,23 @@ public class MessageController {
     @PostMapping("/read/{id}")
     @ResponseBody
     @Transactional
-    public Map<String, Object> markAsRead(@PathVariable Long id) {
+    public Map<String, Object> markAsRead(
+            @RequestHeader(value = "Authorization", required = false) String token,
+            @PathVariable Long id) {
         Map<String, Object> result = new HashMap<>();
         try {
+            Users user = authService.getAuthenticatedUser(token);
+            if (user == null) {
+                result.put("success", false);
+                result.put("message", "请先登录");
+                return result;
+            }
+            Message message = messageDao.findById(id).orElse(null);
+            if (message == null || !resolveMessageUserId(user).equals(message.getUserId())) {
+                result.put("success", false);
+                result.put("message", "无权操作该消息");
+                return result;
+            }
             messageDao.markAsRead(id);
             result.put("success", true);
             result.put("message", "消息已标记为已读");
@@ -94,5 +129,14 @@ public class MessageController {
             result.put("message", "标记消息为已读失败：" + e.getMessage());
         }
         return result;
+    }
+
+    private String resolveMessageUserId(Users user) {
+        if (user == null) {
+            return "";
+        }
+        return user.getUserName() != null && !user.getUserName().trim().isEmpty()
+                ? user.getUserName()
+                : user.getAccount();
     }
 }

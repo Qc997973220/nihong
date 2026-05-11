@@ -633,12 +633,80 @@
             background: rgba(150, 150, 150, 0.2);
             color: #a0a0a0;
         }
+        .cardkey-status.pending {
+            background: rgba(255, 193, 7, 0.18);
+            color: #ffd36a;
+        }
+        .cardkey-status.paid,
+        .cardkey-status.published {
+            background: rgba(0, 200, 100, 0.2);
+            color: #70ffb0;
+        }
+        .cardkey-status.rejected {
+            background: rgba(255, 80, 80, 0.18);
+            color: #ff9a9a;
+        }
         .cardkey-type {
             padding: 2px 8px;
             border-radius: 4px;
             font-size: 0.75rem;
             background: rgba(100, 150, 255, 0.2);
             color: #90c0ff;
+        }
+        .withdrawal-tools {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .withdrawal-filter {
+            padding: 8px 12px;
+            border: 1px solid #3d5a80;
+            border-radius: 4px;
+            background: #1a1a2e;
+            color: #e8e8e8;
+        }
+        .withdrawal-card {
+            background: rgba(15, 25, 45, 0.6);
+            border: 1px solid rgba(90, 160, 255, 0.25);
+            border-radius: 12px;
+            padding: 16px;
+            transition: all 0.2s;
+        }
+        .withdrawal-card:hover {
+            border-color: rgba(90, 160, 255, 0.5);
+            box-shadow: 0 0 15px rgba(91, 165, 255, 0.15);
+        }
+        .withdrawal-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+        .withdrawal-title {
+            color: #eef3fc;
+            font-weight: 700;
+            word-break: break-all;
+        }
+        .withdrawal-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            color: #90b0d1;
+            font-size: 0.86rem;
+            margin-top: 8px;
+        }
+        .withdrawal-amount {
+            color: #70ffb0;
+            font-weight: 700;
+        }
+        .withdrawal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 14px;
+            flex-wrap: wrap;
         }
         .cardkey-used-by {
             font-size: 0.8rem;
@@ -700,6 +768,13 @@
             .cardkey-actions .btn {
                 flex: 1;
             }
+            .withdrawal-head {
+                flex-direction: column;
+            }
+            .withdrawal-actions .btn {
+                flex: 1;
+                justify-content: center;
+            }
             .tab-nav {
                 flex-wrap: wrap;
             }
@@ -743,6 +818,9 @@
             </button>
             <button class="tab-btn" id="tabResource" onclick="switchTab('resource')">
                 <i class="fas fa-edit"></i> 资源管理
+            </button>
+            <button class="tab-btn" id="tabWithdrawal" onclick="switchTab('withdrawal')">
+                <i class="fas fa-wallet"></i> 提现管理 <span id="withdrawBadge">0</span>
             </button>
         </div>
 
@@ -841,7 +919,8 @@
                             <option value="all">全部状态</option>
                             <option value="0">待审核</option>
                             <option value="1">已发布</option>
-                            <option value="2">已拒绝</option>
+                            <option value="2">推荐/公开</option>
+                            <option value="-1">已拒绝</option>
                         </select>
                         <button class="btn btn-refresh" id="refreshResourceBtn">
                             <i class="fas fa-sync-alt"></i> 刷新列表
@@ -862,6 +941,55 @@
                     </button>
                     <span id="resourcePageInfo" style="color: #90b0d1; padding: 0 16px; line-height: 36px;">第 1 / 1 页</span>
                     <button class="btn btn-page" id="resourceNextPageBtn" onclick="resourceNextPage()">
+                        下一页 <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="withdrawalArea" style="display: none;">
+            <div class="cardkey-panel">
+                <div class="cardkey-header">
+                    <div class="cardkey-stats">
+                        <div class="stat-item">
+                            <span class="stat-label">待处理提现</span>
+                            <span class="stat-value" id="withdrawPendingCount">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">已打款</span>
+                            <span class="stat-value" id="withdrawPaidCount">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">已拒绝</span>
+                            <span class="stat-value" id="withdrawRejectedCount">0</span>
+                        </div>
+                    </div>
+                    <div class="withdrawal-tools">
+                        <select id="withdrawStatusFilter" class="withdrawal-filter">
+                            <option value="0">待处理</option>
+                            <option value="1">已打款</option>
+                            <option value="2">已拒绝</option>
+                            <option value="-1">全部记录</option>
+                        </select>
+                        <button class="btn btn-refresh" id="refreshWithdrawalBtn">
+                            <i class="fas fa-sync-alt"></i> 刷新列表
+                        </button>
+                    </div>
+                </div>
+
+                <div id="withdrawalListArea">
+                    <div class="loading">
+                        <i class="fas fa-spinner"></i>
+                        <p style="margin-top: 12px; color: #90b0d1;">加载中...</p>
+                    </div>
+                </div>
+
+                <div id="withdrawalPaginationArea" class="pagination-area" style="display: none; margin-top: 20px; justify-content: center;">
+                    <button class="btn btn-page" id="withdrawalPrevPageBtn" onclick="withdrawalPrevPage()">
+                        <i class="fas fa-chevron-left"></i> 上一页
+                    </button>
+                    <span id="withdrawalPageInfo" style="color: #90b0d1; padding: 0 16px; line-height: 36px;">第 1 / 1 页</span>
+                    <button class="btn btn-page" id="withdrawalNextPageBtn" onclick="withdrawalNextPage()">
                         下一页 <i class="fas fa-chevron-right"></i>
                     </button>
                 </div>
@@ -911,7 +1039,8 @@
                         <select id="editResourceStatus" style="padding: 8px 12px; border: 1px solid #3d5a80; border-radius: 4px; background: #1a1a2e; color: #e8e8e8; flex: 1;">
                             <option value="0">待审核</option>
                             <option value="1">已发布</option>
-                            <option value="2">已拒绝</option>
+                            <option value="2">推荐/公开</option>
+                            <option value="-1">已拒绝</option>
                         </select>
                     </div>
                     <div class="form-row" style="flex-direction: column;">
@@ -938,6 +1067,19 @@
             return '';
         }
 
+        function getAuthToken() {
+            return localStorage.getItem('authToken') || '';
+        }
+
+        function authHeaders(extraHeaders = {}) {
+            const token = getAuthToken();
+            const headers = { ...extraHeaders };
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+            return headers;
+        }
+
         function showToast(message, isError = false) {
             const toast = document.getElementById('toast');
             toast.textContent = message;
@@ -961,7 +1103,7 @@
 
         function checkAdmin() {
             const userInfo = localStorage.getItem('userInfo');
-            if (!userInfo) {
+            if (!userInfo || !getAuthToken()) {
                 showToast('请先登录', true);
                 setTimeout(() => window.location.href = '/', 1500);
                 return null;
@@ -990,7 +1132,9 @@
                 </div>
             `;
 
-            fetch(`/api/resources/pending`)
+            fetch(`/api/resources/pending`, {
+                headers: authHeaders()
+            })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
@@ -1064,7 +1208,7 @@
 
             fetch(`/api/resources/audit`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: authHeaders({ 'Content-Type': 'application/json' }),
                 body: JSON.stringify({ id: id, status: 1 })
             })
             .then(response => response.json())
@@ -1095,7 +1239,7 @@
 
             fetch(`/api/resources/audit`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: authHeaders({ 'Content-Type': 'application/json' }),
                 body: JSON.stringify({ id: id, status: -1 })
             })
             .then(response => response.json())
@@ -1124,6 +1268,7 @@
             if (!admin) return;
 
             loadPendingResources();
+            loadAdminWithdrawals(1, true);
 
             document.getElementById('refreshBtn').addEventListener('click', loadPendingResources);
 
@@ -1140,6 +1285,8 @@
             document.getElementById('refreshCardKeyBtn').addEventListener('click', loadCardKeyList);
             
             document.getElementById('memberTypeFilter').addEventListener('change', loadCardKeyList);
+            document.getElementById('refreshWithdrawalBtn').addEventListener('click', () => loadAdminWithdrawals(1));
+            document.getElementById('withdrawStatusFilter').addEventListener('change', () => loadAdminWithdrawals(1));
         });
 
         function deleteCardKey(id) {
@@ -1148,7 +1295,8 @@
             }
 
             fetch(`/api/cardkey/delete/${id}`, {
-                method: 'DELETE'
+                method: 'DELETE',
+                headers: authHeaders()
             })
             .then(response => response.json())
             .then(data => {
@@ -1176,18 +1324,28 @@
                 document.getElementById('contentArea').style.display = 'block';
                 document.getElementById('cardKeyArea').style.display = 'none';
                 document.getElementById('resourceArea').style.display = 'none';
+                document.getElementById('withdrawalArea').style.display = 'none';
             } else if (tab === 'cardkey') {
                 document.getElementById('tabCardKey').classList.add('active');
                 document.getElementById('contentArea').style.display = 'none';
                 document.getElementById('cardKeyArea').style.display = 'block';
                 document.getElementById('resourceArea').style.display = 'none';
+                document.getElementById('withdrawalArea').style.display = 'none';
                 loadCardKeyList();
             } else if (tab === 'resource') {
                 document.getElementById('tabResource').classList.add('active');
                 document.getElementById('contentArea').style.display = 'none';
                 document.getElementById('cardKeyArea').style.display = 'none';
                 document.getElementById('resourceArea').style.display = 'block';
+                document.getElementById('withdrawalArea').style.display = 'none';
                 loadResourceList();
+            } else if (tab === 'withdrawal') {
+                document.getElementById('tabWithdrawal').classList.add('active');
+                document.getElementById('contentArea').style.display = 'none';
+                document.getElementById('cardKeyArea').style.display = 'none';
+                document.getElementById('resourceArea').style.display = 'none';
+                document.getElementById('withdrawalArea').style.display = 'block';
+                loadAdminWithdrawals(1);
             }
         }
 
@@ -1203,7 +1361,9 @@
                 url += `&keyword=${encodeURIComponent(keyword)}`;
             }
 
-            fetch(url)
+            fetch(url, {
+                headers: authHeaders()
+            })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
@@ -1228,7 +1388,7 @@
 
         function updateResourceStats(data) {
             document.getElementById('resourceTotalCount').textContent = data.totalElements || 0;
-            document.getElementById('resourcePublishedCount').textContent = (data.resources || []).filter(r => r.status === 1).length;
+            document.getElementById('resourcePublishedCount').textContent = (data.resources || []).filter(r => r.status === 1 || r.status === 2).length;
             document.getElementById('resourcePendingCount').textContent = (data.resources || []).filter(r => r.status === 0).length;
         }
 
@@ -1289,8 +1449,8 @@
 
             let html = '<div class="cardkey-list">';
             resources.forEach(resource => {
-                const statusClass = resource.status === 1 ? 'published' : (resource.status === 0 ? 'pending' : 'rejected');
-                const statusText = resource.status === 1 ? '已发布' : (resource.status === 0 ? '待审核' : '已拒绝');
+                const statusClass = (resource.status === 1 || resource.status === 2) ? 'published' : (resource.status === 0 ? 'pending' : 'rejected');
+                const statusText = resource.status === 1 ? '已发布' : (resource.status === 2 ? '推荐/公开' : (resource.status === 0 ? '待审核' : '已拒绝'));
                 html += `
                     <div class="cardkey-card">
                         <div class="cardkey-key" style="font-size: 0.95rem;">${resource.title}</div>
@@ -1314,7 +1474,9 @@
         }
 
         function openResourceEditModal(resourceId) {
-            fetch('/api/resources/' + resourceId)
+            fetch('/api/resources/' + resourceId, {
+                headers: authHeaders()
+            })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
@@ -1364,9 +1526,9 @@
 
             fetch('/api/resources/update', {
                 method: 'POST',
-                headers: {
+                headers: authHeaders({
                     'Content-Type': 'application/json'
-                },
+                }),
                 body: JSON.stringify(resource)
             })
             .then(response => response.json())
@@ -1391,7 +1553,8 @@
             }
 
             fetch(`/api/resources/delete/${id}`, {
-                method: 'DELETE'
+                method: 'DELETE',
+                headers: authHeaders()
             })
             .then(response => response.json())
             .then(data => {
@@ -1425,7 +1588,9 @@
                 ? `/api/cardkey/list?memberType=${memberType}` 
                 : '/api/cardkey/list';
 
-            fetch(url)
+            fetch(url, {
+                headers: authHeaders()
+            })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
@@ -1508,7 +1673,8 @@
             confirmBtn.innerHTML = '<i class="fas fa-spinner"></i> 生成中...';
 
             fetch('/api/cardkey/generate?count=' + count + '&memberType=' + memberType, {
-                method: 'POST'
+                method: 'POST',
+                headers: authHeaders()
             })
             .then(response => response.json())
             .then(data => {
@@ -1528,6 +1694,189 @@
             .finally(() => {
                 confirmBtn.disabled = false;
                 confirmBtn.innerHTML = '<i class="fas fa-check"></i> 确认生成';
+            });
+        }
+
+        let currentWithdrawalPage = 1;
+        let currentWithdrawalTotalPages = 1;
+
+        function loadAdminWithdrawals(page = 1, silent = false) {
+            const listArea = document.getElementById('withdrawalListArea');
+            const status = document.getElementById('withdrawStatusFilter').value;
+            currentWithdrawalPage = page;
+
+            if (!silent && listArea) {
+                listArea.innerHTML = '<div class="loading"><i class="fas fa-spinner"></i><p style="margin-top: 12px; color: #90b0d1;">加载中...</p></div>';
+            }
+
+            const url = `/api/wallet/admin/withdrawals?page=${page}&pageSize=10&status=${encodeURIComponent(status)}`;
+            fetch(url, {
+                headers: authHeaders()
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateWithdrawalStats(data);
+                    if (!silent) {
+                        renderWithdrawalList(data.withdrawals || []);
+                        updateWithdrawalPagination(data);
+                    }
+                } else {
+                    if (!silent) {
+                        showToast(data.message || '加载提现列表失败', true);
+                        listArea.innerHTML = '<div class="cardkey-empty"><i class="fas fa-wallet" style="font-size: 2rem; margin-bottom: 12px;"></i><p>加载失败</p></div>';
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('加载提现列表失败:', error);
+                if (!silent) {
+                    showToast('网络错误', true);
+                    listArea.innerHTML = '<div class="cardkey-empty"><i class="fas fa-wallet" style="font-size: 2rem; margin-bottom: 12px;"></i><p>网络错误</p></div>';
+                }
+            });
+        }
+
+        function updateWithdrawalStats(data) {
+            const pending = data.pendingCount || 0;
+            document.getElementById('withdrawPendingCount').textContent = pending;
+            document.getElementById('withdrawPaidCount').textContent = data.paidCount || 0;
+            document.getElementById('withdrawRejectedCount').textContent = data.rejectedCount || 0;
+            document.getElementById('withdrawBadge').textContent = pending;
+        }
+
+        function renderWithdrawalList(withdrawals) {
+            const listArea = document.getElementById('withdrawalListArea');
+            if (!withdrawals || withdrawals.length === 0) {
+                listArea.innerHTML = '<div class="cardkey-empty"><i class="fas fa-wallet" style="font-size: 2rem; margin-bottom: 12px;"></i><p>暂无提现申请</p></div>';
+                return;
+            }
+
+            let html = '<div class="cardkey-list">';
+            withdrawals.forEach(item => {
+                const statusClass = getWithdrawalStatusClass(item.status);
+                const isPending = item.status === 0;
+                html += `
+                    <div class="withdrawal-card" id="withdrawal-${item.id}">
+                        <div class="withdrawal-head">
+                            <div>
+                                <div class="withdrawal-title">${escapeHtml(item.userName || item.account || '未知用户')}</div>
+                                <div class="withdrawal-meta">
+                                    <span>账号：${escapeHtml(item.account || '--')}</span>
+                                    <span>支付宝：${escapeHtml(item.alipayAccount || '--')}</span>
+                                </div>
+                            </div>
+                            <span class="cardkey-status ${statusClass}">${escapeHtml(item.statusText || '未知')}</span>
+                        </div>
+                        <div class="withdrawal-meta">
+                            <span class="withdrawal-amount">${item.nCoinAmount || 0} N币 · ¥${item.cashAmount || '0.00'}</span>
+                            <span>申请时间：${formatDate(item.createdAt || item.requestAt)}</span>
+                            ${item.processedAt ? `<span>处理时间：${formatDate(item.processedAt)}</span>` : ''}
+                            ${item.adminAccount ? `<span>处理人：${escapeHtml(item.adminAccount)}</span>` : ''}
+                        </div>
+                        ${item.remark ? `<div class="withdrawal-meta"><span>备注：${escapeHtml(item.remark)}</span></div>` : ''}
+                        ${isPending ? `
+                            <div class="withdrawal-actions">
+                                <button class="btn btn-reject" onclick="rejectWithdrawal(${item.id})">
+                                    <i class="fas fa-times"></i> 拒绝
+                                </button>
+                                <button class="btn btn-approve" onclick="approveWithdrawal(${item.id})">
+                                    <i class="fas fa-check"></i> 标记已打款
+                                </button>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            });
+            html += '</div>';
+            listArea.innerHTML = html;
+        }
+
+        function getWithdrawalStatusClass(status) {
+            if (status === 0) return 'pending';
+            if (status === 1) return 'paid';
+            if (status === 2) return 'rejected';
+            return 'used';
+        }
+
+        function updateWithdrawalPagination(data) {
+            currentWithdrawalTotalPages = data.totalPages || 1;
+            const paginationArea = document.getElementById('withdrawalPaginationArea');
+            const pageInfo = document.getElementById('withdrawalPageInfo');
+            const prevBtn = document.getElementById('withdrawalPrevPageBtn');
+            const nextBtn = document.getElementById('withdrawalNextPageBtn');
+
+            if ((data.totalElements || 0) > 0) {
+                paginationArea.style.display = 'flex';
+                pageInfo.textContent = currentWithdrawalTotalPages > 1
+                    ? `第 ${data.currentPage} / ${currentWithdrawalTotalPages} 页，共 ${data.totalElements} 条`
+                    : `共 ${data.totalElements} 条`;
+                prevBtn.disabled = !data.hasPrevious;
+                nextBtn.disabled = !data.hasNext;
+            } else {
+                paginationArea.style.display = 'none';
+            }
+        }
+
+        function withdrawalPrevPage() {
+            if (currentWithdrawalPage > 1) {
+                loadAdminWithdrawals(currentWithdrawalPage - 1);
+            }
+        }
+
+        function withdrawalNextPage() {
+            if (currentWithdrawalPage < currentWithdrawalTotalPages) {
+                loadAdminWithdrawals(currentWithdrawalPage + 1);
+            }
+        }
+
+        function approveWithdrawal(id) {
+            if (!confirm('确认已完成支付宝打款，并标记该提现为已打款吗？')) {
+                return;
+            }
+
+            fetch(`/api/wallet/admin/withdrawals/${id}/approve`, {
+                method: 'POST',
+                headers: authHeaders()
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast(data.message || '已标记为打款');
+                    loadAdminWithdrawals(currentWithdrawalPage);
+                } else {
+                    showToast(data.message || '操作失败', true);
+                }
+            })
+            .catch(error => {
+                console.error('处理提现失败:', error);
+                showToast('网络错误', true);
+            });
+        }
+
+        function rejectWithdrawal(id) {
+            const remark = prompt('请输入拒绝原因（可留空）：', '资料有误，请重新提交');
+            if (remark === null) {
+                return;
+            }
+
+            fetch(`/api/wallet/admin/withdrawals/${id}/reject`, {
+                method: 'POST',
+                headers: authHeaders({ 'Content-Type': 'application/json' }),
+                body: JSON.stringify({ remark: remark })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast(data.message || '提现申请已拒绝');
+                    loadAdminWithdrawals(currentWithdrawalPage);
+                } else {
+                    showToast(data.message || '操作失败', true);
+                }
+            })
+            .catch(error => {
+                console.error('拒绝提现失败:', error);
+                showToast('网络错误', true);
             });
         }
 

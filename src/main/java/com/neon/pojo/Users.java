@@ -39,6 +39,9 @@ public class Users {
     String inviteCode;         //邀请码（每个用户唯一）
     String invitedBy;          //被谁邀请的（邀请人账号）
 
+    Integer nCoinBalance = 0;  // N币可用余额
+    Integer nCoinFrozen = 0;   // N币冻结中余额
+
     Integer memberType;       //会员类型: 1月度 2季度 3年度 4永久 0非会员
     LocalDateTime memberExpiredAt;  //会员到期时间
     String memberStatus;     //会员状态: active, permanent, expired, none

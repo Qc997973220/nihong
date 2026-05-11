@@ -17,6 +17,7 @@ public interface UsersDao extends JpaRepository<Users, String> {
     boolean existsByUserName(String userName);
     Users findByInviteCode(String inviteCode);
     boolean existsByInviteCode(String inviteCode);
+    List<Users> findByInvitedByOrderByCreateTimeDesc(String invitedBy);
     Users findByEmail(String email);
     boolean existsByEmail(String email);
     Users findByToken(String token);
