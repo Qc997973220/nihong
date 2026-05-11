@@ -7,6 +7,7 @@
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <!-- Font Awesome 6 免费版 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <!-- Google Fonts：Inter + Orbitron -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -326,6 +327,116 @@
             margin-top: 4px;
             margin-left: 120px;
         }
+        .invite-share-card {
+            margin-top: 28px;
+            padding: 22px;
+            background: rgba(10, 22, 38, 0.55);
+            border: 1px solid rgba(90, 160, 255, 0.28);
+            border-radius: 18px;
+        }
+        .invite-share-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+        .invite-share-title {
+            color: #dbeeff;
+            font-size: 1.05rem;
+            font-weight: 650;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .invite-code-pill {
+            color: #70ffb0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95rem;
+            padding: 6px 12px;
+            border: 1px solid rgba(112, 255, 176, 0.35);
+            border-radius: 999px;
+            background: rgba(0, 200, 120, 0.12);
+        }
+        .invite-link-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+        .invite-link-input {
+            flex: 1;
+            min-width: 0;
+            padding: 12px 14px;
+            color: #dcecff;
+            background: rgba(5, 14, 26, 0.72);
+            border: 1px solid rgba(90, 160, 255, 0.32);
+            border-radius: 12px;
+            outline: none;
+            font-size: 0.92rem;
+        }
+        .invite-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 14px;
+        }
+        .invite-action-btn {
+            padding: 9px 14px;
+            border-radius: 999px;
+            border: 1px solid rgba(90, 160, 255, 0.42);
+            background: rgba(91, 165, 255, 0.16);
+            color: #b8dcff;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            transition: all 0.2s;
+        }
+        .invite-action-btn:hover {
+            color: #fff;
+            border-color: #5ba5ff;
+            background: rgba(91, 165, 255, 0.26);
+        }
+        .invite-action-btn.primary {
+            color: #fff;
+            border-color: rgba(112, 255, 176, 0.42);
+            background: linear-gradient(105deg, rgba(0, 180, 120, 0.7), rgba(34, 122, 208, 0.75));
+        }
+        .invite-action-btn:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+        .invite-message {
+            display: none;
+            margin-top: 10px;
+            color: #70ffb0;
+            font-size: 0.9rem;
+        }
+        .invite-poster-preview {
+            display: none;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(90, 160, 255, 0.18);
+        }
+        .invite-poster-preview canvas {
+            width: min(100%, 280px);
+            height: auto;
+            border-radius: 16px;
+            border: 1px solid rgba(90, 160, 255, 0.32);
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.38);
+            display: block;
+            margin-bottom: 12px;
+        }
+        #qrHost {
+            position: absolute;
+            left: -9999px;
+            top: -9999px;
+            width: 220px;
+            height: 220px;
+            overflow: hidden;
+        }
         .action-buttons {
             margin-top: 40px;
             display: flex;
@@ -435,6 +546,38 @@
                 </div>
             </div>
 
+            <div class="invite-share-card">
+                <div class="invite-share-header">
+                    <div class="invite-share-title">
+                        <i class="fas fa-share-nodes"></i>
+                        专属邀请推广
+                    </div>
+                    <div class="invite-code-pill" id="inviteCodePill">邀请码：--</div>
+                </div>
+                <div class="invite-link-row">
+                    <input class="invite-link-input" id="inviteLinkInput" type="text" readonly value="">
+                </div>
+                <div class="invite-actions">
+                    <button class="invite-action-btn primary" id="copyInviteLinkBtn">
+                        <i class="fas fa-link"></i> 复制邀请链接
+                    </button>
+                    <button class="invite-action-btn" id="copyInviteCodeBtn">
+                        <i class="fas fa-ticket"></i> 复制邀请码
+                    </button>
+                    <button class="invite-action-btn" id="generatePosterBtn">
+                        <i class="fas fa-image"></i> 生成海报
+                    </button>
+                </div>
+                <div class="invite-message" id="inviteShareMessage"></div>
+                <div class="invite-poster-preview" id="posterPreview">
+                    <canvas id="invitePosterCanvas" width="900" height="1280"></canvas>
+                    <button class="invite-action-btn primary" id="downloadPosterBtn">
+                        <i class="fas fa-download"></i> 下载邀请海报
+                    </button>
+                </div>
+                <div id="qrHost" aria-hidden="true"></div>
+            </div>
+
             <div class="action-buttons">
                 <button class="btn btn-primary" id="changePasswordBtn">
                     <i class="fas fa-key"></i>
@@ -453,13 +596,343 @@
     let username = null;
     let userData = null;
     const userInfo = localStorage.getItem('userInfo');
+
+    function normalizeInviteCode(value) {
+        return (value || '').trim().replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+    }
+
+    function buildInviteLink(inviteCode) {
+        const url = new URL('/', window.location.origin);
+        url.searchParams.set('invite', inviteCode);
+        return url.toString();
+    }
+
+    function showInviteMessage(text, type = 'success') {
+        const message = document.getElementById('inviteShareMessage');
+        if (!message) return;
+        message.innerText = text;
+        message.style.color = type === 'error' ? '#ff8a8a' : '#70ffb0';
+        message.style.display = 'block';
+        clearTimeout(showInviteMessage.timer);
+        showInviteMessage.timer = setTimeout(() => {
+            message.style.display = 'none';
+        }, 2200);
+    }
+
+    function copyText(text, successText) {
+        if (!text) {
+            showInviteMessage('暂无可复制内容', 'error');
+            return;
+        }
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(text)
+                .then(() => showInviteMessage(successText))
+                .catch(() => fallbackCopyText(text, successText));
+        } else {
+            fallbackCopyText(text, successText);
+        }
+    }
+
+    function fallbackCopyText(text, successText) {
+        const tempInput = document.createElement('textarea');
+        tempInput.value = text;
+        tempInput.style.position = 'fixed';
+        tempInput.style.left = '-9999px';
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        try {
+            document.execCommand('copy');
+            showInviteMessage(successText);
+        } catch (e) {
+            showInviteMessage('复制失败，请手动复制', 'error');
+        } finally {
+            tempInput.remove();
+        }
+    }
+
+    function renderInviteShare() {
+        const inviteCode = normalizeInviteCode(userData && userData.inviteCode);
+        const inviteLink = inviteCode ? buildInviteLink(inviteCode) : '';
+        const codePill = document.getElementById('inviteCodePill');
+        const linkInput = document.getElementById('inviteLinkInput');
+        const copyLinkBtn = document.getElementById('copyInviteLinkBtn');
+        const copyCodeBtn = document.getElementById('copyInviteCodeBtn');
+        const posterBtn = document.getElementById('generatePosterBtn');
+
+        if (codePill) codePill.innerText = inviteCode ? `邀请码：${inviteCode}` : '邀请码：暂无';
+        if (linkInput) linkInput.value = inviteLink || '邀请码生成中，请刷新或重新登录';
+        [copyLinkBtn, copyCodeBtn, posterBtn].forEach(btn => {
+            if (btn) btn.disabled = !inviteCode;
+        });
+    }
+
+    async function refreshUserInfoFromToken() {
+        const token = localStorage.getItem('authToken');
+        if (!token) return;
+        try {
+            const response = await fetch('/api/login/validateToken', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token })
+            });
+            const result = await response.json();
+            if (result.valid && result.user) {
+                const displayName = result.user.userName || result.user.username || result.user.account || username;
+                userData = {
+                    ...userData,
+                    ...result.user,
+                    username: displayName
+                };
+                username = displayName;
+                localStorage.setItem('userInfo', JSON.stringify(userData));
+                document.getElementById('nickname').innerText = displayName;
+                document.getElementById('infoUserName').innerText = displayName;
+                document.getElementById('infoInviteCode').innerText = userData.inviteCode || '暂无';
+                renderInviteShare();
+            }
+        } catch (e) {
+            console.error('刷新用户信息失败:', e);
+        }
+    }
+
+    function wrapCanvasText(ctx, text, x, y, maxWidth, lineHeight, maxLines) {
+        const words = text.split('');
+        let line = '';
+        let lines = 0;
+        for (let i = 0; i < words.length; i++) {
+            const testLine = line + words[i];
+            if (ctx.measureText(testLine).width > maxWidth && line) {
+                ctx.fillText(line, x, y);
+                y += lineHeight;
+                line = words[i];
+                lines += 1;
+                if (maxLines && lines >= maxLines - 1) break;
+            } else {
+                line = testLine;
+            }
+        }
+        if (line) ctx.fillText(line, x, y);
+    }
+
+    const INVITE_POSTER_BACKGROUND_URLS = [
+        '/images/invite-poster-bg.png',
+        '/uploads/invite-poster-bg.png',
+        '/invite-poster-bg.png'
+    ];
+
+    function loadImage(url) {
+        return new Promise(resolve => {
+            const img = new Image();
+            img.onload = () => resolve(img);
+            img.onerror = () => resolve(null);
+            img.src = url;
+        });
+    }
+
+    async function loadInvitePosterBackground() {
+        for (const url of INVITE_POSTER_BACKGROUND_URLS) {
+            const image = await loadImage(url);
+            if (image) return image;
+        }
+        return null;
+    }
+
+    function drawImageCover(ctx, image, width, height) {
+        const imageRatio = image.width / image.height;
+        const canvasRatio = width / height;
+        let sourceX = 0;
+        let sourceY = 0;
+        let sourceWidth = image.width;
+        let sourceHeight = image.height;
+
+        if (imageRatio > canvasRatio) {
+            sourceWidth = image.height * canvasRatio;
+            sourceX = (image.width - sourceWidth) / 2;
+        } else {
+            sourceHeight = image.width / canvasRatio;
+            sourceY = (image.height - sourceHeight) / 2;
+        }
+
+        ctx.drawImage(image, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, width, height);
+    }
+
+    function drawFallbackPosterBackground(ctx, canvas, displayName, inviteCode, inviteLink) {
+        const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+        gradient.addColorStop(0, '#07111f');
+        gradient.addColorStop(0.48, '#132b4f');
+        gradient.addColorStop(1, '#191326');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.strokeStyle = 'rgba(90, 190, 255, 0.18)';
+        ctx.lineWidth = 2;
+        for (let i = 0; i < 12; i++) {
+            ctx.beginPath();
+            ctx.moveTo(80 + i * 70, 0);
+            ctx.lineTo(-160 + i * 70, canvas.height);
+            ctx.stroke();
+        }
+
+        ctx.fillStyle = 'rgba(0, 210, 255, 0.16)';
+        ctx.beginPath();
+        ctx.arc(160, 180, 130, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = 'rgba(255, 110, 210, 0.12)';
+        ctx.beginPath();
+        ctx.arc(780, 1080, 180, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '700 54px Inter, Microsoft YaHei, sans-serif';
+        ctx.fillText('NEON 霓虹之都', 78, 142);
+        ctx.font = '500 30px Inter, Microsoft YaHei, sans-serif';
+        ctx.fillStyle = '#9fd6ff';
+        ctx.fillText('AI / 网创 / 电商 / 短视频实操资料库', 82, 196);
+
+        ctx.fillStyle = '#eef7ff';
+        ctx.font = '700 48px Inter, Microsoft YaHei, sans-serif';
+        wrapCanvasText(ctx, `${displayName} 邀请你加入霓虹之都`, 82, 330, 736, 62, 2);
+
+        ctx.fillStyle = 'rgba(255,255,255,0.9)';
+        ctx.font = '400 30px Inter, Microsoft YaHei, sans-serif';
+        wrapCanvasText(ctx, '注册时已自动绑定专属邀请码，进入网站即可查看免费资源与会员工具箱。', 82, 470, 720, 46, 3);
+
+        ctx.fillStyle = 'rgba(6, 17, 31, 0.72)';
+        ctx.strokeStyle = 'rgba(112, 255, 176, 0.45)';
+        ctx.lineWidth = 2;
+        roundRect(ctx, 82, 610, 736, 136, 22, true, true);
+        ctx.fillStyle = '#70ffb0';
+        ctx.font = '700 34px Courier New, monospace';
+        ctx.fillText(`邀请码  ${inviteCode}`, 128, 690);
+
+        ctx.fillStyle = '#c7dcf5';
+        ctx.font = '400 22px Courier New, monospace';
+        ctx.textAlign = 'center';
+        wrapCanvasText(ctx, inviteLink, 450, 1192, 650, 30, 2);
+        ctx.textAlign = 'left';
+    }
+
+    async function getQrCanvas(inviteLink) {
+        if (typeof QRCode === 'undefined') return null;
+        const qrHost = document.getElementById('qrHost');
+        if (!qrHost) return null;
+        qrHost.innerHTML = '';
+        new QRCode(qrHost, {
+            text: inviteLink,
+            width: 220,
+            height: 220,
+            colorDark: '#101827',
+            colorLight: '#ffffff',
+            correctLevel: QRCode.CorrectLevel.H
+        });
+        await new Promise(resolve => setTimeout(resolve, 120));
+        return qrHost.querySelector('canvas') || qrHost.querySelector('img');
+    }
+
+    async function drawInvitePoster() {
+        const inviteCode = normalizeInviteCode(userData && userData.inviteCode);
+        if (!inviteCode) {
+            showInviteMessage('暂无邀请码，无法生成海报', 'error');
+            return;
+        }
+
+        const inviteLink = buildInviteLink(inviteCode);
+        const canvas = document.getElementById('invitePosterCanvas');
+        const preview = document.getElementById('posterPreview');
+        const ctx = canvas.getContext('2d');
+        const displayName = userData.username || userData.userName || userData.account || '霓虹会员';
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const posterBackground = await loadInvitePosterBackground();
+        if (posterBackground) {
+            drawImageCover(ctx, posterBackground, canvas.width, canvas.height);
+        } else {
+            drawFallbackPosterBackground(ctx, canvas, displayName, inviteCode, inviteLink);
+        }
+
+        const qrSource = await getQrCanvas(inviteLink);
+        const cardSize = 340;
+        const qrSize = 250;
+        const cardX = (canvas.width - cardSize) / 2;
+        const cardY = (canvas.height - cardSize) / 2;
+        const qrX = (canvas.width - qrSize) / 2;
+        const qrY = cardY + 34;
+
+        ctx.save();
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
+        ctx.shadowBlur = 32;
+        ctx.shadowOffsetY = 14;
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.98)';
+        roundRect(ctx, cardX, cardY, cardSize, cardSize, 36, true, false);
+        ctx.restore();
+
+        ctx.strokeStyle = 'rgba(0, 210, 255, 0.55)';
+        ctx.lineWidth = 4;
+        roundRect(ctx, cardX + 6, cardY + 6, cardSize - 12, cardSize - 12, 30, false, true);
+
+        if (qrSource) {
+            ctx.drawImage(qrSource, qrX, qrY, qrSize, qrSize);
+        } else {
+            ctx.fillStyle = '#101827';
+            ctx.font = '500 24px Inter, Microsoft YaHei, sans-serif';
+            ctx.textAlign = 'center';
+            wrapCanvasText(ctx, inviteLink, canvas.width / 2, cardY + 132, cardSize - 72, 34, 4);
+            ctx.textAlign = 'left';
+        }
+
+        ctx.fillStyle = '#111827';
+        ctx.font = '700 26px Inter, Microsoft YaHei, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('扫码注册', canvas.width / 2, cardY + cardSize - 32);
+        ctx.textAlign = 'left';
+
+        preview.style.display = 'block';
+        showInviteMessage('邀请海报已生成');
+    }
+
+    function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
+        ctx.beginPath();
+        ctx.moveTo(x + radius, y);
+        ctx.lineTo(x + width - radius, y);
+        ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+        ctx.lineTo(x + width, y + height - radius);
+        ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+        ctx.lineTo(x + radius, y + height);
+        ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+        ctx.lineTo(x, y + radius);
+        ctx.quadraticCurveTo(x, y, x + radius, y);
+        ctx.closePath();
+        if (fill) ctx.fill();
+        if (stroke) ctx.stroke();
+    }
+
+    function initInviteShare() {
+        renderInviteShare();
+        document.getElementById('copyInviteLinkBtn').addEventListener('click', function() {
+            const inviteCode = normalizeInviteCode(userData && userData.inviteCode);
+            copyText(inviteCode ? buildInviteLink(inviteCode) : '', '邀请链接已复制');
+        });
+        document.getElementById('copyInviteCodeBtn').addEventListener('click', function() {
+            copyText(normalizeInviteCode(userData && userData.inviteCode), '邀请码已复制');
+        });
+        document.getElementById('generatePosterBtn').addEventListener('click', drawInvitePoster);
+        document.getElementById('downloadPosterBtn').addEventListener('click', function() {
+            const canvas = document.getElementById('invitePosterCanvas');
+            const inviteCode = normalizeInviteCode(userData && userData.inviteCode) || 'invite';
+            const link = document.createElement('a');
+            link.download = `neon-invite-${inviteCode}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        });
+    }
+
     if (!userInfo) {
         // 如果没登录，直接跳回首页
         window.location.href = '/';
     } else {
         try {
             userData = JSON.parse(userInfo);
-            username = userData.username;
+            username = userData.username || userData.userName || userData.account || '用户';
             document.getElementById('nickname').innerText = username;
             document.getElementById('infoAccount').innerText = userData.account || '未设置';
             document.getElementById('infoUserName').innerText = username;
@@ -503,6 +976,9 @@
             window.location.href = '/';
         }
     }
+
+    initInviteShare();
+    refreshUserInfoFromToken();
 
     // 退出登录
     document.getElementById('logoutBtn').addEventListener('click', function() {

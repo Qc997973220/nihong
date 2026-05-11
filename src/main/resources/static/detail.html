@@ -1663,6 +1663,68 @@
         window.location.href = 'index.html';
     }
 
+    const INVITE_STORAGE_KEY = 'pendingInviteCode';
+    const INVITE_PARAM_NAMES = ['invite', 'inviteCode', 'ref', 'code'];
+
+    function normalizeInviteCode(value) {
+        return (value || '').trim().replace(/[^A-Za-z0-9]/g, '').toUpperCase().slice(0, 32);
+    }
+
+    function getInviteCodeFromParams(params) {
+        for (const name of INVITE_PARAM_NAMES) {
+            const code = normalizeInviteCode(params.get(name));
+            if (code) return code;
+        }
+        return '';
+    }
+
+    function fillInviteCodeInput(code) {
+        const inviteInput = document.getElementById('inviteCode');
+        if (!inviteInput || !code) return;
+        inviteInput.value = code;
+        inviteInput.dataset.fromInviteLink = 'true';
+        inviteInput.placeholder = '已通过专属邀请链接自动填入';
+    }
+
+    function showRegisterPanel(inviteCode) {
+        document.getElementById('loginWrapper').style.display = 'flex';
+        document.getElementById('loginPanel').classList.add('hidden');
+        document.getElementById('registerPanel').classList.remove('hidden');
+        fillInviteCodeInput(inviteCode || localStorage.getItem(INVITE_STORAGE_KEY));
+        const regAccountInput = document.getElementById('regAccount');
+        if (regAccountInput) regAccountInput.focus();
+    }
+
+    function applyInviteCodeFromUrl() {
+        const inviteCode = getInviteCodeFromParams(urlParams);
+        if (!inviteCode) {
+            const cachedInviteCode = localStorage.getItem(INVITE_STORAGE_KEY);
+            if (cachedInviteCode) fillInviteCodeInput(cachedInviteCode);
+            return '';
+        }
+        if (localStorage.getItem('userInfo')) {
+            return inviteCode;
+        }
+        localStorage.setItem(INVITE_STORAGE_KEY, inviteCode);
+        fillInviteCodeInput(inviteCode);
+        showRegisterPanel(inviteCode);
+        return inviteCode;
+    }
+
+    function removeInviteParamsFromUrl() {
+        const cleanUrl = new URL(window.location.href);
+        let changed = false;
+        INVITE_PARAM_NAMES.forEach(name => {
+            if (cleanUrl.searchParams.has(name)) {
+                cleanUrl.searchParams.delete(name);
+                changed = true;
+            }
+        });
+        if (changed) {
+            window.history.replaceState({}, document.title, cleanUrl.pathname + cleanUrl.search + cleanUrl.hash);
+        }
+    }
+
     // ========== 登录检查 ==========
     function isLoggedIn() {
         const userInfo = localStorage.getItem('userInfo');
@@ -3027,6 +3089,8 @@
     document.addEventListener('DOMContentLoaded', function() {
         // 更新限时特惠日期
         updatePromotionDate();
+        const inviteCodeFromUrl = applyInviteCodeFromUrl();
+        if (inviteCodeFromUrl) removeInviteParamsFromUrl();
 
         // 回车登录
         document.getElementById('loginPassword').addEventListener('keypress', function(e) {
@@ -3035,9 +3099,7 @@
 
         // 登录面板切换
         document.getElementById('goToRegister')?.addEventListener('click', function() {
-            document.getElementById('loginPanel').classList.add('hidden');
-            document.getElementById('registerPanel').classList.remove('hidden');
-            document.getElementById('regAccount').focus();
+            showRegisterPanel();
         });
 
         document.getElementById('goToLogin')?.addEventListener('click', function() {
@@ -3115,9 +3177,12 @@
                         memberStatus: result.user.memberStatus,
                         memberExpireText: result.user.memberExpireText,
                         memberExpireAt: result.user.memberExpireAt,
+                        inviteCode: result.user.inviteCode,
+                        invitedBy: result.user.invitedBy,
                         email: result.user.email
                     };
                     localStorage.setItem('userInfo', JSON.stringify(userInfo));
+                    localStorage.removeItem(INVITE_STORAGE_KEY);
 
                     savedUsername = displayName;
                     document.getElementById('displayUsername').innerText = displayName;
@@ -3295,6 +3360,8 @@
                             memberStatus: loginResult.user.memberStatus,
                             memberExpireText: loginResult.user.memberExpireText,
                             memberExpireAt: loginResult.user.memberExpireAt,
+                            inviteCode: loginResult.user.inviteCode,
+                            invitedBy: loginResult.user.invitedBy,
                             email: loginResult.user.email
                         };
                         localStorage.setItem('userInfo', JSON.stringify(userInfo));
@@ -3310,6 +3377,7 @@
 
                         setTimeout(() => {
                             hideLogin();
+                            localStorage.removeItem(INVITE_STORAGE_KEY);
                             fetchDetail();
                         }, 1000);
                     } else {

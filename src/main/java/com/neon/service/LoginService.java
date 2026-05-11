@@ -76,12 +76,15 @@ public class LoginService {
         users.setInviteCode(inviteCode);
         String invitedBy = users.getInvitedBy();
         if (invitedBy != null && !invitedBy.trim().isEmpty()) {
-            Users inviter = usersDao.findByAccount(invitedBy.trim());
+            String inviterKey = invitedBy.trim();
+            Users inviter = usersDao.findByAccount(inviterKey);
             if (inviter == null) {
-                inviter = usersDao.findByInviteCode(invitedBy.trim());
+                inviter = usersDao.findByInviteCode(inviterKey.toUpperCase());
             }
             if (inviter != null) {
                 users.setInvitedBy(inviter.getAccount());
+            } else {
+                users.setInvitedBy(null);
             }
         }
         usersDao.save(users);

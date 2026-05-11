@@ -79,7 +79,8 @@ public class LoginController {
         userInfo.put("avatar", null);
         userInfo.put("lastLoginTime", user.getLastLoginTime());
         userInfo.put("memberType", user.getMemberType() != null ? user.getMemberType() : 0);
-        userInfo.put("inviteCode", user.getInviteCode());
+        userInfo.put("inviteCode", ensureInviteCode(user));
+        userInfo.put("invitedBy", user.getInvitedBy());
 
         if (user.getMemberType() != null && user.getMemberType() == 4) {
             userInfo.put("memberStatus", "permanent");
@@ -98,6 +99,30 @@ public class LoginController {
         }
         
         return userInfo;
+    }
+
+    private String ensureInviteCode(Users user) {
+        String inviteCode = user.getInviteCode();
+        if (inviteCode != null && !inviteCode.trim().isEmpty()) {
+            return inviteCode;
+        }
+
+        inviteCode = generateInviteCode();
+        while (usersDao.existsByInviteCode(inviteCode)) {
+            inviteCode = generateInviteCode();
+        }
+        user.setInviteCode(inviteCode);
+        usersDao.save(user);
+        return inviteCode;
+    }
+
+    private String generateInviteCode() {
+        String chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+        StringBuilder code = new StringBuilder();
+        for (int i = 0; i < 8; i++) {
+            code.append(chars.charAt((int) (Math.random() * chars.length())));
+        }
+        return code.toString();
     }
 
     @PostMapping("/registered")
