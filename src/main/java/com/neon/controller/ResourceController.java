@@ -385,11 +385,14 @@ public class ResourceController {
     }
 
     private boolean hasActiveVip(Users user) {
-        if (user == null || user.getMemberType() == null || user.getMemberType() <= 0) {
+        if (user == null || user.getMemberType() == null) {
             return false;
         }
         if (user.getMemberType() == CardKey.TYPE_PERMANENT || user.getMemberType() == CardKey.TYPE_AGENT) {
             return true;
+        }
+        if (user.getMemberType() != CardKey.TYPE_YEARLY) {
+            return false;
         }
         return user.getMemberExpiredAt() != null && user.getMemberExpiredAt().isAfter(LocalDateTime.now());
     }
@@ -621,10 +624,10 @@ public class ResourceController {
                 return result;
             }
 
-            // 检查是否为VIP会员（memberType > 0 表示会员）
+            // 检查是否为有效VIP会员
             System.out.println("用户memberType: " + user.getMemberType());
             System.out.println("用户memberStatus: " + user.getMemberStatus());
-            if (user.getMemberType() == null || user.getMemberType() == 0) {
+            if (!hasActiveVip(user)) {
                 result.put("success", false);
                 result.put("message", "权限不足，请加入霓虹之都会员后再试");
                 return result;
@@ -825,8 +828,7 @@ public class ResourceController {
             LocalDateTime startOfDay = LocalDateTime.now().toLocalDate().atStartOfDay();
             Long todayDownloads = downloadRecordDao.countTodayDownloads(account, startOfDay);
             
-            // 根据会员类型设置每日下载限制
-            // 旧版会员(1/2)保留历史下载额度，年费会员(3)/永久会员(4)/霓虹代理(5): 无限制
+            // 根据会员类型设置每日下载限制，年费会员(3)/永久会员(4)/霓虹代理(5): 无限制
             int dailyLimit = getDailyLimitByMemberType(user.getMemberType());
             
             if (dailyLimit == -1) {
@@ -919,8 +921,7 @@ public class ResourceController {
             LocalDateTime startOfDay = LocalDateTime.now().toLocalDate().atStartOfDay();
             Long todayDownloads = downloadRecordDao.countTodayDownloadsWithLock(user.getAccount(), startOfDay);
             
-            // 根据会员类型设置每日下载限制
-            // 旧版会员(1/2)保留历史下载额度，年费会员(3)/永久会员(4)/霓虹代理(5): 无限制
+            // 根据会员类型设置每日下载限制，年费会员(3)/永久会员(4)/霓虹代理(5): 无限制
             int dailyLimit = getDailyLimitByMemberType(user.getMemberType());
             
             if (dailyLimit != -1 && todayDownloads >= dailyLimit) {
@@ -961,10 +962,6 @@ public class ResourceController {
             return 0; // 非会员无下载权限
         }
         switch (memberType) {
-            case 1: // 旧版会员
-                return 2;
-            case 2: // 旧版会员
-                return 3;
             case 3: // 年费会员
             case 4: // 永久会员
             case 5: // 霓虹代理

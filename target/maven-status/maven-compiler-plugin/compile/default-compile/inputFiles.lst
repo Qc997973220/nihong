@@ -15,6 +15,7 @@ D:\bangong\nihong\src\main\java\com\neon\controller\AdminUserController.java
 D:\bangong\nihong\src\main\java\com\neon\controller\VisitorController.java
 D:\bangong\nihong\src\main\java\com\neon\controller\LoginController.java
 D:\bangong\nihong\src\main\java\com\neon\pojo\WithdrawalRequest.java
+D:\bangong\nihong\src\main\java\com\neon\service\LegacyMemberMigrationService.java
 D:\bangong\nihong\src\main\java\com\neon\service\CardKeyService.java
 D:\bangong\nihong\src\main\java\com\neon\dao\UsersDao.java
 D:\bangong\nihong\src\main\java\com\neon\dao\MessageDao.java

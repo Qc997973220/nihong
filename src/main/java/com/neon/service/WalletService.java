@@ -366,7 +366,7 @@ public class WalletService {
             return item;
         }
 
-        Integer memberType = invitee.getMemberType();
+        Integer memberType = normalizeMemberType(invitee.getMemberType());
         item.put("account", invitee.getAccount());
         item.put("userName", invitee.getUserName());
         item.put("inviteCode", invitee.getInviteCode());
@@ -472,9 +472,6 @@ public class WalletService {
             return "未知会员";
         }
         switch (type) {
-            case 1:
-            case 2:
-                return "旧版VIP";
             case 3:
                 return "年费VIP";
             case 4:
@@ -482,8 +479,15 @@ public class WalletService {
             case 5:
                 return "霓虹代理";
             default:
-                return "未知会员";
+                return "普通用户";
         }
+    }
+
+    private Integer normalizeMemberType(Integer type) {
+        if (type == null || type == CardKey.TYPE_MONTHLY || type == CardKey.TYPE_QUARTERLY) {
+            return 0;
+        }
+        return type;
     }
 
     private String resolveMemberStatus(Users user) {
@@ -493,7 +497,7 @@ public class WalletService {
         if (user.getMemberType() != null && (user.getMemberType() == CardKey.TYPE_PERMANENT || user.getMemberType() == CardKey.TYPE_AGENT)) {
             return "permanent";
         }
-        if (user.getMemberType() == null || user.getMemberType() == 0) {
+        if (user.getMemberType() == null || user.getMemberType() != CardKey.TYPE_YEARLY) {
             return "none";
         }
         if (user.getMemberExpiredAt() != null && user.getMemberExpiredAt().isBefore(LocalDateTime.now())) {
@@ -512,7 +516,7 @@ public class WalletService {
         if (user.getMemberType() != null && user.getMemberType() == CardKey.TYPE_PERMANENT) {
             return "永久有效";
         }
-        if (user.getMemberType() == null || user.getMemberType() == 0) {
+        if (user.getMemberType() == null || user.getMemberType() != CardKey.TYPE_YEARLY) {
             return "非会员";
         }
         if (user.getMemberExpiredAt() == null) {

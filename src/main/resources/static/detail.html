@@ -1642,7 +1642,9 @@
     const VIP_TOOLBOX_URL = 'https://my.feishu.cn/docx/UhMJdp3WQo3Z6JxPQPWcey6Lnkd?from=from_copylink';
 
     function isVipUser(user) {
-        return user && (user.memberStatus === 'active' || user.memberStatus === 'permanent');
+        const type = Number(user && user.memberType);
+        return user && (type === 3 || type === 4 || type === 5)
+            && (user.memberStatus === 'active' || user.memberStatus === 'permanent');
     }
 
     function isLoggedToolboxUser(user) {
@@ -1817,10 +1819,7 @@
         if (!userInfo) return false;
         try {
             const info = JSON.parse(userInfo);
-            if (info.memberStatus === 'permanent' || info.memberStatus === 'active') {
-                return true;
-            }
-            return false;
+            return isVipUser(info);
         } catch (e) {
             return false;
         }
@@ -1846,10 +1845,11 @@
         if (!userInfo) return null;
         try {
             const info = JSON.parse(userInfo);
-            if (Number(info.memberType) === 5) return '霓虹代理';
-            if (info.memberStatus === 'permanent') return '永久会员';
-            if (info.memberStatus === 'active') return info.memberExpireText;
-            if (info.memberStatus === 'expired') return '会员已到期';
+            const type = Number(info.memberType);
+            if (type === 5) return '霓虹代理';
+            if (type === 4 && info.memberStatus === 'permanent') return '永久会员';
+            if (type === 3 && info.memberStatus === 'active') return info.memberExpireText;
+            if (type === 3 && info.memberStatus === 'expired') return '会员已到期';
             return null;
         } catch (e) {
             return null;
@@ -1868,8 +1868,13 @@
     }
 
     function isVIP() {
-        const status = getMemberStatus();
-        return status === 'active' || status === 'permanent';
+        const userInfo = localStorage.getItem('userInfo');
+        if (!userInfo) return false;
+        try {
+            return isVipUser(JSON.parse(userInfo));
+        } catch (e) {
+            return false;
+        }
     }
 
     function getMemberType() {
@@ -1877,7 +1882,8 @@
         if (!userInfo) return 0;
         try {
             const info = JSON.parse(userInfo);
-            return info.memberType || 0;
+            const type = Number(info.memberType || 0);
+            return (type === 1 || type === 2) ? 0 : type;
         } catch (e) {
             return 0;
         }
@@ -1898,64 +1904,10 @@
             return;
         }
 
-        const memberType = getMemberType();
-        const isLimitedMember = memberType === 1 || memberType === 2;
-
-        if (isLimitedMember) {
-            try {
-                const authToken = localStorage.getItem('authToken');
-                console.log('发送下载验证请求, token:', authToken);
-                const response = await fetch('/api/resources/verify-download', {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'Authorization': authToken ? `Bearer ${authToken}` : ''
-                    },
-                    body: JSON.stringify({
-                        resourceId: parseInt(id),
-                        resourceTitle: document.querySelector('.article-title')?.textContent || ''
-                    })
-                });
-                const result = await response.json();
-                console.log('下载验证响应:', result);
-
-                if (result.success) {
-                    if (result.alreadyDownloaded) {
-                        if (downloadPassword) {
-                            document.getElementById('downloadPasswordDisplay').textContent = downloadPassword;
-                        }
-                        window.open(downloadLink, '_blank');
-                    } else {
-                        if (downloadPassword) {
-                            document.getElementById('downloadPasswordDisplay').textContent = downloadPassword;
-                        }
-                        window.open(downloadLink, '_blank');
-                        updateQuotaDisplay(result);
-                    }
-                } else {
-                    if (result.quotaExceeded) {
-                        showNoticeModal('今日额度已用完', '您今日下载额度已用尽，请明天再来！', 'fa-clock');
-                    } else if (result.message && result.message.includes('登录')) {
-                        clearUserSession();
-                        showNoticeModal('登录失效', result.message || '请重新登录', 'fa-exclamation-circle');
-                        setTimeout(() => {
-                            hideNoticeModal();
-                            showLogin();
-                        }, 2000);
-                    } else {
-                        showNoticeModal('提示', result.message || '获取下载链接失败', 'fa-exclamation-circle');
-                    }
-                }
-            } catch (error) {
-                console.error('验证下载额度失败:', error);
-                showNoticeModal('提示', '验证下载额度失败，请稍后重试', 'fa-exclamation-circle');
-            }
-        } else {
-            if (downloadPassword) {
-                document.getElementById('downloadPasswordDisplay').textContent = downloadPassword;
-            }
-            window.open(downloadLink, '_blank');
+        if (downloadPassword) {
+            document.getElementById('downloadPasswordDisplay').textContent = downloadPassword;
         }
+        window.open(downloadLink, '_blank');
     }
 
     async function updateQuotaDisplay(result) {
@@ -2015,41 +1967,25 @@
         let textColor = '';
         let iconColor = '';
 
-        if (Number(user.memberType) === 5) {
+        const memberType = Number(user.memberType || 0);
+
+        if (memberType === 5) {
             memberTypeText = '霓虹代理';
             bgColor = 'rgba(255, 80, 96, 0.2)';
             textColor = '#ff5f6d';
             iconColor = '#ff5f6d';
-        } else if (user.memberStatus === 'permanent') {
+        } else if (memberType === 4 && user.memberStatus === 'permanent') {
             memberTypeText = '永久会员';
             bgColor = 'rgba(255, 215, 0, 0.2)';
             textColor = '#FFD700';
             iconColor = '#FFD700';
-        } else if (user.memberStatus === 'active') {
-            const type = user.memberType;
-            if (type === 1) {
-                memberTypeText = '旧版会员';
-                bgColor = 'rgba(120, 100, 255, 0.2)';
-                textColor = '#b48aff';
-                iconColor = '#b48aff';
-            } else if (type === 2) {
-                memberTypeText = '旧版会员';
-                bgColor = 'rgba(0, 200, 100, 0.2)';
-                textColor = '#70ffb0';
-                iconColor = '#70ffb0';
-            } else if (type === 3) {
-                memberTypeText = '年费会员';
-                bgColor = 'rgba(255, 150, 50, 0.2)';
-                textColor = '#ffb070';
-                iconColor = '#ffb070';
-            } else {
-                memberTypeText = '会员';
-                bgColor = 'rgba(0, 180, 255, 0.2)';
-                textColor = '#70c0ff';
-                iconColor = '#70c0ff';
-            }
+        } else if (memberType === 3 && user.memberStatus === 'active') {
+            memberTypeText = '年费会员';
+            bgColor = 'rgba(255, 150, 50, 0.2)';
+            textColor = '#ffb070';
+            iconColor = '#ffb070';
             expireText.textContent = '';
-        } else if (user.memberStatus === 'expired') {
+        } else if (memberType === 3 && user.memberStatus === 'expired') {
             memberTypeText = '已到期';
             bgColor = 'rgba(255, 71, 87, 0.2)';
             textColor = '#ff8a8a';
@@ -2410,8 +2346,6 @@
             const freeQuotaMessage = data.freeQuotaMessage || '您今日免费额度已用完,请明天再来吧!';
 
             if (canDownload) {
-                const isLimitedMember = memberType === 1 || memberType === 2;
-                const dailyLimit = memberType === 1 ? 2 : (memberType === 2 ? 3 : '∞');
                 downloadSectionHtml = `
                     <div class="download-section">
                         <div class="download-info">
@@ -2424,12 +2358,6 @@
                                 <i class="fas fa-key"></i>
                                 <span>获取密码：</span>
                                 <span class="download-password" id="downloadPasswordDisplay">******</span>
-                            </div>
-                            ` : ''}
-                            ${!isFreeResource && isLimitedMember ? `
-                            <div class="download-quota-info" id="downloadQuotaInfo">
-                                <i class="fas fa-chart-line"></i>
-                                <span>今日剩余下载次数：<span id="quotaRemaining">加载中...</span> / ${dailyLimit}</span>
                             </div>
                             ` : ''}
                         </div>

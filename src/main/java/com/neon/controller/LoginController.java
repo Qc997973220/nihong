@@ -82,7 +82,7 @@ public class LoginController {
         userInfo.put("token", user.getToken());
         userInfo.put("avatar", null);
         userInfo.put("lastLoginTime", user.getLastLoginTime());
-        Integer memberType = user.getMemberType() != null ? user.getMemberType() : 0;
+        Integer memberType = normalizeMemberType(user.getMemberType());
         userInfo.put("memberType", memberType);
         userInfo.put("memberTypeName", getMemberTypeName(memberType));
         userInfo.put("isAgent", memberType == CardKey.TYPE_AGENT);
@@ -367,6 +367,7 @@ public class LoginController {
     }
 
     private String getMemberTypeName(Integer memberType) {
+        memberType = normalizeMemberType(memberType);
         if (memberType == null || memberType == 0) {
             return "非会员";
         }
@@ -377,11 +378,17 @@ public class LoginController {
                 return "永久会员";
             case CardKey.TYPE_AGENT:
                 return "霓虹代理";
-            case CardKey.TYPE_MONTHLY:
-            case CardKey.TYPE_QUARTERLY:
-                return "旧版会员(已停用)";
             default:
                 return "未知会员";
         }
+    }
+
+    private Integer normalizeMemberType(Integer memberType) {
+        if (memberType == null
+                || memberType == CardKey.TYPE_MONTHLY
+                || memberType == CardKey.TYPE_QUARTERLY) {
+            return 0;
+        }
+        return memberType;
     }
 }

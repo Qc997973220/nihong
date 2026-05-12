@@ -2854,7 +2854,9 @@
     const VIP_TOOLBOX_URL = 'https://my.feishu.cn/docx/UhMJdp3WQo3Z6JxPQPWcey6Lnkd?from=from_copylink';
 
     function isVipUser(user) {
-        return user && (user.memberStatus === 'active' || user.memberStatus === 'permanent');
+        const type = Number(user && user.memberType);
+        return user && (type === 3 || type === 4 || type === 5)
+            && (user.memberStatus === 'active' || user.memberStatus === 'permanent');
     }
 
     function isLoggedToolboxUser(user) {
@@ -3161,8 +3163,7 @@
             
             // 更新VIP按钮状态
             if (vipBtn) {
-                const status = currentUser.memberStatus;
-                if (status === 'active' || status === 'permanent') {
+                if (isVipUser(currentUser)) {
                     vipBtn.style.display = 'none';
                 } else {
                     vipBtn.style.display = 'flex';
@@ -3785,41 +3786,25 @@
         let textColor = '';
         let iconColor = '';
 
-        if (Number(user.memberType) === 5) {
+        const memberType = Number(user.memberType || 0);
+
+        if (memberType === 5) {
             memberTypeText = '霓虹代理';
             bgColor = 'rgba(255, 80, 96, 0.2)';
             textColor = '#ff5f6d';
             iconColor = '#ff5f6d';
-        } else if (user.memberStatus === 'permanent') {
+        } else if (memberType === 4 && user.memberStatus === 'permanent') {
             memberTypeText = '永久会员';
             bgColor = 'rgba(255, 215, 0, 0.2)';
             textColor = '#FFD700';
             iconColor = '#FFD700';
-        } else if (user.memberStatus === 'active') {
-            const type = user.memberType;
-            if (type === 1) {
-                memberTypeText = '旧版会员';
-                bgColor = 'rgba(120, 100, 255, 0.2)';
-                textColor = '#b48aff';
-                iconColor = '#b48aff';
-            } else if (type === 2) {
-                memberTypeText = '旧版会员';
-                bgColor = 'rgba(0, 200, 100, 0.2)';
-                textColor = '#70ffb0';
-                iconColor = '#70ffb0';
-            } else if (type === 3) {
-                memberTypeText = '年费会员';
-                bgColor = 'rgba(255, 150, 50, 0.2)';
-                textColor = '#ffb070';
-                iconColor = '#ffb070';
-            } else {
-                memberTypeText = '会员';
-                bgColor = 'rgba(0, 180, 255, 0.2)';
-                textColor = '#70c0ff';
-                iconColor = '#70c0ff';
-            }
+        } else if (memberType === 3 && user.memberStatus === 'active') {
+            memberTypeText = '年费会员';
+            bgColor = 'rgba(255, 150, 50, 0.2)';
+            textColor = '#ffb070';
+            iconColor = '#ffb070';
             expireText.textContent = user.memberExpireText || '';
-        } else if (user.memberStatus === 'expired') {
+        } else if (memberType === 3 && user.memberStatus === 'expired') {
             memberTypeText = '已到期';
             bgColor = 'rgba(255, 71, 87, 0.2)';
             textColor = '#ff8a8a';
@@ -3842,7 +3827,7 @@
 
         const vipBtn = document.getElementById('vipUpgradeBtn');
         if (vipBtn) {
-            if (user.memberStatus === 'active' || user.memberStatus === 'permanent') {
+            if (isVipUser(user)) {
                 vipBtn.style.display = 'none';
             } else {
                 vipBtn.style.display = 'flex';
@@ -4279,8 +4264,7 @@
                 // 登录成功后立即更新VIP按钮状态
                 const vipBtn = document.getElementById('vipUpgradeBtn');
                 if (vipBtn) {
-                    const status = result.user.memberStatus;
-                    if (status === 'active' || status === 'permanent') {
+                    if (isVipUser(result.user)) {
                         vipBtn.style.display = 'none';
                     } else {
                         vipBtn.style.display = 'flex';
@@ -4491,8 +4475,7 @@
                     // 注册成功后立即更新VIP按钮状态
                     const vipBtn = document.getElementById('vipUpgradeBtn');
                     if (vipBtn) {
-                        const status = loginResult.user.memberStatus;
-                        if (status === 'active' || status === 'permanent') {
+                        if (isVipUser(loginResult.user)) {
                             vipBtn.style.display = 'none';
                         } else {
                             vipBtn.style.display = 'flex';
@@ -4714,7 +4697,7 @@
                 // 控制VIP按钮显示
                 const vipBtn = document.getElementById('vipUpgradeBtn');
                 if (vipBtn) {
-                    if (userInfo.memberStatus === 'active' || userInfo.memberStatus === 'permanent') {
+                    if (isVipUser(userInfo)) {
                         vipBtn.style.display = 'none';
                     } else {
                         vipBtn.style.display = 'flex';
@@ -5621,7 +5604,7 @@
                 updateMemberStatusBar(result);
 
                 const vipBtn = document.getElementById('vipUpgradeBtn');
-                if (vipBtn && (result.memberStatus === 'permanent' || result.memberStatus === 'active')) {
+                if (vipBtn && isVipUser(result)) {
                     vipBtn.style.display = 'none';
                 }
 

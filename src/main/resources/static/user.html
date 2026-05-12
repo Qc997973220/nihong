@@ -895,10 +895,11 @@
 
     function getInviteStatusText(invitee) {
         if (!invitee) return '未开通VIP';
-        if (Number(invitee.memberType) === 5) return '霓虹代理';
-        if (invitee.memberStatus === 'permanent') return '永久VIP';
-        if (invitee.memberStatus === 'active') return invitee.memberTypeName || 'VIP会员';
-        if (invitee.memberStatus === 'expired') return 'VIP已到期';
+        const type = Number(invitee.memberType);
+        if (type === 5) return '霓虹代理';
+        if (type === 4 && invitee.memberStatus === 'permanent') return '永久VIP';
+        if (type === 3 && invitee.memberStatus === 'active') return invitee.memberTypeName || '年费VIP';
+        if (type === 3 && invitee.memberStatus === 'expired') return 'VIP已到期';
         return '未开通VIP';
     }
 
@@ -1501,21 +1502,20 @@
 
             // 显示会员状态（头部和详情两处）
             let memberStatusDisplay = '';
+            const memberType = Number(userData.memberType || 0);
             if (isAgentUser()) {
                 memberStatusDisplay = '霓虹代理 · 欢迎回来';
                 document.getElementById('infoMemberStatus').style.color = '#ff5f6d';
-            } else if (userData.memberStatus === 'permanent') {
+            } else if (memberType === 4 && userData.memberStatus === 'permanent') {
                 memberStatusDisplay = '永久会员 · 欢迎回来';
                 document.getElementById('infoMemberStatus').style.color = '#FFD700';
-            } else if (userData.memberStatus === 'active') {
+            } else if (memberType === 3 && userData.memberStatus === 'active') {
                 let memberTypeName = '会员';
-                if (userData.memberType === 1) memberTypeName = '旧版会员';
-                else if (userData.memberType === 2) memberTypeName = '旧版会员';
-                else if (userData.memberType === 3) memberTypeName = '年费会员';
+                memberTypeName = '年费会员';
                 let expireText = userData.memberExpireText || '';
                 memberStatusDisplay = expireText ? memberTypeName + ' · ' + expireText : memberTypeName;
                 document.getElementById('infoMemberStatus').style.color = '#70ffb0';
-            } else if (userData.memberStatus === 'expired') {
+            } else if (memberType === 3 && userData.memberStatus === 'expired') {
                 memberStatusDisplay = '已到期';
                 document.getElementById('infoMemberStatus').style.color = '#ff8a8a';
             } else {
@@ -1607,7 +1607,9 @@
         }
 
         const loggedIn = userInfo && (userInfo.account || userInfo.username || userInfo.userName);
-        const vip = userInfo && (userInfo.memberStatus === 'active' || userInfo.memberStatus === 'permanent');
+        const memberType = Number(userInfo && userInfo.memberType);
+        const vip = userInfo && (memberType === 3 || memberType === 4 || memberType === 5)
+            && (userInfo.memberStatus === 'active' || userInfo.memberStatus === 'permanent');
         if (loggedIn) {
             toolboxBtn.classList.add('active');
             toolboxBtn.classList.toggle('locked', !vip);

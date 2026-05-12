@@ -159,7 +159,7 @@ public class AdminUserController {
 
     private Map<String, Object> buildUserItem(Users user) {
         Map<String, Object> item = new LinkedHashMap<>();
-        Integer memberType = user.getMemberType() != null ? user.getMemberType() : 0;
+        Integer memberType = normalizeMemberType(user.getMemberType());
         item.put("account", user.getAccount());
         item.put("userName", user.getUserName());
         item.put("nickname", user.getNickname());
@@ -178,6 +178,7 @@ public class AdminUserController {
     }
 
     private String getMemberTypeName(Integer memberType) {
+        memberType = normalizeMemberType(memberType);
         if (memberType == null || memberType == 0) {
             return "普通用户";
         }
@@ -188,16 +189,13 @@ public class AdminUserController {
                 return "永久会员";
             case CardKey.TYPE_AGENT:
                 return "霓虹代理";
-            case CardKey.TYPE_MONTHLY:
-            case CardKey.TYPE_QUARTERLY:
-                return "旧版会员(已停用)";
             default:
                 return "未知会员";
         }
     }
 
     private String resolveMemberStatus(Users user) {
-        Integer memberType = user.getMemberType();
+        Integer memberType = normalizeMemberType(user.getMemberType());
         if (memberType == null || memberType == 0) {
             return "none";
         }
@@ -211,7 +209,7 @@ public class AdminUserController {
     }
 
     private String resolveMemberExpireText(Users user) {
-        Integer memberType = user.getMemberType();
+        Integer memberType = normalizeMemberType(user.getMemberType());
         if (memberType == null || memberType == 0) {
             return "非会员";
         }
@@ -225,5 +223,14 @@ public class AdminUserController {
             return "暂无到期时间";
         }
         return user.getMemberExpiredAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+    }
+
+    private Integer normalizeMemberType(Integer memberType) {
+        if (memberType == null
+                || memberType == CardKey.TYPE_MONTHLY
+                || memberType == CardKey.TYPE_QUARTERLY) {
+            return 0;
+        }
+        return memberType;
     }
 }

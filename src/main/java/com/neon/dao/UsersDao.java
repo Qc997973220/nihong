@@ -2,6 +2,9 @@ package com.neon.dao;
 
 import com.neon.pojo.Users;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -26,6 +29,10 @@ public interface UsersDao extends JpaRepository<Users, String> {
 
     boolean existsByRegisteredIpAndRegisteredDate(String registeredIp, LocalDateTime registeredDate);
 
-    @org.springframework.data.jpa.repository.Query("SELECT COUNT(u) > 0 FROM Users u WHERE u.registeredIp = :ip AND u.registeredDate >= :start AND u.registeredDate < :end")
-    boolean existsByRegisteredIpToday(@org.springframework.data.repository.query.Param("ip") String ip, @org.springframework.data.repository.query.Param("start") LocalDateTime start, @org.springframework.data.repository.query.Param("end") LocalDateTime end);
+    @Query("SELECT COUNT(u) > 0 FROM Users u WHERE u.registeredIp = :ip AND u.registeredDate >= :start AND u.registeredDate < :end")
+    boolean existsByRegisteredIpToday(@Param("ip") String ip, @Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("UPDATE Users u SET u.memberType = 0, u.memberStatus = 'none', u.memberExpiredAt = null, u.operatingTime = :now WHERE u.memberType IN (1, 2)")
+    int convertLegacyMembersToRegular(@Param("now") LocalDateTime now);
 }

@@ -70,7 +70,7 @@ public class CardKeyController {
     private String getMemberTypeName(int memberType) {
         switch (memberType) {
             case CardKey.TYPE_MONTHLY:
-            case CardKey.TYPE_QUARTERLY: return "旧版会员(已停用)";
+            case CardKey.TYPE_QUARTERLY: return "已停用类型";
             case CardKey.TYPE_YEARLY: return "年费会员(360天)";
             case CardKey.TYPE_PERMANENT: return "永久会员";
             default: return "未知";

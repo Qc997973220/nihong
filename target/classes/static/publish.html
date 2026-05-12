@@ -1611,7 +1611,9 @@
             }
 
             const loggedIn = userInfo && (userInfo.account || userInfo.username || userInfo.userName);
-            const vip = userInfo && (userInfo.memberStatus === 'active' || userInfo.memberStatus === 'permanent');
+            const memberType = Number(userInfo && userInfo.memberType);
+            const vip = userInfo && (memberType === 3 || memberType === 4 || memberType === 5)
+                && (userInfo.memberStatus === 'active' || userInfo.memberStatus === 'permanent');
             if (loggedIn) {
                 toolboxBtn.classList.add('active');
                 toolboxBtn.classList.toggle('locked', !vip);

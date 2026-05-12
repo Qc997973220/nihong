@@ -7,8 +7,8 @@ import java.time.LocalDateTime;
 @Table(name = "card_key")
 public class CardKey {
 
-    public static final int TYPE_MONTHLY = 1;    // 旧版会员（已停用）
-    public static final int TYPE_QUARTERLY = 2;  // 旧版会员（已停用）
+    public static final int TYPE_MONTHLY = 1;    // 已停用类型，启动迁移后按普通用户处理
+    public static final int TYPE_QUARTERLY = 2;  // 已停用类型，启动迁移后按普通用户处理
     public static final int TYPE_YEARLY = 3;     // 年费会员 360天
     public static final int TYPE_PERMANENT = 4;  // 永久会员
     public static final int TYPE_AGENT = 5;      // 霓虹代理（仅管理员授予，不生成卡密）
@@ -112,7 +112,7 @@ public class CardKey {
         if (memberType == null) return "未知";
         switch (memberType) {
             case TYPE_MONTHLY:
-            case TYPE_QUARTERLY: return "旧版会员(已停用)";
+            case TYPE_QUARTERLY: return "已停用类型";
             case TYPE_YEARLY: return "年费会员(360天)";
             case TYPE_PERMANENT: return "永久会员";
             case TYPE_AGENT: return "霓虹代理";

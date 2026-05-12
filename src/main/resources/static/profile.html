@@ -466,12 +466,13 @@
                                 // 显示会员状态（仅限当前用户）
                                 if (currentUser.memberStatus) {
                                     document.getElementById('memberStatusSection').style.display = 'flex';
-                                    const statusText = Number(currentUser.memberType) === 5 ? '霓虹代理' :
-                                                      currentUser.memberStatus === 'permanent' ? '永久会员' :
-                                                      currentUser.memberStatus === 'active' ? (currentUser.memberExpireText || '会员') :
-                                                      currentUser.memberStatus === 'expired' ? '已到期' : '非会员';
+                                    const memberType = Number(currentUser.memberType);
+                                    const statusText = memberType === 5 ? '霓虹代理' :
+                                                      (memberType === 4 && currentUser.memberStatus === 'permanent') ? '永久会员' :
+                                                      (memberType === 3 && currentUser.memberStatus === 'active') ? (currentUser.memberExpireText || '年费会员') :
+                                                      (memberType === 3 && currentUser.memberStatus === 'expired') ? '已到期' : '非会员';
                                     document.getElementById('infoMemberStatus').textContent = statusText;
-                                    document.getElementById('infoMemberStatus').style.color = Number(currentUser.memberType) === 5 ? '#ff5f6d' : '';
+                                    document.getElementById('infoMemberStatus').style.color = memberType === 5 ? '#ff5f6d' : '';
                                 }
                             }
                         } catch (e) {
