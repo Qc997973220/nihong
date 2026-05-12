@@ -650,6 +650,135 @@
             color: white;
             border-color: #999;
         }
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 10px 0;
+            }
+            .navbar .container {
+                justify-content: center;
+                gap: 10px;
+                padding: 0 16px;
+            }
+            .logo {
+                width: 100%;
+                text-align: center;
+                font-size: 1.28rem;
+            }
+            .back-link {
+                font-size: 0.92rem;
+            }
+            .container {
+                padding: 24px 16px;
+            }
+            .profile-card {
+                padding: 24px 18px;
+                margin-top: 20px;
+                border-radius: 18px;
+            }
+            .profile-header {
+                gap: 16px;
+                margin-bottom: 26px;
+            }
+            .user-info h1,
+            #nickname {
+                font-size: 1.55rem !important;
+                word-break: break-word;
+            }
+            .user-info p {
+                font-size: 0.95rem;
+            }
+            .info-section > div:first-child {
+                align-items: flex-start !important;
+                gap: 12px;
+                flex-wrap: wrap;
+            }
+            .info-section h2 {
+                font-size: 1.25rem;
+            }
+            .info-item {
+                align-items: flex-start;
+                flex-direction: column;
+                gap: 5px;
+            }
+            .info-label {
+                width: auto;
+                font-size: 0.9rem;
+            }
+            .info-value {
+                width: 100%;
+                font-size: 1rem;
+                overflow-wrap: anywhere;
+            }
+            .info-hint {
+                margin-left: 0;
+            }
+            .invite-share-card,
+            .wallet-card {
+                padding: 16px;
+                border-radius: 14px;
+            }
+            .invite-share-header,
+            .wallet-header {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+            .invite-code-pill {
+                max-width: 100%;
+                overflow-wrap: anywhere;
+            }
+            .invite-link-row,
+            .withdrawal-form {
+                flex-direction: column;
+            }
+            .invite-actions,
+            .action-buttons {
+                flex-direction: column;
+            }
+            .invite-action-btn,
+            .action-buttons .btn,
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            .wallet-stats {
+                grid-template-columns: 1fr;
+            }
+            .invitee-row,
+            .withdrawal-row {
+                grid-template-columns: 1fr;
+                align-items: flex-start;
+            }
+            .status-badge {
+                justify-self: flex-start;
+            }
+        }
+        @media (max-width: 480px) {
+            .contact-btn {
+                width: 48px;
+                height: 48px;
+            }
+            .contact-btn i {
+                font-size: 1.25rem;
+            }
+            .edit-modal-overlay {
+                padding: 12px;
+            }
+            .edit-modal {
+                max-width: calc(100vw - 24px);
+                max-height: calc(100vh - 24px);
+            }
+            .edit-modal-body {
+                padding: 18px;
+            }
+            .edit-modal-footer {
+                padding: 14px 18px;
+                flex-direction: column;
+            }
+            .edit-modal-footer .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1826,6 +1955,34 @@
     .edit-modal-footer .btn {
         padding: 10px 20px;
         font-size: 0.9rem;
+    }
+    @media (max-width: 480px) {
+        .edit-modal-overlay {
+            padding: 12px;
+        }
+        .edit-modal {
+            max-width: calc(100vw - 24px);
+            max-height: calc(100vh - 24px);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .edit-modal-header {
+            padding: 16px 18px;
+        }
+        .edit-modal-body {
+            padding: 18px;
+            overflow-y: auto;
+        }
+        .edit-modal-footer {
+            padding: 14px 18px;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+        .edit-modal-footer .btn {
+            width: 100%;
+            justify-content: center;
+        }
     }
 </style>
 

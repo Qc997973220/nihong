@@ -577,17 +577,69 @@
             line-height: 1.6;
         }
         @media (max-width: 768px) {
+            .navbar {
+                padding: 10px 0;
+            }
+            .navbar .container {
+                justify-content: center;
+                gap: 10px;
+                padding: 0 16px;
+            }
+            .logo {
+                width: 100%;
+                text-align: center;
+                font-size: 1.28rem;
+            }
+            .back-link {
+                font-size: 0.92rem;
+            }
             .container {
                 padding: 24px 16px;
             }
+            .page-header {
+                margin-bottom: 24px;
+            }
+            .page-header h1 {
+                font-size: 1.75rem;
+            }
+            .page-header p {
+                font-size: 0.92rem;
+            }
             .publish-layout {
                 grid-template-columns: 1fr;
+                gap: 18px;
             }
             .publish-main {
-                padding: 24px;
+                padding: 22px 18px;
+                border-radius: 18px;
+            }
+            .info-card {
+                padding: 18px;
+                border-radius: 16px;
+            }
+            .form-group {
+                margin-bottom: 20px;
+            }
+            .form-input,
+            .form-select {
+                padding: 12px 14px;
             }
             .btn-group {
                 flex-direction: column;
+            }
+            .btn-group .btn,
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            .ql-toolbar.ql-snow {
+                overflow-x: auto;
+                white-space: nowrap;
+                padding: 8px;
+            }
+            .ql-container.ql-snow {
+                min-height: 180px;
+                max-height: 320px;
             }
         }
         .rules-modal-overlay {
@@ -961,6 +1013,43 @@
         .editor-toolbar-wrapper .ql-editor.ql-blank::before {
             color: #6a8ab0;
             font-style: normal;
+        }
+        @media (max-width: 480px) {
+            .float-contact {
+                right: 12px;
+                bottom: 18px;
+            }
+            .contact-btn {
+                width: 48px;
+                height: 48px;
+            }
+            .contact-btn i {
+                font-size: 1.25rem;
+            }
+            .rules-modal-overlay {
+                padding: 12px;
+            }
+            .rules-modal {
+                max-width: calc(100vw - 24px);
+                max-height: calc(100vh - 24px);
+            }
+            .rules-modal-header,
+            .rules-modal-body,
+            .rules-modal-footer {
+                padding: 16px 18px;
+            }
+            .rules-modal-header h2 {
+                font-size: 1.05rem;
+            }
+            .rules-checkbox {
+                align-items: flex-start;
+            }
+            .emoji-list {
+                right: auto;
+                left: 0;
+                grid-template-columns: repeat(6, 1fr);
+                max-width: calc(100vw - 48px);
+            }
         }
     </style>
 </head>

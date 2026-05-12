@@ -825,25 +825,26 @@ public class ResourceController {
             }
             account = user.getAccount();
             
-            LocalDateTime startOfDay = LocalDateTime.now().toLocalDate().atStartOfDay();
-            Long todayDownloads = downloadRecordDao.countTodayDownloads(account, startOfDay);
-            
-            // 根据会员类型设置每日下载限制，年费会员(3)/永久会员(4)/霓虹代理(5): 无限制
-            int dailyLimit = getDailyLimitByMemberType(user.getMemberType());
-            
-            if (dailyLimit == -1) {
-                // 无限制会员
+            if (hasActiveVip(user)) {
+                LocalDateTime startOfDay = LocalDateTime.now().toLocalDate().atStartOfDay();
+                Long todayDownloads = downloadRecordDao.countTodayDownloads(account, startOfDay);
+
                 result.put("success", true);
                 result.put("hasQuota", true);
                 result.put("remaining", -1); // -1表示无限制
                 result.put("todayDownloads", todayDownloads);
+                result.put("dailyLimit", -1);
                 result.put("unlimited", true);
             } else {
-                int remaining = dailyLimit - todayDownloads.intValue();
+                int remaining = getRemainingFreeUnlocks(account);
+                int used = FREE_DAILY_UNLOCK_LIMIT - remaining;
+
                 result.put("success", true);
                 result.put("hasQuota", remaining > 0);
                 result.put("remaining", remaining);
-                result.put("todayDownloads", todayDownloads);
+                result.put("todayDownloads", used);
+                result.put("dailyLimit", FREE_DAILY_UNLOCK_LIMIT);
+                result.put("unlimited", false);
             }
         } catch (Exception e) {
             e.printStackTrace();

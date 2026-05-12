@@ -2314,6 +2314,7 @@
         /* 响应式 */
         @media (max-width: 768px) {
             .container { padding: 0 16px; }
+            .navbar { padding: 10px 0; }
             .neon-title { font-size: 2.5rem; letter-spacing: 4px; }
             .lightning-left, .lightning-right { font-size: 1.1em; margin-right: 6px; margin-left: 6px; }
             .hero { padding: 40px 0 30px; }
@@ -2358,13 +2359,12 @@
             .contact-item i { font-size: 1.2rem; }
             .contact-item span { font-size: 0.95rem; }
             .navbar .container { flex-wrap: wrap; gap: 12px; }
-            .left-area { gap: 10px; }
-            .right-area { gap: 8px; }
+            .left-area, .right-area { width: 100%; justify-content: center; gap: 10px; }
             .visitor-count { padding: 5px 10px; font-size: 0.8rem; }
             .logo { font-size: 1.3rem; }
             .user-info { padding: 5px 12px 5px 8px; gap: 8px; }
             .user-avatar { width: 30px; height: 30px; font-size: 0.85rem; }
-            .user-name { font-size: 0.85rem; }
+            .user-name { font-size: 0.85rem; max-width: 120px; overflow: hidden; text-overflow: ellipsis; }
             .publish-btn, .vip-btn { padding: 6px 12px; font-size: 0.85rem; }
             .music-player { width: 32px; height: 32px; }
             .member-status-bar { padding: 3px 8px; font-size: 0.7rem; }
@@ -2405,6 +2405,14 @@
             }
             .nav-links {
                 width: 100%;
+                justify-content: center;
+            }
+            .right-area {
+                width: 100%;
+                justify-content: center;
+            }
+            .publish-btn, .vip-btn {
+                min-width: 112px;
                 justify-content: center;
             }
             .member-status-bar {
@@ -5016,38 +5024,38 @@
                 <div class="vip-promotion-date" id="vipPromotionDate">2026-05-04 12:00:00</div>
                 <div class="vip-promotion-title">限时特惠 · 年卡7折 永久5折</div>
             </div>
-            <div class="vip-benefit-cards">
-                <div class="vip-benefit-card vip-benefit-card-basic">
-                    <div class="vip-benefit-card-header">
-                        <div class="vip-benefit-name"><i class="fas fa-user"></i> 普通会员</div>
-                    </div>
-                    <ul class="vip-benefit-list">
-                        <li><i class="fas fa-check"></i><span>每日可免费解锁 2 篇资源内容</span></li>
+            <div class="vip-plan-grid">
+                <div class="vip-plan-card vip-plan-card-basic">
+                    <div class="vip-plan-name"><i class="fas fa-user"></i> 普通会员</div>
+                    <div class="vip-plan-price">免费</div>
+                    <div class="vip-plan-meta">每日 2 篇</div>
+                    <ul class="vip-plan-benefits">
+                        <li><i class="fas fa-check"></i><span>每日解锁 2 篇免费资源</span></li>
                     </ul>
                 </div>
-                <div class="vip-benefit-card">
-                    <div class="vip-benefit-card-header">
-                        <div class="vip-benefit-name"><i class="fas fa-crown"></i> 年费会员</div>
-                        <div class="vip-benefit-tag">有效期 360 天</div>
-                    </div>
-                    <ul class="vip-benefit-list">
+                <div class="vip-plan-card">
+                    <div class="vip-plan-name"><i class="fas fa-crown"></i> 年费会员</div>
+                    <div class="vip-plan-price">¥139.9</div>
+                    <div class="vip-plan-meta"><span>7折优惠</span><s>原价¥200</s></div>
+                    <ul class="vip-plan-benefits">
+                        <li><i class="fas fa-check"></i><span>360天有效</span></li>
                         <li><i class="fas fa-check"></i><span>全站资源免费畅享</span></li>
                         <li><i class="fas fa-check"></i><span>VIP 专享工具箱</span></li>
                         <li><i class="fas fa-check"></i><span>专属客服通道</span></li>
                     </ul>
                 </div>
-                <div class="vip-benefit-card vip-benefit-card-permanent">
-                    <div class="vip-benefit-card-header">
-                        <div class="vip-benefit-name"><i class="fas fa-gem"></i> 永久会员</div>
-                        <div class="vip-benefit-tag">永久有效</div>
-                    </div>
-                    <ul class="vip-benefit-list">
+                <div class="vip-plan-card vip-plan-card-hot">
+                    <div class="vip-plan-badge">推荐</div>
+                    <div class="vip-plan-name"><i class="fas fa-gem"></i> 永久会员</div>
+                    <div class="vip-plan-price">¥199.9</div>
+                    <div class="vip-plan-meta"><span>5折优惠</span><s>原价¥400</s></div>
+                    <ul class="vip-plan-benefits">
+                        <li><i class="fas fa-check"></i><span>永久有效</span></li>
                         <li><i class="fas fa-check"></i><span>全站资源无限畅享</span></li>
                         <li><i class="fas fa-check"></i><span>VIP 专享工具箱</span></li>
-                        <li><i class="fas fa-check"></i><span>永久会员专享活动</span></li>
-                        <li><i class="fas fa-check"></i><span>专享客服通道</span></li>
-                        <li><i class="fas fa-check"></i><span>快速审核通道</span></li>
-                        <li><i class="fas fa-check"></i><span>专享推广返利权益</span></li>
+                        <li><i class="fas fa-check"></i><span>专属客服通道</span></li>
+                        <li><i class="fas fa-check"></i><span>优先审核</span></li>
+                        <li><i class="fas fa-check"></i><span>推广返利</span></li>
                     </ul>
                 </div>
             </div>
@@ -5093,7 +5101,7 @@
         border: 2px solid rgba(212, 175, 55, 0.5);
         border-radius: 20px;
         width: 100%;
-        max-width: 520px;
+        max-width: 560px;
         max-height: calc(100vh - 40px);
         display: flex;
         flex-direction: column;
@@ -5281,72 +5289,109 @@
     .vip-promotion-title::before {
         content: '🔥';
     }
-    .vip-benefit-cards {
+    .vip-plan-grid {
         display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 10px;
-        margin-bottom: 16px;
+        margin-bottom: 14px;
     }
-    .vip-benefit-card {
+    .vip-plan-card {
+        position: relative;
+        min-width: 0;
         background: rgba(20, 15, 5, 0.62);
         border: 1px solid rgba(212, 175, 55, 0.28);
         border-radius: 12px;
-        padding: 12px 14px;
+        padding: 12px 10px 10px;
+        text-align: center;
     }
-    .vip-benefit-card-basic {
+    .vip-plan-card-basic {
         border-color: rgba(140, 165, 200, 0.28);
         background: rgba(35, 45, 60, 0.35);
     }
-    .vip-benefit-card-permanent {
-        border-color: rgba(255, 215, 0, 0.55);
-        background: rgba(212, 175, 55, 0.1);
+    .vip-plan-card-hot {
+        border-color: rgba(255, 215, 0, 0.6);
+        background: rgba(212, 175, 55, 0.12);
     }
-    .vip-benefit-card-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        margin-bottom: 8px;
+    .vip-plan-badge {
+        position: absolute;
+        top: -9px;
+        right: 10px;
+        background: linear-gradient(135deg, #ff6b6b, #ff8e53);
+        color: #fff;
+        border-radius: 999px;
+        padding: 2px 8px;
+        font-size: 0.64rem;
+        font-weight: 700;
     }
-    .vip-benefit-name {
+    .vip-plan-name {
+        min-height: 22px;
         color: #FFD700;
-        font-size: 0.98rem;
+        font-size: 0.86rem;
         font-weight: 700;
         display: flex;
         align-items: center;
-        gap: 8px;
-    }
-    .vip-benefit-card-basic .vip-benefit-name {
-        color: #d6e3f5;
-    }
-    .vip-benefit-tag {
-        flex-shrink: 0;
-        color: #70ffb0;
-        background: rgba(112, 255, 176, 0.1);
-        border: 1px solid rgba(112, 255, 176, 0.25);
-        border-radius: 999px;
-        padding: 3px 9px;
-        font-size: 0.74rem;
+        justify-content: center;
+        gap: 6px;
         white-space: nowrap;
     }
-    .vip-benefit-list {
+    .vip-plan-card-basic .vip-plan-name {
+        color: #d6e3f5;
+    }
+    .vip-plan-price {
+        margin-top: 7px;
+        color: #70ffb0;
+        font-size: 1.22rem;
+        line-height: 1.1;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+    .vip-plan-card-hot .vip-plan-price {
+        color: #FFD700;
+    }
+    .vip-plan-meta {
+        min-height: 22px;
+        margin-top: 6px;
+        color: #aebdd0;
+        font-size: 0.72rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+    .vip-plan-meta span {
+        color: #ffbc78;
+    }
+    .vip-plan-meta s {
+        color: #7f8792;
+    }
+    .vip-plan-benefits {
         list-style: none;
-        margin: 0;
+        margin: 9px 0 0;
         padding: 0;
         display: grid;
-        gap: 6px;
+        gap: 5px;
+        justify-items: center;
+        text-align: center;
     }
-    .vip-benefit-list li {
-        display: flex;
-        align-items: flex-start;
-        gap: 8px;
+    .vip-plan-benefits li {
+        width: min(100%, 136px);
+        min-height: 21px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        padding: 3px 7px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(212, 175, 55, 0.14);
+        border-radius: 999px;
         color: #d8cdb5;
-        font-size: 0.84rem;
-        line-height: 1.45;
+        font-size: 0.7rem;
+        line-height: 1.2;
     }
-    .vip-benefit-list li i {
+    .vip-plan-benefits li i {
         color: #70ffb0;
-        font-size: 0.72rem;
-        margin-top: 4px;
+        font-size: 0.58rem;
         flex-shrink: 0;
     }
     .vip-info-compact {
@@ -5464,18 +5509,104 @@
             max-width: calc(100vw - 24px);
             max-height: calc(100vh - 24px);
         }
+        .vip-modal-header {
+            padding: 16px 18px;
+        }
+        .vip-modal-body {
+            padding: 16px;
+        }
         .vip-promotion-bar {
             flex-direction: column;
             align-items: flex-start;
             gap: 6px;
+            padding: 9px 11px;
         }
-        .vip-benefit-card-header {
-            align-items: flex-start;
-            flex-direction: column;
+        .vip-plan-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 6px;
+            overflow: visible;
+            scroll-snap-type: none;
+            padding-top: 2px;
+            padding-bottom: 0;
         }
-        .vip-benefit-tag {
+        .vip-plan-card {
+            scroll-snap-align: none;
+            padding: 10px 5px 8px;
+            border-radius: 10px;
+        }
+        .vip-plan-badge {
+            top: -7px;
+            right: 4px;
+            padding: 1px 5px;
+            font-size: 0.56rem;
+        }
+        .vip-plan-name {
+            min-height: 30px;
+            font-size: 0.72rem;
+            line-height: 1.2;
+            gap: 3px;
             white-space: normal;
+        }
+        .vip-plan-price {
+            margin-top: 4px;
+            font-size: 1rem;
+        }
+        .vip-plan-meta {
+            min-height: 28px;
+            margin-top: 4px;
+            font-size: 0.6rem;
+            line-height: 1.2;
+            gap: 3px;
+        }
+        .vip-plan-benefits {
+            margin-top: 7px;
+            gap: 4px;
+        }
+        .vip-plan-benefits li {
+            width: 100%;
+            min-height: 0;
+            border-radius: 8px;
+            font-size: 0.58rem;
+            line-height: 1.25;
+            gap: 3px;
+            padding: 3px;
+        }
+        .vip-plan-benefits li span {
+            min-width: 0;
+            overflow-wrap: anywhere;
+        }
+        .vip-modal-footer {
+            padding: 14px 16px;
+        }
+        .vip-modal-footer .btn {
+            flex: 1;
+            justify-content: center;
+        }
+    }
+    @media (max-width: 360px) {
+        .vip-modal-body {
+            padding: 12px;
+        }
+        .vip-plan-grid {
+            gap: 4px;
+        }
+        .vip-plan-card {
+            padding: 9px 4px 7px;
+        }
+        .vip-plan-name {
+            font-size: 0.66rem;
+        }
+        .vip-plan-price {
+            font-size: 0.92rem;
+        }
+        .vip-plan-meta {
+            font-size: 0.56rem;
+        }
+        .vip-plan-benefits li {
+            font-size: 0.54rem;
+        }
+        .vip-plan-benefits li i {
+            display: none;
         }
     }
 </style>
