@@ -2137,6 +2137,64 @@
         window.open(downloadLink, '_blank');
     }
 
+    async function unlockFreeResourceDownload(resourceId) {
+        const userInfo = localStorage.getItem('userInfo');
+        if (!userInfo) {
+            showLogin();
+            return;
+        }
+
+        const authToken = localStorage.getItem('authToken');
+        const button = document.getElementById('downloadActionBtn');
+        if (button) {
+            button.classList.add('disabled');
+            button.style.pointerEvents = 'none';
+        }
+
+        try {
+            const response = await fetch('/api/resources/verify-download', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': authToken ? `Bearer ${authToken}` : ''
+                },
+                body: JSON.stringify({ resourceId })
+            });
+            const result = await response.json();
+
+            if (!result.success) {
+                if (result.freeQuotaExceeded) {
+                    updateQuotaDisplay({ remaining: 0 });
+                    showNoticeModal('免费额度已用完', result.message || '您今日免费额度已用完,请明天再来吧!', 'fa-clock');
+                } else {
+                    showNoticeModal('获取失败', result.message || '获取下载链接失败，请稍后再试', 'fa-exclamation-circle');
+                }
+                return;
+            }
+
+            updateQuotaDisplay(result);
+            if (result.downloadPassword) {
+                const passwordDisplay = document.getElementById('downloadPasswordDisplay');
+                if (passwordDisplay) {
+                    passwordDisplay.textContent = result.downloadPassword;
+                }
+            }
+            if (result.downloadLink) {
+                window.open(result.downloadLink, '_blank');
+            } else {
+                showNoticeModal('获取失败', '资源下载链接为空，请联系管理员', 'fa-exclamation-circle');
+            }
+        } catch (error) {
+            console.error('免费资源解锁失败:', error);
+            showNoticeModal('获取失败', '获取下载链接失败，请稍后再试', 'fa-exclamation-circle');
+        } finally {
+            if (button) {
+                button.classList.remove('disabled');
+                button.style.pointerEvents = '';
+            }
+        }
+    }
+
     async function updateQuotaDisplay(result) {
         const quotaRemaining = document.getElementById('quotaRemaining');
         if (!quotaRemaining || !result) return;
@@ -2537,6 +2595,8 @@
         const downloadPassword = resource.downloadPassword || '';
         const commentEnabled = resource.commentEnabled;
         const viewCount = resource.viewCount;
+        const resourceId = resource.id || id;
+        const hasDownloadPassword = data.hasDownloadPassword === true || !!downloadPassword;
 
         // 安全格式化日期
         let createdDate = '未知';
@@ -2562,7 +2622,7 @@
             const isFreeResource = data.freeResource === true || category === '免费';
             const loginRequired = data.loginRequired === true;
             const memberStatusText = getMemberStatusText();
-            const ordinaryUser = !!localStorage.getItem('userInfo') && !isVipLoggedIn();
+            const ordinaryUser = !!localStorage.getItem('userInfo') && !isVIP();
             const hasFreeRemaining = typeof data.freeRemaining === 'number' && data.freeRemaining >= 0;
             const freeQuotaInfoHtml = ordinaryUser && isFreeResource && hasFreeRemaining
                 ? `
@@ -2587,7 +2647,7 @@
                                 <i class="fas fa-download"></i>
                                 <span>${isFreeResource ? '免费资源' : '解锁资源'}</span>
                             </div>
-                            ${downloadPassword ? `
+                            ${hasDownloadPassword ? `
                             <div class="download-password-item">
                                 <i class="fas fa-key"></i>
                                 <span>获取密码：</span>
@@ -2638,6 +2698,33 @@
                         <a href="javascript:void(0)" onclick="showNoticeModal('免费额度已用完', '${freeQuotaMessage}', 'fa-clock')" class="download-btn" style="background: rgba(128, 128, 128, 0.3); border: 1px solid rgba(128, 128, 128, 0.5);">
                             <i class="fas fa-hourglass-half"></i>
                             <span>免费额度已用完</span>
+                        </a>
+                    </div>
+                `;
+            } else if (isFreeResource && ordinaryUser && hasFreeRemaining) {
+                downloadSectionHtml = `
+                    <div class="download-section">
+                        <div class="download-info">
+                            <div class="download-label">
+                                <i class="fas fa-lock-open"></i>
+                                <span>免费资源</span>
+                            </div>
+                            <div class="download-password-item">
+                                <i class="fas fa-info-circle"></i>
+                                <span>点击后解锁下载链接并扣除 1 次免费额度</span>
+                            </div>
+                            ${hasDownloadPassword ? `
+                            <div class="download-password-item">
+                                <i class="fas fa-key"></i>
+                                <span>获取密码：</span>
+                                <span class="download-password" id="downloadPasswordDisplay">******</span>
+                            </div>
+                            ` : ''}
+                            ${freeQuotaInfoHtml}
+                        </div>
+                        <a href="javascript:void(0)" onclick="unlockFreeResourceDownload(${Number(resourceId) || 0})" class="download-btn" id="downloadActionBtn">
+                            <i class="fas fa-unlock"></i>
+                            <span>解锁免费资源</span>
                         </a>
                     </div>
                 `;

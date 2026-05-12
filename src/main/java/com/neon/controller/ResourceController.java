@@ -264,25 +264,31 @@ public class ResourceController {
             // 如果用户没有下载权限，隐藏下载链接和密码
             boolean quotaExceeded = false;
             boolean freeQuotaExceeded = false;
+            boolean freeAlreadyUnlocked = false;
             int freeRemaining = -1;
-            if (freeResource && user != null && resourceHasDownload) {
-                Map<String, Object> freeUnlockResult = unlockFreeResourceIfAllowed(user, resource);
-                if (!Boolean.TRUE.equals(freeUnlockResult.get("allowed"))) {
-                    user = null;
-                    freeQuotaExceeded = true;
+
+            if (freeResource) {
+                if (user == null) {
+                    responseResource.setDownloadLink(null);
+                    responseResource.setDownloadPassword(null);
+                    loginRequired = resourceHasDownload;
+                } else if (resourceHasDownload && hasActiveVip(user)) {
+                    freeRemaining = -1;
+                } else if (resourceHasDownload) {
+                    freeAlreadyUnlocked = downloadRecordDao.existsByAccountAndResourceId(user.getAccount(), resource.getId());
+                    freeRemaining = getRemainingFreeUnlocks(user.getAccount());
+
+                    if (!freeAlreadyUnlocked) {
+                        responseResource.setDownloadLink(null);
+                        responseResource.setDownloadPassword(null);
+                        freeQuotaExceeded = freeRemaining <= 0;
+                    }
                 }
-                Object remainingValue = freeUnlockResult.get("remaining");
-                if (remainingValue instanceof Number) {
-                    freeRemaining = ((Number) remainingValue).intValue();
-                }
-            }
-            if (user == null) {
+            } else if (user == null) {
                 responseResource.setDownloadLink(null);
                 responseResource.setDownloadPassword(null);
 
-                if (freeResource) {
-                    loginRequired = resourceHasDownload && !freeQuotaExceeded;
-                } else if (isDownloadQuotaExceeded(tokenUser)) {
+                if (isDownloadQuotaExceeded(tokenUser)) {
                     quotaExceeded = true; // 只是下载额度用完
                 }
             }
@@ -290,6 +296,7 @@ public class ResourceController {
             // 添加 hasAccess 字段，表示资源是否有下载链接（不管用户是否能访问）
             // 用于前端判断是否渲染下载区域
             result.put("hasAccess", resourceHasDownload);
+            result.put("hasDownloadPassword", resource.getDownloadPassword() != null && !resource.getDownloadPassword().trim().isEmpty());
             result.put("freeResource", freeResource);
             result.put("loginRequired", loginRequired);
             // 添加 quotaExceeded 字段，表示用户是否只是下载额度用完（但会员未到期）
@@ -297,6 +304,7 @@ public class ResourceController {
             result.put("freeQuotaExceeded", freeQuotaExceeded);
             result.put("freeQuotaMessage", FREE_QUOTA_EXCEEDED_MESSAGE);
             result.put("freeRemaining", freeRemaining);
+            result.put("freeAlreadyUnlocked", freeAlreadyUnlocked);
             
             Map<String, Object> commentResult = resourceService.getCommentsByResourceId(id, commentPage, commentSize, userIdentifier);
         
@@ -874,7 +882,6 @@ public class ResourceController {
             
             Users user = (Users) tokenResult.get("user");
             Long resourceId = Long.valueOf(request.get("resourceId").toString());
-            String resourceTitle = (String) request.get("resourceTitle");
 
             Resource resource = resourceService.getResourceById(resourceId);
             if (resource == null) {
@@ -882,6 +889,9 @@ public class ResourceController {
                 result.put("message", "资源不存在");
                 return result;
             }
+            String resourceTitle = request.get("resourceTitle") != null
+                    ? request.get("resourceTitle").toString()
+                    : resource.getTitle();
 
             if (isFreeResource(resource)) {
                 Map<String, Object> freeUnlockResult = unlockFreeResourceIfAllowed(user, resource);
@@ -898,6 +908,8 @@ public class ResourceController {
                 result.put("freeResource", true);
                 result.put("remaining", freeUnlockResult.get("remaining"));
                 result.put("unlimited", freeUnlockResult.get("unlimited"));
+                result.put("downloadLink", resource.getDownloadLink());
+                result.put("downloadPassword", resource.getDownloadPassword());
                 result.put("message", "免费资源获取成功");
                 return result;
             }
