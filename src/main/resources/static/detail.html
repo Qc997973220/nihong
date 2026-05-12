@@ -1037,7 +1037,11 @@
             border: 2px solid rgba(212, 175, 55, 0.5);
             border-radius: 20px;
             width: 100%;
-            max-width: 420px;
+            max-width: 520px;
+            max-height: calc(100vh - 40px);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
             box-shadow: 0 0 60px rgba(212, 175, 55, 0.3), 0 20px 60px rgba(0, 0, 0, 0.6);
         }
         .vip-modal-header {
@@ -1074,6 +1078,7 @@
         }
         .vip-modal-body {
             padding: 24px;
+            overflow-y: auto;
         }
         .vip-promotion-bar {
             display: flex;
@@ -1184,6 +1189,74 @@
             font-size: 0.75rem;
             color: #808080;
         }
+        .vip-benefit-cards {
+            display: grid;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        .vip-benefit-card {
+            background: rgba(20, 15, 5, 0.62);
+            border: 1px solid rgba(212, 175, 55, 0.28);
+            border-radius: 12px;
+            padding: 12px 14px;
+        }
+        .vip-benefit-card-basic {
+            border-color: rgba(140, 165, 200, 0.28);
+            background: rgba(35, 45, 60, 0.35);
+        }
+        .vip-benefit-card-permanent {
+            border-color: rgba(255, 215, 0, 0.55);
+            background: rgba(212, 175, 55, 0.1);
+        }
+        .vip-benefit-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+        .vip-benefit-name {
+            color: #FFD700;
+            font-size: 0.98rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .vip-benefit-card-basic .vip-benefit-name {
+            color: #d6e3f5;
+        }
+        .vip-benefit-tag {
+            flex-shrink: 0;
+            color: #70ffb0;
+            background: rgba(112, 255, 176, 0.1);
+            border: 1px solid rgba(112, 255, 176, 0.25);
+            border-radius: 999px;
+            padding: 3px 9px;
+            font-size: 0.74rem;
+            white-space: nowrap;
+        }
+        .vip-benefit-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: grid;
+            gap: 6px;
+        }
+        .vip-benefit-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            color: #d8cdb5;
+            font-size: 0.84rem;
+            line-height: 1.45;
+        }
+        .vip-benefit-list li i {
+            color: #70ffb0;
+            font-size: 0.72rem;
+            margin-top: 4px;
+            flex-shrink: 0;
+        }
         .vip-get-code {
             background: rgba(90, 160, 255, 0.1);
             border: 1px solid rgba(90, 160, 255, 0.3);
@@ -1278,6 +1351,7 @@
             display: flex;
             gap: 12px;
             justify-content: flex-end;
+            flex-shrink: 0;
         }
         .btn-vip {
             background: linear-gradient(105deg, #8B6914, #D4AF37);
@@ -1304,6 +1378,28 @@
         .btn-secondary:hover {
             background: rgba(120, 120, 120, 0.4);
             color: #e0e0e0;
+        }
+        @media (max-width: 480px) {
+            .vip-modal-overlay {
+                padding: 12px;
+            }
+            .vip-modal {
+                max-width: calc(100vw - 24px);
+                max-height: calc(100vh - 24px);
+            }
+            .vip-promotion-bar {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 6px;
+            }
+            .vip-benefit-card-header {
+                align-items: flex-start;
+                flex-direction: column;
+                gap: 6px;
+            }
+            .vip-benefit-tag {
+                white-space: normal;
+            }
         }
     </style>
 </head>
@@ -1405,23 +1501,39 @@
                 <div class="vip-promotion-date" id="vipPromotionDate">2026-05-04 12:00:00</div>
                 <div class="vip-promotion-title">限时特惠 · 年卡7折 永久5折</div>
             </div>
-            <div class="vip-price-cards">
-                <div class="vip-price-card">
-                    <div class="vip-card-name">年卡</div>
-                    <div class="vip-card-price">¥139.9 <s>¥199.9</s></div>
-                    <div class="vip-card-discount">7折</div>
-                    <div class="vip-card-rights">无限制</div>
-                    <div class="vip-card-toolbox">享VIP专属网创工具箱</div>
-                    <div class="vip-card-cycle">360天</div>
+            <div class="vip-benefit-cards">
+                <div class="vip-benefit-card vip-benefit-card-basic">
+                    <div class="vip-benefit-card-header">
+                        <div class="vip-benefit-name"><i class="fas fa-user"></i> 普通会员</div>
+                    </div>
+                    <ul class="vip-benefit-list">
+                        <li><i class="fas fa-check"></i><span>每日可免费解锁 2 篇资源内容</span></li>
+                    </ul>
                 </div>
-                <div class="vip-price-card vip-price-card-hot">
-                    <div class="vip-card-hot-tag">推荐</div>
-                    <div class="vip-card-name">永久</div>
-                    <div class="vip-card-price">¥199.9 <s>¥399.9</s></div>
-                    <div class="vip-card-discount">5折</div>
-                    <div class="vip-card-rights">无限制</div>
-                    <div class="vip-card-toolbox">享VIP专属网创工具箱</div>
-                    <div class="vip-card-cycle">永久有效</div>
+                <div class="vip-benefit-card">
+                    <div class="vip-benefit-card-header">
+                        <div class="vip-benefit-name"><i class="fas fa-crown"></i> 年费会员</div>
+                        <div class="vip-benefit-tag">有效期 360 天</div>
+                    </div>
+                    <ul class="vip-benefit-list">
+                        <li><i class="fas fa-check"></i><span>全站资源免费畅享</span></li>
+                        <li><i class="fas fa-check"></i><span>VIP 专享工具箱</span></li>
+                        <li><i class="fas fa-check"></i><span>专属客服通道</span></li>
+                    </ul>
+                </div>
+                <div class="vip-benefit-card vip-benefit-card-permanent">
+                    <div class="vip-benefit-card-header">
+                        <div class="vip-benefit-name"><i class="fas fa-gem"></i> 永久会员</div>
+                        <div class="vip-benefit-tag">永久有效</div>
+                    </div>
+                    <ul class="vip-benefit-list">
+                        <li><i class="fas fa-check"></i><span>全站资源无限畅享</span></li>
+                        <li><i class="fas fa-check"></i><span>VIP 专享工具箱</span></li>
+                        <li><i class="fas fa-check"></i><span>永久会员专享活动</span></li>
+                        <li><i class="fas fa-check"></i><span>专享客服通道</span></li>
+                        <li><i class="fas fa-check"></i><span>快速审核通道</span></li>
+                        <li><i class="fas fa-check"></i><span>专享推广返利权益</span></li>
+                    </ul>
                 </div>
             </div>
             <div class="vip-get-code">
@@ -1436,16 +1548,6 @@
                 <input type="text" id="vipActivationCode" placeholder="请输入VIP激活码">
             </div>
             <div class="vip-message" id="vipMessage"></div>
-            <div class="vip-info-compact">
-                <div class="vip-info-row">
-                    <span><i class="fas fa-gem"></i> 解锁付费资源</span>
-                    <span><i class="fas fa-clock"></i> 专属会员时长</span>
-                </div>
-                <div class="vip-info-row">
-                    <span><i class="fas fa-star"></i> 优先客服支持</span>
-                    <span><i class="fas fa-bolt"></i> 优先审核通道</span>
-                </div>
-            </div>
         </div>
         <div class="vip-modal-footer">
             <button class="btn btn-secondary" id="cancelVipBtn">取消</button>
@@ -2304,6 +2406,8 @@
             const canDownload = downloadLink && downloadLink.trim();
             // quotaExceeded=true 表示用户只是今日下载额度用完（但会员未到期）
             const quotaExceeded = data.quotaExceeded === true;
+            const freeQuotaExceeded = data.freeQuotaExceeded === true;
+            const freeQuotaMessage = data.freeQuotaMessage || '您今日免费额度已用完,请明天再来吧!';
 
             if (canDownload) {
                 const isLimitedMember = memberType === 1 || memberType === 2;
@@ -2351,6 +2455,25 @@
                         <a href="javascript:void(0)" onclick="showLogin()" class="download-btn">
                             <i class="fas fa-sign-in-alt"></i>
                             <span>登录获取</span>
+                        </a>
+                    </div>
+                `;
+            } else if (freeQuotaExceeded) {
+                downloadSectionHtml = `
+                    <div class="download-section">
+                        <div class="download-info">
+                            <div class="download-label">
+                                <i class="fas fa-clock"></i>
+                                <span>免费资源</span>
+                            </div>
+                            <div class="download-password-item">
+                                <i class="fas fa-info-circle"></i>
+                                <span>${freeQuotaMessage}</span>
+                            </div>
+                        </div>
+                        <a href="javascript:void(0)" onclick="showNoticeModal('免费额度已用完', '${freeQuotaMessage}', 'fa-clock')" class="download-btn" style="background: rgba(128, 128, 128, 0.3); border: 1px solid rgba(128, 128, 128, 0.5);">
+                            <i class="fas fa-hourglass-half"></i>
+                            <span>免费额度已用完</span>
                         </a>
                     </div>
                 `;

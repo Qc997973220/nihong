@@ -46,6 +46,8 @@ public class ResourceController {
     private static final long MAX_UPLOAD_IMAGE_SIZE = 3L * 1024 * 1024;
     private static final int MAX_IMAGE_DIMENSION = 1600;
     private static final float JPEG_QUALITY = 0.82f;
+    private static final int FREE_DAILY_UNLOCK_LIMIT = 2;
+    private static final String FREE_QUOTA_EXCEEDED_MESSAGE = "您今日免费额度已用完,请明天再来吧!";
 
     @Autowired
     private ResourceService resourceService;
@@ -261,12 +263,25 @@ public class ResourceController {
 
             // 如果用户没有下载权限，隐藏下载链接和密码
             boolean quotaExceeded = false;
+            boolean freeQuotaExceeded = false;
+            int freeRemaining = -1;
+            if (freeResource && user != null && resourceHasDownload) {
+                Map<String, Object> freeUnlockResult = unlockFreeResourceIfAllowed(user, resource);
+                if (!Boolean.TRUE.equals(freeUnlockResult.get("allowed"))) {
+                    user = null;
+                    freeQuotaExceeded = true;
+                }
+                Object remainingValue = freeUnlockResult.get("remaining");
+                if (remainingValue instanceof Number) {
+                    freeRemaining = ((Number) remainingValue).intValue();
+                }
+            }
             if (user == null) {
                 responseResource.setDownloadLink(null);
                 responseResource.setDownloadPassword(null);
 
                 if (freeResource) {
-                    loginRequired = resourceHasDownload;
+                    loginRequired = resourceHasDownload && !freeQuotaExceeded;
                 } else if (isDownloadQuotaExceeded(tokenUser)) {
                     quotaExceeded = true; // 只是下载额度用完
                 }
@@ -279,6 +294,9 @@ public class ResourceController {
             result.put("loginRequired", loginRequired);
             // 添加 quotaExceeded 字段，表示用户是否只是下载额度用完（但会员未到期）
             result.put("quotaExceeded", quotaExceeded);
+            result.put("freeQuotaExceeded", freeQuotaExceeded);
+            result.put("freeQuotaMessage", FREE_QUOTA_EXCEEDED_MESSAGE);
+            result.put("freeRemaining", freeRemaining);
             
             Map<String, Object> commentResult = resourceService.getCommentsByResourceId(id, commentPage, commentSize, userIdentifier);
         
@@ -387,6 +405,56 @@ public class ResourceController {
         LocalDateTime startOfDay = LocalDateTime.now().toLocalDate().atStartOfDay();
         Long todayDownloads = downloadRecordDao.countTodayDownloads(user.getAccount(), startOfDay);
         return todayDownloads >= dailyLimit;
+    }
+
+    private Map<String, Object> unlockFreeResourceIfAllowed(Users user, Resource resource) {
+        Map<String, Object> result = new HashMap<>();
+        result.put("allowed", false);
+        result.put("remaining", 0);
+        result.put("unlimited", false);
+        result.put("alreadyUnlocked", false);
+
+        if (user == null || user.getAccount() == null || resource == null || resource.getId() == null) {
+            result.put("message", "请先登录");
+            return result;
+        }
+
+        if (hasActiveVip(user)) {
+            result.put("allowed", true);
+            result.put("remaining", -1);
+            result.put("unlimited", true);
+            return result;
+        }
+
+        if (downloadRecordDao.existsByAccountAndResourceId(user.getAccount(), resource.getId())) {
+            result.put("allowed", true);
+            result.put("alreadyUnlocked", true);
+            result.put("remaining", getRemainingFreeUnlocks(user.getAccount()));
+            return result;
+        }
+
+        LocalDateTime startOfDay = LocalDateTime.now().toLocalDate().atStartOfDay();
+        long todayUnlocks = downloadRecordDao.countTodayFreeUnlocks(user.getAccount(), startOfDay, "免费");
+        if (todayUnlocks >= FREE_DAILY_UNLOCK_LIMIT) {
+            result.put("message", FREE_QUOTA_EXCEEDED_MESSAGE);
+            return result;
+        }
+
+        DownloadRecord record = new DownloadRecord();
+        record.setAccount(user.getAccount());
+        record.setResourceId(resource.getId());
+        record.setResourceTitle(resource.getTitle());
+        downloadRecordDao.save(record);
+
+        result.put("allowed", true);
+        result.put("remaining", Math.max(0, FREE_DAILY_UNLOCK_LIMIT - (int) todayUnlocks - 1));
+        return result;
+    }
+
+    private int getRemainingFreeUnlocks(String account) {
+        LocalDateTime startOfDay = LocalDateTime.now().toLocalDate().atStartOfDay();
+        long todayUnlocks = downloadRecordDao.countTodayFreeUnlocks(account, startOfDay, "免费");
+        return Math.max(0, FREE_DAILY_UNLOCK_LIMIT - (int) todayUnlocks);
     }
 
     private boolean isFreeResource(Resource resource) {
@@ -813,11 +881,20 @@ public class ResourceController {
             }
 
             if (isFreeResource(resource)) {
+                Map<String, Object> freeUnlockResult = unlockFreeResourceIfAllowed(user, resource);
+                if (!Boolean.TRUE.equals(freeUnlockResult.get("allowed"))) {
+                    result.put("success", false);
+                    result.put("freeQuotaExceeded", true);
+                    result.put("quotaExceeded", true);
+                    result.put("message", FREE_QUOTA_EXCEEDED_MESSAGE);
+                    return result;
+                }
+
                 result.put("success", true);
-                result.put("alreadyDownloaded", false);
+                result.put("alreadyDownloaded", Boolean.TRUE.equals(freeUnlockResult.get("alreadyUnlocked")));
                 result.put("freeResource", true);
-                result.put("remaining", -1);
-                result.put("unlimited", true);
+                result.put("remaining", freeUnlockResult.get("remaining"));
+                result.put("unlimited", freeUnlockResult.get("unlimited"));
                 result.put("message", "免费资源获取成功");
                 return result;
             }
