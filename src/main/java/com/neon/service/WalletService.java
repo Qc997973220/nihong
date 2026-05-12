@@ -3,6 +3,7 @@ package com.neon.service;
 import com.neon.dao.InviteRewardRecordDao;
 import com.neon.dao.UsersDao;
 import com.neon.dao.WithdrawalRequestDao;
+import com.neon.pojo.CardKey;
 import com.neon.pojo.InviteRewardRecord;
 import com.neon.pojo.Users;
 import com.neon.pojo.WithdrawalRequest;
@@ -72,6 +73,9 @@ public class WalletService {
         result.put("cashEquivalent", toCashAmount(available).toPlainString());
         result.put("inviteCount", inviteCount);
         result.put("inviteRewardTotal", inviteRewardTotal);
+        result.put("promotionPermission", hasPromotionPermission(user));
+        result.put("isAgent", isAgent(user));
+        result.put("inviteRewardRates", buildRewardPolicy(user));
         result.put("pendingWithdrawalCount", pendingWithdrawals);
         return result;
     }
@@ -82,6 +86,9 @@ public class WalletService {
             result.put("invitees", new ArrayList<>());
             result.put("inviteCount", 0);
             result.put("inviteRewardTotal", 0);
+            result.put("promotionPermission", false);
+            result.put("isAgent", false);
+            result.put("inviteRewardRates", new HashMap<>());
             return result;
         }
 
@@ -99,6 +106,9 @@ public class WalletService {
         result.put("invitees", inviteeList);
         result.put("inviteCount", inviteeList.size());
         result.put("inviteRewardTotal", rewardTotal);
+        result.put("promotionPermission", hasPromotionPermission(inviter));
+        result.put("isAgent", isAgent(inviter));
+        result.put("inviteRewardRates", buildRewardPolicy(inviter));
         return result;
     }
 
@@ -284,13 +294,20 @@ public class WalletService {
 
         String inviterAccount = invitee.getInvitedBy();
         Integer memberType = invitee.getMemberType();
-        Integer rewardAmount = getRewardAmount(memberType);
-        if (inviterAccount == null || inviterAccount.trim().isEmpty() || rewardAmount == null || rewardAmount <= 0) {
+        if (inviterAccount == null || inviterAccount.trim().isEmpty()) {
             return false;
         }
 
         Users inviter = usersDao.findByAccount(inviterAccount.trim());
         if (inviter == null || inviter.getAccount() == null || inviter.getAccount().equals(invitee.getAccount())) {
+            return false;
+        }
+        if (!hasPromotionPermission(inviter)) {
+            return false;
+        }
+
+        Integer rewardAmount = getRewardAmount(inviter, memberType);
+        if (rewardAmount == null || rewardAmount <= 0) {
             return false;
         }
 
@@ -412,19 +429,39 @@ public class WalletService {
         return request;
     }
 
-    private Integer getRewardAmount(Integer memberType) {
+    public boolean hasPromotionPermission(Users user) {
+        if (user == null || user.getMemberType() == null) {
+            return false;
+        }
+        return user.getMemberType() == CardKey.TYPE_PERMANENT || user.getMemberType() == CardKey.TYPE_AGENT;
+    }
+
+    public boolean isAgent(Users user) {
+        return user != null && user.getMemberType() != null && user.getMemberType() == CardKey.TYPE_AGENT;
+    }
+
+    public Map<String, Integer> buildRewardPolicy(Users inviter) {
+        Map<String, Integer> rates = new LinkedHashMap<>();
+        if (isAgent(inviter)) {
+            rates.put("yearly", 69);
+            rates.put("permanent", 99);
+        } else if (hasPromotionPermission(inviter)) {
+            rates.put("yearly", 25);
+            rates.put("permanent", 40);
+        }
+        return rates;
+    }
+
+    private Integer getRewardAmount(Users inviter, Integer memberType) {
         if (memberType == null) {
             return null;
         }
+        Map<String, Integer> rates = buildRewardPolicy(inviter);
         switch (memberType) {
-            case 1:
-                return 24;
-            case 2:
-                return 34;
-            case 3:
-                return 69;
-            case 4:
-                return 100;
+            case CardKey.TYPE_YEARLY:
+                return rates.get("yearly");
+            case CardKey.TYPE_PERMANENT:
+                return rates.get("permanent");
             default:
                 return null;
         }
@@ -436,13 +473,14 @@ public class WalletService {
         }
         switch (type) {
             case 1:
-                return "月度VIP";
             case 2:
-                return "季度VIP";
+                return "旧版VIP";
             case 3:
-                return "年度VIP";
+                return "年费VIP";
             case 4:
                 return "永久VIP";
+            case 5:
+                return "霓虹代理";
             default:
                 return "未知会员";
         }
@@ -452,7 +490,7 @@ public class WalletService {
         if (user == null) {
             return "none";
         }
-        if (user.getMemberType() != null && user.getMemberType() == 4) {
+        if (user.getMemberType() != null && (user.getMemberType() == CardKey.TYPE_PERMANENT || user.getMemberType() == CardKey.TYPE_AGENT)) {
             return "permanent";
         }
         if (user.getMemberType() == null || user.getMemberType() == 0) {
@@ -468,7 +506,10 @@ public class WalletService {
         if (user == null) {
             return "暂无";
         }
-        if (user.getMemberType() != null && user.getMemberType() == 4) {
+        if (user.getMemberType() != null && user.getMemberType() == CardKey.TYPE_AGENT) {
+            return "霓虹代理 · 永久有效";
+        }
+        if (user.getMemberType() != null && user.getMemberType() == CardKey.TYPE_PERMANENT) {
             return "永久有效";
         }
         if (user.getMemberType() == null || user.getMemberType() == 0) {

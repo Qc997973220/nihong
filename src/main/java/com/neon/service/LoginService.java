@@ -1,6 +1,7 @@
 package com.neon.service;
 
 import com.neon.dao.UsersDao;
+import com.neon.pojo.CardKey;
 import com.neon.pojo.Users;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -91,7 +92,7 @@ public class LoginService {
             if (inviter == null) {
                 inviter = usersDao.findByInviteCode(inviterKey.toUpperCase());
             }
-            if (inviter != null) {
+            if (walletService.hasPromotionPermission(inviter)) {
                 users.setInvitedBy(inviter.getAccount());
             } else {
                 users.setInvitedBy(null);
@@ -177,6 +178,10 @@ public class LoginService {
 
         Integer memberType = (int) cardResult.get("memberType");
         int expireDays = (int) cardResult.get("expireDays");
+        if (!CardKeyService.isActivationMemberType(memberType) || expireDays == 0) {
+            result.put("message", "该会员类型已停止激活");
+            return result;
+        }
         user.setMemberType(memberType);
         if (expireDays == Integer.MAX_VALUE) {
             user.setMemberExpiredAt(null);
@@ -196,7 +201,7 @@ public class LoginService {
 
         result.put("success", true);
         result.put("memberType", memberType);
-        if (memberType == 4) {
+        if (memberType == CardKey.TYPE_PERMANENT) {
             result.put("memberStatus", "permanent");
             result.put("memberExpireText", "永久有效");
         } else {

@@ -42,7 +42,7 @@ public class Users {
     Integer nCoinBalance = 0;  // N币可用余额
     Integer nCoinFrozen = 0;   // N币冻结中余额
 
-    Integer memberType;       //会员类型: 1月度 2季度 3年度 4永久 0非会员
+    Integer memberType;       //会员类型: 1/2旧版(停用) 3年费 4永久 5霓虹代理 0非会员
     LocalDateTime memberExpiredAt;  //会员到期时间
     String memberStatus;     //会员状态: active, permanent, expired, none
 

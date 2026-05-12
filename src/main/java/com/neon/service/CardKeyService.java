@@ -61,6 +61,10 @@ public class CardKeyService {
             result.put("message", "卡密已被使用");
             return result;
         }
+        if (!isActivationMemberType(ck.getMemberType())) {
+            result.put("message", "该会员类型已停止激活");
+            return result;
+        }
 
         ck.setStatus(1);
         ck.setUsedAt(LocalDateTime.now());
@@ -78,12 +82,15 @@ public class CardKeyService {
     public static int getExpireDays(Integer memberType) {
         if (memberType == null) return 0;
         switch (memberType) {
-            case CardKey.TYPE_MONTHLY: return 30;
-            case CardKey.TYPE_QUARTERLY: return 90;
             case CardKey.TYPE_YEARLY: return 360;
             case CardKey.TYPE_PERMANENT: return Integer.MAX_VALUE;
             default: return 0;
         }
+    }
+
+    public static boolean isActivationMemberType(Integer memberType) {
+        return memberType != null
+                && (memberType == CardKey.TYPE_YEARLY || memberType == CardKey.TYPE_PERMANENT);
     }
 
     public CardKey save(CardKey cardKey) {

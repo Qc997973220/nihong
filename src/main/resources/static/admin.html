@@ -816,6 +816,9 @@
             <button class="tab-btn" id="tabCardKey" onclick="switchTab('cardkey')">
                 <i class="fas fa-key"></i> 卡密管理
             </button>
+            <button class="tab-btn" id="tabMember" onclick="switchTab('member')">
+                <i class="fas fa-user-shield"></i> 权限管理
+            </button>
             <button class="tab-btn" id="tabResource" onclick="switchTab('resource')">
                 <i class="fas fa-edit"></i> 资源管理
             </button>
@@ -851,9 +854,7 @@
                     <div class="cardkey-actions">
                         <select id="memberTypeFilter" style="padding: 8px 12px; border: 1px solid #3d5a80; border-radius: 4px; background: #1a1a2e; color: #e8e8e8; margin-right: 10px;">
                             <option value="0">全部类型</option>
-                            <option value="1">月度会员(30天)</option>
-                            <option value="2">季度会员(90天)</option>
-                            <option value="3">年度会员(360天)</option>
+                            <option value="3">年费会员(360天)</option>
                             <option value="4">永久会员</option>
                         </select>
                         <button class="btn btn-generate" id="generateBtn">
@@ -873,9 +874,7 @@
                     <div class="form-row">
                         <label>会员类型：</label>
                         <select id="memberType" style="padding: 8px 12px; border: 1px solid #3d5a80; border-radius: 4px; background: #1a1a2e; color: #e8e8e8;">
-                            <option value="1">月度会员(30天)</option>
-                            <option value="2">季度会员(90天)</option>
-                            <option value="3">年度会员(360天)</option>
+                            <option value="3">年费会员(360天)</option>
                             <option value="4">永久会员</option>
                         </select>
                         <button class="btn btn-confirm" id="confirmGenerateBtn">
@@ -891,6 +890,59 @@
                     <div class="loading">
                         <i class="fas fa-spinner"></i>
                         <p style="margin-top: 12px; color: #90b0d1;">加载中...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="memberArea" style="display: none;">
+            <div class="cardkey-panel">
+                <div class="cardkey-header">
+                    <div class="cardkey-stats">
+                        <div class="stat-item">
+                            <span class="stat-label">可授予类型</span>
+                            <span class="stat-value">3</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">推广权限</span>
+                            <span class="stat-value" style="font-size: 1rem;">永久/代理</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">隐藏等级</span>
+                            <span class="stat-value" style="font-size: 1rem; color: #ff5f6d;">霓虹代理</span>
+                        </div>
+                    </div>
+                    <div class="cardkey-actions">
+                        <input type="text" id="memberSearchInput" placeholder="输入账号/用户名/手机号/邮箱" style="padding: 8px 12px; border: 1px solid #3d5a80; border-radius: 4px; background: #1a1a2e; color: #e8e8e8; width: 220px; margin-right: 10px;">
+                        <button class="btn btn-refresh" id="memberSearchBtn">
+                            <i class="fas fa-search"></i> 搜索用户
+                        </button>
+                    </div>
+                </div>
+
+                <div class="generate-form" style="display: flex; margin-bottom: 18px;">
+                    <div class="form-row">
+                        <label>指定账号：</label>
+                        <input type="text" id="grantAccountInput" placeholder="请输入账号" style="padding: 8px 12px; border: 1px solid #3d5a80; border-radius: 4px; background: #1a1a2e; color: #e8e8e8;">
+                    </div>
+                    <div class="form-row">
+                        <label>会员权限：</label>
+                        <select id="grantMemberType" style="padding: 8px 12px; border: 1px solid #3d5a80; border-radius: 4px; background: #1a1a2e; color: #e8e8e8;">
+                            <option value="3">年费会员(360天)</option>
+                            <option value="4">永久会员</option>
+                            <option value="5">霓虹代理</option>
+                            <option value="0">普通用户</option>
+                        </select>
+                        <button class="btn btn-confirm" id="grantMemberBtn">
+                            <i class="fas fa-check"></i> 保存权限
+                        </button>
+                    </div>
+                </div>
+
+                <div id="memberListArea">
+                    <div class="cardkey-empty">
+                        <i class="fas fa-user-shield" style="font-size: 2rem; margin-bottom: 12px;"></i>
+                        <p>搜索用户后可授予年费会员、永久会员或霓虹代理</p>
                     </div>
                 </div>
             </div>
@@ -1285,6 +1337,11 @@
             document.getElementById('refreshCardKeyBtn').addEventListener('click', loadCardKeyList);
             
             document.getElementById('memberTypeFilter').addEventListener('change', loadCardKeyList);
+            document.getElementById('memberSearchBtn').addEventListener('click', searchAdminUsers);
+            document.getElementById('memberSearchInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') searchAdminUsers();
+            });
+            document.getElementById('grantMemberBtn').addEventListener('click', grantMemberPermission);
             document.getElementById('refreshWithdrawalBtn').addEventListener('click', () => loadAdminWithdrawals(1));
             document.getElementById('withdrawStatusFilter').addEventListener('change', () => loadAdminWithdrawals(1));
         });
@@ -1323,19 +1380,29 @@
                 document.getElementById('tabAudit').classList.add('active');
                 document.getElementById('contentArea').style.display = 'block';
                 document.getElementById('cardKeyArea').style.display = 'none';
+                document.getElementById('memberArea').style.display = 'none';
                 document.getElementById('resourceArea').style.display = 'none';
                 document.getElementById('withdrawalArea').style.display = 'none';
             } else if (tab === 'cardkey') {
                 document.getElementById('tabCardKey').classList.add('active');
                 document.getElementById('contentArea').style.display = 'none';
                 document.getElementById('cardKeyArea').style.display = 'block';
+                document.getElementById('memberArea').style.display = 'none';
                 document.getElementById('resourceArea').style.display = 'none';
                 document.getElementById('withdrawalArea').style.display = 'none';
                 loadCardKeyList();
+            } else if (tab === 'member') {
+                document.getElementById('tabMember').classList.add('active');
+                document.getElementById('contentArea').style.display = 'none';
+                document.getElementById('cardKeyArea').style.display = 'none';
+                document.getElementById('memberArea').style.display = 'block';
+                document.getElementById('resourceArea').style.display = 'none';
+                document.getElementById('withdrawalArea').style.display = 'none';
             } else if (tab === 'resource') {
                 document.getElementById('tabResource').classList.add('active');
                 document.getElementById('contentArea').style.display = 'none';
                 document.getElementById('cardKeyArea').style.display = 'none';
+                document.getElementById('memberArea').style.display = 'none';
                 document.getElementById('resourceArea').style.display = 'block';
                 document.getElementById('withdrawalArea').style.display = 'none';
                 loadResourceList();
@@ -1343,10 +1410,123 @@
                 document.getElementById('tabWithdrawal').classList.add('active');
                 document.getElementById('contentArea').style.display = 'none';
                 document.getElementById('cardKeyArea').style.display = 'none';
+                document.getElementById('memberArea').style.display = 'none';
                 document.getElementById('resourceArea').style.display = 'none';
                 document.getElementById('withdrawalArea').style.display = 'block';
                 loadAdminWithdrawals(1);
             }
+        }
+
+        function getGrantMemberTypeName(type) {
+            switch (Number(type)) {
+                case 3: return '年费会员';
+                case 4: return '永久会员';
+                case 5: return '霓虹代理';
+                case 1: return '旧版会员(已停用)';
+                case 2: return '旧版会员(已停用)';
+                default: return '普通用户';
+            }
+        }
+
+        function getMemberBadgeStyle(type) {
+            if (Number(type) === 5) {
+                return 'color:#ff5f6d;border-color:rgba(255,95,109,0.45);background:rgba(255,95,109,0.14);';
+            }
+            if (Number(type) === 4) {
+                return 'color:#ffd700;border-color:rgba(255,215,0,0.45);background:rgba(255,215,0,0.14);';
+            }
+            if (Number(type) === 3) {
+                return 'color:#70ffb0;border-color:rgba(112,255,176,0.4);background:rgba(0,180,120,0.12);';
+            }
+            return '';
+        }
+
+        function fillGrantForm(account, memberType) {
+            document.getElementById('grantAccountInput').value = account || '';
+            document.getElementById('grantMemberType').value = String(
+                [0, 3, 4, 5].includes(Number(memberType)) ? Number(memberType) : 3
+            );
+        }
+
+        function searchAdminUsers() {
+            const listArea = document.getElementById('memberListArea');
+            const keyword = document.getElementById('memberSearchInput').value.trim();
+            listArea.innerHTML = '<div class="loading"><i class="fas fa-spinner"></i><p style="margin-top: 12px; color: #90b0d1;">加载中...</p></div>';
+
+            fetch(`/api/admin/users/search?keyword=${encodeURIComponent(keyword)}`, {
+                headers: authHeaders()
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    renderAdminUsers(data.users || []);
+                } else {
+                    showToast(data.message || '用户查询失败', true);
+                    listArea.innerHTML = `<div class="cardkey-empty"><p>${escapeHtml(data.message || '用户查询失败')}</p></div>`;
+                }
+            })
+            .catch(error => {
+                console.error('用户查询失败:', error);
+                showToast('网络错误', true);
+                listArea.innerHTML = '<div class="cardkey-empty"><p>用户查询失败</p></div>';
+            });
+        }
+
+        function renderAdminUsers(users) {
+            const listArea = document.getElementById('memberListArea');
+            if (users.length === 0) {
+                listArea.innerHTML = '<div class="cardkey-empty"><i class="fas fa-user" style="font-size: 2rem; margin-bottom: 12px;"></i><p>暂无匹配用户</p></div>';
+                return;
+            }
+
+            let html = '<div class="cardkey-list">';
+            users.forEach(user => {
+                const badgeStyle = getMemberBadgeStyle(user.memberType);
+                html += `
+                    <div class="cardkey-card">
+                        <div class="cardkey-key" style="font-size: 1rem;">${escapeHtml(user.userName || user.account || '--')}</div>
+                        <div class="cardkey-meta">
+                            <span>账号: ${escapeHtml(user.account || '--')}</span>
+                            <span class="cardkey-status" style="${badgeStyle}">${escapeHtml(user.memberTypeName || getGrantMemberTypeName(user.memberType))}</span>
+                            <span>${escapeHtml(user.memberExpireText || '')}</span>
+                        </div>
+                        <div class="cardkey-used-by">推广权限: ${user.promotionPermission ? '已开启' : '未开启'} · 最近登录: ${formatDate(user.lastLoginTime)}</div>
+                        <button class="btn btn-confirm" style="margin-top: 12px;" onclick="fillGrantForm('${escapeHtml(user.account || '')}', ${Number(user.memberType || 0)})">
+                            <i class="fas fa-user-shield"></i> 选择此账号
+                        </button>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            listArea.innerHTML = html;
+        }
+
+        function grantMemberPermission() {
+            const account = document.getElementById('grantAccountInput').value.trim();
+            const memberType = Number(document.getElementById('grantMemberType').value);
+            if (!account) {
+                showToast('请输入账号', true);
+                return;
+            }
+
+            fetch('/api/admin/users/member', {
+                method: 'POST',
+                headers: authHeaders({ 'Content-Type': 'application/json' }),
+                body: JSON.stringify({ account, memberType })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast(data.message || '会员权限已更新');
+                    renderAdminUsers([data.user]);
+                } else {
+                    showToast(data.message || '权限更新失败', true);
+                }
+            })
+            .catch(error => {
+                console.error('权限更新失败:', error);
+                showToast('网络错误', true);
+            });
         }
 
         function loadResourceList(page = 1) {
@@ -1651,10 +1831,11 @@
 
         function getMemberTypeName(type) {
             switch (type) {
-                case 1: return '月度会员(30天)';
-                case 2: return '季度会员(90天)';
-                case 3: return '年度会员(360天)';
+                case 1: return '旧版会员(已停用)';
+                case 2: return '旧版会员(已停用)';
+                case 3: return '年费会员(360天)';
                 case 4: return '永久会员';
+                case 5: return '霓虹代理';
                 default: return '未知';
             }
         }

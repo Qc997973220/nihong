@@ -1381,7 +1381,7 @@
             </div>
             <div class="input-group">
                 <label><i class="fa-solid fa-gift" style="margin-right: 6px;"></i> 邀请码</label>
-                <input type="text" id="inviteCode" placeholder="选填，老会员的邀请码">
+                <input type="text" id="inviteCode" placeholder="选填，永久VIP的邀请码">
             </div>
             <button class="login-btn" id="registerBtn"><i class="fa-solid fa-user-plus"></i> 注册并登录</button>
             <button class="cancel-btn" id="cancelRegisterBtn"><i class="fa-solid fa-xmark"></i> 关闭</button>
@@ -1406,22 +1406,6 @@
                 <div class="vip-promotion-title">限时特惠 · 年卡7折 永久5折</div>
             </div>
             <div class="vip-price-cards">
-                <div class="vip-price-card">
-                    <div class="vip-card-name">月卡</div>
-                    <div class="vip-card-price">¥49.9</div>
-                    <div class="vip-card-discount">无折扣</div>
-                    <div class="vip-card-rights">每日2篇</div>
-                    <div class="vip-card-toolbox">享VIP专属网创工具箱</div>
-                    <div class="vip-card-cycle">30天</div>
-                </div>
-                <div class="vip-price-card">
-                    <div class="vip-card-name">季卡</div>
-                    <div class="vip-card-price">¥69.9</div>
-                    <div class="vip-card-discount">无折扣</div>
-                    <div class="vip-card-rights">每日3篇</div>
-                    <div class="vip-card-toolbox">享VIP专属网创工具箱</div>
-                    <div class="vip-card-cycle">90天</div>
-                </div>
                 <div class="vip-price-card">
                     <div class="vip-card-name">年卡</div>
                     <div class="vip-card-price">¥139.9 <s>¥199.9</s></div>
@@ -1760,6 +1744,7 @@
         if (!userInfo) return null;
         try {
             const info = JSON.parse(userInfo);
+            if (Number(info.memberType) === 5) return '霓虹代理';
             if (info.memberStatus === 'permanent') return '永久会员';
             if (info.memberStatus === 'active') return info.memberExpireText;
             if (info.memberStatus === 'expired') return '会员已到期';
@@ -1928,7 +1913,12 @@
         let textColor = '';
         let iconColor = '';
 
-        if (user.memberStatus === 'permanent') {
+        if (Number(user.memberType) === 5) {
+            memberTypeText = '霓虹代理';
+            bgColor = 'rgba(255, 80, 96, 0.2)';
+            textColor = '#ff5f6d';
+            iconColor = '#ff5f6d';
+        } else if (user.memberStatus === 'permanent') {
             memberTypeText = '永久会员';
             bgColor = 'rgba(255, 215, 0, 0.2)';
             textColor = '#FFD700';
@@ -1936,17 +1926,17 @@
         } else if (user.memberStatus === 'active') {
             const type = user.memberType;
             if (type === 1) {
-                memberTypeText = '月度会员';
+                memberTypeText = '旧版会员';
                 bgColor = 'rgba(120, 100, 255, 0.2)';
                 textColor = '#b48aff';
                 iconColor = '#b48aff';
             } else if (type === 2) {
-                memberTypeText = '季度会员';
+                memberTypeText = '旧版会员';
                 bgColor = 'rgba(0, 200, 100, 0.2)';
                 textColor = '#70ffb0';
                 iconColor = '#70ffb0';
             } else if (type === 3) {
-                memberTypeText = '年度会员';
+                memberTypeText = '年费会员';
                 bgColor = 'rgba(255, 150, 50, 0.2)';
                 textColor = '#ffb070';
                 iconColor = '#ffb070';
@@ -3491,9 +3481,7 @@
 
                 if (result.success === true) {
                     let memberTypeName = '会员';
-                    if (result.memberType === 1) memberTypeName = '月度会员';
-                    else if (result.memberType === 2) memberTypeName = '季度会员';
-                    else if (result.memberType === 3) memberTypeName = '年度会员';
+                    if (result.memberType === 3) memberTypeName = '年费会员';
                     else if (result.memberType === 4) memberTypeName = '永久会员';
 
                     const updatedUserInfo = {

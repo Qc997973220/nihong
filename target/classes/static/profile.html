@@ -457,7 +457,8 @@
                                 document.getElementById('avatarUploadSection').style.display = 'block';
 
                                 // 显示邀请码（仅限当前用户）
-                                if (currentUser.inviteCode) {
+                                const canPromote = currentUser.promotionPermission === true || Number(currentUser.memberType) === 4 || Number(currentUser.memberType) === 5;
+                                if (currentUser.inviteCode && canPromote) {
                                     document.getElementById('inviteCodeSection').style.display = 'flex';
                                     document.getElementById('infoInviteCode').textContent = currentUser.inviteCode;
                                 }
@@ -465,10 +466,12 @@
                                 // 显示会员状态（仅限当前用户）
                                 if (currentUser.memberStatus) {
                                     document.getElementById('memberStatusSection').style.display = 'flex';
-                                    const statusText = currentUser.memberStatus === 'permanent' ? '永久会员' :
+                                    const statusText = Number(currentUser.memberType) === 5 ? '霓虹代理' :
+                                                      currentUser.memberStatus === 'permanent' ? '永久会员' :
                                                       currentUser.memberStatus === 'active' ? (currentUser.memberExpireText || '会员') :
                                                       currentUser.memberStatus === 'expired' ? '已到期' : '非会员';
                                     document.getElementById('infoMemberStatus').textContent = statusText;
+                                    document.getElementById('infoMemberStatus').style.color = Number(currentUser.memberType) === 5 ? '#ff5f6d' : '';
                                 }
                             }
                         } catch (e) {

@@ -414,6 +414,32 @@
             color: #70ffb0;
             font-size: 0.9rem;
         }
+        .reward-policy-box {
+            display: none;
+            margin-top: 14px;
+            padding: 12px 14px;
+            border: 1px solid rgba(112, 255, 176, 0.22);
+            border-radius: 12px;
+            background: rgba(5, 18, 30, 0.58);
+            color: #c8ddf5;
+            font-size: 0.9rem;
+            line-height: 1.7;
+        }
+        .reward-policy-box.agent {
+            border-color: rgba(255, 95, 109, 0.45);
+            background: rgba(255, 80, 96, 0.1);
+        }
+        .agent-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 3px 9px;
+            border-radius: 999px;
+            color: #ff5f6d;
+            border: 1px solid rgba(255, 95, 109, 0.45);
+            background: rgba(255, 80, 96, 0.12);
+            font-size: 0.78rem;
+            font-weight: 700;
+        }
         .invite-poster-preview {
             display: none;
             margin-top: 16px;
@@ -566,6 +592,11 @@
             color: #ff8a8a;
             border-color: rgba(255, 100, 100, 0.35);
             background: rgba(255, 80, 80, 0.12);
+        }
+        .status-badge.agent {
+            color: #ff5f6d;
+            border-color: rgba(255, 95, 109, 0.45);
+            background: rgba(255, 80, 96, 0.12);
         }
         .empty-muted {
             color: #90b0d1;
@@ -744,6 +775,7 @@
                     </button>
                 </div>
                 <div class="invite-message" id="inviteShareMessage"></div>
+                <div class="reward-policy-box" id="rewardPolicyBox"></div>
                 <div class="poster-loading" id="posterLoading">
                     <i class="fas fa-spinner fa-spin"></i>
                     <span>正在生成海报...</span>
@@ -863,6 +895,7 @@
 
     function getInviteStatusText(invitee) {
         if (!invitee) return '未开通VIP';
+        if (Number(invitee.memberType) === 5) return '霓虹代理';
         if (invitee.memberStatus === 'permanent') return '永久VIP';
         if (invitee.memberStatus === 'active') return invitee.memberTypeName || 'VIP会员';
         if (invitee.memberStatus === 'expired') return 'VIP已到期';
@@ -892,6 +925,11 @@
 
     async function loadInvitees() {
         const list = document.getElementById('inviteeList');
+        if (!hasPromotionPermission()) {
+            document.getElementById('inviteCountText').innerText = '永久VIP专享';
+            list.innerHTML = `<div class="empty-muted">${PROMOTION_LOCK_MESSAGE}</div>`;
+            return;
+        }
         try {
             const response = await fetch('/api/wallet/invites', {
                 headers: authHeaders()
@@ -914,7 +952,7 @@
 
             list.innerHTML = invitees.map(invitee => {
                 const statusText = getInviteStatusText(invitee);
-                const statusClass = invitee.memberStatus || '';
+                const statusClass = Number(invitee.memberType) === 5 ? 'agent' : (invitee.memberStatus || '');
                 const displayName = invitee.userName || invitee.account || '用户';
                 const registerTime = formatDateTime(invitee.registeredDate || invitee.createTime);
                 return `
@@ -1043,6 +1081,56 @@
         }, 2200);
     }
 
+    const PROMOTION_LOCK_MESSAGE = '权限不足,永久VIP专享';
+
+    function isAgentUser() {
+        return Number(userData && userData.memberType) === 5 || (userData && userData.isAgent === true);
+    }
+
+    function hasPromotionPermission() {
+        const type = Number(userData && userData.memberType);
+        return !!(userData && (userData.promotionPermission === true || type === 4 || type === 5));
+    }
+
+    function getRewardRates() {
+        const rates = userData && userData.inviteRewardRates ? userData.inviteRewardRates : {};
+        if (rates.yearly && rates.permanent) {
+            return rates;
+        }
+        if (isAgentUser()) {
+            return { yearly: 69, permanent: 99 };
+        }
+        if (hasPromotionPermission()) {
+            return { yearly: 25, permanent: 40 };
+        }
+        return {};
+    }
+
+    function ensurePromotionPermission() {
+        if (hasPromotionPermission()) return true;
+        showInviteMessage(PROMOTION_LOCK_MESSAGE, 'error');
+        return false;
+    }
+
+    function renderRewardPolicy() {
+        const box = document.getElementById('rewardPolicyBox');
+        if (!box) return;
+        if (!hasPromotionPermission()) {
+            box.className = 'reward-policy-box';
+            box.style.display = 'block';
+            box.innerHTML = PROMOTION_LOCK_MESSAGE;
+            return;
+        }
+        const rates = getRewardRates();
+        const agent = isAgentUser();
+        box.className = agent ? 'reward-policy-box agent' : 'reward-policy-box';
+        box.style.display = 'block';
+        box.innerHTML = `
+            ${agent ? '<span class="agent-badge">霓虹代理</span><br>' : ''}
+            当前返现力度：年卡返还 ${rates.yearly || 0} N币，永久卡返还 ${rates.permanent || 0} N币
+        `;
+    }
+
     function setPosterLoading(loading) {
         const loadingEl = document.getElementById('posterLoading');
         const posterBtn = document.getElementById('generatePosterBtn');
@@ -1094,18 +1182,20 @@
 
     function renderInviteShare() {
         const inviteCode = normalizeInviteCode(userData && userData.inviteCode);
-        const inviteLink = inviteCode ? buildInviteLink(inviteCode) : '';
+        const allowed = hasPromotionPermission();
+        const inviteLink = allowed && inviteCode ? buildInviteLink(inviteCode) : '';
         const codePill = document.getElementById('inviteCodePill');
         const linkInput = document.getElementById('inviteLinkInput');
         const copyLinkBtn = document.getElementById('copyInviteLinkBtn');
         const copyCodeBtn = document.getElementById('copyInviteCodeBtn');
         const posterBtn = document.getElementById('generatePosterBtn');
 
-        if (codePill) codePill.innerText = inviteCode ? `邀请码：${inviteCode}` : '邀请码：暂无';
-        if (linkInput) linkInput.value = inviteLink || '邀请码生成中，请刷新或重新登录';
+        if (codePill) codePill.innerText = allowed && inviteCode ? `邀请码：${inviteCode}` : '永久VIP专享';
+        if (linkInput) linkInput.value = allowed ? (inviteLink || '邀请码生成中，请刷新或重新登录') : PROMOTION_LOCK_MESSAGE;
         [copyLinkBtn, copyCodeBtn, posterBtn].forEach(btn => {
-            if (btn) btn.disabled = !inviteCode;
+            if (btn) btn.disabled = allowed ? !inviteCode : false;
         });
+        renderRewardPolicy();
     }
 
     async function refreshUserInfoFromToken() {
@@ -1129,7 +1219,7 @@
                 localStorage.setItem('userInfo', JSON.stringify(userData));
                 document.getElementById('nickname').innerText = displayName;
                 document.getElementById('infoUserName').innerText = displayName;
-                document.getElementById('infoInviteCode').innerText = userData.inviteCode || '暂无';
+                document.getElementById('infoInviteCode').innerText = hasPromotionPermission() ? (userData.inviteCode || '暂无') : '永久VIP专享';
                 updateWalletSummary(userData);
                 renderInviteShare();
             }
@@ -1274,6 +1364,9 @@
     async function drawInvitePoster() {
         let started = false;
         try {
+            if (!ensurePromotionPermission()) {
+                return;
+            }
             const inviteCode = normalizeInviteCode(userData && userData.inviteCode);
             if (!inviteCode) {
                 showInviteMessage('暂无邀请码，无法生成海报', 'error');
@@ -1366,14 +1459,17 @@
     function initInviteShare() {
         renderInviteShare();
         document.getElementById('copyInviteLinkBtn').addEventListener('click', function() {
+            if (!ensurePromotionPermission()) return;
             const inviteCode = normalizeInviteCode(userData && userData.inviteCode);
             copyText(inviteCode ? buildInviteLink(inviteCode) : '', '邀请链接已复制');
         });
         document.getElementById('copyInviteCodeBtn').addEventListener('click', function() {
+            if (!ensurePromotionPermission()) return;
             copyText(normalizeInviteCode(userData && userData.inviteCode), '邀请码已复制');
         });
         document.getElementById('generatePosterBtn').addEventListener('click', drawInvitePoster);
         document.getElementById('downloadPosterBtn').addEventListener('click', function() {
+            if (!ensurePromotionPermission()) return;
             const canvas = document.getElementById('invitePosterCanvas');
             const inviteCode = normalizeInviteCode(userData && userData.inviteCode) || 'invite';
             const link = document.createElement('a');
@@ -1396,23 +1492,26 @@
             document.getElementById('userEmail').innerText = userData.email || '未设置';
 
             // 显示邀请码
-            if (userData.inviteCode) {
+            if (hasPromotionPermission() && userData.inviteCode) {
                 document.getElementById('infoInviteCode').innerText = userData.inviteCode;
             } else {
-                document.getElementById('infoInviteCode').innerText = '暂无';
+                document.getElementById('infoInviteCode').innerText = hasPromotionPermission() ? '暂无' : '永久VIP专享';
             }
             updateWalletSummary(userData);
 
             // 显示会员状态（头部和详情两处）
             let memberStatusDisplay = '';
-            if (userData.memberStatus === 'permanent') {
+            if (isAgentUser()) {
+                memberStatusDisplay = '霓虹代理 · 欢迎回来';
+                document.getElementById('infoMemberStatus').style.color = '#ff5f6d';
+            } else if (userData.memberStatus === 'permanent') {
                 memberStatusDisplay = '永久会员 · 欢迎回来';
                 document.getElementById('infoMemberStatus').style.color = '#FFD700';
             } else if (userData.memberStatus === 'active') {
                 let memberTypeName = '会员';
-                if (userData.memberType === 1) memberTypeName = '月度会员';
-                else if (userData.memberType === 2) memberTypeName = '季度会员';
-                else if (userData.memberType === 3) memberTypeName = '年度会员';
+                if (userData.memberType === 1) memberTypeName = '旧版会员';
+                else if (userData.memberType === 2) memberTypeName = '旧版会员';
+                else if (userData.memberType === 3) memberTypeName = '年费会员';
                 let expireText = userData.memberExpireText || '';
                 memberStatusDisplay = expireText ? memberTypeName + ' · ' + expireText : memberTypeName;
                 document.getElementById('infoMemberStatus').style.color = '#70ffb0';

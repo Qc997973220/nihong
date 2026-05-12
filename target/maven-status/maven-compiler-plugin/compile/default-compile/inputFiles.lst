@@ -11,6 +11,7 @@ D:\bangong\nihong\src\main\java\com\neon\config\WebConfig.java
 D:\bangong\nihong\src\main\java\com\neon\service\SiteStatsService.java
 D:\bangong\nihong\src\main\java\com\neon\pojo\Users.java
 D:\bangong\nihong\src\main\java\com\neon\pojo\Resource.java
+D:\bangong\nihong\src\main\java\com\neon\controller\AdminUserController.java
 D:\bangong\nihong\src\main\java\com\neon\controller\VisitorController.java
 D:\bangong\nihong\src\main\java\com\neon\controller\LoginController.java
 D:\bangong\nihong\src\main\java\com\neon\pojo\WithdrawalRequest.java

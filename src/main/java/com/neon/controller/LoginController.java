@@ -1,6 +1,7 @@
 package com.neon.controller;
 
 import com.neon.dao.UsersDao;
+import com.neon.pojo.CardKey;
 import com.neon.pojo.Users;
 import com.neon.service.AuthService;
 import com.neon.service.CacheService;
@@ -81,15 +82,23 @@ public class LoginController {
         userInfo.put("token", user.getToken());
         userInfo.put("avatar", null);
         userInfo.put("lastLoginTime", user.getLastLoginTime());
-        userInfo.put("memberType", user.getMemberType() != null ? user.getMemberType() : 0);
+        Integer memberType = user.getMemberType() != null ? user.getMemberType() : 0;
+        userInfo.put("memberType", memberType);
+        userInfo.put("memberTypeName", getMemberTypeName(memberType));
+        userInfo.put("isAgent", memberType == CardKey.TYPE_AGENT);
+        userInfo.put("promotionPermission", walletService.hasPromotionPermission(user));
+        userInfo.put("inviteRewardRates", walletService.buildRewardPolicy(user));
         userInfo.put("inviteCode", ensureInviteCode(user));
         userInfo.put("invitedBy", user.getInvitedBy());
         userInfo.putAll(walletService.buildWalletSummary(user));
 
-        if (user.getMemberType() != null && user.getMemberType() == 4) {
+        if (memberType == CardKey.TYPE_AGENT) {
+            userInfo.put("memberStatus", "permanent");
+            userInfo.put("memberExpireText", "霓虹代理 · 永久有效");
+        } else if (memberType == CardKey.TYPE_PERMANENT) {
             userInfo.put("memberStatus", "permanent");
             userInfo.put("memberExpireText", "永久有效");
-        } else if (user.getMemberType() != null && user.getMemberType() == 0) {
+        } else if (memberType == 0) {
             userInfo.put("memberStatus", "none");
             userInfo.put("memberExpireText", "非会员");
         } else if (user.getMemberExpiredAt() != null) {
@@ -152,16 +161,7 @@ public class LoginController {
                 user.setRegisteredDate(LocalDateTime.now());
                 usersDao.save(user);
                 
-                String memberTypeName = "未知";
-                if (user.getMemberType() != null) {
-                    switch (user.getMemberType()) {
-                        case 1: memberTypeName = "月度会员(30天)"; break;
-                        case 2: memberTypeName = "季度会员(90天)"; break;
-                        case 3: memberTypeName = "年度会员(360天)"; break;
-                        case 4: memberTypeName = "永久会员"; break;
-                        default: memberTypeName = "非会员"; break;
-                    }
-                }
+                String memberTypeName = getMemberTypeName(user.getMemberType());
                 result.put("memberType", user.getMemberType());
                 result.put("memberTypeName", memberTypeName);
             }
@@ -364,5 +364,24 @@ public class LoginController {
             ip = ip.split(",")[0].trim();
         }
         return ip != null ? ip : "unknown";
+    }
+
+    private String getMemberTypeName(Integer memberType) {
+        if (memberType == null || memberType == 0) {
+            return "非会员";
+        }
+        switch (memberType) {
+            case CardKey.TYPE_YEARLY:
+                return "年费会员(360天)";
+            case CardKey.TYPE_PERMANENT:
+                return "永久会员";
+            case CardKey.TYPE_AGENT:
+                return "霓虹代理";
+            case CardKey.TYPE_MONTHLY:
+            case CardKey.TYPE_QUARTERLY:
+                return "旧版会员(已停用)";
+            default:
+                return "未知会员";
+        }
     }
 }

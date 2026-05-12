@@ -30,7 +30,7 @@ public class CardKeyController {
     public Map<String, Object> generateCardKeys(
             @RequestHeader(value = "Authorization", required = false) String token,
             @RequestParam(defaultValue = "10") int count,
-            @RequestParam(defaultValue = "1") int memberType) {
+            @RequestParam(defaultValue = "3") int memberType) {
         log.info("收到生成卡密请求: count={}, memberType={}", count, memberType);
         Map<String, Object> result = new HashMap<>();
         if (!requireAdmin(token, result)) {
@@ -43,9 +43,9 @@ public class CardKeyController {
                 return result;
             }
 
-            if (memberType < 1 || memberType > 4) {
+            if (!CardKeyService.isActivationMemberType(memberType)) {
                 result.put("success", false);
-                result.put("message", "会员类型无效");
+                result.put("message", "会员类型无效，仅支持年费会员和永久会员");
                 return result;
             }
 
@@ -69,9 +69,9 @@ public class CardKeyController {
 
     private String getMemberTypeName(int memberType) {
         switch (memberType) {
-            case CardKey.TYPE_MONTHLY: return "月度会员(30天)";
-            case CardKey.TYPE_QUARTERLY: return "季度会员(90天)";
-            case CardKey.TYPE_YEARLY: return "年度会员(360天)";
+            case CardKey.TYPE_MONTHLY:
+            case CardKey.TYPE_QUARTERLY: return "旧版会员(已停用)";
+            case CardKey.TYPE_YEARLY: return "年费会员(360天)";
             case CardKey.TYPE_PERMANENT: return "永久会员";
             default: return "未知";
         }
@@ -88,10 +88,12 @@ public class CardKeyController {
         }
         try {
             List<CardKey> keys;
-            if (memberType != null && memberType >= 1 && memberType <= 4) {
+            if (memberType != null && CardKeyService.isActivationMemberType(memberType)) {
                 keys = cardKeyService.findByMemberType(memberType);
             } else {
-                keys = cardKeyService.findAll();
+                keys = cardKeyService.findAll().stream()
+                        .filter(key -> CardKeyService.isActivationMemberType(key.getMemberType()))
+                        .toList();
             }
             result.put("success", true);
             result.put("data", keys);

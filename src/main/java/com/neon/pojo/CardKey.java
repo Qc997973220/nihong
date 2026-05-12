@@ -7,10 +7,11 @@ import java.time.LocalDateTime;
 @Table(name = "card_key")
 public class CardKey {
 
-    public static final int TYPE_MONTHLY = 1;    // 月度会员 30天
-    public static final int TYPE_QUARTERLY = 2;  // 季度会员 90天
-    public static final int TYPE_YEARLY = 3;     // 年度会员 360天
+    public static final int TYPE_MONTHLY = 1;    // 旧版会员（已停用）
+    public static final int TYPE_QUARTERLY = 2;  // 旧版会员（已停用）
+    public static final int TYPE_YEARLY = 3;     // 年费会员 360天
     public static final int TYPE_PERMANENT = 4;  // 永久会员
+    public static final int TYPE_AGENT = 5;      // 霓虹代理（仅管理员授予，不生成卡密）
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,7 +23,7 @@ public class CardKey {
     @Column(nullable = false)
     private Integer status = 0;
 
-    private Integer memberType = 1;
+    private Integer memberType = TYPE_YEARLY;
 
     private LocalDateTime usedAt;
 
@@ -110,10 +111,11 @@ public class CardKey {
     public String getMemberTypeName() {
         if (memberType == null) return "未知";
         switch (memberType) {
-            case TYPE_MONTHLY: return "月度会员(30天)";
-            case TYPE_QUARTERLY: return "季度会员(90天)";
-            case TYPE_YEARLY: return "年度会员(360天)";
+            case TYPE_MONTHLY:
+            case TYPE_QUARTERLY: return "旧版会员(已停用)";
+            case TYPE_YEARLY: return "年费会员(360天)";
             case TYPE_PERMANENT: return "永久会员";
+            case TYPE_AGENT: return "霓虹代理";
             default: return "未知";
         }
     }

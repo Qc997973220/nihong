@@ -1,6 +1,7 @@
 package com.neon.controller;
 
 import com.neon.pojo.Comment;
+import com.neon.pojo.CardKey;
 import com.neon.pojo.DownloadRecord;
 import com.neon.pojo.Message;
 import com.neon.pojo.Resource;
@@ -369,7 +370,7 @@ public class ResourceController {
         if (user == null || user.getMemberType() == null || user.getMemberType() <= 0) {
             return false;
         }
-        if (user.getMemberType() == 4) {
+        if (user.getMemberType() == CardKey.TYPE_PERMANENT || user.getMemberType() == CardKey.TYPE_AGENT) {
             return true;
         }
         return user.getMemberExpiredAt() != null && user.getMemberExpiredAt().isAfter(LocalDateTime.now());
@@ -757,7 +758,7 @@ public class ResourceController {
             Long todayDownloads = downloadRecordDao.countTodayDownloads(account, startOfDay);
             
             // 根据会员类型设置每日下载限制
-            // 月度会员(1): 2次/天, 季度会员(2): 3次/天, 年度会员(3)/永久会员(4): 无限制
+            // 旧版会员(1/2)保留历史下载额度，年费会员(3)/永久会员(4)/霓虹代理(5): 无限制
             int dailyLimit = getDailyLimitByMemberType(user.getMemberType());
             
             if (dailyLimit == -1) {
@@ -842,7 +843,7 @@ public class ResourceController {
             Long todayDownloads = downloadRecordDao.countTodayDownloadsWithLock(user.getAccount(), startOfDay);
             
             // 根据会员类型设置每日下载限制
-            // 月度会员(1): 2次/天, 季度会员(2): 3次/天, 年度会员(3)/永久会员(4): 无限制
+            // 旧版会员(1/2)保留历史下载额度，年费会员(3)/永久会员(4)/霓虹代理(5): 无限制
             int dailyLimit = getDailyLimitByMemberType(user.getMemberType());
             
             if (dailyLimit != -1 && todayDownloads >= dailyLimit) {
@@ -883,12 +884,13 @@ public class ResourceController {
             return 0; // 非会员无下载权限
         }
         switch (memberType) {
-            case 1: // 月度会员
+            case 1: // 旧版会员
                 return 2;
-            case 2: // 季度会员
+            case 2: // 旧版会员
                 return 3;
-            case 3: // 年度会员
+            case 3: // 年费会员
             case 4: // 永久会员
+            case 5: // 霓虹代理
                 return -1; // -1表示无限制
             default: // 非会员或其他
                 return 0;
