@@ -566,6 +566,31 @@
             font-size: 0.82rem;
             margin-top: 4px;
         }
+        .invitee-reward {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 3px;
+            text-align: right;
+            min-width: 92px;
+        }
+        .invitee-reward-amount {
+            color: #70ffb0;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+        .invitee-reward-label {
+            color: #90b0d1;
+            font-size: 0.76rem;
+            white-space: nowrap;
+        }
+        .invitee-reward.empty .invitee-reward-amount {
+            color: #8fb4d8;
+            font-family: inherit;
+            font-weight: 650;
+        }
         .status-badge {
             border-radius: 999px;
             padding: 5px 10px;
@@ -750,6 +775,10 @@
             }
             .status-badge {
                 justify-self: flex-start;
+            }
+            .invitee-reward {
+                align-items: flex-start;
+                text-align: left;
             }
         }
         @media (max-width: 480px) {
@@ -1005,6 +1034,69 @@
         });
     }
 
+    function escapeHtml(value) {
+        return String(value ?? '').replace(/[&<>"']/g, char => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;'
+        }[char]));
+    }
+
+    function getRewardMemberTypeLabel(type) {
+        const numericType = Number(type);
+        if (numericType === 4) return '永久VIP奖励';
+        if (numericType === 3) return '年费VIP奖励';
+        return '邀请奖励';
+    }
+
+    function getInviteRewardRecords(invitee) {
+        return Array.isArray(invitee && invitee.rewardRecords) ? invitee.rewardRecords : [];
+    }
+
+    function getInviteRewardView(invitee) {
+        const records = getInviteRewardRecords(invitee);
+        const recordTotal = records.reduce((sum, record) => sum + Number(record.rewardAmount || 0), 0);
+        const total = Number(invitee && invitee.rewardAmountTotal !== undefined ? invitee.rewardAmountTotal : recordTotal);
+
+        if (total > 0) {
+            const labels = records.length > 0
+                ? [...new Set(records.map(record => getRewardMemberTypeLabel(record.memberType)))]
+                : ['邀请奖励'];
+            return {
+                amount: `+${total} N币`,
+                label: labels.join(' / '),
+                empty: false
+            };
+        }
+
+        const rewardedTypes = Array.isArray(invitee && invitee.rewardedMemberTypes) ? invitee.rewardedMemberTypes : [];
+        if (rewardedTypes.length > 0) {
+            const rates = getRewardRates();
+            const fallbackTotal = rewardedTypes.reduce((sum, type) => {
+                const numericType = Number(type);
+                if (numericType === 4) return sum + Number(rates.permanent || 0);
+                if (numericType === 3) return sum + Number(rates.yearly || 0);
+                return sum;
+            }, 0);
+            if (fallbackTotal > 0) {
+                const labels = [...new Set(rewardedTypes.map(type => getRewardMemberTypeLabel(type)))];
+                return {
+                    amount: `+${fallbackTotal} N币`,
+                    label: labels.join(' / '),
+                    empty: false
+                };
+            }
+        }
+
+        return {
+            amount: '未奖励',
+            label: getInviteStatusText(invitee),
+            empty: true
+        };
+    }
+
     function updateWalletSummary(summary) {
         walletSummary = {
             ...walletSummary,
@@ -1071,6 +1163,13 @@
             }
 
             const invitees = data.invitees || [];
+            userData = {
+                ...(userData || {}),
+                inviteRewardRates: data.inviteRewardRates || (userData && userData.inviteRewardRates) || {},
+                promotionPermission: data.promotionPermission !== undefined ? data.promotionPermission : (userData && userData.promotionPermission),
+                isAgent: data.isAgent !== undefined ? data.isAgent : (userData && userData.isAgent)
+            };
+            renderRewardPolicy();
             document.getElementById('inviteCountText').innerText = `已邀请 ${data.inviteCount || invitees.length} 人`;
             if (data.inviteRewardTotal !== undefined) {
                 document.getElementById('inviteRewardTotalValue').innerText = data.inviteRewardTotal || 0;
@@ -1081,17 +1180,20 @@
             }
 
             list.innerHTML = invitees.map(invitee => {
-                const statusText = getInviteStatusText(invitee);
-                const statusClass = Number(invitee.memberType) === 5 ? 'agent' : (invitee.memberStatus || '');
-                const displayName = invitee.userName || invitee.account || '用户';
+                const rewardView = getInviteRewardView(invitee);
+                const rewardClass = rewardView.empty ? 'empty' : 'earned';
+                const displayName = invitee.userName || '用户';
                 const registerTime = formatDateTime(invitee.registeredDate || invitee.createTime);
                 return `
                     <div class="invitee-row">
                         <div class="invitee-main">
-                            <div class="invitee-name">${displayName}</div>
-                            <div class="invitee-meta">账号：${invitee.account || '--'} · 注册：${registerTime}</div>
+                            <div class="invitee-name">${escapeHtml(displayName)}</div>
+                            <div class="invitee-meta">注册：${escapeHtml(registerTime)}</div>
                         </div>
-                        <span class="status-badge ${statusClass}">${statusText}</span>
+                        <div class="invitee-reward ${rewardClass}">
+                            <div class="invitee-reward-amount">${escapeHtml(rewardView.amount)}</div>
+                            <div class="invitee-reward-label">${escapeHtml(rewardView.label)}</div>
+                        </div>
                     </div>
                 `;
             }).join('');

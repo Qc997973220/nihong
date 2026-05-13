@@ -95,7 +95,7 @@ public class WalletService {
         List<Users> invitees = usersDao.findByInvitedByOrderByCreateTimeDesc(inviter.getAccount());
         List<Map<String, Object>> inviteeList = new ArrayList<>();
         for (Users invitee : invitees) {
-            inviteeList.add(buildInviteeItem(invitee));
+            inviteeList.add(buildInviteeItem(invitee, inviter.getAccount()));
         }
 
         long rewardTotal = inviteRewardRecordDao.findByInviterAccountOrderByRewardedAtDesc(inviter.getAccount())
@@ -344,7 +344,7 @@ public class WalletService {
 
         List<Users> invitees = usersDao.findByInvitedByOrderByCreateTimeDesc(inviter.getAccount());
         for (Users invitee : invitees) {
-            result.add(buildInviteeItem(invitee));
+            result.add(buildInviteeItem(invitee, inviter.getAccount()));
         }
         return result;
     }
@@ -360,13 +360,24 @@ public class WalletService {
         return result;
     }
 
-    private Map<String, Object> buildInviteeItem(Users invitee) {
+    private Map<String, Object> buildInviteeItem(Users invitee, String inviterAccount) {
         Map<String, Object> item = new HashMap<>();
         if (invitee == null) {
             return item;
         }
 
         Integer memberType = normalizeMemberType(invitee.getMemberType());
+        List<InviteRewardRecord> rewardRecords = inviteRewardRecordDao.findByInviteeAccountOrderByRewardedAtDesc(invitee.getAccount())
+                .stream()
+                .filter(record -> inviterAccount == null || inviterAccount.equals(record.getInviterAccount()))
+                .collect(Collectors.toList());
+        List<Map<String, Object>> rewardItems = new ArrayList<>();
+        long rewardAmountTotal = 0;
+        for (InviteRewardRecord record : rewardRecords) {
+            rewardItems.add(buildInviteRewardItem(record));
+            rewardAmountTotal += record.getRewardAmount() != null ? record.getRewardAmount() : 0;
+        }
+
         item.put("account", invitee.getAccount());
         item.put("userName", invitee.getUserName());
         item.put("inviteCode", invitee.getInviteCode());
@@ -378,10 +389,24 @@ public class WalletService {
         item.put("registeredDate", invitee.getRegisteredDate());
         item.put("createTime", invitee.getCreateTime());
         item.put("lastLoginTime", invitee.getLastLoginTime());
-        item.put("rewardedMemberTypes", inviteRewardRecordDao.findByInviteeAccountOrderByRewardedAtDesc(invitee.getAccount())
-                .stream()
+        item.put("rewardedMemberTypes", rewardRecords.stream()
                 .map(InviteRewardRecord::getMemberType)
                 .collect(Collectors.toList()));
+        item.put("rewardRecords", rewardItems);
+        item.put("rewardAmountTotal", rewardAmountTotal);
+        return item;
+    }
+
+    private Map<String, Object> buildInviteRewardItem(InviteRewardRecord record) {
+        Map<String, Object> item = new HashMap<>();
+        if (record == null) {
+            return item;
+        }
+        item.put("memberType", record.getMemberType());
+        item.put("memberTypeName", getMemberTypeName(record.getMemberType()));
+        item.put("rewardAmount", record.getRewardAmount());
+        item.put("memberStatus", record.getMemberStatus());
+        item.put("rewardedAt", record.getRewardedAt());
         return item;
     }
 
