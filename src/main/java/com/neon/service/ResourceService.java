@@ -140,6 +140,18 @@ public class ResourceService {
         return result;
     }
 
+    public List<Resource> getHomeCarouselResources() {
+        LocalDateTime since = LocalDateTime.now().minusDays(2);
+        List<Resource> resources = resourceRepository.findByCreatedAtGreaterThanEqualAndStatusIn(since, Arrays.asList(1, 2));
+        resources.forEach(resource -> resource.setViewCount(getViewCount(resource.getId())));
+        return resources.stream()
+                .sorted(Comparator
+                        .comparing((Resource resource) -> resource.getViewCount() != null ? resource.getViewCount() : 0).reversed()
+                        .thenComparing(Resource::getCreatedAt, Comparator.nullsLast(Comparator.reverseOrder())))
+                .limit(8)
+                .collect(Collectors.toList());
+    }
+
     private String normalizeCategory(String category) {
         if (category == null || category.trim().isEmpty() || "全部".equals(category.trim())) {
             return null;

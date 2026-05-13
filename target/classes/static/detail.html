@@ -1628,6 +1628,579 @@
                 display: none;
             }
         }
+
+        /* VIP升级弹窗：高级科技版覆盖样式 */
+        .vip-modal-overlay {
+            background:
+                    radial-gradient(circle at 18% 12%, rgba(0, 210, 255, 0.18), transparent 34%),
+                    radial-gradient(circle at 82% 18%, rgba(255, 216, 108, 0.16), transparent 30%),
+                    radial-gradient(circle at 50% 90%, rgba(113, 81, 255, 0.16), transparent 34%),
+                    rgba(3, 7, 16, 0.88);
+            backdrop-filter: blur(18px) saturate(145%);
+            -webkit-backdrop-filter: blur(18px) saturate(145%);
+            padding: 24px;
+        }
+        .vip-modal-overlay.active .vip-modal {
+            animation: vipModalIn 0.34s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes vipModalIn {
+            from {
+                opacity: 0;
+                transform: translateY(18px) scale(0.98);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        .vip-modal {
+            position: relative;
+            isolation: isolate;
+            max-width: 760px;
+            border: 1px solid rgba(139, 205, 255, 0.36);
+            border-radius: 18px;
+            background:
+                    linear-gradient(145deg, rgba(8, 15, 29, 0.98), rgba(5, 9, 20, 0.98) 58%, rgba(12, 9, 22, 0.98)),
+                    #07101f;
+            box-shadow:
+                    0 30px 90px rgba(0, 0, 0, 0.72),
+                    0 0 0 1px rgba(255, 255, 255, 0.05),
+                    0 0 58px rgba(0, 210, 255, 0.14),
+                    0 0 64px rgba(255, 214, 94, 0.12);
+        }
+        .vip-modal::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            background:
+                    linear-gradient(rgba(104, 177, 255, 0.055) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(104, 177, 255, 0.055) 1px, transparent 1px),
+                    radial-gradient(circle at 20% 0%, rgba(78, 224, 255, 0.18), transparent 32%),
+                    radial-gradient(circle at 92% 18%, rgba(255, 215, 97, 0.13), transparent 24%);
+            background-size: 34px 34px, 34px 34px, auto, auto;
+            opacity: 0.88;
+        }
+        .vip-modal::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+            pointer-events: none;
+            border-radius: inherit;
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+        }
+        .vip-modal > * {
+            position: relative;
+            z-index: 1;
+        }
+        .vip-modal-header {
+            align-items: flex-start;
+            padding: 26px 30px 24px;
+            border-bottom: 1px solid rgba(122, 193, 255, 0.18);
+            background:
+                    linear-gradient(120deg, rgba(18, 38, 67, 0.86), rgba(8, 15, 29, 0.42) 58%),
+                    linear-gradient(90deg, rgba(255, 215, 97, 0.1), transparent 42%);
+            overflow: hidden;
+        }
+        .vip-modal-header::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(87, 225, 255, 0.72), rgba(255, 215, 97, 0.72), transparent);
+        }
+        .vip-header-copy {
+            max-width: calc(100% - 54px);
+        }
+        .vip-kicker {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            color: #70efff;
+            font-family: 'Orbitron', 'Inter', sans-serif;
+            font-size: 0.72rem;
+            font-weight: 700;
+        }
+        .vip-kicker span {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #70efff;
+            box-shadow: 0 0 14px rgba(112, 239, 255, 0.95);
+        }
+        .vip-modal-header h2 {
+            margin: 0;
+            font-family: 'Orbitron', 'Inter', sans-serif;
+            font-size: 1.58rem;
+            line-height: 1.2;
+            font-weight: 900;
+            color: #fff6d8;
+            text-shadow: 0 0 22px rgba(255, 215, 97, 0.28);
+        }
+        .vip-modal-header h2 i {
+            margin-right: 10px;
+            color: #ffdc6a;
+            filter: drop-shadow(0 0 12px rgba(255, 215, 97, 0.56));
+        }
+        .vip-modal-header p {
+            margin: 9px 0 0;
+            color: #b9d7f5;
+            font-size: 0.9rem;
+            line-height: 1.45;
+        }
+        .vip-close-btn {
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            border: 1px solid rgba(164, 207, 255, 0.24);
+            background: rgba(10, 21, 38, 0.72);
+            color: #d8ecff;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        }
+        .vip-close-btn:hover {
+            transform: translateY(-1px);
+            border-color: rgba(255, 106, 135, 0.62);
+            background: rgba(86, 24, 42, 0.72);
+            color: #fff;
+            box-shadow: 0 12px 28px rgba(255, 77, 112, 0.18);
+        }
+        .vip-modal-body {
+            padding: 22px 26px 24px;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(111, 220, 255, 0.45) rgba(255, 255, 255, 0.06);
+        }
+        .vip-promotion-bar {
+            border-radius: 12px;
+            padding: 12px 14px;
+            margin-bottom: 10px;
+            border: 1px solid rgba(255, 215, 97, 0.34);
+            background:
+                    linear-gradient(95deg, rgba(255, 215, 97, 0.14), rgba(0, 210, 255, 0.1)),
+                    rgba(8, 16, 31, 0.76);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 14px 34px rgba(0, 0, 0, 0.18);
+        }
+        .vip-promotion-date {
+            color: #9bdcff;
+            font-family: 'Orbitron', 'Inter', sans-serif;
+            font-size: 0.78rem;
+        }
+        .vip-promotion-title {
+            color: #ffe59b;
+            font-weight: 800;
+        }
+        .vip-promotion-title::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ffda6a;
+            box-shadow: 0 0 12px rgba(255, 218, 106, 0.9);
+        }
+        .vip-trust-strip {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+        .vip-trust-strip span {
+            min-width: 0;
+            min-height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            padding: 8px 10px;
+            border: 1px solid rgba(111, 220, 255, 0.18);
+            border-radius: 10px;
+            background: rgba(9, 22, 42, 0.68);
+            color: #cfeaff;
+            font-size: 0.78rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .vip-trust-strip i {
+            color: #72f0ff;
+        }
+        .vip-plan-grid {
+            grid-template-columns: 0.88fr 1fr 1.08fr;
+            gap: 12px;
+            margin-bottom: 16px;
+            align-items: stretch;
+        }
+        .vip-plan-card {
+            text-align: left;
+            border-radius: 12px;
+            padding: 16px 14px 14px;
+            overflow: hidden;
+            background:
+                    linear-gradient(160deg, rgba(17, 34, 60, 0.86), rgba(8, 13, 27, 0.9)),
+                    rgba(8, 13, 27, 0.9);
+            border: 1px solid rgba(111, 220, 255, 0.18);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 12px 34px rgba(0, 0, 0, 0.22);
+            transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+        }
+        .vip-plan-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, rgba(109, 231, 255, 0.2), rgba(109, 231, 255, 0.72), rgba(255, 215, 97, 0.2));
+        }
+        .vip-plan-card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(111, 220, 255, 0.46);
+            box-shadow: 0 18px 42px rgba(0, 0, 0, 0.32), 0 0 32px rgba(0, 210, 255, 0.12);
+        }
+        .vip-plan-card-basic {
+            background: linear-gradient(160deg, rgba(22, 31, 47, 0.78), rgba(8, 12, 22, 0.88));
+            border-color: rgba(158, 178, 205, 0.18);
+        }
+        .vip-plan-card-hot {
+            background:
+                    radial-gradient(circle at 82% 0%, rgba(255, 224, 119, 0.2), transparent 35%),
+                    linear-gradient(160deg, rgba(48, 33, 10, 0.88), rgba(12, 16, 28, 0.92));
+            border-color: rgba(255, 218, 106, 0.58);
+            box-shadow: 0 18px 48px rgba(0, 0, 0, 0.34), 0 0 38px rgba(255, 215, 97, 0.16);
+        }
+        .vip-plan-card-hot::before {
+            background: linear-gradient(90deg, #ffdb6b, #78efff, #ffdb6b);
+        }
+        .vip-plan-badge {
+            top: 11px;
+            right: 12px;
+            border-radius: 999px;
+            padding: 4px 10px;
+            color: #151008;
+            background: linear-gradient(135deg, #ffe9a8, #ffbd4a);
+            box-shadow: 0 8px 20px rgba(255, 190, 74, 0.24);
+            font-size: 0.68rem;
+        }
+        .vip-plan-name {
+            justify-content: flex-start;
+            min-height: 30px;
+            color: #dff4ff;
+            font-size: 0.92rem;
+            line-height: 1.25;
+            white-space: normal;
+        }
+        .vip-plan-name i {
+            width: 28px;
+            height: 28px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 9px;
+            color: #07101f;
+            background: linear-gradient(135deg, #78efff, #b8f7ff);
+            box-shadow: 0 8px 18px rgba(120, 239, 255, 0.16);
+            flex-shrink: 0;
+        }
+        .vip-plan-card-basic .vip-plan-name {
+            color: #d7e5f8;
+        }
+        .vip-plan-card-basic .vip-plan-name i {
+            background: linear-gradient(135deg, #aab7ca, #e2ecfa);
+        }
+        .vip-plan-card-hot .vip-plan-name {
+            color: #fff4c7;
+            padding-right: 52px;
+        }
+        .vip-plan-card-hot .vip-plan-name i {
+            background: linear-gradient(135deg, #fff0aa, #ffbd4a);
+        }
+        .vip-plan-price {
+            margin-top: 12px;
+            color: #80f6ff;
+            font-family: 'Orbitron', 'Inter', sans-serif;
+            font-size: 1.5rem;
+            line-height: 1;
+            font-weight: 900;
+        }
+        .vip-plan-card-basic .vip-plan-price {
+            color: #dce9fb;
+        }
+        .vip-plan-card-hot .vip-plan-price {
+            color: #ffdf74;
+            text-shadow: 0 0 20px rgba(255, 223, 116, 0.25);
+        }
+        .vip-plan-meta {
+            min-height: 26px;
+            justify-content: flex-start;
+            margin-top: 8px;
+            color: #9fb7d2;
+            font-size: 0.76rem;
+            gap: 8px;
+        }
+        .vip-plan-meta span {
+            color: #ffe19a;
+            font-weight: 800;
+        }
+        .vip-plan-meta s {
+            color: #6f7d8e;
+        }
+        .vip-plan-benefits {
+            align-items: stretch;
+            justify-items: stretch;
+            gap: 7px;
+            margin-top: 12px;
+            text-align: left;
+        }
+        .vip-plan-benefits li {
+            width: 100%;
+            min-height: 0;
+            justify-content: flex-start;
+            padding: 0;
+            border: 0;
+            border-radius: 0;
+            background: transparent;
+            color: #d7e7f4;
+            font-size: 0.76rem;
+            line-height: 1.35;
+        }
+        .vip-plan-benefits li i {
+            width: 18px;
+            height: 18px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(99, 255, 190, 0.12);
+            color: #6affc3;
+            font-size: 0.56rem;
+        }
+        .vip-get-code {
+            border-radius: 12px;
+            padding: 15px 16px;
+            background:
+                    linear-gradient(135deg, rgba(53, 153, 255, 0.13), rgba(255, 215, 97, 0.08)),
+                    rgba(9, 20, 38, 0.76);
+            border: 1px solid rgba(111, 220, 255, 0.2);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+        }
+        .vip-get-code-title {
+            color: #cdeeff;
+            font-size: 0.92rem;
+        }
+        .vip-get-code-title i {
+            color: #72f0ff;
+        }
+        .vip-get-code-content {
+            color: #9fb8d1;
+            font-size: 0.86rem;
+        }
+        .vip-get-code-content span {
+            color: #ffe08a !important;
+            font-weight: 800;
+        }
+        .vip-form-group {
+            margin-bottom: 14px;
+        }
+        .vip-form-group label {
+            color: #d4eaff;
+            font-weight: 700;
+        }
+        .vip-form-group label i {
+            color: #ffdd72;
+        }
+        .vip-form-group input {
+            height: 48px;
+            border-radius: 12px;
+            background: rgba(3, 10, 21, 0.82);
+            border: 1px solid rgba(111, 220, 255, 0.26);
+            color: #eff8ff;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 10px 28px rgba(0, 0, 0, 0.18);
+        }
+        .vip-form-group input:focus {
+            border-color: rgba(255, 221, 114, 0.86);
+            box-shadow: 0 0 0 3px rgba(255, 221, 114, 0.12), 0 0 28px rgba(255, 221, 114, 0.18);
+        }
+        .vip-form-group input::placeholder {
+            color: #6e86a2;
+        }
+        .vip-message {
+            border-radius: 12px;
+            font-weight: 700;
+        }
+        .vip-message.error {
+            background: rgba(255, 76, 116, 0.12);
+            border-color: rgba(255, 105, 139, 0.42);
+            color: #ffc4d2;
+        }
+        .vip-message.success {
+            background: rgba(60, 255, 184, 0.12);
+            border-color: rgba(96, 255, 196, 0.36);
+            color: #c8ffe9;
+        }
+        .vip-modal-footer {
+            padding: 18px 26px 22px;
+            border-top: 1px solid rgba(122, 193, 255, 0.18);
+            background: rgba(4, 10, 20, 0.62);
+        }
+        .vip-modal-footer .btn {
+            min-height: 44px;
+            padding: 11px 22px;
+            font-weight: 800;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn-vip {
+            position: relative;
+            overflow: hidden;
+            min-width: 188px;
+            border-radius: 12px;
+            color: #120d04;
+            background: linear-gradient(135deg, #fff0ae, #ffbd47 48%, #70efff);
+            box-shadow: 0 14px 34px rgba(255, 190, 74, 0.26), 0 0 32px rgba(112, 239, 255, 0.12);
+        }
+        .btn-vip::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: -45%;
+            width: 34%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+            transform: skewX(-18deg);
+            transition: left 0.45s ease;
+        }
+        .btn-vip:hover {
+            transform: translateY(-2px);
+            background: linear-gradient(135deg, #fff6c8, #ffc64f 48%, #89f7ff);
+            box-shadow: 0 18px 42px rgba(255, 198, 79, 0.36), 0 0 36px rgba(112, 239, 255, 0.18);
+        }
+        .btn-vip:hover::before {
+            left: 112%;
+        }
+        .btn-vip:disabled {
+            opacity: 0.68;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .btn-secondary {
+            border-radius: 12px;
+            background: rgba(12, 25, 45, 0.8);
+            border: 1px solid rgba(164, 207, 255, 0.22);
+            color: #b8cee6;
+        }
+        .btn-secondary:hover {
+            background: rgba(20, 39, 66, 0.92);
+            border-color: rgba(164, 207, 255, 0.38);
+            color: #fff;
+        }
+        @media (max-width: 680px) {
+            .vip-modal-overlay {
+                padding: 12px;
+                align-items: flex-start;
+                overflow-y: auto;
+            }
+            .vip-modal {
+                max-width: calc(100vw - 24px);
+                max-height: none;
+                margin: 12px 0;
+            }
+            .vip-modal-header {
+                padding: 22px 18px 20px;
+            }
+            .vip-header-copy {
+                max-width: calc(100% - 46px);
+            }
+            .vip-modal-header h2 {
+                font-size: 1.28rem;
+            }
+            .vip-modal-header p {
+                font-size: 0.82rem;
+            }
+            .vip-close-btn {
+                width: 34px;
+                height: 34px;
+                border-radius: 10px;
+            }
+            .vip-modal-body {
+                padding: 18px;
+            }
+            .vip-promotion-bar {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 6px;
+            }
+            .vip-trust-strip {
+                grid-template-columns: 1fr;
+            }
+            .vip-trust-strip span {
+                justify-content: flex-start;
+                white-space: normal;
+            }
+            .vip-plan-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+                overflow: visible;
+                padding: 0;
+            }
+            .vip-plan-card {
+                padding: 15px 14px;
+                border-radius: 12px;
+            }
+            .vip-plan-name {
+                min-height: 28px;
+                font-size: 0.9rem;
+                white-space: normal;
+            }
+            .vip-plan-price {
+                font-size: 1.35rem;
+            }
+            .vip-plan-meta {
+                min-height: 0;
+                font-size: 0.74rem;
+            }
+            .vip-plan-benefits {
+                gap: 6px;
+            }
+            .vip-plan-benefits li {
+                font-size: 0.74rem;
+                padding: 0;
+            }
+            .vip-plan-benefits li i {
+                display: inline-flex;
+            }
+            .vip-modal-footer {
+                flex-direction: column-reverse;
+                padding: 16px 18px 18px;
+            }
+            .vip-modal-footer .btn,
+            .btn-vip {
+                width: 100%;
+                min-width: 0;
+                flex: none;
+            }
+        }
+        @media (max-width: 360px) {
+            .vip-modal-body {
+                padding: 14px;
+            }
+            .vip-plan-name {
+                font-size: 0.84rem;
+            }
+            .vip-plan-price {
+                font-size: 1.22rem;
+            }
+            .vip-plan-meta,
+            .vip-plan-benefits li,
+            .vip-get-code-content {
+                font-size: 0.7rem;
+            }
+            .vip-plan-benefits li i {
+                display: inline-flex;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1720,13 +2293,22 @@
 <div class="vip-modal-overlay" id="vipModal">
     <div class="vip-modal">
         <div class="vip-modal-header">
-            <h2><i class="fas fa-crown"></i> 升级VIP</h2>
+            <div class="vip-header-copy">
+                <div class="vip-kicker"><span></span> NEON VIP ACCESS</div>
+                <h2><i class="fas fa-crown"></i> 升级VIP权限</h2>
+                <p>全站资源无限畅享 · VIP工具箱 · 专属客服通道</p>
+            </div>
             <button class="vip-close-btn" id="closeVipModal"><i class="fas fa-times"></i></button>
         </div>
         <div class="vip-modal-body">
             <div class="vip-promotion-bar">
                 <div class="vip-promotion-date" id="vipPromotionDate">2026-05-04 12:00:00</div>
                 <div class="vip-promotion-title">限时特惠 · 年卡7折 永久5折</div>
+            </div>
+            <div class="vip-trust-strip">
+                <span><i class="fas fa-shield-alt"></i> 官方卡密激活</span>
+                <span><i class="fas fa-bolt"></i> 秒级开通权限</span>
+                <span><i class="fas fa-lock"></i> 账号权益绑定</span>
             </div>
             <div class="vip-plan-grid">
                 <div class="vip-plan-card vip-plan-card-basic">
@@ -1764,21 +2346,21 @@
                 </div>
             </div>
             <div class="vip-get-code">
-                <div class="vip-get-code-title"><i class="fas fa-info-circle"></i> 激活码卡密获取方式</div>
+                <div class="vip-get-code-title"><i class="fas fa-info-circle"></i> 官方激活码获取方式</div>
                 <div class="vip-get-code-content">
-                    <p>1. 咸鱼/淘宝搜索：<span style="color: #FFD700;">霓虹之都激活码</span> 或 <span style="color: #FFD700;">neonvip激活码</span></p>
-                    <p>2. 通过代理商购买</p>
+                    <p>1. 闲鱼/淘宝搜索：<span style="color: #FFD700;">霓虹之都激活码</span> 或 <span style="color: #FFD700;">neonvip激活码</span></p>
+                    <p>2. 通过授权代理商购买官方卡密</p>
                 </div>
             </div>
             <div class="vip-form-group">
                 <label><i class="fas fa-key"></i> 输入激活码</label>
-                <input type="text" id="vipActivationCode" placeholder="请输入VIP激活码">
+                <input type="text" id="vipActivationCode" placeholder="粘贴VIP激活码，立即验证开通">
             </div>
             <div class="vip-message" id="vipMessage"></div>
         </div>
         <div class="vip-modal-footer">
             <button class="btn btn-secondary" id="cancelVipBtn">取消</button>
-            <button class="btn btn-vip" id="activateVipBtn"><i class="fas fa-crown"></i> 立即激活</button>
+            <button class="btn btn-vip" id="activateVipBtn"><i class="fas fa-crown"></i> 验证并激活VIP</button>
         </div>
     </div>
 </div>
@@ -3888,7 +4470,7 @@
                 messageDiv.style.display = 'block';
             } finally {
                 btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-crown"></i> 立即激活';
+                btn.innerHTML = '<i class="fas fa-crown"></i> 验证并激活VIP';
             }
         });
 

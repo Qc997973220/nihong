@@ -812,6 +812,13 @@ public class ResourceController {
         return result;
     }
 
+    // 首页轮播图：最近两天可见资源按访问量倒序取前8条
+    @GetMapping("/home-carousel")
+    @ResponseBody
+    public List<Resource> getHomeCarouselResources() {
+        return resourceService.getHomeCarouselResources();
+    }
+
     // 获取下载额度
     @GetMapping("/download-quota")
     @ResponseBody

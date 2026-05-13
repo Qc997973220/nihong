@@ -2368,7 +2368,7 @@
             .publish-btn, .vip-btn { padding: 6px 12px; font-size: 0.85rem; }
             .music-player { width: 32px; height: 32px; }
             .member-status-bar { padding: 3px 8px; font-size: 0.7rem; }
-            .neon-engine-core { 
+            .neon-engine-core {
                 display: none;
             }
         }
@@ -2418,6 +2418,913 @@
             .member-status-bar {
                 width: auto;
                 align-self: center;
+            }
+        }
+
+        /* 首页高级正式版覆盖样式 */
+        body {
+            background:
+                    linear-gradient(180deg, #050910 0%, #07111d 46%, #050810 100%);
+        }
+        body::after {
+            opacity: 0.72;
+            background-image:
+                    linear-gradient(rgba(112, 239, 255, 0.035) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(112, 239, 255, 0.035) 1px, transparent 1px);
+            background-size: 54px 54px;
+        }
+        #mainContent {
+            background:
+                    linear-gradient(120deg, rgba(255, 218, 106, 0.045), transparent 28%),
+                    linear-gradient(240deg, rgba(107, 255, 197, 0.035), transparent 34%),
+                    linear-gradient(180deg, rgba(8, 15, 29, 0.12), rgba(3, 7, 14, 0.6));
+        }
+        #mainContent > .container {
+            max-width: 1220px;
+        }
+        .navbar {
+            background: rgba(4, 10, 20, 0.86);
+            backdrop-filter: blur(22px) saturate(150%);
+            border-bottom: 1px solid rgba(137, 203, 255, 0.18);
+            box-shadow: 0 14px 40px rgba(0, 0, 0, 0.26);
+        }
+        .navbar .container {
+            max-width: 1220px;
+        }
+        .logo {
+            font-weight: 700;
+            background: linear-gradient(135deg, #ffffff, #9deeff 45%, #ffe099);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 10px rgba(112, 239, 255, 0.26));
+            letter-spacing: 0;
+        }
+        .visitor-count,
+        .music-player,
+        .user-info,
+        .member-status-bar,
+        .publish-btn,
+        .vip-btn {
+            border-radius: 8px;
+        }
+        .visitor-count {
+            background: rgba(7, 18, 34, 0.78);
+            border-color: rgba(113, 204, 255, 0.2);
+            color: #ccecff;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
+        .music-player {
+            background: rgba(8, 20, 38, 0.78);
+            border-color: rgba(113, 204, 255, 0.22);
+        }
+        .publish-btn {
+            background: linear-gradient(135deg, #0f69c7, #23b6d8);
+            box-shadow: 0 12px 26px rgba(17, 126, 199, 0.22);
+        }
+        .vip-btn {
+            color: #141008;
+            background: linear-gradient(135deg, #fff0af, #ffbe4d);
+            box-shadow: 0 12px 26px rgba(255, 190, 77, 0.2);
+        }
+        .publish-btn:hover,
+        .vip-btn:hover,
+        .user-info:hover {
+            transform: translateY(-1px);
+        }
+        .neon-engine-core {
+            margin: 22px 0 18px;
+            border-radius: 8px;
+            border-color: rgba(112, 239, 255, 0.28);
+            background:
+                    linear-gradient(90deg, rgba(6, 18, 32, 0.94), rgba(10, 27, 44, 0.86), rgba(6, 18, 32, 0.94));
+            box-shadow: 0 18px 42px rgba(0, 0, 0, 0.24), inset 0 0 36px rgba(112, 239, 255, 0.03);
+        }
+        .engine-badge,
+        .feature-tag,
+        .engine-collapse-btn {
+            border-radius: 6px;
+            letter-spacing: 0;
+        }
+        .home-hero {
+            position: relative;
+            padding: 18px 0 34px;
+            text-align: left;
+        }
+        .hero-shell {
+            position: relative;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 430px;
+            gap: 24px;
+            align-items: stretch;
+            padding: 34px;
+            border: 1px solid rgba(137, 203, 255, 0.24);
+            border-radius: 8px;
+            overflow: hidden;
+            background:
+                    linear-gradient(135deg, rgba(8, 19, 36, 0.96), rgba(6, 10, 20, 0.98) 56%, rgba(23, 18, 9, 0.94)),
+                    #07101f;
+            box-shadow:
+                    0 34px 90px rgba(0, 0, 0, 0.46),
+                    0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+        }
+        .hero-shell::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background-image:
+                    linear-gradient(rgba(112, 239, 255, 0.05) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(112, 239, 255, 0.05) 1px, transparent 1px);
+            background-size: 42px 42px;
+            mask-image: linear-gradient(90deg, rgba(0, 0, 0, 0.84), transparent 82%);
+        }
+        .hero-shell::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #70efff, #ffe099, #6affc3);
+            opacity: 0.86;
+        }
+        .hero-copy,
+        .hero-command-panel {
+            position: relative;
+            z-index: 1;
+        }
+        .hero-copy {
+            min-height: 430px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding-right: 6px;
+        }
+        .hero-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            padding: 7px 10px;
+            margin-bottom: 18px;
+            border: 1px solid rgba(112, 239, 255, 0.24);
+            border-radius: 8px;
+            background: rgba(5, 16, 30, 0.72);
+            color: #aeeeff;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0;
+        }
+        .hero-live-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #6affc3;
+            box-shadow: 0 0 14px rgba(106, 255, 195, 0.8);
+        }
+        .home-hero .neon-title {
+            display: block;
+            margin: 0 0 16px;
+            font-size: 3.75rem;
+            line-height: 1.05;
+            letter-spacing: 0;
+            background: linear-gradient(135deg, #ffffff 0%, #aeeeff 36%, #ffe099 76%, #ffffff 100%);
+            background-size: 220% 220%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+            filter: drop-shadow(0 0 16px rgba(112, 239, 255, 0.18));
+        }
+        .home-hero .neon-title::before,
+        .home-hero .lightning-left,
+        .home-hero .lightning-right {
+            display: none;
+        }
+        .hero-lede {
+            max-width: 640px;
+            margin: 0;
+            color: #b8cbe2;
+            font-size: 1.06rem;
+            line-height: 1.85;
+            font-weight: 420;
+        }
+        .hero-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 22px;
+        }
+        .hero-action {
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 11px 16px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 800;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+        .hero-action-primary {
+            color: #07101f;
+            background: linear-gradient(135deg, #8df3ff, #6affc3);
+            box-shadow: 0 14px 30px rgba(106, 255, 195, 0.16);
+        }
+        .hero-action-secondary {
+            color: #161006;
+            background: linear-gradient(135deg, #fff0ad, #ffbd47);
+            box-shadow: 0 14px 30px rgba(255, 189, 71, 0.18);
+        }
+        .hero-action:hover {
+            transform: translateY(-2px);
+        }
+        .home-search {
+            flex-direction: row;
+            max-width: 680px;
+            margin: 22px 0 0;
+            border-radius: 8px;
+            background: rgba(3, 12, 25, 0.74);
+            border: 1px solid rgba(137, 203, 255, 0.26);
+            box-shadow: 0 18px 42px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+        }
+        .home-search input {
+            padding: 15px 18px;
+            letter-spacing: 0;
+        }
+        .home-search input::placeholder {
+            color: #7691af;
+            letter-spacing: 0;
+        }
+        .home-search button {
+            border-radius: 0 8px 8px 0;
+            background: linear-gradient(135deg, #0f69c7, #23b6d8);
+            box-shadow: none;
+        }
+        .hero-metrics {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+            max-width: 680px;
+            margin-top: 18px;
+        }
+        .hero-metrics div {
+            min-height: 62px;
+            padding: 12px;
+            border: 1px solid rgba(137, 203, 255, 0.16);
+            border-radius: 8px;
+            background: rgba(8, 22, 40, 0.56);
+        }
+        .hero-metrics strong {
+            display: block;
+            color: #f5fbff;
+            font-family: 'Orbitron', 'Inter', sans-serif;
+            font-size: 1.18rem;
+            line-height: 1.1;
+            letter-spacing: 0;
+        }
+        .hero-metrics span {
+            display: block;
+            margin-top: 6px;
+            color: #8ca8c5;
+            font-size: 0.78rem;
+        }
+        .hero-command-panel {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            min-height: 468px;
+            padding: 14px;
+            overflow: hidden;
+            border: 1px solid rgba(137, 203, 255, 0.2);
+            border-radius: 8px;
+            background:
+                    linear-gradient(180deg, rgba(112, 239, 255, 0.06), rgba(9, 19, 35, 0.82)),
+                    rgba(6, 15, 29, 0.9);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+        }
+        .command-panel-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid rgba(137, 203, 255, 0.14);
+            color: #8fb6d8;
+            font-family: 'Orbitron', 'Inter', sans-serif;
+            font-size: 0.74rem;
+            font-weight: 800;
+            letter-spacing: 0;
+        }
+        .panel-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            color: #6affc3;
+        }
+        .panel-status i {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #6affc3;
+            box-shadow: 0 0 12px rgba(106, 255, 195, 0.76);
+        }
+        .access-overview {
+            display: grid;
+            gap: 10px;
+            margin-top: 14px;
+        }
+        .access-row {
+            position: relative;
+            display: grid;
+            grid-template-columns: auto minmax(0, 1fr) auto;
+            align-items: center;
+            gap: 12px;
+            padding: 13px;
+            border: 1px solid rgba(137, 203, 255, 0.14);
+            border-radius: 8px;
+            background: rgba(4, 12, 24, 0.58);
+        }
+        .access-row-featured {
+            border-color: rgba(255, 224, 153, 0.42);
+            background: linear-gradient(135deg, rgba(255, 224, 153, 0.12), rgba(4, 12, 24, 0.58));
+        }
+        .access-icon {
+            width: 36px;
+            height: 36px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            color: #07101f;
+            background: linear-gradient(135deg, #8df3ff, #6affc3);
+            flex-shrink: 0;
+        }
+        .access-row-featured .access-icon {
+            background: linear-gradient(135deg, #fff0ad, #ffbd47);
+        }
+        .access-row strong {
+            display: block;
+            color: #edf8ff;
+            font-size: 0.96rem;
+            line-height: 1.25;
+        }
+        .access-row small {
+            display: block;
+            margin-top: 4px;
+            color: #8ca8c5;
+            font-size: 0.76rem;
+            line-height: 1.35;
+        }
+        .access-row em {
+            padding: 4px 8px;
+            border-radius: 6px;
+            background: rgba(255, 224, 153, 0.14);
+            color: #ffe099;
+            border: 1px solid rgba(255, 224, 153, 0.28);
+            font-size: 0.68rem;
+            font-style: normal;
+            font-weight: 800;
+        }
+        .hero-panel-foot {
+            position: absolute;
+            left: 22px;
+            right: 22px;
+            top: calc(50% + 22px);
+            z-index: 6;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 0;
+            padding-top: 0;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+        .hero-panel-foot span {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 7px 9px;
+            border: 1px solid rgba(137, 203, 255, 0.14);
+            border-radius: 8px;
+            background: rgba(8, 22, 40, 0.58);
+            color: #b8d4ef;
+            font-size: 0.78rem;
+        }
+        .hero-panel-foot i {
+            color: #70efff;
+        }
+        .recommend-carousel {
+            position: relative;
+            flex: 1 1 auto;
+            height: 402px;
+            min-height: 0;
+            margin-top: 12px;
+            overflow: hidden;
+            display: flex;
+        }
+        .recommend-carousel-empty {
+            width: 100%;
+            height: 100%;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            border: 1px solid rgba(137, 203, 255, 0.14);
+            border-radius: 8px;
+            background: rgba(4, 12, 24, 0.58);
+            color: #9fb8d2;
+            font-weight: 700;
+        }
+        .recommend-slide {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            min-height: 0;
+            display: block;
+            padding: 0;
+            border: 1px solid rgba(137, 203, 255, 0.16);
+            border-radius: 8px;
+            overflow: hidden;
+            background:
+                    linear-gradient(145deg, rgba(10, 26, 48, 0.9), rgba(4, 12, 24, 0.9)),
+                    rgba(4, 12, 24, 0.88);
+            cursor: pointer;
+            animation: recommendSlideIn 0.32s ease;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
+        .recommend-slide::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 8px;
+            pointer-events: none;
+            background:
+                    radial-gradient(circle at 85% 12%, rgba(255, 224, 153, 0.13), transparent 34%),
+                    radial-gradient(circle at 16% 80%, rgba(112, 239, 255, 0.12), transparent 34%);
+        }
+        @keyframes recommendSlideIn {
+            from {
+                opacity: 0;
+                transform: translateX(14px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        .recommend-slide > * {
+            position: relative;
+            z-index: 1;
+        }
+        .recommend-slide-main {
+            width: 100%;
+            height: 100%;
+            min-height: 0;
+            display: block;
+        }
+        .recommend-slide-media {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            margin-bottom: 0;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 0;
+            background:
+                    linear-gradient(135deg, rgba(112, 239, 255, 0.12), rgba(255, 224, 153, 0.08)),
+                    rgba(4, 12, 24, 0.76);
+        }
+        .recommend-slide-media img,
+        .recommend-slide-placeholder {
+            width: 100%;
+            height: 100%;
+        }
+        .recommend-slide-media img {
+            display: block;
+            object-fit: cover;
+        }
+        .recommend-slide-placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(112, 239, 255, 0.72);
+            font-size: 2rem;
+        }
+        .recommend-slide-media::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background:
+                    linear-gradient(180deg, rgba(3, 8, 16, 0.08), transparent 34%, rgba(3, 8, 16, 0.34)),
+                    inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+        }
+        .recommend-slide:hover {
+            border-color: rgba(112, 239, 255, 0.38);
+        }
+        .recommend-carousel-dots {
+            position: absolute;
+            left: 22px;
+            right: 22px;
+            bottom: 20px;
+            z-index: 7;
+            min-height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            margin-top: 0;
+            pointer-events: auto;
+        }
+        .recommend-carousel-dot {
+            width: 8px;
+            height: 8px;
+            padding: 0;
+            border: 0;
+            border-radius: 50%;
+            background: rgba(221, 244, 255, 0.48);
+            box-shadow: 0 0 0 1px rgba(4, 12, 24, 0.42);
+            cursor: pointer;
+            transition: width 0.2s ease, background 0.2s ease;
+        }
+        .recommend-carousel-dot.active {
+            width: 24px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, #70efff, #ffe099);
+        }
+        .carousel-nav-btn {
+            width: 38px;
+            height: 38px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(221, 244, 255, 0.28);
+            border-radius: 50%;
+            background: rgba(4, 12, 24, 0.58);
+            backdrop-filter: blur(14px);
+            color: #cfeaff;
+            cursor: pointer;
+            pointer-events: auto;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.34);
+            transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+        }
+        .carousel-nav-btn:hover {
+            transform: scale(1.04);
+            border-color: rgba(112, 239, 255, 0.5);
+            background: rgba(13, 36, 62, 0.82);
+        }
+        .recommend-section,
+        .external-links {
+            border-radius: 8px;
+            background: rgba(7, 17, 31, 0.78);
+            border: 1px solid rgba(137, 203, 255, 0.18);
+            box-shadow: 0 20px 48px rgba(0, 0, 0, 0.26), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+        }
+        .recommend-section {
+            margin: 30px 0 22px;
+            padding: 20px;
+        }
+        .recommend-header h3,
+        .links-header h3 {
+            color: #edf8ff;
+            text-shadow: none;
+            font-weight: 800;
+            letter-spacing: 0;
+        }
+        .recommend-item {
+            border-radius: 8px;
+            background: rgba(4, 13, 25, 0.64);
+            border-color: rgba(137, 203, 255, 0.14);
+        }
+        .recommend-item:hover {
+            transform: translateX(2px);
+            background: rgba(11, 29, 51, 0.82);
+            border-color: rgba(112, 239, 255, 0.35);
+        }
+        .recommend-access-badge {
+            border-radius: 6px;
+            letter-spacing: 0;
+        }
+        .external-links {
+            margin-bottom: 30px;
+            padding: 18px;
+        }
+        .home-notice-bar {
+            margin: -18px 0 26px;
+            position: relative;
+            z-index: 2;
+        }
+        .home-notice-bar .links-scroll-msg {
+            margin: 0;
+            border-radius: 8px;
+            padding: 9px 14px;
+            background:
+                    linear-gradient(90deg, rgba(112, 239, 255, 0.08), rgba(255, 224, 153, 0.06)),
+                    rgba(6, 16, 30, 0.86);
+            border-color: rgba(137, 203, 255, 0.18);
+            box-shadow: 0 16px 32px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+        }
+        .home-notice-bar .scroll-content-msg span {
+            color: #b8d4ef;
+            font-size: 0.82rem;
+        }
+        .external-links-compact {
+            margin: 12px 0 34px;
+            padding: 12px;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+        }
+        .external-links-compact .links-header {
+            margin-bottom: 8px;
+            padding: 0 2px;
+        }
+        .external-links-compact .links-header h3 {
+            font-size: 0.92rem;
+        }
+        .external-links-compact .link-nav-btn {
+            width: 26px;
+            height: 26px;
+        }
+        .external-links-compact .links-scroll {
+            padding-bottom: 2px;
+        }
+        .external-links-compact .links-container {
+            gap: 8px;
+            padding: 2px;
+        }
+        .external-links-compact .link-card {
+            width: 132px;
+            padding: 9px 10px;
+        }
+        .external-links-compact .link-name {
+            font-size: 0.82rem;
+        }
+        .link-nav-btn,
+        .link-card,
+        .links-scroll-msg {
+            border-radius: 8px;
+        }
+        .link-card {
+            width: 174px;
+            background: rgba(4, 13, 25, 0.68);
+            border-color: rgba(137, 203, 255, 0.16);
+            box-shadow: none;
+        }
+        .link-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(112, 239, 255, 0.38);
+            box-shadow: 0 16px 32px rgba(0, 0, 0, 0.22);
+        }
+        .resource-section-head {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 20px;
+            margin: 34px 0 16px;
+            padding-top: 4px;
+        }
+        .section-kicker {
+            display: block;
+            margin-bottom: 7px;
+            color: #70efff;
+            font-family: 'Orbitron', 'Inter', sans-serif;
+            font-size: 0.74rem;
+            font-weight: 800;
+            letter-spacing: 0;
+        }
+        .resource-section-head h2 {
+            margin: 0;
+            color: #f4fbff;
+            font-size: 1.7rem;
+            line-height: 1.2;
+        }
+        .resource-section-head p {
+            max-width: 420px;
+            margin: 0;
+            color: #8ca8c5;
+            font-size: 0.92rem;
+            line-height: 1.65;
+            text-align: right;
+        }
+        .categories {
+            margin: 0 0 24px;
+            padding: 8px;
+            border: 1px solid rgba(137, 203, 255, 0.14);
+            border-radius: 8px;
+            background: rgba(7, 17, 31, 0.66);
+        }
+        .category-chip {
+            border-radius: 8px;
+            background: transparent;
+            border-color: transparent;
+            box-shadow: none;
+            color: #9fb8d2;
+            font-weight: 700;
+        }
+        .category-chip:hover,
+        .category-chip.active {
+            background: linear-gradient(135deg, rgba(112, 239, 255, 0.16), rgba(106, 255, 195, 0.12));
+            border-color: rgba(112, 239, 255, 0.28);
+            box-shadow: none;
+            transform: none;
+            color: #f5fbff;
+        }
+        .resource-grid {
+            gap: 18px;
+            margin: 24px 0 56px;
+            scroll-margin-top: 120px;
+        }
+        .resource-card {
+            position: relative;
+            border-radius: 8px;
+            padding: 14px;
+            background:
+                    linear-gradient(180deg, rgba(13, 28, 49, 0.86), rgba(6, 14, 26, 0.92));
+            border: 1px solid rgba(137, 203, 255, 0.16);
+            box-shadow: 0 18px 42px rgba(0, 0, 0, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+            overflow: hidden;
+        }
+        .resource-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 0;
+            height: 2px;
+            background: linear-gradient(90deg, rgba(112, 239, 255, 0.78), rgba(255, 224, 153, 0.68), rgba(106, 255, 195, 0.64));
+            opacity: 0;
+            transition: opacity 0.22s ease;
+        }
+        .resource-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(112, 239, 255, 0.34);
+            box-shadow: 0 24px 54px rgba(0, 0, 0, 0.34), 0 0 24px rgba(112, 239, 255, 0.08);
+        }
+        .resource-card:hover::before {
+            opacity: 1;
+        }
+        .card-image,
+        .card-image-placeholder,
+        .card-image-overlay {
+            border-radius: 8px;
+        }
+        .card-image,
+        .card-image-placeholder {
+            height: 156px;
+            margin-bottom: 14px;
+        }
+        .card-image-placeholder {
+            background:
+                    linear-gradient(135deg, rgba(112, 239, 255, 0.12), rgba(255, 224, 153, 0.08)),
+                    rgba(7, 17, 31, 0.86);
+        }
+        .card-title {
+            color: #f4fbff;
+            font-size: 1.08rem;
+            font-weight: 800;
+            line-height: 1.45;
+        }
+        .card-desc {
+            color: #9fb8d2;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        .card-meta {
+            border-top-color: rgba(137, 203, 255, 0.14);
+            gap: 9px;
+            padding-top: 13px;
+        }
+        .card-type,
+        .card-link,
+        .access-badge,
+        .card-view-count {
+            border-radius: 6px;
+        }
+        .card-type {
+            background: rgba(112, 239, 255, 0.08);
+            color: #bfefff;
+            border-color: rgba(112, 239, 255, 0.24);
+        }
+        .card-link {
+            background: linear-gradient(135deg, #0f69c7, #23b6d8);
+            box-shadow: 0 10px 22px rgba(17, 126, 199, 0.18);
+        }
+        .free-badge {
+            background: linear-gradient(135deg, #12c99b, #23b6d8);
+        }
+        .vip-badge {
+            background: linear-gradient(135deg, #fff0ad, #ff9f43);
+            color: #181006;
+        }
+        .footer {
+            background: rgba(4, 10, 20, 0.9);
+            border-top-color: rgba(137, 203, 255, 0.16);
+        }
+        @media (max-width: 900px) {
+            .home-hero {
+                padding-top: 12px;
+            }
+            .hero-shell {
+                grid-template-columns: 1fr;
+                padding: 24px;
+            }
+            .hero-copy {
+                min-height: auto;
+                padding-right: 0;
+            }
+            .home-hero .neon-title {
+                font-size: 2.8rem;
+            }
+            .hero-command-panel {
+                min-height: 400px;
+            }
+            .recommend-carousel {
+                height: 320px;
+            }
+            .resource-section-head {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+            .resource-section-head p {
+                max-width: 100%;
+                text-align: left;
+            }
+        }
+        @media (max-width: 600px) {
+            .home-hero {
+                padding: 10px 0 24px;
+            }
+            .hero-shell {
+                padding: 18px;
+                gap: 18px;
+            }
+            .home-hero .neon-title {
+                font-size: 2.2rem;
+                line-height: 1.16;
+            }
+            .hero-lede {
+                font-size: 0.95rem;
+                line-height: 1.72;
+            }
+            .hero-actions {
+                display: grid;
+                grid-template-columns: 1fr;
+            }
+            .home-search {
+                flex-direction: column;
+                border-radius: 8px;
+            }
+            .home-search input {
+                text-align: left;
+                border-bottom: 1px solid rgba(137, 203, 255, 0.16);
+            }
+            .home-search button {
+                width: 100%;
+                min-height: 44px;
+                border-radius: 0 0 8px 8px;
+            }
+            .hero-metrics {
+                grid-template-columns: 1fr;
+            }
+            .access-row {
+                grid-template-columns: auto minmax(0, 1fr);
+            }
+            .access-row em {
+                grid-column: 2;
+                justify-self: start;
+            }
+            .recommend-carousel,
+            .recommend-carousel-empty,
+            .recommend-slide {
+                min-height: 0;
+            }
+            .recommend-carousel {
+                height: 260px;
+            }
+            .recommend-slide-media {
+                height: 100%;
+            }
+            .hero-panel-foot {
+                align-items: center;
+            }
+            .recommend-content {
+                gap: 10px;
+            }
+            .categories {
+                gap: 6px;
+            }
+            .category-chip {
+                flex: 1 1 calc(33.333% - 6px);
+                text-align: center;
+                padding: 8px 10px;
+            }
+            .resource-grid {
+                margin-top: 18px;
             }
         }
     </style>
@@ -2689,34 +3596,63 @@
             </div>
         </div>
 
-        <section class="hero">
+        <section class="hero home-hero">
+            <div class="hero-shell">
+                <div class="hero-copy">
+                    <div class="hero-eyebrow"><span class="hero-live-dot"></span> 官方资源权益中枢</div>
+                    <h1 class="neon-title">
+                        <span class="lightning-left"></span>
+                        NEON 霓虹之都
+                        <span class="lightning-right"></span>
+                    </h1>
+                    <p class="hero-lede">精选付费课程、蓝海项目、效率工具与风口资讯，按会员权益集中整理，打开即可检索并进入详情。</p>
 
-            <h1 class="neon-title">
-                <span class="lightning-left"></span>
-                NEON 霓虹之都
-                <span class="lightning-right"></span>
-            </h1>
-            <p>精选全网付费可实操课程/蓝海项目VIP免费获取,最新风口资讯各种黑科技尽在霓虹之都</p>
+                    <div class="hero-actions">
+                        <a class="hero-action hero-action-primary" href="#resourceGrid"><i class="fa-solid fa-layer-group"></i><span>浏览资源库</span></a>
+                        <a class="hero-action hero-action-secondary" href="javascript:void(0)" onclick="document.getElementById('vipModal').classList.add('active');document.getElementById('vipActivationCode').value='';document.getElementById('vipMessage').style.display='none';if(typeof updatePromotionDate==='function'){updatePromotionDate();}"><i class="fas fa-crown"></i><span>开通VIP权限</span></a>
+                    </div>
 
-            <div class="search-box">
-                <input type="text" id="searchInput" placeholder="梦的开始·霓虹之都">
-                <button id="searchBtn"><i class="fa-solid fa-magnifying-glass"></i> 搜索</button>
+                    <div class="search-box home-search">
+                        <input type="text" id="searchInput" placeholder="搜索课程、项目、软件或资讯">
+                        <button id="searchBtn"><i class="fa-solid fa-magnifying-glass"></i> 搜索</button>
+                    </div>
+
+                    <div class="hero-metrics">
+                        <div><strong>24H</strong><span>持续更新</span></div>
+                        <div><strong>VIP</strong><span>权益解锁</span></div>
+                        <div><strong>全站</strong><span>统一检索</span></div>
+                    </div>
+                </div>
+
+                <div class="hero-command-panel">
+                    <div class="command-panel-top">
+                        <span><i class="fas fa-fire"></i> HOT PICKS</span>
+                        <span class="panel-status"><i></i> LIVE</span>
+                    </div>
+                    <div class="recommend-carousel" id="recommendCarousel">
+                        <div class="recommend-carousel-empty">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <span>热门轮播加载中</span>
+                        </div>
+                    </div>
+                    <div class="recommend-carousel-dots" id="recommendCarouselDots"></div>
+                    <div class="hero-panel-foot">
+                        <button type="button" class="carousel-nav-btn" id="recommendPrev" aria-label="上一张轮播"><i class="fas fa-chevron-left"></i></button>
+                        <button type="button" class="carousel-nav-btn" id="recommendNext" aria-label="下一张轮播"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                </div>
             </div>
         </section>
 
-        <!-- 本周推荐榜模块 -->
-        <div class="recommend-section" id="recommendSection">
-            <div class="recommend-header">
-                <h3><i class="fas fa-fire"></i> 本周推荐榜</h3>
-            </div>
-            <div class="recommend-content">
-                <div class="recommend-list" id="recommendLeft"></div>
-                <div class="recommend-list" id="recommendRight"></div>
-            </div>
-        </div>
+        <div class="home-notice-bar" id="homeNoticeBar"></div>
 
-        <!-- 外部链接模块（新增） -->
-        <div class="external-links" id="externalLinks"></div>
+        <div class="resource-section-head">
+            <div>
+                <span class="section-kicker">RESOURCE MATRIX</span>
+                <h2>精选资源库</h2>
+            </div>
+            <p>按分类筛选，快速进入详情查看资源说明与下载权限。</p>
+        </div>
 
         <div class="categories">
             <span class="category-chip active">全部</span>
@@ -2729,6 +3665,9 @@
 
         <div class="resource-grid" id="resourceGrid"></div>
         <div class="pagination" id="pagination"></div>
+
+        <!-- 外部链接模块 -->
+        <div class="external-links external-links-compact" id="externalLinks"></div>
     </div>
 
     <footer class="footer">
@@ -2975,17 +3914,17 @@
         async function validateSession() {
             const token = localStorage.getItem('authToken');
             const storedUserInfo = localStorage.getItem('userInfo');
-            
+
             console.log('=== validateSession 开始 ===');
             console.log('token:', token ? '存在' : '不存在');
             console.log('storedUserInfo:', storedUserInfo ? '存在' : '不存在');
-            
+
             if (!token || !storedUserInfo) {
                 console.log('没有token或用户信息，直接返回');
                 // 没有token或用户信息，使用默认状态，不清除UI
                 return;
             }
-            
+
             try {
                 const response = await fetch('/api/login/validateToken', {
                     method: 'POST',
@@ -2996,17 +3935,17 @@
                         token: token
                     })
                 });
-                
+
                 // 检查HTTP状态码
                 if (!response.ok) {
                     console.error('验证会话失败，HTTP状态:', response.status);
                     // HTTP错误但不清除本地缓存，保留用户显示状态
                     return;
                 }
-                
+
                 const result = await response.json();
                 console.log('validateToken返回:', result);
-                
+
                 if (!result.valid) {
                     console.log('会话验证结果:', result.message);
                     if (result.kicked) {
@@ -3017,13 +3956,13 @@
                     // 否则保留本地缓存的登录状态
                     return;
                 }
-                
+
                 // Token有效，更新用户信息（保留已有值，只更新后端返回的字段）
                 if (result.user) {
                     const userInfo = result.user;
                     console.log('后端返回的userInfo:', userInfo);
                     console.log('更新前的currentUser:', currentUser);
-                    
+
                     // 重要：保留所有本地已有的值，只有当后端返回有效值时才更新
                     currentUser = {
                         ...currentUser,
@@ -3035,9 +3974,9 @@
                         memberStatus: userInfo.memberStatus || currentUser.memberStatus,
                         memberExpireText: userInfo.memberExpireText || currentUser.memberExpireText
                     };
-                    
+
                     console.log('更新后的currentUser:', currentUser);
-                    
+
                     // 合并后端返回的数据和本地缓存，保留已有值
                     const existingInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
                     const mergedUserInfo = {
@@ -3052,7 +3991,7 @@
                     };
                     localStorage.setItem('userInfo', JSON.stringify(mergedUserInfo));
                     console.log('合并后的userInfo:', mergedUserInfo);
-                    
+
                     if (currentUser.username) {
                         document.getElementById('displayUsername').textContent = currentUser.username;
                     }
@@ -3060,7 +3999,7 @@
                         document.getElementById('userAvatar').innerHTML = `<img src="${currentUser.avatar}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
                     }
                     updateMemberBadge(currentUser);
-                    
+
                     if (currentUser.role === '1') {
                         document.getElementById('adminLink').style.display = 'block';
                     }
@@ -3071,7 +4010,7 @@
                 // 不调用clearUserSession()，保持本地存储的用户信息
             }
         }
-        
+
         function clearUserSession() {
             localStorage.removeItem('authToken');
             localStorage.removeItem('userInfo');
@@ -3087,11 +4026,11 @@
             // 首先从localStorage读取用户信息，立即更新UI
             const storedUserInfo = localStorage.getItem('userInfo');
             const token = localStorage.getItem('authToken');
-            
+
             console.log('=== initUserSession 开始 ===');
             console.log('localStorage userInfo:', storedUserInfo ? '存在' : '不存在');
             console.log('localStorage authToken:', token ? '存在' : '不存在');
-            
+
             // 修改：只要有userInfo就显示登录状态，不再强制要求token
             if (storedUserInfo) {
                 try {
@@ -3107,9 +4046,9 @@
                         memberStatus: userInfo.memberStatus,
                         memberExpireText: userInfo.memberExpireText
                     };
-                    
+
                     console.log('currentUser 更新后:', currentUser);
-                    
+
                     // 立即更新UI显示
                     updateUserDisplay();
                 } catch (e) {
@@ -3121,7 +4060,7 @@
                 // 如果没有用户信息，显示未登录状态
                 updateUserDisplay();
             }
-            
+
             // 然后异步验证Token有效性
             console.log('准备调用 validateSession...');
             await validateSession();
@@ -3130,17 +4069,17 @@
         function updateUserDisplay() {
             console.log('=== updateUserDisplay 被调用 ===');
             console.log('currentUser:', currentUser);
-            
+
             const displayUsername = document.getElementById('displayUsername');
             const userAvatar = document.getElementById('userAvatar');
             const memberStatusBar = document.getElementById('memberStatusBar');
             const adminLink = document.getElementById('adminLink');
             const vipBtn = document.getElementById('vipUpgradeBtn');
-            
+
             console.log('displayUsername元素:', displayUsername);
             console.log('userAvatar元素:', userAvatar);
             console.log('memberStatusBar元素:', memberStatusBar);
-            
+
             // 更新用户名显示
             if (displayUsername) {
                 const nameToShow = currentUser.username || '未登录用户';
@@ -3149,7 +4088,7 @@
             } else {
                 console.log('displayUsername元素不存在!');
             }
-            
+
             // 更新头像显示
             if (userAvatar) {
                 if (currentUser.avatar) {
@@ -3160,7 +4099,7 @@
                     console.log('设置userAvatar首字符为:', displayName.charAt(0).toUpperCase());
                 }
             }
-            
+
             // 更新会员徽章 - 只要有用户信息就显示
             if (memberStatusBar && (currentUser.account || currentUser.memberStatus)) {
                 console.log('准备更新会员徽章, memberStatus:', currentUser.memberStatus);
@@ -3168,7 +4107,7 @@
             } else {
                 console.log('会员徽章未更新, memberStatusBar:', !!memberStatusBar, 'account:', currentUser.account, 'memberStatus:', currentUser.memberStatus);
             }
-            
+
             // 更新VIP按钮状态
             if (vipBtn) {
                 if (isVipUser(currentUser)) {
@@ -3178,7 +4117,7 @@
                 }
             }
             updateVipToolboxVisibility(currentUser);
-            
+
             // 检查是否为管理员
             if (adminLink && currentUser.role === '1') {
                 adminLink.style.display = 'block';
@@ -3340,7 +4279,7 @@
                     console.error('解析缓存资源失败:', e);
                 }
             }
-            
+
             // 从服务器获取最新资源列表
             fetch(`/api/resources/list`)
                 .then(response => response.json())
@@ -3350,7 +4289,7 @@
                     // 缓存资源列表到localStorage，过期时间10分钟
                     localStorage.setItem('cachedResources', JSON.stringify(data));
                     localStorage.setItem('cachedResourcesTimestamp', Date.now().toString());
-                    
+
                     const resourceGrid = document.getElementById('resourceGrid');
                     if (resourceGrid) {
                         resourceGrid.innerHTML = '';
@@ -3497,9 +4436,20 @@
     // 渲染外部链接模块
     function renderExternalLinks() {
         const container = document.getElementById('externalLinks');
+        const noticeBar = document.getElementById('homeNoticeBar');
         if (!container) return;
 
         const scrollMsgText = '欢迎进入霓虹之都网创资源库,本站24小时实时更新，同步更新各大资源网站的付费可实操课程。网站会员免费查看，资源审核工作量大, 请勿轻信课程广告 , 具体内容需自行分辨 , 谨防上当受骗。';
+
+        if (noticeBar) {
+            noticeBar.innerHTML = `
+                <div class="links-scroll-msg home-scroll-msg">
+                    <div class="scroll-content-msg" id="scrollMessage">
+                        <span>${scrollMsgText}</span><span>${scrollMsgText}</span>
+                    </div>
+                </div>
+            `;
+        }
 
         let html = `
                 <div class="links-header">
@@ -3524,11 +4474,6 @@
         });
 
         html += `
-                    </div>
-                </div>
-                <div class="links-scroll-msg">
-                    <div class="scroll-content-msg" id="scrollMessage">
-                        <span>${scrollMsgText}</span><span>${scrollMsgText}</span>
                     </div>
                 </div>
             `;
@@ -3556,6 +4501,9 @@
     let totalResourceElements = 0;
     let currentSearchKeyword = '';
     let currentCategory = '全部';
+    let recommendCarouselItems = [];
+    let recommendCarouselIndex = 0;
+    let recommendCarouselTimer = null;
 
     // 渲染卡片
     function renderCards(resources) {
@@ -3704,60 +4652,150 @@
         });
     });
 
-    // 获取本周推荐榜资源
+    // 获取首页热门轮播资源
     async function fetchRecommendedResources() {
         try {
-            const response = await fetch('/api/resources/status/2');
+            const response = await fetch('/api/resources/home-carousel');
             const resources = await response.json();
             renderRecommendList(resources);
         } catch (error) {
             console.error('获取推荐资源失败:', error);
+            renderRecommendList([]);
         }
     }
 
     function renderRecommendList(resources) {
-        const leftContainer = document.getElementById('recommendLeft');
-        const rightContainer = document.getElementById('recommendRight');
-        if (!leftContainer || !rightContainer) return;
+        const carousel = document.getElementById('recommendCarousel');
+        const dots = document.getElementById('recommendCarouselDots');
+        if (!carousel || !dots) return;
 
-        if (!resources || resources.length === 0) {
-            leftContainer.innerHTML = '<div class="recommend-item"><span style="color:#666;">暂无推荐内容</span></div>';
-            rightContainer.innerHTML = '';
+        recommendCarouselItems = Array.isArray(resources)
+            ? resources.filter(item => item && item.id).slice(0, 8)
+            : [];
+        recommendCarouselIndex = 0;
+        bindRecommendCarouselControls();
+
+        if (recommendCarouselItems.length === 0) {
+            stopRecommendCarousel();
+            carousel.innerHTML = `
+                <div class="recommend-carousel-empty">
+                    <i class="fas fa-fire"></i>
+                    <span>暂无热门轮播资源</span>
+                </div>
+            `;
+            dots.innerHTML = '';
             return;
         }
 
-        const midpoint = Math.ceil(resources.length / 2);
-        const leftItems = resources.slice(0, midpoint);
-        const rightItems = resources.slice(midpoint);
+        updateRecommendCarousel();
+        startRecommendCarousel();
+    }
 
-        const renderRecommendItem = (r) => {
-            const isFree = r.category === '免费';
-            const badgeClass = isFree ? 'recommend-free-badge' : 'recommend-vip-badge';
-            const badgeText = isFree ? '免费' : 'VIP';
-            return `
-            <div class="recommend-item" onclick="window.open('detail.html?id=${r.id}', '_blank')">
-                <i class="fas fa-chevron-right" style="color:#5a85c0;font-size:0.7rem;"></i>
-                <a href="detail.html?id=${r.id}" target="_blank">${r.title}</a>
-                <span class="recommend-access-badge ${badgeClass}">${badgeText}</span>
+    function updateRecommendCarousel() {
+        const carousel = document.getElementById('recommendCarousel');
+        const dots = document.getElementById('recommendCarouselDots');
+        if (!carousel || !dots || recommendCarouselItems.length === 0) return;
+
+        const item = recommendCarouselItems[recommendCarouselIndex];
+        const imageHtml = getRecommendImageHtml(item);
+
+        carousel.innerHTML = `
+            <div class="recommend-slide" onclick="window.open('detail.html?id=${item.id}', '_blank')">
+                <div class="recommend-slide-main">
+                    ${imageHtml}
+                </div>
             </div>
         `;
-        };
 
-        leftContainer.innerHTML = leftItems.map(renderRecommendItem).join('');
-        rightContainer.innerHTML = rightItems.map(renderRecommendItem).join('');
+        dots.innerHTML = recommendCarouselItems.map((_, index) => `
+            <button type="button" class="recommend-carousel-dot ${index === recommendCarouselIndex ? 'active' : ''}" data-index="${index}" aria-label="第${index + 1}条推荐"></button>
+        `).join('');
+        dots.querySelectorAll('.recommend-carousel-dot').forEach(dot => {
+            dot.addEventListener('click', function() {
+                recommendCarouselIndex = Number(this.dataset.index) || 0;
+                updateRecommendCarousel();
+                startRecommendCarousel();
+            });
+        });
+    }
+
+    function startRecommendCarousel() {
+        stopRecommendCarousel();
+        if (recommendCarouselItems.length <= 1) return;
+        recommendCarouselTimer = setInterval(() => {
+            recommendCarouselIndex = (recommendCarouselIndex + 1) % recommendCarouselItems.length;
+            updateRecommendCarousel();
+        }, 4500);
+    }
+
+    function stopRecommendCarousel() {
+        if (recommendCarouselTimer) {
+            clearInterval(recommendCarouselTimer);
+            recommendCarouselTimer = null;
+        }
+    }
+
+    function bindRecommendCarouselControls() {
+        const prevBtn = document.getElementById('recommendPrev');
+        const nextBtn = document.getElementById('recommendNext');
+        if (prevBtn && !prevBtn.dataset.bound) {
+            prevBtn.dataset.bound = 'true';
+            prevBtn.addEventListener('click', function() {
+                if (recommendCarouselItems.length === 0) return;
+                recommendCarouselIndex = (recommendCarouselIndex - 1 + recommendCarouselItems.length) % recommendCarouselItems.length;
+                updateRecommendCarousel();
+                startRecommendCarousel();
+            });
+        }
+        if (nextBtn && !nextBtn.dataset.bound) {
+            nextBtn.dataset.bound = 'true';
+            nextBtn.addEventListener('click', function() {
+                if (recommendCarouselItems.length === 0) return;
+                recommendCarouselIndex = (recommendCarouselIndex + 1) % recommendCarouselItems.length;
+                updateRecommendCarousel();
+                startRecommendCarousel();
+            });
+        }
+    }
+
+    function getRecommendImageHtml(item) {
+        const image = String(item.image || '').trim();
+        if (!image) {
+            return `
+                <div class="recommend-slide-media">
+                    <div class="recommend-slide-placeholder"><i class="fas fa-image"></i></div>
+                </div>
+            `;
+        }
+        return `
+            <div class="recommend-slide-media">
+                <img src="${escapeRecommendHtml(image)}" alt="${escapeRecommendHtml(item.title || '推荐资源')}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="recommend-slide-placeholder" style="display:none;"><i class="fas fa-image"></i></div>
+            </div>
+        `;
+    }
+
+    function escapeRecommendHtml(value) {
+        return String(value ?? '').replace(/[&<>"']/g, char => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;'
+        }[char]));
     }
     // 登录/注册相关
     function showLogin() {
         document.getElementById('loginWrapper').style.display = 'flex';
-        
+
         const loginPanel = document.getElementById('loginPanel');
         const registerPanel = document.getElementById('registerPanel');
         const forgotPasswordPanel = document.getElementById('forgotPasswordPanel');
-        
+
         if (loginPanel) loginPanel.classList.remove('hidden');
         if (registerPanel) registerPanel.classList.add('hidden');
         if (forgotPasswordPanel) forgotPasswordPanel.classList.add('hidden');
-        
+
         // 检查是否还有锁定状态
         if (lockUntilTime && lockUntilTime > new Date()) {
             const btn = document.getElementById('loginBtn');
@@ -3777,7 +4815,7 @@
             }
             lockUntilTime = null;
         }
-        
+
         const loginAccountInput = document.getElementById('loginAccount');
         if (loginAccountInput) loginAccountInput.focus();
     }
@@ -4303,7 +5341,7 @@
                 messageDiv.className = 'message error';
                 messageDiv.innerText = result.message || '登录失败次数过多，账号已锁定';
                 messageDiv.style.display = 'block';
-                
+
                 // 从消息中解析锁定时间
                 const lockTimeMatch = result.message ? result.message.match(/请在\s+([\d\-:\s]+)\s+后重试/) : null;
                 if (lockTimeMatch && lockTimeMatch[1]) {
@@ -4338,11 +5376,11 @@
         if (lockCountdownInterval) {
             clearInterval(lockCountdownInterval);
         }
-        
+
         lockCountdownInterval = setInterval(() => {
             const now = new Date();
             const remaining = lockUntilTime - now;
-            
+
             if (remaining <= 0) {
                 clearInterval(lockCountdownInterval);
                 lockCountdownInterval = null;
@@ -4353,7 +5391,7 @@
                 messageDiv.innerText = '账号已解锁，请重新登录';
                 return;
             }
-            
+
             const minutes = Math.floor(remaining / 60000);
             const seconds = Math.floor((remaining % 60000) / 1000);
             btn.innerHTML = `<i class="fa-solid fa-lock"></i> 请等待 ${minutes}:${seconds.toString().padStart(2, '0')}`;
@@ -4448,7 +5486,7 @@
 
                     // 使用userName作为显示名称
                     const displayName = loginResult.user.userName || loginResult.user.account;
-                    
+
                     // 存储用户信息到localStorage
                     const userInfo = {
                         account: loginResult.user.account,
@@ -4511,7 +5549,7 @@
                 messageDiv.style.display = 'block';
             } else {
                 messageDiv.className = 'message error';
-                messageDiv.innerText = '卡密无效，请咸鱼搜索"霓虹之都卡密"获取有效卡密';
+                messageDiv.innerText = '卡密无效，请闲鱼搜索"霓虹之都卡密"获取有效卡密';
                 messageDiv.style.display = 'block';
             }
         } catch (error) {
@@ -4577,7 +5615,7 @@
             console.error('获取未读消息数量失败:', error);
         }
     }
-    
+
     // 获取未读消息列表
     async function getUnreadMessages(username) {
         try {
@@ -4591,7 +5629,7 @@
                     const messages = result.messages || [];
                     const notificationList = document.getElementById('notificationList');
                     notificationList.innerHTML = '';
-                    
+
                     if (messages.length === 0) {
                         notificationList.innerHTML = '<div style="padding: 16px; text-align: center; color: #90b0d1;">暂无未读消息</div>';
                     } else {
@@ -4607,26 +5645,26 @@
                                 <div style="font-size: 0.8rem; color: #90b0d1;">${message.createdAt}</div>
                                 <div style="position: absolute; top: 12px; right: 12px; width: 8px; height: 8px; background: #ff4757; border-radius: 50%;"></div>
                             `;
-                            
+
                             messageItem.addEventListener('click', async () => {
                                 // 先标记消息为已读
                                 await markMessageAsRead(message.id);
-                                
+
                                 // 从通知列表中移除该消息
                                 messageItem.remove();
-                                
+
                                 // 检查通知列表是否为空
                                 const notificationList = document.getElementById('notificationList');
                                 if (notificationList.children.length === 0) {
                                     notificationList.innerHTML = '<div style="padding: 16px; text-align: center; color: #90b0d1;">暂无未读消息</div>';
                                 }
-                                
+
                                 // 如果是评论回复类型的消息，跳转到相关资源详情页
                                 if (message.type === 'comment_reply' && message.resourceId) {
                                     window.open(`detail.html?id=${message.resourceId}`, '_blank');
                                 }
                             });
-                            
+
                             notificationList.appendChild(messageItem);
                         });
                     }
@@ -4636,7 +5674,7 @@
             console.error('获取未读消息列表失败:', error);
         }
     }
-    
+
     // 标记消息为已读
     async function markMessageAsRead(messageId) {
         try {
@@ -4760,7 +5798,7 @@
             }
             isPlaying = !isPlaying;
         });
-        
+
         // 绑定消息图标点击事件
         document.getElementById('notificationIcon').addEventListener('click', function() {
             const dropdown = document.getElementById('notificationDropdown');
@@ -4776,7 +5814,7 @@
                 dropdown.style.display = 'none';
             }
         });
-        
+
         // 点击其他地方关闭消息下拉菜单
         document.addEventListener('click', function(event) {
             const notificationIcon = document.getElementById('notificationIcon');
@@ -4785,7 +5823,7 @@
                 dropdown.style.display = 'none';
             }
         });
-        
+
         // 绑定全部标记为已读按钮点击事件
         document.getElementById('markAllReadBtn').addEventListener('click', function() {
             // 获取所有未读消息并标记为已读
@@ -5016,13 +6054,22 @@
 <div class="vip-modal-overlay" id="vipModal">
     <div class="vip-modal">
         <div class="vip-modal-header">
-            <h2><i class="fas fa-crown"></i> 升级VIP</h2>
+            <div class="vip-header-copy">
+                <div class="vip-kicker"><span></span> NEON VIP ACCESS</div>
+                <h2><i class="fas fa-crown"></i> 升级VIP权限</h2>
+                <p>全站资源无限畅享 · VIP工具箱 · 专属客服通道</p>
+            </div>
             <button class="vip-close-btn" id="closeVipModal"><i class="fas fa-times"></i></button>
         </div>
         <div class="vip-modal-body">
             <div class="vip-promotion-bar">
                 <div class="vip-promotion-date" id="vipPromotionDate">2026-05-04 12:00:00</div>
                 <div class="vip-promotion-title">限时特惠 · 年卡7折 永久5折</div>
+            </div>
+            <div class="vip-trust-strip">
+                <span><i class="fas fa-shield-alt"></i> 官方卡密激活</span>
+                <span><i class="fas fa-bolt"></i> 秒级开通权限</span>
+                <span><i class="fas fa-lock"></i> 账号权益绑定</span>
             </div>
             <div class="vip-plan-grid">
                 <div class="vip-plan-card vip-plan-card-basic">
@@ -5060,21 +6107,21 @@
                 </div>
             </div>
             <div class="vip-get-code">
-                <div class="vip-get-code-title"><i class="fas fa-info-circle"></i> 激活码卡密获取方式</div>
+                <div class="vip-get-code-title"><i class="fas fa-info-circle"></i> 官方激活码获取方式</div>
                 <div class="vip-get-code-content">
-                    <p>1. 咸鱼/淘宝搜索：<span style="color: #FFD700;">霓虹之都激活码</span> 或 <span style="color: #FFD700;">neonvip激活码</span></p>
-                    <p>2. 通过代理商购买</p>
+                    <p>1. 闲鱼/淘宝搜索：<span style="color: #FFD700;">霓虹之都激活码</span> 或 <span style="color: #FFD700;">neonvip激活码</span></p>
+                    <p>2. 通过授权代理商购买官方卡密</p>
                 </div>
             </div>
             <div class="vip-form-group">
                 <label><i class="fas fa-key"></i> 输入激活码</label>
-                <input type="text" id="vipActivationCode" placeholder="请输入VIP激活码">
+                <input type="text" id="vipActivationCode" placeholder="粘贴VIP激活码，立即验证开通">
             </div>
             <div class="vip-message" id="vipMessage"></div>
         </div>
         <div class="vip-modal-footer">
             <button class="btn btn-secondary" id="cancelVipBtn">取消</button>
-            <button class="btn btn-vip" id="activateVipBtn"><i class="fas fa-crown"></i> 立即激活</button>
+            <button class="btn btn-vip" id="activateVipBtn"><i class="fas fa-crown"></i> 验证并激活VIP</button>
         </div>
     </div>
 </div>
@@ -5609,6 +6656,579 @@
             display: none;
         }
     }
+
+    /* VIP升级弹窗：高级科技版覆盖样式 */
+    .vip-modal-overlay {
+        background:
+                radial-gradient(circle at 18% 12%, rgba(0, 210, 255, 0.18), transparent 34%),
+                radial-gradient(circle at 82% 18%, rgba(255, 216, 108, 0.16), transparent 30%),
+                radial-gradient(circle at 50% 90%, rgba(113, 81, 255, 0.16), transparent 34%),
+                rgba(3, 7, 16, 0.88);
+        backdrop-filter: blur(18px) saturate(145%);
+        -webkit-backdrop-filter: blur(18px) saturate(145%);
+        padding: 24px;
+    }
+    .vip-modal-overlay.active .vip-modal {
+        animation: vipModalIn 0.34s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes vipModalIn {
+        from {
+            opacity: 0;
+            transform: translateY(18px) scale(0.98);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+    .vip-modal {
+        position: relative;
+        isolation: isolate;
+        max-width: 760px;
+        border: 1px solid rgba(139, 205, 255, 0.36);
+        border-radius: 18px;
+        background:
+                linear-gradient(145deg, rgba(8, 15, 29, 0.98), rgba(5, 9, 20, 0.98) 58%, rgba(12, 9, 22, 0.98)),
+                #07101f;
+        box-shadow:
+                0 30px 90px rgba(0, 0, 0, 0.72),
+                0 0 0 1px rgba(255, 255, 255, 0.05),
+                0 0 58px rgba(0, 210, 255, 0.14),
+                0 0 64px rgba(255, 214, 94, 0.12);
+    }
+    .vip-modal::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        background:
+                linear-gradient(rgba(104, 177, 255, 0.055) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(104, 177, 255, 0.055) 1px, transparent 1px),
+                radial-gradient(circle at 20% 0%, rgba(78, 224, 255, 0.18), transparent 32%),
+                radial-gradient(circle at 92% 18%, rgba(255, 215, 97, 0.13), transparent 24%);
+        background-size: 34px 34px, 34px 34px, auto, auto;
+        opacity: 0.88;
+    }
+    .vip-modal::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        z-index: 2;
+        pointer-events: none;
+        border-radius: inherit;
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    }
+    .vip-modal > * {
+        position: relative;
+        z-index: 1;
+    }
+    .vip-modal-header {
+        align-items: flex-start;
+        padding: 26px 30px 24px;
+        border-bottom: 1px solid rgba(122, 193, 255, 0.18);
+        background:
+                linear-gradient(120deg, rgba(18, 38, 67, 0.86), rgba(8, 15, 29, 0.42) 58%),
+                linear-gradient(90deg, rgba(255, 215, 97, 0.1), transparent 42%);
+        overflow: hidden;
+    }
+    .vip-modal-header::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(87, 225, 255, 0.72), rgba(255, 215, 97, 0.72), transparent);
+    }
+    .vip-header-copy {
+        max-width: calc(100% - 54px);
+    }
+    .vip-kicker {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+        color: #70efff;
+        font-family: 'Orbitron', 'Inter', sans-serif;
+        font-size: 0.72rem;
+        font-weight: 700;
+    }
+    .vip-kicker span {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #70efff;
+        box-shadow: 0 0 14px rgba(112, 239, 255, 0.95);
+    }
+    .vip-modal-header h2 {
+        margin: 0;
+        font-family: 'Orbitron', 'Inter', sans-serif;
+        font-size: 1.58rem;
+        line-height: 1.2;
+        font-weight: 900;
+        color: #fff6d8;
+        text-shadow: 0 0 22px rgba(255, 215, 97, 0.28);
+    }
+    .vip-modal-header h2 i {
+        margin-right: 10px;
+        color: #ffdc6a;
+        filter: drop-shadow(0 0 12px rgba(255, 215, 97, 0.56));
+    }
+    .vip-modal-header p {
+        margin: 9px 0 0;
+        color: #b9d7f5;
+        font-size: 0.9rem;
+        line-height: 1.45;
+    }
+    .vip-close-btn {
+        width: 38px;
+        height: 38px;
+        border-radius: 12px;
+        border: 1px solid rgba(164, 207, 255, 0.24);
+        background: rgba(10, 21, 38, 0.72);
+        color: #d8ecff;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+    .vip-close-btn:hover {
+        transform: translateY(-1px);
+        border-color: rgba(255, 106, 135, 0.62);
+        background: rgba(86, 24, 42, 0.72);
+        color: #fff;
+        box-shadow: 0 12px 28px rgba(255, 77, 112, 0.18);
+    }
+    .vip-modal-body {
+        padding: 22px 26px 24px;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(111, 220, 255, 0.45) rgba(255, 255, 255, 0.06);
+    }
+    .vip-promotion-bar {
+        border-radius: 12px;
+        padding: 12px 14px;
+        margin-bottom: 10px;
+        border: 1px solid rgba(255, 215, 97, 0.34);
+        background:
+                linear-gradient(95deg, rgba(255, 215, 97, 0.14), rgba(0, 210, 255, 0.1)),
+                rgba(8, 16, 31, 0.76);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 14px 34px rgba(0, 0, 0, 0.18);
+    }
+    .vip-promotion-date {
+        color: #9bdcff;
+        font-family: 'Orbitron', 'Inter', sans-serif;
+        font-size: 0.78rem;
+    }
+    .vip-promotion-title {
+        color: #ffe59b;
+        font-weight: 800;
+    }
+    .vip-promotion-title::before {
+        content: '';
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #ffda6a;
+        box-shadow: 0 0 12px rgba(255, 218, 106, 0.9);
+    }
+    .vip-trust-strip {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+        margin-bottom: 14px;
+    }
+    .vip-trust-strip span {
+        min-width: 0;
+        min-height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        padding: 8px 10px;
+        border: 1px solid rgba(111, 220, 255, 0.18);
+        border-radius: 10px;
+        background: rgba(9, 22, 42, 0.68);
+        color: #cfeaff;
+        font-size: 0.78rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+    .vip-trust-strip i {
+        color: #72f0ff;
+    }
+    .vip-plan-grid {
+        grid-template-columns: 0.88fr 1fr 1.08fr;
+        gap: 12px;
+        margin-bottom: 16px;
+        align-items: stretch;
+    }
+    .vip-plan-card {
+        text-align: left;
+        border-radius: 12px;
+        padding: 16px 14px 14px;
+        overflow: hidden;
+        background:
+                linear-gradient(160deg, rgba(17, 34, 60, 0.86), rgba(8, 13, 27, 0.9)),
+                rgba(8, 13, 27, 0.9);
+        border: 1px solid rgba(111, 220, 255, 0.18);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 12px 34px rgba(0, 0, 0, 0.22);
+        transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+    }
+    .vip-plan-card::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 3px;
+        background: linear-gradient(90deg, rgba(109, 231, 255, 0.2), rgba(109, 231, 255, 0.72), rgba(255, 215, 97, 0.2));
+    }
+    .vip-plan-card:hover {
+        transform: translateY(-3px);
+        border-color: rgba(111, 220, 255, 0.46);
+        box-shadow: 0 18px 42px rgba(0, 0, 0, 0.32), 0 0 32px rgba(0, 210, 255, 0.12);
+    }
+    .vip-plan-card-basic {
+        background: linear-gradient(160deg, rgba(22, 31, 47, 0.78), rgba(8, 12, 22, 0.88));
+        border-color: rgba(158, 178, 205, 0.18);
+    }
+    .vip-plan-card-hot {
+        background:
+                radial-gradient(circle at 82% 0%, rgba(255, 224, 119, 0.2), transparent 35%),
+                linear-gradient(160deg, rgba(48, 33, 10, 0.88), rgba(12, 16, 28, 0.92));
+        border-color: rgba(255, 218, 106, 0.58);
+        box-shadow: 0 18px 48px rgba(0, 0, 0, 0.34), 0 0 38px rgba(255, 215, 97, 0.16);
+    }
+    .vip-plan-card-hot::before {
+        background: linear-gradient(90deg, #ffdb6b, #78efff, #ffdb6b);
+    }
+    .vip-plan-badge {
+        top: 11px;
+        right: 12px;
+        border-radius: 999px;
+        padding: 4px 10px;
+        color: #151008;
+        background: linear-gradient(135deg, #ffe9a8, #ffbd4a);
+        box-shadow: 0 8px 20px rgba(255, 190, 74, 0.24);
+        font-size: 0.68rem;
+    }
+    .vip-plan-name {
+        justify-content: flex-start;
+        min-height: 30px;
+        color: #dff4ff;
+        font-size: 0.92rem;
+        line-height: 1.25;
+        white-space: normal;
+    }
+    .vip-plan-name i {
+        width: 28px;
+        height: 28px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 9px;
+        color: #07101f;
+        background: linear-gradient(135deg, #78efff, #b8f7ff);
+        box-shadow: 0 8px 18px rgba(120, 239, 255, 0.16);
+        flex-shrink: 0;
+    }
+    .vip-plan-card-basic .vip-plan-name {
+        color: #d7e5f8;
+    }
+    .vip-plan-card-basic .vip-plan-name i {
+        background: linear-gradient(135deg, #aab7ca, #e2ecfa);
+    }
+    .vip-plan-card-hot .vip-plan-name {
+        color: #fff4c7;
+        padding-right: 52px;
+    }
+    .vip-plan-card-hot .vip-plan-name i {
+        background: linear-gradient(135deg, #fff0aa, #ffbd4a);
+    }
+    .vip-plan-price {
+        margin-top: 12px;
+        color: #80f6ff;
+        font-family: 'Orbitron', 'Inter', sans-serif;
+        font-size: 1.5rem;
+        line-height: 1;
+        font-weight: 900;
+    }
+    .vip-plan-card-basic .vip-plan-price {
+        color: #dce9fb;
+    }
+    .vip-plan-card-hot .vip-plan-price {
+        color: #ffdf74;
+        text-shadow: 0 0 20px rgba(255, 223, 116, 0.25);
+    }
+    .vip-plan-meta {
+        min-height: 26px;
+        justify-content: flex-start;
+        margin-top: 8px;
+        color: #9fb7d2;
+        font-size: 0.76rem;
+        gap: 8px;
+    }
+    .vip-plan-meta span {
+        color: #ffe19a;
+        font-weight: 800;
+    }
+    .vip-plan-meta s {
+        color: #6f7d8e;
+    }
+    .vip-plan-benefits {
+        align-items: stretch;
+        justify-items: stretch;
+        gap: 7px;
+        margin-top: 12px;
+        text-align: left;
+    }
+    .vip-plan-benefits li {
+        width: 100%;
+        min-height: 0;
+        justify-content: flex-start;
+        padding: 0;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+        color: #d7e7f4;
+        font-size: 0.76rem;
+        line-height: 1.35;
+    }
+    .vip-plan-benefits li i {
+        width: 18px;
+        height: 18px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: rgba(99, 255, 190, 0.12);
+        color: #6affc3;
+        font-size: 0.56rem;
+    }
+    .vip-get-code {
+        border-radius: 12px;
+        padding: 15px 16px;
+        background:
+                linear-gradient(135deg, rgba(53, 153, 255, 0.13), rgba(255, 215, 97, 0.08)),
+                rgba(9, 20, 38, 0.76);
+        border: 1px solid rgba(111, 220, 255, 0.2);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    }
+    .vip-get-code-title {
+        color: #cdeeff;
+        font-size: 0.92rem;
+    }
+    .vip-get-code-title i {
+        color: #72f0ff;
+    }
+    .vip-get-code-content {
+        color: #9fb8d1;
+        font-size: 0.86rem;
+    }
+    .vip-get-code-content span {
+        color: #ffe08a !important;
+        font-weight: 800;
+    }
+    .vip-form-group {
+        margin-bottom: 14px;
+    }
+    .vip-form-group label {
+        color: #d4eaff;
+        font-weight: 700;
+    }
+    .vip-form-group label i {
+        color: #ffdd72;
+    }
+    .vip-form-group input {
+        height: 48px;
+        border-radius: 12px;
+        background: rgba(3, 10, 21, 0.82);
+        border: 1px solid rgba(111, 220, 255, 0.26);
+        color: #eff8ff;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 10px 28px rgba(0, 0, 0, 0.18);
+    }
+    .vip-form-group input:focus {
+        border-color: rgba(255, 221, 114, 0.86);
+        box-shadow: 0 0 0 3px rgba(255, 221, 114, 0.12), 0 0 28px rgba(255, 221, 114, 0.18);
+    }
+    .vip-form-group input::placeholder {
+        color: #6e86a2;
+    }
+    .vip-message {
+        border-radius: 12px;
+        font-weight: 700;
+    }
+    .vip-message.error {
+        background: rgba(255, 76, 116, 0.12);
+        border-color: rgba(255, 105, 139, 0.42);
+        color: #ffc4d2;
+    }
+    .vip-message.success {
+        background: rgba(60, 255, 184, 0.12);
+        border-color: rgba(96, 255, 196, 0.36);
+        color: #c8ffe9;
+    }
+    .vip-modal-footer {
+        padding: 18px 26px 22px;
+        border-top: 1px solid rgba(122, 193, 255, 0.18);
+        background: rgba(4, 10, 20, 0.62);
+    }
+    .vip-modal-footer .btn {
+        min-height: 44px;
+        padding: 11px 22px;
+        font-weight: 800;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+    .btn-vip {
+        position: relative;
+        overflow: hidden;
+        min-width: 188px;
+        border-radius: 12px;
+        color: #120d04;
+        background: linear-gradient(135deg, #fff0ae, #ffbd47 48%, #70efff);
+        box-shadow: 0 14px 34px rgba(255, 190, 74, 0.26), 0 0 32px rgba(112, 239, 255, 0.12);
+    }
+    .btn-vip::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: -45%;
+        width: 34%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+        transform: skewX(-18deg);
+        transition: left 0.45s ease;
+    }
+    .btn-vip:hover {
+        transform: translateY(-2px);
+        background: linear-gradient(135deg, #fff6c8, #ffc64f 48%, #89f7ff);
+        box-shadow: 0 18px 42px rgba(255, 198, 79, 0.36), 0 0 36px rgba(112, 239, 255, 0.18);
+    }
+    .btn-vip:hover::before {
+        left: 112%;
+    }
+    .btn-vip:disabled {
+        opacity: 0.68;
+        cursor: not-allowed;
+        transform: none;
+    }
+    .btn-secondary {
+        border-radius: 12px;
+        background: rgba(12, 25, 45, 0.8);
+        border: 1px solid rgba(164, 207, 255, 0.22);
+        color: #b8cee6;
+    }
+    .btn-secondary:hover {
+        background: rgba(20, 39, 66, 0.92);
+        border-color: rgba(164, 207, 255, 0.38);
+        color: #fff;
+    }
+    @media (max-width: 680px) {
+        .vip-modal-overlay {
+            padding: 12px;
+            align-items: flex-start;
+            overflow-y: auto;
+        }
+        .vip-modal {
+            max-width: calc(100vw - 24px);
+            max-height: none;
+            margin: 12px 0;
+        }
+        .vip-modal-header {
+            padding: 22px 18px 20px;
+        }
+        .vip-header-copy {
+            max-width: calc(100% - 46px);
+        }
+        .vip-modal-header h2 {
+            font-size: 1.28rem;
+        }
+        .vip-modal-header p {
+            font-size: 0.82rem;
+        }
+        .vip-close-btn {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+        }
+        .vip-modal-body {
+            padding: 18px;
+        }
+        .vip-promotion-bar {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 6px;
+        }
+        .vip-trust-strip {
+            grid-template-columns: 1fr;
+        }
+        .vip-trust-strip span {
+            justify-content: flex-start;
+            white-space: normal;
+        }
+        .vip-plan-grid {
+            grid-template-columns: 1fr;
+            gap: 10px;
+            overflow: visible;
+            padding: 0;
+        }
+        .vip-plan-card {
+            padding: 15px 14px;
+            border-radius: 12px;
+        }
+        .vip-plan-name {
+            min-height: 28px;
+            font-size: 0.9rem;
+            white-space: normal;
+        }
+        .vip-plan-price {
+            font-size: 1.35rem;
+        }
+        .vip-plan-meta {
+            min-height: 0;
+            font-size: 0.74rem;
+        }
+        .vip-plan-benefits {
+            gap: 6px;
+        }
+        .vip-plan-benefits li {
+            font-size: 0.74rem;
+            padding: 0;
+        }
+        .vip-plan-benefits li i {
+            display: inline-flex;
+        }
+        .vip-modal-footer {
+            flex-direction: column-reverse;
+            padding: 16px 18px 18px;
+        }
+        .vip-modal-footer .btn,
+        .btn-vip {
+            width: 100%;
+            min-width: 0;
+            flex: none;
+        }
+    }
+    @media (max-width: 360px) {
+        .vip-modal-body {
+            padding: 14px;
+        }
+        .vip-plan-name {
+            font-size: 0.84rem;
+        }
+        .vip-plan-price {
+            font-size: 1.22rem;
+        }
+        .vip-plan-meta,
+        .vip-plan-benefits li,
+        .vip-get-code-content {
+            font-size: 0.7rem;
+        }
+        .vip-plan-benefits li i {
+            display: inline-flex;
+        }
+    }
 </style>
 
 <script>
@@ -5616,7 +7236,7 @@
     document.addEventListener('DOMContentLoaded', function() {
         const today = new Date().toDateString();
         const lastReadDate = localStorage.getItem('newsReadDate');
-        
+
         if (lastReadDate !== today) {
             const newsDate = document.getElementById('newsDate');
             const now = new Date();
@@ -5713,7 +7333,7 @@
         try {
             const response = await fetch('/api/login/activate', {
                 method: 'POST',
-                headers: { 
+                headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                     'Authorization': authToken || ''
                 },
@@ -5758,7 +7378,7 @@
         }
 
         btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-crown"></i> 立即激活';
+        btn.innerHTML = '<i class="fas fa-crown"></i> 验证并激活VIP';
     });
 </script>
 </body>
