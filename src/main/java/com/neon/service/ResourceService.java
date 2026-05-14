@@ -29,6 +29,8 @@ public class ResourceService {
 
     private static final int DEFAULT_PAGE_SIZE = 12;
     private static final int MAX_PAGE_SIZE = 50;
+    private static final String VIP_CATEGORY = "VIP专享";
+    private static final String LEGACY_VIP_CATEGORY = "网创";
 
     public List<Resource> getAllResources() {
         String cacheKey = cacheService.getResourceListKey();
@@ -85,10 +87,11 @@ public class ResourceService {
         if (page <= 0) page = 1;
 
         String normalizedCategory = normalizeCategory(category);
+        List<String> categoryFilters = normalizedCategory != null ? getCategoryFilters(normalizedCategory) : null;
         String normalizedKeyword = keyword != null && !keyword.trim().isEmpty() ? keyword.trim() : null;
 
         String cacheKey = cacheService.getResourceListKey() + ":page:" + page + ":" + size
-                + ":category:" + (normalizedCategory != null ? normalizedCategory : "all")
+                + ":category:" + (categoryFilters != null ? String.join("|", categoryFilters) : "all")
                 + ":keyword:" + (normalizedKeyword != null ? normalizedKeyword : "none");
         Map<String, Object> cachedData = (Map<String, Object>) cacheService.get(cacheKey);
 
@@ -107,15 +110,15 @@ public class ResourceService {
         List<Integer> visibleStatuses = Arrays.asList(1, 2);
         Page<Resource> resourcePage;
 
-        if (normalizedKeyword != null && normalizedCategory != null) {
-            resourcePage = resourceRepository.findByTitleContainingIgnoreCaseAndCategoryAndStatusInOrderByTopDescCreatedAtDesc(
-                    normalizedKeyword, normalizedCategory, visibleStatuses, pageable);
+        if (normalizedKeyword != null && categoryFilters != null) {
+            resourcePage = resourceRepository.findByTitleContainingIgnoreCaseAndCategoryInAndStatusInOrderByTopDescCreatedAtDesc(
+                    normalizedKeyword, categoryFilters, visibleStatuses, pageable);
         } else if (normalizedKeyword != null) {
             resourcePage = resourceRepository.findByTitleContainingIgnoreCaseAndStatusInOrderByTopDescCreatedAtDesc(
                     normalizedKeyword, visibleStatuses, pageable);
-        } else if (normalizedCategory != null) {
-            resourcePage = resourceRepository.findByCategoryAndStatusInOrderByTopDescCreatedAtDesc(
-                    normalizedCategory, visibleStatuses, pageable);
+        } else if (categoryFilters != null) {
+            resourcePage = resourceRepository.findByCategoryInAndStatusInOrderByTopDescCreatedAtDesc(
+                    categoryFilters, visibleStatuses, pageable);
         } else {
             resourcePage = resourceRepository.findByStatusInOrderByTopDescCreatedAtDesc(visibleStatuses, pageable);
         }
@@ -157,6 +160,24 @@ public class ResourceService {
             return null;
         }
         return category.trim();
+    }
+
+    private List<String> getCategoryFilters(String category) {
+        if (VIP_CATEGORY.equals(category) || LEGACY_VIP_CATEGORY.equals(category)) {
+            return Arrays.asList(VIP_CATEGORY, LEGACY_VIP_CATEGORY);
+        }
+        return Collections.singletonList(category);
+    }
+
+    private String normalizeStoredCategory(String category) {
+        if (category == null) {
+            return null;
+        }
+        String trimmed = category.trim();
+        if (LEGACY_VIP_CATEGORY.equals(trimmed)) {
+            return VIP_CATEGORY;
+        }
+        return trimmed;
     }
 
     public List<Resource> searchResources(String keyword) {
@@ -324,6 +345,7 @@ public class ResourceService {
     }
 
     public Resource saveResource(Resource resource) {
+        resource.setCategory(normalizeStoredCategory(resource.getCategory()));
         resource.setCreatedAt(LocalDateTime.now());
         resource.setUpdatedAt(LocalDateTime.now());
         Resource savedResource = resourceRepository.save(resource);
@@ -446,7 +468,7 @@ public class ResourceService {
             existingResource.setImage(resource.getImage());
         }
         if (resource.getCategory() != null) {
-            existingResource.setCategory(resource.getCategory());
+            existingResource.setCategory(normalizeStoredCategory(resource.getCategory()));
         }
         if (resource.getDownloadLink() != null) {
             existingResource.setDownloadLink(resource.getDownloadLink());

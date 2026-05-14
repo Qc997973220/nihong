@@ -4498,11 +4498,8 @@
 
         <div class="categories">
             <span class="category-chip active">全部</span>
+            <span class="category-chip">VIP专享</span>
             <span class="category-chip">免费</span>
-            <span class="category-chip">网创</span>
-            <span class="category-chip">软件</span>
-            <span class="category-chip">游戏</span>
-            <span class="category-chip">资讯</span>
         </div>
 
         <div class="resource-grid" id="resourceGrid"></div>
@@ -4606,11 +4603,8 @@
             <label><i class="fa-solid fa-tag" style="margin-right: 6px;"></i> 分类 <span style="color:#ff8a8a;">*</span></label>
             <select id="resourceCategory">
                 <option value="" selected disabled>-- 请选择分类 --</option>
+                <option value="VIP专享">VIP专享</option>
                 <option value="免费">免费</option>
-                <option value="网创">网创</option>
-                <option value="软件">软件</option>
-                <option value="游戏">游戏</option>
-                <option value="资讯">资讯</option>
             </select>
         </div>
         <div class="input-group">
@@ -4665,6 +4659,11 @@
 
     function getHost() {
         return '';
+    }
+
+    function displayCategoryName(category) {
+        const value = String(category || '').trim();
+        return value === '网创' ? 'VIP专享' : value;
     }
 
     // 全局变量
@@ -4796,7 +4795,7 @@
 
             if (!token || !storedUserInfo) {
                 console.log('没有token或用户信息，直接返回');
-                // 没有token或用户信息，使用默认状态，不清除UI
+                clearUserSession();
                 return;
             }
 
@@ -4824,11 +4823,9 @@
                 if (!result.valid) {
                     console.log('会话验证结果:', result.message);
                     if (result.kicked) {
-                        // 被其他设备挤下线，清除会话
-                        clearUserSession();
                         alert('您的账号已在其他设备登录，如非本人操作请修改密码');
                     }
-                    // 否则保留本地缓存的登录状态
+                    clearUserSession();
                     return;
                 }
 
@@ -4906,8 +4903,7 @@
             console.log('localStorage userInfo:', storedUserInfo ? '存在' : '不存在');
             console.log('localStorage authToken:', token ? '存在' : '不存在');
 
-            // 修改：只要有userInfo就显示登录状态，不再强制要求token
-            if (storedUserInfo) {
+            if (storedUserInfo && token) {
                 try {
                     const userInfo = JSON.parse(storedUserInfo);
                     console.log('解析用户信息成功:', userInfo);
@@ -4932,7 +4928,10 @@
                 }
             } else {
                 console.log('localStorage中没有用户信息');
-                // 如果没有用户信息，显示未登录状态
+                if (storedUserInfo && !token) {
+                    clearUserSession();
+                    return;
+                }
                 updateUserDisplay();
             }
 
@@ -5183,6 +5182,7 @@
         function createResourceCard(resource) {
             const card = document.createElement('div');
             card.className = 'resource-card';
+            const categoryName = displayCategoryName(resource.category || '未分类');
             const viewCountHtml = `<div class="card-view-count"><i class="fa-regular fa-eye"></i> ${resource.viewCount || 0}</div>`;
             const accessBadgeHtml = resource.category === '免费'
                 ? '<div class="access-badge free-badge">免费</div>'
@@ -5201,7 +5201,7 @@
                     <h3 class="card-title">${resource.title}</h3>
                     <p class="card-desc">${resource.summary}</p>
                     <div class="card-meta">
-                        <span class="card-type">${resource.category}</span>
+                        <span class="card-type">${categoryName}</span>
                         <span class="card-date">${formatDate(resource.createdAt)}</span>
                         <a href="javascript:void(0)" class="card-link" onclick="viewResource(${resource.id});">
                             查看详情 <i class="fa-solid fa-arrow-right"></i>
@@ -5400,6 +5400,7 @@
         }
 
         grid.innerHTML = pageResources.map(r => {
+            const categoryName = displayCategoryName(r.category || '未分类');
             const date = r.createdAt ? new Date(r.createdAt).toLocaleDateString('zh-CN', {
                 year: 'numeric', month: '2-digit', day: '2-digit'
             }) : '未知';
@@ -5422,7 +5423,7 @@
                     <h3 class="card-title">${r.title}</h3>
                     <p class="card-desc">${r.summary || '暂无简介'}</p>
                     <div class="card-meta">
-                        <span class="card-type">${r.category || '未分类'}</span>
+                        <span class="card-type">${categoryName}</span>
                         <span class="card-date">${date}</span>
                         <a href="javascript:void(0)" class="card-link" onclick="viewResource(${r.id});">查看详情 <i class="fa-solid fa-arrow-right"></i></a>
                     </div>
@@ -6469,7 +6470,7 @@
 
     // 登录拦截
     function isLoggedIn() {
-        return localStorage.getItem('userInfo') !== null;
+        return !!(localStorage.getItem('authToken') && localStorage.getItem('userInfo'));
     }
 
     document.getElementById('userInfo').addEventListener('click', function(e) {
@@ -6608,7 +6609,8 @@
         if (inviteCodeFromUrl) removeInviteParamsFromUrl();
 
         const savedUserInfo = localStorage.getItem('userInfo');
-        if (savedUserInfo) {
+        const savedAuthToken = localStorage.getItem('authToken');
+        if (savedUserInfo && savedAuthToken) {
             try {
                 const userInfo = JSON.parse(savedUserInfo);
                 const displayName = userInfo.username || userInfo.userName || '用户';
@@ -6659,10 +6661,15 @@
                 getUnreadMessageCount(userInfo.username);
             } catch (e) {
                 console.error('解析用户信息失败:', e);
+                localStorage.removeItem('userInfo');
+                localStorage.removeItem('authToken');
                 document.getElementById('displayUsername').innerText = '未登录';
                 document.getElementById('userAvatar').innerText = 'U';
             }
         } else {
+            if (savedUserInfo && !savedAuthToken) {
+                localStorage.removeItem('userInfo');
+            }
             document.getElementById('displayUsername').innerText = '未登录';
             document.getElementById('userAvatar').innerText = 'U';
             updateVipToolboxVisibility(null);

@@ -3947,7 +3947,8 @@
         // 安全提取字段
         const title = resource.title || '无标题';
         const author = resource.author || '匿名';
-        const category = resource.category || '未分类';
+        const rawCategory = resource.category || '未分类';
+        const category = displayCategoryName(rawCategory);
         const createdAt = resource.createdAt;
         const content = resource.content || '';
         const image = resource.image || '';
@@ -3979,7 +3980,7 @@
         let downloadSectionHtml = '';
         // hasAccess=true 表示资源本身有下载链接
         if (data.hasAccess === true) {
-            const isFreeResource = data.freeResource === true || category === '免费';
+            const isFreeResource = data.freeResource === true || rawCategory === '免费' || category === '免费';
             const loginRequired = data.loginRequired === true;
             const memberStatusText = getMemberStatusText();
             const ordinaryUser = !!localStorage.getItem('userInfo') && !isVIP();
@@ -4203,7 +4204,7 @@
                             <li>互联网转载资源审核不严格可能会有一些其他联系方式，请大家不要盲目相信，被骗本站概不负责！</li>
                             <li>本网站部分内容只做项目揭秘,交流学习，无法一对一教学指导，每篇文章内都含项目全套的教程讲解，请仔细阅读。</li>
                             <li>本站分享的所有平台仅供展示，本站不对平台真实性负责，站长建议大家自己根据项目关键词自己选择平台。</li>
-                            <li>[网创]板块因文章发布时间和您阅读文章时间存在时间差，有些项目红利期可能已经过了，能不能赚钱需要自己判断，本网站仅做资源分享，不做任何收益保障。</li>
+                            <li>[VIP专享]板块因文章发布时间和您阅读文章时间存在时间差，有些项目红利期可能已经过了，能不能赚钱需要自己判断，本网站仅做资源分享，不做任何收益保障。</li>
                             <li>本站资源大多存储在云盘，如发现链接失效，请联系我们我们会第一时间更新。</li>
                         </ol>
                     </div>
@@ -4600,6 +4601,11 @@
             .replace(/>/g, "&gt;")
             .replace(/"/g, "&quot;")
             .replace(/'/g, "&#039;");
+    }
+
+    function displayCategoryName(category) {
+        const value = String(category || '').trim();
+        return value === '网创' ? 'VIP专享' : value;
     }
 
     // ========== 点赞功能 ==========

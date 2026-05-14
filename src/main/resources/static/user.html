@@ -1383,6 +1383,12 @@
         };
     }
 
+    function clearLocalSessionAndRedirect() {
+        localStorage.removeItem('userInfo');
+        localStorage.removeItem('authToken');
+        window.location.href = '/';
+    }
+
     function showWalletMessage(text, type = 'success') {
         const message = document.getElementById('walletMessage');
         if (!message) return;
@@ -1818,7 +1824,10 @@
 
     async function refreshUserInfoFromToken() {
         const token = localStorage.getItem('authToken');
-        if (!token) return;
+        if (!token) {
+            clearLocalSessionAndRedirect();
+            return false;
+        }
         try {
             const response = await fetch('/api/login/validateToken', {
                 method: 'POST',
@@ -1840,9 +1849,13 @@
                 document.getElementById('infoInviteCode').innerText = hasPromotionPermission() ? (userData.inviteCode || '暂无') : '永久VIP专享';
                 updateWalletSummary(userData);
                 renderInviteShare();
+                return true;
             }
+            clearLocalSessionAndRedirect();
+            return false;
         } catch (e) {
             console.error('刷新用户信息失败:', e);
+            return false;
         }
     }
 
@@ -2102,9 +2115,9 @@
         });
     }
 
-    if (!userInfo) {
+    if (!userInfo || !getAuthToken()) {
         // 如果没登录，直接跳回首页
-        window.location.href = '/';
+        clearLocalSessionAndRedirect();
     } else {
         try {
             userData = JSON.parse(userInfo);
@@ -2152,13 +2165,15 @@
             document.getElementById('infoIntroduction').innerText = introText;
         } catch (e) {
             console.error('解析用户信息失败:', e);
-            window.location.href = '/';
+            clearLocalSessionAndRedirect();
         }
     }
 
     initInviteShare();
     document.getElementById('withdrawBtn').addEventListener('click', submitWithdrawal);
-    refreshUserInfoFromToken().finally(loadWalletData);
+    refreshUserInfoFromToken().then(valid => {
+        if (valid) loadWalletData();
+    });
 
     // 退出登录
     document.getElementById('logoutBtn').addEventListener('click', function() {

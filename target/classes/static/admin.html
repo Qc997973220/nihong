@@ -1063,11 +1063,8 @@
                     <div class="form-row">
                         <label>分类：</label>
                         <select id="editResourceCategory" style="padding: 8px 12px; border: 1px solid #3d5a80; border-radius: 4px; background: #1a1a2e; color: #e8e8e8; flex: 1;">
+                            <option value="VIP专享">VIP专享</option>
                             <option value="免费">免费</option>
-                            <option value="网创">网创</option>
-                            <option value="软件">软件</option>
-                            <option value="游戏">游戏</option>
-                            <option value="资讯">资讯</option>
                         </select>
                     </div>
                     <div class="form-row">
@@ -1153,6 +1150,11 @@
             });
         }
 
+        function displayCategoryName(category) {
+            const value = String(category || '').trim();
+            return value === '网创' ? 'VIP专享' : value;
+        }
+
         function checkAdmin() {
             const userInfo = localStorage.getItem('userInfo');
             if (!userInfo || !getAuthToken()) {
@@ -1224,7 +1226,7 @@
                         <div class="resource-header">
                             <div class="resource-title">${escapeHtml(resource.title)}</div>
                             <div class="resource-meta">
-                                <span class="meta-tag category">${escapeHtml(resource.category)}</span>
+                                <span class="meta-tag category">${escapeHtml(displayCategoryName(resource.category))}</span>
                                 <span class="meta-tag author"><i class="fas fa-user"></i> ${escapeHtml(resource.author)}</span>
                                 <span class="meta-tag time"><i class="far fa-clock"></i> ${formatDate(resource.createdAt)}</span>
                             </div>
@@ -1633,7 +1635,7 @@
                     <div class="cardkey-card">
                         <div class="cardkey-key" style="font-size: 0.95rem;">${resource.title}</div>
                         <div class="cardkey-meta">
-                            <span class="cardkey-type">${resource.category || '未分类'}</span>
+                            <span class="cardkey-type">${displayCategoryName(resource.category || '未分类')}</span>
                             <span class="cardkey-status ${statusClass}">${statusText}</span>
                             <span>${formatDate(resource.createdAt)}</span>
                         </div>
@@ -1661,7 +1663,7 @@
                         const resource = data.resource;
                         document.getElementById('editResourceId').value = resource.id;
                         document.getElementById('editResourceTitle').value = resource.title || '';
-                        document.getElementById('editResourceCategory').value = resource.category || '网创';
+                        document.getElementById('editResourceCategory').value = displayCategoryName(resource.category || 'VIP专享');
                         document.getElementById('editResourceSummary').value = resource.summary || '';
                         document.getElementById('editResourceImage').value = resource.image || '';
                         document.getElementById('editResourceDownloadLink').value = resource.downloadLink || '';

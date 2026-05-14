@@ -20,6 +20,8 @@ public interface ResourceDao extends JpaRepository<Resource, Long> {
     Page<Resource> findByTitleContainingIgnoreCaseAndStatusInOrderByTopDescCreatedAtDesc(String title, List<Integer> statuses, Pageable pageable);
     Page<Resource> findByCategoryAndStatusInOrderByTopDescCreatedAtDesc(String category, List<Integer> statuses, Pageable pageable);
     Page<Resource> findByTitleContainingIgnoreCaseAndCategoryAndStatusInOrderByTopDescCreatedAtDesc(String title, String category, List<Integer> statuses, Pageable pageable);
+    Page<Resource> findByCategoryInAndStatusInOrderByTopDescCreatedAtDesc(List<String> categories, List<Integer> statuses, Pageable pageable);
+    Page<Resource> findByTitleContainingIgnoreCaseAndCategoryInAndStatusInOrderByTopDescCreatedAtDesc(String title, List<String> categories, List<Integer> statuses, Pageable pageable);
     List<Resource> findByCreatedAtGreaterThanEqualAndStatusInOrderByViewCountDescCreatedAtDesc(LocalDateTime createdAt, List<Integer> statuses, Pageable pageable);
     List<Resource> findByCreatedAtGreaterThanEqualAndStatusIn(LocalDateTime createdAt, List<Integer> statuses);
     long countByStatusIn(List<Integer> statuses);
