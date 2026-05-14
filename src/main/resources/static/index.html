@@ -4533,9 +4533,9 @@
 
         <div class="categories">
             <span class="category-chip active">全部</span>
-            <span class="category-chip">VIP专享</span>
-            <span class="category-chip">娱乐</span>
-            <span class="category-chip">免费</span>
+            <span class="category-chip">VIP项目</span>
+            <span class="category-chip">免费项目</span>
+            <span class="category-chip">娱乐资源</span>
         </div>
 
         <div class="resource-grid" id="resourceGrid"></div>
@@ -4639,9 +4639,9 @@
             <label><i class="fa-solid fa-tag" style="margin-right: 6px;"></i> 分类 <span style="color:#ff8a8a;">*</span></label>
             <select id="resourceCategory">
                 <option value="" selected disabled>-- 请选择分类 --</option>
-                <option value="VIP专享">VIP专享</option>
-                <option value="娱乐">娱乐</option>
-                <option value="免费">免费</option>
+                <option value="VIP项目">VIP项目</option>
+                <option value="免费项目">免费项目</option>
+                <option value="娱乐资源">娱乐资源</option>
             </select>
         </div>
         <div class="input-group">
@@ -4700,14 +4700,15 @@
 
     function displayCategoryName(category) {
         const value = String(category || '').trim();
-        if (value === '网创') return 'VIP专享';
-        if (value === '软件' || value === '游戏' || value === '资讯') return '娱乐';
+        if (value === '网创' || value === 'VIP专享') return 'VIP项目';
+        if (value === '免费') return '免费项目';
+        if (value === '娱乐' || value === '软件' || value === '游戏' || value === '资讯') return '娱乐资源';
         return value;
     }
 
     function isFreeCategory(category) {
         const value = displayCategoryName(category);
-        return value === '免费' || value === '娱乐';
+        return value === '免费项目' || value === '娱乐资源';
     }
 
     // 全局变量

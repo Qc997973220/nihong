@@ -4204,7 +4204,7 @@
                             <li>互联网转载资源审核不严格可能会有一些其他联系方式，请大家不要盲目相信，被骗本站概不负责！</li>
                             <li>本网站部分内容只做项目揭秘,交流学习，无法一对一教学指导，每篇文章内都含项目全套的教程讲解，请仔细阅读。</li>
                             <li>本站分享的所有平台仅供展示，本站不对平台真实性负责，站长建议大家自己根据项目关键词自己选择平台。</li>
-                            <li>[VIP专享]板块因文章发布时间和您阅读文章时间存在时间差，有些项目红利期可能已经过了，能不能赚钱需要自己判断，本网站仅做资源分享，不做任何收益保障。</li>
+                            <li>[VIP项目]板块因文章发布时间和您阅读文章时间存在时间差，有些项目红利期可能已经过了，能不能赚钱需要自己判断，本网站仅做资源分享，不做任何收益保障。</li>
                             <li>本站资源大多存储在云盘，如发现链接失效，请联系我们我们会第一时间更新。</li>
                         </ol>
                     </div>
@@ -4605,14 +4605,15 @@
 
     function displayCategoryName(category) {
         const value = String(category || '').trim();
-        if (value === '网创') return 'VIP专享';
-        if (value === '软件' || value === '游戏' || value === '资讯') return '娱乐';
+        if (value === '网创' || value === 'VIP专享') return 'VIP项目';
+        if (value === '免费') return '免费项目';
+        if (value === '娱乐' || value === '软件' || value === '游戏' || value === '资讯') return '娱乐资源';
         return value;
     }
 
     function isFreeCategory(category) {
         const value = displayCategoryName(category);
-        return value === '免费' || value === '娱乐';
+        return value === '免费项目' || value === '娱乐资源';
     }
 
     // ========== 点赞功能 ==========
