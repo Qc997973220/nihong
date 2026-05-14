@@ -3980,7 +3980,7 @@
         let downloadSectionHtml = '';
         // hasAccess=true 表示资源本身有下载链接
         if (data.hasAccess === true) {
-            const isFreeResource = data.freeResource === true || rawCategory === '免费' || category === '免费';
+            const isFreeResource = data.freeResource === true || isFreeCategory(rawCategory) || isFreeCategory(category);
             const loginRequired = data.loginRequired === true;
             const memberStatusText = getMemberStatusText();
             const ordinaryUser = !!localStorage.getItem('userInfo') && !isVIP();
@@ -4216,7 +4216,7 @@
             category,
             createdDate,
             viewCount: viewCount || 0,
-            isFreeResource: data.freeResource === true || String(category || '').includes('免费') || String(category || '').includes('鍏嶈垂')
+            isFreeResource: data.freeResource === true || isFreeCategory(category) || String(category || '').includes('鍏嶈垂')
         });
         console.log('渲染完成');
 
@@ -4605,7 +4605,14 @@
 
     function displayCategoryName(category) {
         const value = String(category || '').trim();
-        return value === '网创' ? 'VIP专享' : value;
+        if (value === '网创') return 'VIP专享';
+        if (value === '软件' || value === '游戏' || value === '资讯') return '娱乐';
+        return value;
+    }
+
+    function isFreeCategory(category) {
+        const value = displayCategoryName(category);
+        return value === '免费' || value === '娱乐';
     }
 
     // ========== 点赞功能 ==========

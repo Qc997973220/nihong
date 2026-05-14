@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -48,6 +49,7 @@ public class ResourceController {
     private static final float JPEG_QUALITY = 0.82f;
     private static final int FREE_DAILY_UNLOCK_LIMIT = 2;
     private static final String FREE_QUOTA_EXCEEDED_MESSAGE = "您今日免费额度已用完,请明天再来吧!";
+    private static final List<String> FREE_RESOURCE_CATEGORIES = Arrays.asList("免费", "娱乐", "软件", "游戏", "资讯");
 
     @Autowired
     private ResourceService resourceService;
@@ -445,7 +447,7 @@ public class ResourceController {
         }
 
         LocalDateTime startOfDay = LocalDateTime.now().toLocalDate().atStartOfDay();
-        long todayUnlocks = downloadRecordDao.countTodayFreeUnlocks(user.getAccount(), startOfDay, "免费");
+        long todayUnlocks = downloadRecordDao.countTodayFreeUnlocks(user.getAccount(), startOfDay, FREE_RESOURCE_CATEGORIES);
         if (todayUnlocks >= FREE_DAILY_UNLOCK_LIMIT) {
             result.put("message", FREE_QUOTA_EXCEEDED_MESSAGE);
             return result;
@@ -464,14 +466,14 @@ public class ResourceController {
 
     private int getRemainingFreeUnlocks(String account) {
         LocalDateTime startOfDay = LocalDateTime.now().toLocalDate().atStartOfDay();
-        long todayUnlocks = downloadRecordDao.countTodayFreeUnlocks(account, startOfDay, "免费");
+        long todayUnlocks = downloadRecordDao.countTodayFreeUnlocks(account, startOfDay, FREE_RESOURCE_CATEGORIES);
         return Math.max(0, FREE_DAILY_UNLOCK_LIMIT - (int) todayUnlocks);
     }
 
     private boolean isFreeResource(Resource resource) {
         return resource != null
                 && resource.getCategory() != null
-                && "免费".equals(resource.getCategory().trim());
+                && FREE_RESOURCE_CATEGORIES.contains(resource.getCategory().trim());
     }
 
     private boolean isVisibleResource(Resource resource) {

@@ -19,6 +19,11 @@
             box-sizing: border-box;
         }
 
+        html {
+            overflow-y: scroll;
+            scrollbar-gutter: stable;
+        }
+
         body {
             font-family: "Inter", system-ui, -apple-system, sans-serif;
             background: #0b0e14;
@@ -3249,6 +3254,36 @@
             margin: 24px 0 56px;
             scroll-margin-top: 120px;
         }
+        .resource-grid.is-loading {
+            position: relative;
+            min-height: var(--resource-grid-loading-height, 360px);
+        }
+        .resource-grid.is-loading::after {
+            content: '资源加载中...';
+            position: absolute;
+            inset: 0;
+            z-index: 5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #9fb8d2;
+            font-weight: 700;
+            border-radius: 8px;
+            background: rgba(5, 10, 20, 0.42);
+            backdrop-filter: blur(2px);
+            pointer-events: none;
+        }
+        .resource-grid.is-loading .resource-card {
+            opacity: 0.45;
+            pointer-events: none;
+        }
+        .resource-loading-state {
+            grid-column: 1 / -1;
+            margin: 0;
+            padding: 40px 0;
+            color: #7f9bc0;
+            text-align: center;
+        }
         .resource-card {
             position: relative;
             border-radius: 8px;
@@ -3430,7 +3465,7 @@
                 gap: 6px;
             }
             .category-chip {
-                flex: 1 1 calc(33.333% - 6px);
+                flex: 1 1 calc(50% - 6px);
                 text-align: center;
                 padding: 8px 10px;
             }
@@ -3732,7 +3767,7 @@
             }
             .categories {
                 display: grid;
-                grid-template-columns: repeat(3, minmax(0, 1fr));
+                grid-template-columns: repeat(2, minmax(0, 1fr));
                 gap: 8px;
             }
             .category-chip {
@@ -4163,7 +4198,7 @@
                 height: 238px;
             }
             .categories {
-                grid-template-columns: repeat(3, minmax(0, 1fr));
+                grid-template-columns: repeat(2, minmax(0, 1fr));
             }
             .category-chip {
                 font-size: 0.76rem;
@@ -4499,6 +4534,7 @@
         <div class="categories">
             <span class="category-chip active">全部</span>
             <span class="category-chip">VIP专享</span>
+            <span class="category-chip">娱乐</span>
             <span class="category-chip">免费</span>
         </div>
 
@@ -4604,6 +4640,7 @@
             <select id="resourceCategory">
                 <option value="" selected disabled>-- 请选择分类 --</option>
                 <option value="VIP专享">VIP专享</option>
+                <option value="娱乐">娱乐</option>
                 <option value="免费">免费</option>
             </select>
         </div>
@@ -4663,7 +4700,14 @@
 
     function displayCategoryName(category) {
         const value = String(category || '').trim();
-        return value === '网创' ? 'VIP专享' : value;
+        if (value === '网创') return 'VIP专享';
+        if (value === '软件' || value === '游戏' || value === '资讯') return '娱乐';
+        return value;
+    }
+
+    function isFreeCategory(category) {
+        const value = displayCategoryName(category);
+        return value === '免费' || value === '娱乐';
     }
 
     // 全局变量
@@ -5184,7 +5228,7 @@
             card.className = 'resource-card';
             const categoryName = displayCategoryName(resource.category || '未分类');
             const viewCountHtml = `<div class="card-view-count"><i class="fa-regular fa-eye"></i> ${resource.viewCount || 0}</div>`;
-            const accessBadgeHtml = resource.category === '免费'
+            const accessBadgeHtml = isFreeCategory(resource.category)
                 ? '<div class="access-badge free-badge">免费</div>'
                 : '<div class="access-badge vip-badge">VIP</div>';
             const imageHtml = resource.image
@@ -5405,7 +5449,7 @@
                 year: 'numeric', month: '2-digit', day: '2-digit'
             }) : '未知';
             const viewCountHtml = `<div class="card-view-count"><i class="fa-regular fa-eye"></i> ${r.viewCount || 0}</div>`;
-            const accessBadgeHtml = r.category === '免费'
+            const accessBadgeHtml = isFreeCategory(r.category)
                 ? '<div class="access-badge free-badge">免费</div>'
                 : '<div class="access-badge vip-badge">VIP</div>';
             const imageHtml = r.image
@@ -5479,15 +5523,34 @@
     }
 
     // 获取资源列表
+    function setResourceLoadingState(grid) {
+        if (!grid) return;
+
+        if (grid.querySelector('.resource-card')) {
+            const currentHeight = Math.max(grid.offsetHeight, 320);
+            grid.style.setProperty('--resource-grid-loading-height', `${currentHeight}px`);
+            grid.classList.add('is-loading');
+            return;
+        }
+
+        grid.classList.remove('is-loading');
+        grid.style.removeProperty('--resource-grid-loading-height');
+        grid.innerHTML = '<p class="resource-loading-state">资源加载中...</p>';
+    }
+
+    function clearResourceLoadingState(grid) {
+        if (!grid) return;
+        grid.classList.remove('is-loading');
+        grid.style.removeProperty('--resource-grid-loading-height');
+    }
+
     async function fetchResources(page = 1) {
         currentPage = page;
         localStorage.removeItem('cachedResources');
         localStorage.removeItem('cachedResourcesTimestamp');
 
         const grid = document.getElementById('resourceGrid');
-        if (grid) {
-            grid.innerHTML = '<p style="color:#7f9bc0; grid-column:1/-1; text-align:center; padding: 40px 0;">资源加载中...</p>';
-        }
+        setResourceLoadingState(grid);
 
         try {
             const params = new URLSearchParams({
@@ -5511,9 +5574,13 @@
 
             renderCards(allResources);
             renderPagination(totalResourcePages, totalResourceElements);
+            clearResourceLoadingState(grid);
         } catch (error) {
             console.error('获取资源列表失败', error);
-            document.getElementById('resourceGrid').innerHTML = '<p style="color:#ff8a8a; grid-column:1/-1; text-align:center;">加载失败，请刷新重试</p>';
+            clearResourceLoadingState(grid);
+            if (grid) {
+                grid.innerHTML = '<p class="resource-loading-state" style="color:#ff8a8a;">加载失败，请刷新重试</p>';
+            }
             renderPagination(0, 0);
         }
     }
@@ -5665,7 +5732,7 @@
 
     function getRecommendAccessMeta(item) {
         const category = String(item.category || '').trim();
-        const isFree = category.includes('免费');
+        const isFree = isFreeCategory(category);
         return isFree
             ? { className: 'free', label: '免费资源', icon: 'fas fa-unlock' }
             : { className: 'vip', label: 'VIP资源', icon: 'fas fa-crown' };

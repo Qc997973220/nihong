@@ -31,6 +31,8 @@ public class ResourceService {
     private static final int MAX_PAGE_SIZE = 50;
     private static final String VIP_CATEGORY = "VIP专享";
     private static final String LEGACY_VIP_CATEGORY = "网创";
+    private static final String ENTERTAINMENT_CATEGORY = "娱乐";
+    private static final List<String> LEGACY_ENTERTAINMENT_CATEGORIES = Arrays.asList("软件", "游戏", "资讯");
 
     public List<Resource> getAllResources() {
         String cacheKey = cacheService.getResourceListKey();
@@ -166,6 +168,12 @@ public class ResourceService {
         if (VIP_CATEGORY.equals(category) || LEGACY_VIP_CATEGORY.equals(category)) {
             return Arrays.asList(VIP_CATEGORY, LEGACY_VIP_CATEGORY);
         }
+        if (ENTERTAINMENT_CATEGORY.equals(category) || LEGACY_ENTERTAINMENT_CATEGORIES.contains(category)) {
+            List<String> categories = new ArrayList<>();
+            categories.add(ENTERTAINMENT_CATEGORY);
+            categories.addAll(LEGACY_ENTERTAINMENT_CATEGORIES);
+            return categories;
+        }
         return Collections.singletonList(category);
     }
 
@@ -176,6 +184,9 @@ public class ResourceService {
         String trimmed = category.trim();
         if (LEGACY_VIP_CATEGORY.equals(trimmed)) {
             return VIP_CATEGORY;
+        }
+        if (LEGACY_ENTERTAINMENT_CATEGORIES.contains(trimmed)) {
+            return ENTERTAINMENT_CATEGORY;
         }
         return trimmed;
     }

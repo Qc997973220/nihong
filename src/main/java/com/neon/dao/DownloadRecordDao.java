@@ -19,10 +19,10 @@ public interface DownloadRecordDao extends JpaRepository<DownloadRecord, Long> {
 
     @Query("SELECT COUNT(DISTINCT dr.resourceId) FROM DownloadRecord dr " +
             "WHERE dr.account = :account AND dr.downloadedAt >= :startOfDay " +
-            "AND dr.resourceId IN (SELECT r.id FROM Resource r WHERE r.category = :category)")
+            "AND dr.resourceId IN (SELECT r.id FROM Resource r WHERE r.category IN :categories)")
     Long countTodayFreeUnlocks(@Param("account") String account,
                                @Param("startOfDay") LocalDateTime startOfDay,
-                               @Param("category") String category);
+                               @Param("categories") List<String> categories);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT COUNT(dr) FROM DownloadRecord dr WHERE dr.account = :account AND dr.downloadedAt >= :startOfDay")
