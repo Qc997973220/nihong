@@ -91,6 +91,7 @@ public class AdminUserController {
 
         applyMemberType(target, memberType);
         usersDao.save(target);
+        walletService.grantInviteRewardIfNeeded(target);
 
         result.put("success", true);
         result.put("message", "会员权限已更新");

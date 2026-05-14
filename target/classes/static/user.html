@@ -361,8 +361,16 @@
         }
         .invite-link-row {
             display: flex;
+            align-items: center;
             gap: 10px;
             margin-bottom: 14px;
+        }
+        .invite-link-label {
+            flex: 0 0 76px;
+            color: #9bbce0;
+            font-size: 0.86rem;
+            font-weight: 700;
+            white-space: nowrap;
         }
         .invite-link-input {
             flex: 1;
@@ -808,6 +816,369 @@
                 justify-content: center;
             }
         }
+
+        /* Premium account center */
+        body {
+            background:
+                    linear-gradient(180deg, #050910 0%, #07111d 48%, #050810 100%);
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 1;
+            background:
+                    radial-gradient(circle at 16% 12%, rgba(112, 239, 255, 0.12), transparent 32%),
+                    radial-gradient(circle at 86% 18%, rgba(255, 224, 153, 0.08), transparent 28%),
+                    linear-gradient(120deg, rgba(255, 218, 106, 0.035), transparent 34%);
+        }
+        body::after {
+            opacity: 0.72;
+            background-image:
+                    linear-gradient(rgba(112, 239, 255, 0.035) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(112, 239, 255, 0.035) 1px, transparent 1px);
+            background-size: 54px 54px;
+        }
+        .navbar {
+            background: rgba(4, 10, 20, 0.86);
+            border-bottom: 1px solid rgba(137, 203, 255, 0.18);
+            box-shadow: 0 14px 40px rgba(0, 0, 0, 0.26);
+        }
+        .logo {
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffffff, #9deeff 48%, #ffe099);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 12px rgba(112, 239, 255, 0.28));
+            letter-spacing: 0;
+        }
+        .back-link {
+            min-height: 36px;
+            padding: 8px 12px;
+            border: 1px solid rgba(137, 203, 255, 0.18);
+            border-radius: 8px;
+            color: #cfeaff;
+            background: rgba(8, 22, 40, 0.66);
+        }
+        .back-link:hover {
+            color: #07101f;
+            background: linear-gradient(135deg, #8df3ff, #6affc3);
+            text-shadow: none;
+        }
+        body > .container {
+            max-width: 1120px;
+            padding-top: 34px;
+            padding-bottom: 56px;
+        }
+        .profile-card {
+            position: relative;
+            overflow: hidden;
+            margin-top: 14px;
+            padding: 30px;
+            border-radius: 10px;
+            border: 1px solid rgba(137, 203, 255, 0.22);
+            background:
+                    linear-gradient(135deg, rgba(8, 19, 36, 0.96), rgba(6, 10, 20, 0.98) 58%, rgba(22, 17, 9, 0.92)),
+                    #07101f;
+            box-shadow:
+                    0 34px 90px rgba(0, 0, 0, 0.44),
+                    inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+        }
+        .profile-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background-image:
+                    linear-gradient(rgba(112, 239, 255, 0.05) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(112, 239, 255, 0.05) 1px, transparent 1px);
+            background-size: 42px 42px;
+            mask-image: linear-gradient(90deg, rgba(0, 0, 0, 0.86), transparent 86%);
+        }
+        .profile-card::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #70efff, #ffe099, #6affc3);
+            opacity: 0.86;
+        }
+        .profile-card > * {
+            position: relative;
+            z-index: 1;
+        }
+        .profile-header {
+            min-height: 132px;
+            margin-bottom: 24px;
+            padding: 24px;
+            align-items: center;
+            justify-content: space-between;
+            border: 1px solid rgba(137, 203, 255, 0.16);
+            border-radius: 8px;
+            background:
+                    radial-gradient(circle at 90% 18%, rgba(255, 224, 153, 0.12), transparent 32%),
+                    linear-gradient(135deg, rgba(112, 239, 255, 0.08), rgba(4, 12, 24, 0.6));
+        }
+        .profile-header::before {
+            content: 'NEON ACCOUNT';
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 38px;
+            padding: 0 12px;
+            border: 1px solid rgba(112, 239, 255, 0.22);
+            border-radius: 8px;
+            color: #8df3ff;
+            background: rgba(4, 12, 24, 0.62);
+            font-family: 'Orbitron', 'Inter', sans-serif;
+            font-size: 0.78rem;
+            font-weight: 800;
+            letter-spacing: 0;
+        }
+        .user-info h1,
+        #nickname {
+            color: #f5fbff;
+            font-size: 2.15rem !important;
+            line-height: 1.16;
+            font-weight: 850;
+            letter-spacing: 0;
+            text-shadow: 0 0 18px rgba(112, 239, 255, 0.18);
+        }
+        .user-info p,
+        #memberTypeDisplay {
+            margin-top: 8px;
+            color: #a9c2dc;
+            font-size: 0.96rem;
+        }
+        .info-section,
+        .wallet-card,
+        .invite-share-card {
+            position: relative;
+            overflow: hidden;
+            margin-top: 18px;
+            padding: 22px;
+            border: 1px solid rgba(137, 203, 255, 0.16);
+            border-radius: 8px;
+            background:
+                    linear-gradient(180deg, rgba(112, 239, 255, 0.045), rgba(4, 12, 24, 0.62)),
+                    rgba(6, 15, 29, 0.82);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+        }
+        .info-section::before,
+        .wallet-card::before,
+        .invite-share-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(112, 239, 255, 0.48), transparent);
+            opacity: 0.76;
+        }
+        .info-section > div:first-child,
+        .wallet-header,
+        .invite-share-header {
+            padding-bottom: 14px;
+            margin-bottom: 14px;
+            border-bottom: 1px solid rgba(137, 203, 255, 0.12);
+        }
+        .info-section h2,
+        .wallet-header > div,
+        .invite-share-title {
+            margin: 0;
+            border: 0;
+            padding: 0;
+            color: #edf8ff;
+            font-size: 1.05rem;
+            font-weight: 850;
+            letter-spacing: 0;
+        }
+        .info-section h2::before,
+        .wallet-header > div::before,
+        .invite-share-title::before {
+            content: '';
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            margin-right: 9px;
+            border-radius: 50%;
+            background: #70efff;
+            box-shadow: 0 0 12px rgba(112, 239, 255, 0.74);
+            vertical-align: middle;
+        }
+        .info-item {
+            display: grid;
+            grid-template-columns: 132px minmax(0, 1fr);
+            gap: 8px 14px;
+            align-items: center;
+            margin: 0;
+            padding: 13px 0;
+            border-bottom: 1px solid rgba(137, 203, 255, 0.09);
+        }
+        .info-item:last-child {
+            border-bottom: 0;
+        }
+        .info-label {
+            width: auto;
+            color: #8ca8c5;
+            font-size: 0.86rem;
+            font-weight: 800;
+        }
+        .info-value {
+            min-width: 0;
+            color: #edf8ff;
+            font-size: 0.98rem;
+            font-weight: 650;
+            overflow-wrap: anywhere;
+        }
+        .info-hint {
+            grid-column: 2;
+            margin: -3px 0 0;
+            color: #7fa7cc;
+            line-height: 1.5;
+        }
+        #userPoints,
+        #infoInviteCode,
+        #infoMemberStatus {
+            font-family: 'Orbitron', 'Inter', sans-serif;
+            letter-spacing: 0;
+        }
+        .wallet-stats {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
+        .wallet-stat {
+            min-height: 92px;
+            padding: 16px;
+            border-radius: 8px;
+            border-color: rgba(137, 203, 255, 0.16);
+            background:
+                    linear-gradient(145deg, rgba(8, 22, 40, 0.86), rgba(4, 12, 24, 0.82));
+        }
+        .wallet-label {
+            color: #8ca8c5;
+            font-size: 0.78rem;
+            font-weight: 750;
+        }
+        .wallet-value {
+            margin-top: 8px;
+            color: #6affc3;
+            font-size: 1.25rem;
+            letter-spacing: 0;
+        }
+        .invite-link-input,
+        .withdraw-input,
+        .edit-form-group input,
+        .edit-form-group select,
+        #editIntroduction {
+            border-radius: 8px !important;
+            border: 1px solid rgba(137, 203, 255, 0.22) !important;
+            background: rgba(4, 12, 24, 0.72) !important;
+            color: #edf8ff !important;
+        }
+        .invite-action-btn,
+        .btn {
+            min-height: 38px;
+            border-radius: 8px;
+            font-weight: 850;
+        }
+        .btn-primary,
+        .invite-action-btn.primary {
+            color: #07101f;
+            background: linear-gradient(135deg, #8df3ff, #6affc3);
+            border: 1px solid rgba(141, 243, 255, 0.36);
+            box-shadow: 0 14px 28px rgba(106, 255, 195, 0.14);
+        }
+        .btn-primary:hover,
+        .invite-action-btn.primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 18px 36px rgba(106, 255, 195, 0.22);
+        }
+        .btn-secondary,
+        .invite-action-btn {
+            color: #cfeaff;
+            background: rgba(8, 22, 40, 0.72);
+            border: 1px solid rgba(137, 203, 255, 0.2);
+        }
+        .btn-secondary:hover,
+        .invite-action-btn:hover {
+            color: #fff;
+            border-color: rgba(112, 239, 255, 0.4);
+            background: rgba(13, 36, 62, 0.88);
+        }
+        .invite-code-pill,
+        .status-badge {
+            border-radius: 8px;
+        }
+        .invitee-row,
+        .withdrawal-row {
+            border-radius: 8px;
+            border-color: rgba(137, 203, 255, 0.14);
+            background: rgba(4, 12, 24, 0.54);
+        }
+        .action-buttons {
+            margin-top: 22px;
+            padding-top: 22px;
+            border-top: 1px solid rgba(137, 203, 255, 0.12);
+        }
+
+        @media (max-width: 980px) {
+            body > .container {
+                max-width: 760px;
+            }
+            .wallet-stats {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+        @media (max-width: 768px) {
+            body > .container {
+                padding: 22px 14px 38px;
+            }
+            .profile-card {
+                padding: 16px;
+                border-radius: 8px;
+            }
+            .profile-header {
+                align-items: flex-start;
+                flex-direction: column;
+                min-height: 0;
+                padding: 18px;
+            }
+            .profile-header::before {
+                width: 100%;
+            }
+            .info-section,
+            .wallet-card,
+            .invite-share-card {
+                padding: 16px;
+            }
+            .info-section > div:first-child {
+                align-items: stretch !important;
+                flex-direction: column;
+                gap: 12px;
+            }
+            .info-section > div:first-child .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            .info-item {
+                grid-template-columns: 1fr;
+                gap: 5px;
+            }
+            .info-hint {
+                grid-column: auto;
+            }
+            .wallet-stats {
+                grid-template-columns: 1fr;
+            }
+            .withdraw-form,
+            .invite-link-row {
+                flex-direction: column;
+            }
+        }
     </style>
 </head>
 <body>
@@ -919,12 +1290,20 @@
                     <div class="invite-code-pill" id="inviteCodePill">邀请码：--</div>
                 </div>
                 <div class="invite-link-row">
+                    <span class="invite-link-label">中文链接</span>
                     <input class="invite-link-input" id="inviteLinkInput" type="text" readonly value="">
+                    <button class="invite-action-btn primary" id="copyInviteLinkBtn">
+                        <i class="fas fa-link"></i> 复制
+                    </button>
+                </div>
+                <div class="invite-link-row">
+                    <span class="invite-link-label">备用链接</span>
+                    <input class="invite-link-input" id="inviteBackupLinkInput" type="text" readonly value="">
+                    <button class="invite-action-btn" id="copyInviteBackupLinkBtn">
+                        <i class="fas fa-link"></i> 复制
+                    </button>
                 </div>
                 <div class="invite-actions">
-                    <button class="invite-action-btn primary" id="copyInviteLinkBtn">
-                        <i class="fas fa-link"></i> 复制邀请链接
-                    </button>
                     <button class="invite-action-btn" id="copyInviteCodeBtn">
                         <i class="fas fa-ticket"></i> 复制邀请码
                     </button>
@@ -1295,10 +1674,13 @@
         return (value || '').trim().replace(/[^A-Za-z0-9]/g, '').toUpperCase();
     }
 
-    function buildInviteLink(inviteCode) {
-        const url = new URL('/', window.location.origin);
-        url.searchParams.set('invite', inviteCode);
-        return url.toString();
+    const PRIMARY_INVITE_ORIGIN = 'https://霓虹之都.中国';
+    const BACKUP_INVITE_ORIGIN = 'https://neonvip.cn';
+
+    function buildInviteLink(inviteCode, origin = PRIMARY_INVITE_ORIGIN) {
+        const params = new URLSearchParams();
+        params.set('invite', inviteCode);
+        return `${origin}?${params.toString()}`;
     }
 
     function showInviteMessage(text, type = 'success') {
@@ -1416,15 +1798,19 @@
         const inviteCode = normalizeInviteCode(userData && userData.inviteCode);
         const allowed = hasPromotionPermission();
         const inviteLink = allowed && inviteCode ? buildInviteLink(inviteCode) : '';
+        const backupInviteLink = allowed && inviteCode ? buildInviteLink(inviteCode, BACKUP_INVITE_ORIGIN) : '';
         const codePill = document.getElementById('inviteCodePill');
         const linkInput = document.getElementById('inviteLinkInput');
+        const backupLinkInput = document.getElementById('inviteBackupLinkInput');
         const copyLinkBtn = document.getElementById('copyInviteLinkBtn');
+        const copyBackupLinkBtn = document.getElementById('copyInviteBackupLinkBtn');
         const copyCodeBtn = document.getElementById('copyInviteCodeBtn');
         const posterBtn = document.getElementById('generatePosterBtn');
 
         if (codePill) codePill.innerText = allowed && inviteCode ? `邀请码：${inviteCode}` : '永久VIP专享';
         if (linkInput) linkInput.value = allowed ? (inviteLink || '邀请码生成中，请刷新或重新登录') : PROMOTION_LOCK_MESSAGE;
-        [copyLinkBtn, copyCodeBtn, posterBtn].forEach(btn => {
+        if (backupLinkInput) backupLinkInput.value = allowed ? (backupInviteLink || '邀请码生成中，请刷新或重新登录') : PROMOTION_LOCK_MESSAGE;
+        [copyLinkBtn, copyBackupLinkBtn, copyCodeBtn, posterBtn].forEach(btn => {
             if (btn) btn.disabled = allowed ? !inviteCode : false;
         });
         renderRewardPolicy();
@@ -1693,7 +2079,12 @@
         document.getElementById('copyInviteLinkBtn').addEventListener('click', function() {
             if (!ensurePromotionPermission()) return;
             const inviteCode = normalizeInviteCode(userData && userData.inviteCode);
-            copyText(inviteCode ? buildInviteLink(inviteCode) : '', '邀请链接已复制');
+            copyText(inviteCode ? buildInviteLink(inviteCode) : '', '中文链接已复制');
+        });
+        document.getElementById('copyInviteBackupLinkBtn').addEventListener('click', function() {
+            if (!ensurePromotionPermission()) return;
+            const inviteCode = normalizeInviteCode(userData && userData.inviteCode);
+            copyText(inviteCode ? buildInviteLink(inviteCode, BACKUP_INVITE_ORIGIN) : '', '备用链接已复制');
         });
         document.getElementById('copyInviteCodeBtn').addEventListener('click', function() {
             if (!ensurePromotionPermission()) return;
@@ -1825,6 +2216,39 @@
 </div>
 
 <script>
+    (function initMobileContactDock() {
+        const dock = document.querySelector('.float-contact');
+        if (!dock || dock.dataset.contactDockReady) return;
+        dock.dataset.contactDockReady = 'true';
+        const mobileQuery = window.matchMedia('(max-width: 768px)');
+
+        function closeDockPopups(except) {
+            dock.querySelectorAll('.contact-btn.is-open').forEach(btn => {
+                if (btn !== except) btn.classList.remove('is-open');
+            });
+        }
+
+        dock.querySelectorAll('.contact-btn').forEach(btn => {
+            btn.addEventListener('click', function(event) {
+                if (!mobileQuery.matches) return;
+                if (event.target.closest('.contact-popup')) return;
+                const wasOpen = this.classList.contains('is-open');
+                closeDockPopups(this);
+                this.classList.toggle('is-open', !wasOpen);
+            });
+        });
+
+        document.addEventListener('click', function(event) {
+            if (mobileQuery.matches && !dock.contains(event.target)) {
+                closeDockPopups();
+            }
+        });
+
+        window.addEventListener('resize', function() {
+            if (!mobileQuery.matches) closeDockPopups();
+        });
+    })();
+
     (function initVipToolbox() {
         const toolboxBtn = document.getElementById('vipToolboxBtn');
         if (!toolboxBtn) return;
@@ -2084,6 +2508,304 @@
         .edit-modal-footer .btn {
             width: 100%;
             justify-content: center;
+        }
+    }
+
+    /* Mobile final pass: account layout and touch-friendly contact dock */
+    @media (max-width: 768px) {
+        html,
+        body {
+            overflow-x: hidden;
+        }
+        body {
+            padding-bottom: 86px;
+        }
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 1100;
+        }
+        .navbar .container {
+            width: 100%;
+            max-width: 100%;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 0 12px;
+            box-sizing: border-box;
+        }
+        .logo {
+            width: 100%;
+            min-width: 0;
+            text-align: center;
+            font-size: clamp(1.1rem, 5vw, 1.34rem);
+            line-height: 1.18;
+        }
+        .back-link {
+            width: 100%;
+            min-height: 38px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+        }
+        body > .container {
+            width: 100%;
+            max-width: 100%;
+            padding: 16px 12px 24px;
+            box-sizing: border-box;
+        }
+        .profile-card,
+        .profile-header,
+        .info-section,
+        .wallet-card,
+        .invite-share-card,
+        .edit-modal {
+            max-width: 100%;
+            min-width: 0;
+            box-sizing: border-box;
+        }
+        .profile-card {
+            margin-top: 10px;
+            padding: 14px;
+            border-radius: 10px;
+        }
+        .profile-header {
+            gap: 12px;
+            padding: 14px;
+            margin-bottom: 14px;
+            border-radius: 8px;
+            align-items: stretch;
+        }
+        .profile-header::before {
+            width: auto;
+            max-width: 100%;
+            align-self: stretch;
+            box-sizing: border-box;
+            min-height: 34px;
+            font-size: 0.7rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .user-info h1,
+        #nickname {
+            max-width: 100%;
+            font-size: clamp(1.28rem, 6vw, 1.58rem) !important;
+            line-height: 1.2;
+            overflow-wrap: anywhere;
+        }
+        .user-info p,
+        #memberTypeDisplay {
+            font-size: 0.86rem;
+            line-height: 1.45;
+        }
+        .info-section,
+        .wallet-card,
+        .invite-share-card {
+            margin-top: 12px;
+            padding: 14px;
+            border-radius: 10px;
+        }
+        .info-section > div:first-child,
+        .wallet-header,
+        .invite-share-header {
+            align-items: stretch !important;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .info-section > div:first-child .btn,
+        .invite-action-btn,
+        .action-buttons .btn {
+            width: 100%;
+            justify-content: center;
+        }
+        .info-item {
+            grid-template-columns: 1fr;
+            gap: 5px;
+            padding: 11px 0;
+        }
+        .info-label,
+        .info-value,
+        .info-hint,
+        .wallet-header span,
+        .withdrawal-meta,
+        .invite-code-pill,
+        .invite-link-input {
+            min-width: 0;
+            max-width: 100%;
+            overflow-wrap: anywhere;
+        }
+        .info-hint {
+            grid-column: auto;
+        }
+        .wallet-stats {
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            gap: 10px;
+        }
+        .wallet-stat {
+            min-height: 82px;
+            padding: 12px;
+            border-radius: 8px;
+        }
+        .wallet-value {
+            font-size: 1.1rem;
+            overflow-wrap: anywhere;
+        }
+        .withdraw-form,
+        .invite-link-row,
+        .invite-actions,
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+        .withdraw-input,
+        .invite-link-input {
+            width: 100%;
+        }
+        .invite-poster-preview canvas {
+            width: 100%;
+            height: auto;
+        }
+        .withdrawal-row,
+        .invitee-row {
+            grid-template-columns: 1fr;
+            gap: 8px;
+        }
+        .status-badge {
+            justify-self: flex-start;
+        }
+        .footer {
+            padding-bottom: 12px;
+        }
+        .float-contact {
+            display: flex !important;
+            position: fixed;
+            left: 12px;
+            right: 12px;
+            top: auto;
+            bottom: 10px;
+            transform: none;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 8px;
+            border: 1px solid rgba(137, 203, 255, 0.18);
+            border-radius: 14px;
+            background: rgba(4, 10, 20, 0.9);
+            backdrop-filter: blur(18px);
+            box-shadow: 0 16px 34px rgba(0, 0, 0, 0.36), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            z-index: 1200;
+        }
+        .contact-btn {
+            width: 40px;
+            height: 40px;
+            flex: 0 0 40px;
+            border-radius: 50%;
+        }
+        .contact-btn i {
+            font-size: 1.08rem;
+        }
+        .contact-popup {
+            position: fixed;
+            left: 50%;
+            right: auto;
+            top: auto;
+            bottom: 74px;
+            width: min(260px, calc(100vw - 32px));
+            min-width: 0;
+            max-width: calc(100vw - 32px);
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            padding: 12px;
+            border-radius: 12px;
+            text-align: center;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        .contact-btn:hover .contact-popup,
+        .contact-btn:focus-within .contact-popup,
+        .contact-btn.is-open .contact-popup {
+            left: 50%;
+            right: auto;
+            top: auto;
+            bottom: 74px;
+            transform: translateX(-50%);
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+        .contact-popup img {
+            width: 150px;
+            height: 150px;
+            margin: 0;
+            flex: 0 0 auto;
+        }
+        .contact-popup p {
+            width: 100%;
+            max-width: 100%;
+            margin: 0;
+            color: #c7d9ee;
+            font-size: 0.82rem;
+            line-height: 1.35;
+            text-align: center;
+            white-space: normal;
+            word-break: keep-all;
+            overflow-wrap: break-word;
+            writing-mode: horizontal-tb !important;
+            text-orientation: mixed !important;
+        }
+        .contact-popup .email-text,
+        .contact-popup .toolbox-text {
+            word-break: break-all;
+        }
+        @media (hover: none) {
+            .contact-btn:hover .contact-popup {
+                opacity: 0;
+                visibility: hidden;
+                pointer-events: none;
+            }
+            .contact-btn.is-open .contact-popup {
+                opacity: 1;
+                visibility: visible;
+                pointer-events: auto;
+            }
+        }
+    }
+
+    @media (max-width: 420px) {
+        body {
+            padding-bottom: 78px;
+        }
+        .wallet-stats {
+            grid-template-columns: 1fr !important;
+        }
+        .contact-btn {
+            width: 36px;
+            height: 36px;
+            flex-basis: 36px;
+        }
+        .contact-popup {
+            bottom: 68px;
+            width: min(238px, calc(100vw - 28px));
+            padding: 10px;
+        }
+        .contact-btn:hover .contact-popup,
+        .contact-btn:focus-within .contact-popup,
+        .contact-btn.is-open .contact-popup {
+            bottom: 68px;
+        }
+        .contact-popup img {
+            width: 136px;
+            height: 136px;
         }
     }
 </style>

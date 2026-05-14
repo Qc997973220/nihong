@@ -48,6 +48,7 @@ public class WalletController {
         if (!walletService.hasPromotionPermission(user)) {
             return authError("权限不足,永久VIP专享");
         }
+        walletService.reconcileInviteRewardsForInviter(user);
         Map<String, Object> result = walletService.buildInviteSummary(user);
         result.put("success", true);
         return result;

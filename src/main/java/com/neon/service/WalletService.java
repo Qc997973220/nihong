@@ -112,6 +112,22 @@ public class WalletService {
         return result;
     }
 
+    @Transactional
+    public int reconcileInviteRewardsForInviter(Users inviter) {
+        if (inviter == null || inviter.getAccount() == null || !hasPromotionPermission(inviter)) {
+            return 0;
+        }
+
+        int granted = 0;
+        List<Users> invitees = usersDao.findByInvitedByOrderByCreateTimeDesc(inviter.getAccount());
+        for (Users invitee : invitees) {
+            if (shouldGrantInviteReward(invitee) && grantInviteRewardIfNeeded(invitee)) {
+                granted++;
+            }
+        }
+        return granted;
+    }
+
     public Map<String, Object> buildWithdrawalSummary(Users user) {
         Map<String, Object> result = new HashMap<>();
         if (user == null) {
@@ -293,8 +309,11 @@ public class WalletService {
         }
 
         String inviterAccount = invitee.getInvitedBy();
-        Integer memberType = invitee.getMemberType();
-        if (inviterAccount == null || inviterAccount.trim().isEmpty()) {
+        Integer memberType = normalizeMemberType(invitee.getMemberType());
+        if (invitee.getAccount() == null || inviterAccount == null || inviterAccount.trim().isEmpty()) {
+            return false;
+        }
+        if (!shouldGrantInviteReward(invitee)) {
             return false;
         }
 
@@ -490,6 +509,17 @@ public class WalletService {
             default:
                 return null;
         }
+    }
+
+    private boolean shouldGrantInviteReward(Users invitee) {
+        if (invitee == null) {
+            return false;
+        }
+        Integer memberType = normalizeMemberType(invitee.getMemberType());
+        if (memberType == CardKey.TYPE_PERMANENT) {
+            return true;
+        }
+        return memberType == CardKey.TYPE_YEARLY && "active".equals(resolveMemberStatus(invitee));
     }
 
     private String getMemberTypeName(Integer type) {
