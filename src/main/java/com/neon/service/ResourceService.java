@@ -31,10 +31,10 @@ public class ResourceService {
     private static final int MAX_PAGE_SIZE = 50;
     private static final String VIP_CATEGORY = "VIP项目";
     private static final String FREE_CATEGORY = "免费项目";
-    private static final String ENTERTAINMENT_CATEGORY = "娱乐资源";
+    private static final String ENTERTAINMENT_CATEGORY = "免费资源";
     private static final List<String> LEGACY_VIP_CATEGORIES = Arrays.asList("VIP专享", "网创");
     private static final List<String> LEGACY_FREE_CATEGORIES = Collections.singletonList("免费");
-    private static final List<String> LEGACY_ENTERTAINMENT_CATEGORIES = Arrays.asList("娱乐", "软件", "游戏", "资讯");
+    private static final List<String> LEGACY_ENTERTAINMENT_CATEGORIES = Arrays.asList("娱乐资源", "娱乐", "软件", "游戏", "资讯");
 
     public List<Resource> getAllResources() {
         String cacheKey = cacheService.getResourceListKey();

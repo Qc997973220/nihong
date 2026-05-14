@@ -4607,13 +4607,13 @@
         const value = String(category || '').trim();
         if (value === '网创' || value === 'VIP专享') return 'VIP项目';
         if (value === '免费') return '免费项目';
-        if (value === '娱乐' || value === '软件' || value === '游戏' || value === '资讯') return '娱乐资源';
+        if (value === '娱乐资源' || value === '娱乐' || value === '软件' || value === '游戏' || value === '资讯') return '免费资源';
         return value;
     }
 
     function isFreeCategory(category) {
         const value = displayCategoryName(category);
-        return value === '免费项目' || value === '娱乐资源';
+        return value === '免费项目' || value === '免费资源';
     }
 
     // ========== 点赞功能 ==========

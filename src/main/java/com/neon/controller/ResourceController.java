@@ -49,7 +49,7 @@ public class ResourceController {
     private static final float JPEG_QUALITY = 0.82f;
     private static final int FREE_DAILY_UNLOCK_LIMIT = 2;
     private static final String FREE_QUOTA_EXCEEDED_MESSAGE = "您今日免费额度已用完,请明天再来吧!";
-    private static final List<String> FREE_RESOURCE_CATEGORIES = Arrays.asList("免费项目", "免费", "娱乐资源", "娱乐", "软件", "游戏", "资讯");
+    private static final List<String> FREE_RESOURCE_CATEGORIES = Arrays.asList("免费项目", "免费", "免费资源", "娱乐资源", "娱乐", "软件", "游戏", "资讯");
 
     @Autowired
     private ResourceService resourceService;

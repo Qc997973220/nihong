@@ -1065,7 +1065,7 @@
                         <select id="editResourceCategory" style="padding: 8px 12px; border: 1px solid #3d5a80; border-radius: 4px; background: #1a1a2e; color: #e8e8e8; flex: 1;">
                             <option value="VIP项目">VIP项目</option>
                             <option value="免费项目">免费项目</option>
-                            <option value="娱乐资源">娱乐资源</option>
+                            <option value="免费资源">免费资源</option>
                         </select>
                     </div>
                     <div class="form-row">
@@ -1155,7 +1155,7 @@
             const value = String(category || '').trim();
             if (value === '网创' || value === 'VIP专享') return 'VIP项目';
             if (value === '免费') return '免费项目';
-            if (value === '娱乐' || value === '软件' || value === '游戏' || value === '资讯') return '娱乐资源';
+            if (value === '娱乐资源' || value === '娱乐' || value === '软件' || value === '游戏' || value === '资讯') return '免费资源';
             return value;
         }
 

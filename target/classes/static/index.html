@@ -1797,10 +1797,15 @@
             font-weight: 700;
             line-height: 1;
             pointer-events: none;
+            white-space: nowrap;
         }
         .free-badge {
             background: linear-gradient(135deg, #18c98b, #2fb7ff);
             box-shadow: 0 8px 18px rgba(0, 180, 130, 0.35);
+        }
+        .entertainment-badge {
+            background: linear-gradient(135deg, #ff7ad9, #7c6bff);
+            box-shadow: 0 8px 18px rgba(170, 90, 255, 0.34);
         }
         .vip-badge {
             background: linear-gradient(135deg, #f2c94c, #ff7a45);
@@ -3004,6 +3009,11 @@
             background: linear-gradient(135deg, rgba(255, 240, 173, 0.96), rgba(255, 189, 71, 0.96));
             border-color: rgba(255, 224, 153, 0.62);
         }
+        .recommend-access-badge.entertainment {
+            color: #18051f;
+            background: linear-gradient(135deg, rgba(255, 150, 226, 0.96), rgba(142, 128, 255, 0.96));
+            border-color: rgba(255, 195, 239, 0.62);
+        }
         .recommend-heat-badge {
             min-width: 72px;
             color: #dff7ff;
@@ -3362,6 +3372,9 @@
         }
         .free-badge {
             background: linear-gradient(135deg, #12c99b, #23b6d8);
+        }
+        .entertainment-badge {
+            background: linear-gradient(135deg, #ff7ad9, #7c6bff);
         }
         .vip-badge {
             background: linear-gradient(135deg, #fff0ad, #ff9f43);
@@ -4535,7 +4548,7 @@
             <span class="category-chip active">全部</span>
             <span class="category-chip">VIP项目</span>
             <span class="category-chip">免费项目</span>
-            <span class="category-chip">娱乐资源</span>
+            <span class="category-chip">免费资源</span>
         </div>
 
         <div class="resource-grid" id="resourceGrid"></div>
@@ -4641,7 +4654,7 @@
                 <option value="" selected disabled>-- 请选择分类 --</option>
                 <option value="VIP项目">VIP项目</option>
                 <option value="免费项目">免费项目</option>
-                <option value="娱乐资源">娱乐资源</option>
+                <option value="免费资源">免费资源</option>
             </select>
         </div>
         <div class="input-group">
@@ -4702,13 +4715,24 @@
         const value = String(category || '').trim();
         if (value === '网创' || value === 'VIP专享') return 'VIP项目';
         if (value === '免费') return '免费项目';
-        if (value === '娱乐' || value === '软件' || value === '游戏' || value === '资讯') return '娱乐资源';
+        if (value === '娱乐资源' || value === '娱乐' || value === '软件' || value === '游戏' || value === '资讯') return '免费资源';
         return value;
     }
 
     function isFreeCategory(category) {
         const value = displayCategoryName(category);
-        return value === '免费项目' || value === '娱乐资源';
+        return value === '免费项目' || value === '免费资源';
+    }
+
+    function getCategoryBadgeMeta(category) {
+        const categoryName = displayCategoryName(category);
+        if (categoryName === '免费项目') {
+            return { className: 'free', cardClassName: 'free-badge', label: '免费项目', icon: 'fas fa-unlock' };
+        }
+        if (categoryName === '免费资源') {
+            return { className: 'entertainment', cardClassName: 'entertainment-badge', label: '免费资源', icon: 'fas fa-icons' };
+        }
+        return { className: 'vip', cardClassName: 'vip-badge', label: 'VIP项目', icon: 'fas fa-crown' };
     }
 
     // 全局变量
@@ -5228,10 +5252,9 @@
             const card = document.createElement('div');
             card.className = 'resource-card';
             const categoryName = displayCategoryName(resource.category || '未分类');
+            const badge = getCategoryBadgeMeta(resource.category);
             const viewCountHtml = `<div class="card-view-count"><i class="fa-regular fa-eye"></i> ${resource.viewCount || 0}</div>`;
-            const accessBadgeHtml = isFreeCategory(resource.category)
-                ? '<div class="access-badge free-badge">免费</div>'
-                : '<div class="access-badge vip-badge">VIP</div>';
+            const accessBadgeHtml = `<div class="access-badge ${badge.cardClassName}">${escapeRecommendHtml(badge.label)}</div>`;
             const imageHtml = resource.image
                 ? `<div class="card-image-wrapper" onclick="viewResource(${resource.id})">
                        <img class="card-image" src="${resource.image}" alt="${resource.title}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
@@ -5446,13 +5469,12 @@
 
         grid.innerHTML = pageResources.map(r => {
             const categoryName = displayCategoryName(r.category || '未分类');
+            const badge = getCategoryBadgeMeta(r.category);
             const date = r.createdAt ? new Date(r.createdAt).toLocaleDateString('zh-CN', {
                 year: 'numeric', month: '2-digit', day: '2-digit'
             }) : '未知';
             const viewCountHtml = `<div class="card-view-count"><i class="fa-regular fa-eye"></i> ${r.viewCount || 0}</div>`;
-            const accessBadgeHtml = isFreeCategory(r.category)
-                ? '<div class="access-badge free-badge">免费</div>'
-                : '<div class="access-badge vip-badge">VIP</div>';
+            const accessBadgeHtml = `<div class="access-badge ${badge.cardClassName}">${escapeRecommendHtml(badge.label)}</div>`;
             const imageHtml = r.image
                 ? `<div class="card-image-wrapper" onclick="viewResource(${r.id})">
                        <img class="card-image" src="${r.image}" alt="${r.title}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
@@ -5732,11 +5754,7 @@
     }
 
     function getRecommendAccessMeta(item) {
-        const category = String(item.category || '').trim();
-        const isFree = isFreeCategory(category);
-        return isFree
-            ? { className: 'free', label: '免费资源', icon: 'fas fa-unlock' }
-            : { className: 'vip', label: 'VIP资源', icon: 'fas fa-crown' };
+        return getCategoryBadgeMeta(item.category);
     }
 
     function formatRecommendCount(value) {
