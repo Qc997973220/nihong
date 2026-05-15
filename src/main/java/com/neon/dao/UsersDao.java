@@ -22,7 +22,9 @@ public interface UsersDao extends JpaRepository<Users, String> {
     boolean existsByInviteCode(String inviteCode);
     List<Users> findByInvitedByOrderByCreateTimeDesc(String invitedBy);
     Users findByEmail(String email);
+    Users findByEmailIgnoreCase(String email);
     boolean existsByEmail(String email);
+    boolean existsByEmailIgnoreCase(String email);
     Users findByToken(String token);
     
     List<Users> findByRegisteredIpAndRegisteredDate(String registeredIp, LocalDateTime registeredDate);

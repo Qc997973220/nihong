@@ -5,6 +5,7 @@ import com.neon.pojo.CardKey;
 import com.neon.pojo.Users;
 import com.neon.service.AuthService;
 import com.neon.service.CacheService;
+import com.neon.service.EmailVerificationService;
 import com.neon.service.LoginService;
 import com.neon.service.WalletService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,8 @@ public class LoginController {
     CacheService cacheService;
     @Autowired
     WalletService walletService;
+    @Autowired
+    EmailVerificationService emailVerificationService;
 
     @PostMapping("/first")
     @ResponseBody
@@ -209,12 +212,13 @@ public class LoginController {
             user.setPhone(phone);
         }
         if (email != null) {
-            if (usersDao.existsByEmail(email) && !email.equals(user.getEmail())) {
+            String normalizedEmail = normalizeEmail(email);
+            String currentEmail = normalizeEmail(user.getEmail());
+            if (!normalizedEmail.isEmpty() && !normalizedEmail.equals(currentEmail)) {
                 result.put("status", 0);
-                result.put("message", "该邮箱已被其他账号绑定，请更换邮箱");
+                result.put("message", "绑定邮箱需要先完成邮箱验证码验证");
                 return result;
             }
-            user.setEmail(email);
         }
         user.setOperatingTime(LocalDateTime.now());
         usersDao.save(user);
@@ -231,6 +235,90 @@ public class LoginController {
         
         result.put("status", 1);
         result.put("message", "更新成功");
+        return result;
+    }
+
+    @PostMapping("/sendBindEmailCode")
+    @ResponseBody
+    public Map<String, Object> sendBindEmailCode(
+            @RequestHeader(value = "Authorization", required = false) String token,
+            @RequestParam String email) {
+        Map<String, Object> result = new HashMap<>();
+        Users user = authService.getAuthenticatedUser(token);
+        if (user == null) {
+            result.put("status", 0);
+            result.put("message", "请先登录");
+            return result;
+        }
+
+        String normalizedEmail = normalizeEmail(email);
+        if (!isValidEmail(normalizedEmail)) {
+            result.put("status", 0);
+            result.put("message", "请输入有效的邮箱地址");
+            return result;
+        }
+
+        Users emailOwner = usersDao.findByEmailIgnoreCase(normalizedEmail);
+        if (emailOwner != null && !emailOwner.getAccount().equals(user.getAccount())) {
+            result.put("status", 0);
+            result.put("message", "该邮箱已被其他账号绑定，请更换邮箱");
+            return result;
+        }
+
+        EmailVerificationService.SendCodeResult sendResult =
+                emailVerificationService.sendBindEmailCode(user.getAccount(), normalizedEmail);
+        result.put("status", sendResult.isSuccess() ? 1 : 0);
+        result.put("message", sendResult.getMessage());
+        return result;
+    }
+
+    @PostMapping("/bindEmail")
+    @ResponseBody
+    public Map<String, Object> bindEmail(
+            @RequestHeader(value = "Authorization", required = false) String token,
+            @RequestParam String email,
+            @RequestParam String code) {
+        Map<String, Object> result = new HashMap<>();
+        Users user = authService.getAuthenticatedUser(token);
+        if (user == null) {
+            result.put("status", 0);
+            result.put("message", "请先登录");
+            return result;
+        }
+
+        String normalizedEmail = normalizeEmail(email);
+        if (!isValidEmail(normalizedEmail)) {
+            result.put("status", 0);
+            result.put("message", "请输入有效的邮箱地址");
+            return result;
+        }
+        if (!isValidCode(code)) {
+            result.put("status", 0);
+            result.put("message", "请输入6位数字验证码");
+            return result;
+        }
+
+        Users emailOwner = usersDao.findByEmailIgnoreCase(normalizedEmail);
+        if (emailOwner != null && !emailOwner.getAccount().equals(user.getAccount())) {
+            result.put("status", 0);
+            result.put("message", "该邮箱已被其他账号绑定，请更换邮箱");
+            return result;
+        }
+
+        if (!emailVerificationService.verifyBindEmailCode(user.getAccount(), normalizedEmail, code)) {
+            result.put("status", 0);
+            result.put("message", "验证码错误或已过期，请重新获取");
+            return result;
+        }
+
+        user.setEmail(normalizedEmail);
+        user.setOperatingTime(LocalDateTime.now());
+        usersDao.save(user);
+        clearUserInfoCache(user);
+
+        result.put("status", 1);
+        result.put("message", "邮箱绑定成功");
+        result.put("email", normalizedEmail);
         return result;
     }
 
@@ -322,25 +410,114 @@ public class LoginController {
         return result;
     }
 
+    @PostMapping("/recover/sendCode")
+    @ResponseBody
+    public Map<String, Object> sendRecoverCode(@RequestParam String email,
+                                               @RequestParam(required = false) String account) {
+        Map<String, Object> result = new HashMap<>();
+        String normalizedEmail = normalizeEmail(email);
+        if (!isValidEmail(normalizedEmail)) {
+            result.put("status", 0);
+            result.put("message", "请输入有效的邮箱地址");
+            return result;
+        }
+
+        Users user = usersDao.findByEmailIgnoreCase(normalizedEmail);
+        if (user == null) {
+            result.put("status", 0);
+            result.put("message", "该邮箱未绑定账号");
+            return result;
+        }
+        if (account != null && !account.trim().isEmpty() && !account.trim().equalsIgnoreCase(user.getAccount())) {
+            result.put("status", 0);
+            result.put("message", "账号与绑定邮箱不匹配");
+            return result;
+        }
+
+        EmailVerificationService.SendCodeResult sendResult =
+                emailVerificationService.sendPasswordResetCode(normalizedEmail);
+        result.put("status", sendResult.isSuccess() ? 1 : 0);
+        result.put("message", sendResult.getMessage());
+        return result;
+    }
+
+    @PostMapping("/recover/resetPassword")
+    @ResponseBody
+    public Map<String, Object> resetPasswordByEmailCode(@RequestParam String email,
+                                                        @RequestParam String code,
+                                                        @RequestParam String newPassword) {
+        Map<String, Object> result = new HashMap<>();
+        String normalizedEmail = normalizeEmail(email);
+        if (!isValidEmail(normalizedEmail)) {
+            result.put("status", 0);
+            result.put("message", "请输入有效的邮箱地址");
+            return result;
+        }
+        if (!isValidCode(code)) {
+            result.put("status", 0);
+            result.put("message", "请输入6位数字验证码");
+            return result;
+        }
+        if (newPassword == null || !newPassword.matches("^[A-Za-z0-9]{6,16}$")) {
+            result.put("status", 0);
+            result.put("message", "新密码只能包含字母和数字，长度为6-16位");
+            return result;
+        }
+
+        Users user = usersDao.findByEmailIgnoreCase(normalizedEmail);
+        if (user == null) {
+            result.put("status", 0);
+            result.put("message", "该邮箱未绑定账号");
+            return result;
+        }
+        if (!emailVerificationService.verifyPasswordResetCode(normalizedEmail, code)) {
+            result.put("status", 0);
+            result.put("message", "验证码错误或已过期，请重新获取");
+            return result;
+        }
+        if (newPassword.equals(user.getPassword())) {
+            result.put("status", 0);
+            result.put("message", "新密码不能和原密码相同");
+            return result;
+        }
+
+        user.setPassword(newPassword);
+        user.setOperatingTime(LocalDateTime.now());
+        authService.invalidateCurrentToken(user);
+
+        result.put("status", 1);
+        result.put("message", "密码重置成功，请使用新密码登录");
+        return result;
+    }
+
     @PostMapping("/recover")
     @ResponseBody
     public Map<String, Object> recover(@RequestParam String account,
                                        @RequestParam String email) {
         Map<String, Object> result = new HashMap<>();
-        Users user = usersDao.findByAccount(account);
-        if (user == null) {
-            result.put("status", 0);
-            result.put("message", "账号不存在");
-            return result;
-        }
-        if (user.getEmail() != null && user.getEmail().equalsIgnoreCase(email)) {
-            result.put("status", 1);
-            result.put("password", user.getPassword());
-        } else {
-            result.put("status", 0);
-            result.put("message", "账号与绑定邮箱校验不通过，请确保绑定邮箱处于在线状态");
-        }
+        result.put("status", 0);
+        result.put("message", "请先获取邮箱验证码，然后通过验证码重置密码");
         return result;
+    }
+
+    private String normalizeEmail(String email) {
+        return email == null ? "" : email.trim().toLowerCase();
+    }
+
+    private boolean isValidEmail(String email) {
+        return email != null && email.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
+    }
+
+    private boolean isValidCode(String code) {
+        return code != null && code.trim().matches("^\\d{6}$");
+    }
+
+    private void clearUserInfoCache(Users user) {
+        if (user == null || user.getUserName() == null) {
+            return;
+        }
+        cacheService.delete(cacheService.getUserInfoKey(user.getUserName()) + ":own");
+        cacheService.delete(cacheService.getUserInfoKey(user.getUserName()) + ":other");
     }
 
     private String getClientIp(HttpServletRequest request) {
