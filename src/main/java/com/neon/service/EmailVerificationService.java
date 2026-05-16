@@ -2,6 +2,7 @@ package com.neon.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.MailAuthenticationException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -73,9 +74,12 @@ public class EmailVerificationService {
         String code = String.format("%06d", secureRandom.nextInt(1_000_000));
         try {
             sendMail(normalizedEmail, subject, description, code);
+        } catch (MailAuthenticationException e) {
+            e.printStackTrace();
+            return SendCodeResult.fail("邮箱登录认证失败，请确认发件邮箱和QQ邮箱授权码匹配，并检查服务器已配置QQ_MAIL_AUTH_CODE");
         } catch (Exception e) {
             e.printStackTrace();
-            return SendCodeResult.fail("验证码发送失败，请检查邮箱服务配置后重试");
+            return SendCodeResult.fail("验证码发送失败，请稍后重试");
         }
 
         codeStore.put(key, new VerificationCodeRecord(code, now.plusMinutes(CODE_TTL_MINUTES), now));

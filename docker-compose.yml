@@ -17,4 +17,6 @@ services:
       - ./static:/app/static
     environment:
       - SPRING_PROFILES_ACTIVE=prod
+      - QQ_MAIL_USERNAME=${QQ_MAIL_USERNAME}
+      - QQ_MAIL_AUTH_CODE=${QQ_MAIL_AUTH_CODE}
     restart: unless-stopped
