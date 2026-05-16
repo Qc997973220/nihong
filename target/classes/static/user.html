@@ -2968,7 +2968,7 @@
 
     document.getElementById('editModal').addEventListener('click', function(e) {
         if (e.target === this) {
-            this.classList.remove('active');
+            e.stopPropagation();
         }
     });
 
@@ -3211,10 +3211,10 @@
             messageDiv.className = 'edit-message error';
             messageDiv.innerText = '网络错误，请稍后重试';
             messageDiv.style.display = 'block';
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-check"></i> 保存';
         }
-
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-check"></i> 保存';
     });
 </script>
 </body>

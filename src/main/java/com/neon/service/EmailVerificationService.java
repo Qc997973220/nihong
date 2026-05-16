@@ -3,11 +3,12 @@ package com.neon.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailAuthenticationException;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import jakarta.mail.internet.MimeMessage;
 import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -32,6 +33,9 @@ public class EmailVerificationService {
 
     @Value("${app.mail.from-name:Neon}")
     private String fromName;
+
+    @Value("${app.mail.logo-url:}")
+    private String logoUrl;
 
     public SendCodeResult sendBindEmailCode(String account, String email) {
         return sendCode(
@@ -109,21 +113,77 @@ public class EmailVerificationService {
         return true;
     }
 
-    private void sendMail(String to, String subject, String description, String code) {
-        SimpleMailMessage message = new SimpleMailMessage();
+    private void sendMail(String to, String subject, String description, String code) throws Exception {
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, false, "UTF-8");
         if (StringUtils.hasText(from)) {
-            message.setFrom(from);
+            if (StringUtils.hasText(fromName)) {
+                helper.setFrom(from, fromName);
+            } else {
+                helper.setFrom(from);
+            }
         }
-        message.setTo(to);
-        message.setSubject(subject);
-        message.setText(
+        helper.setTo(to);
+        helper.setSubject(subject);
+        helper.setText(buildPlainText(description, code), buildHtmlText(description, code));
+        mailSender.send(message);
+    }
+
+    private String buildPlainText(String description, String code) {
+        return "霓虹之都.中国  NEON\n\n" +
                 description + "\n\n" +
                 "验证码：" + code + "\n" +
                 "有效期：5分钟\n\n" +
                 "如果不是您本人操作，请忽略本邮件。\n" +
-                fromName
-        );
-        mailSender.send(message);
+                fromName;
+    }
+
+    private String buildHtmlText(String description, String code) {
+        String logoHtml = StringUtils.hasText(logoUrl)
+                ? "<img src=\"" + escapeHtml(logoUrl) + "\" alt=\"NEON\" style=\"width:42px;height:42px;border-radius:12px;display:block;object-fit:cover;\">"
+                : "<div style=\"width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#78f7ff,#6affc3);color:#07101f;font-weight:900;font-size:13px;line-height:42px;text-align:center;letter-spacing:0;\">NEON</div>";
+
+        return "<!doctype html>" +
+                "<html><body style=\"margin:0;padding:0;background:#eef4f8;font-family:Arial,'Microsoft YaHei',sans-serif;color:#152232;\">" +
+                "<div style=\"max-width:560px;margin:0 auto;padding:28px 16px;\">" +
+                "<div style=\"overflow:hidden;border:1px solid #d6e4ec;border-radius:16px;background:#ffffff;box-shadow:0 18px 48px rgba(18,37,61,0.12);\">" +
+                "<div style=\"padding:24px 26px;background:linear-gradient(135deg,#06111f,#0a2036 58%,#09251c);color:#effcff;\">" +
+                "<div style=\"display:flex;align-items:center;gap:12px;\">" +
+                logoHtml +
+                "<div>" +
+                "<div style=\"font-size:20px;font-weight:900;letter-spacing:0;\">霓虹之都.中国&nbsp;&nbsp;NEON</div>" +
+                "<div style=\"margin-top:4px;font-size:12px;color:#aeeeff;letter-spacing:0;\">Official Verification Code</div>" +
+                "</div>" +
+                "</div>" +
+                "</div>" +
+                "<div style=\"padding:28px 26px 26px;\">" +
+                "<div style=\"font-size:15px;line-height:1.8;color:#405168;\">" + escapeHtml(description) + "</div>" +
+                "<div style=\"margin:22px 0;padding:18px;border-radius:14px;background:#f4fbfc;border:1px solid #cce8ee;text-align:center;\">" +
+                "<div style=\"font-size:12px;color:#6b8095;font-weight:700;\">验证码</div>" +
+                "<div style=\"margin-top:8px;font-size:34px;line-height:1;font-weight:900;letter-spacing:8px;color:#07101f;font-family:Arial,sans-serif;\">" + escapeHtml(code) + "</div>" +
+                "</div>" +
+                "<div style=\"font-size:13px;line-height:1.7;color:#66788d;\">" +
+                "验证码有效期为 <b>5分钟</b>。如果不是您本人操作，请忽略本邮件。" +
+                "</div>" +
+                "</div>" +
+                "<div style=\"padding:14px 26px;border-top:1px solid #e5eef3;background:#f8fbfd;color:#8190a2;font-size:12px;\">" +
+                escapeHtml(fromName) +
+                "</div>" +
+                "</div>" +
+                "</div>" +
+                "</body></html>";
+    }
+
+    private String escapeHtml(String value) {
+        if (value == null) {
+            return "";
+        }
+        return value
+                .replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\"", "&quot;")
+                .replace("'", "&#39;");
     }
 
     private void cleanupExpiredCodes() {
