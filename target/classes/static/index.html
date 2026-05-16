@@ -430,6 +430,31 @@
             font-size: 1.4rem;
             color: #5ba5ff;
         }
+        .verification-code-row {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 10px;
+            align-items: center;
+        }
+        .verification-code-row .code-btn {
+            border: 1px solid rgba(91, 165, 255, 0.45);
+            background: rgba(20, 50, 85, 0.65);
+            color: #cfe6ff;
+            border-radius: 12px;
+            padding: 12px 14px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+        }
+        .verification-code-row .code-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.65;
+        }
+        @media (max-width: 420px) {
+            .verification-code-row {
+                grid-template-columns: 1fr;
+            }
+        }
         .email-status-msg {
             text-align: center;
             padding: 20px;
@@ -4313,12 +4338,12 @@
     </div>
 </div>
 
-<!-- 密码找回弹窗 2: 输入账号和邮箱 -->
+<!-- 密码找回弹窗 2: 邮箱验证码重置密码 -->
 <div class="login-wrapper" id="forgotPasswordWrapper2" style="display: none;">
     <div class="forgot-password-modal">
         <h2><i class="fa-solid fa-satellite-dish" style="margin-right: 8px;"></i>邮箱验证</h2>
-        <div class="sub">请输入绑定的账号和邮箱</div>
-        <div class="input-group">
+        <div class="sub">请输入绑定邮箱，获取验证码后设置新密码</div>
+        <div class="input-group" style="display: none;">
             <label><i class="fa-regular fa-user" style="margin-right: 6px;"></i>账号 <span style="color:#ff8a8a;">*</span></label>
             <input type="text" id="forgotAccount" maxlength="9" placeholder="请输入要找回的账号">
         </div>
@@ -4326,11 +4351,26 @@
             <label><i class="fa-solid fa-envelope" style="margin-right: 6px;"></i>邮箱地址 <span style="color:#ff8a8a;">*</span></label>
             <input type="email" id="forgotEmail" placeholder="请输入绑定的邮箱地址">
         </div>
+        <div class="input-group">
+            <label><i class="fa-solid fa-shield-halved" style="margin-right: 6px;"></i>邮箱验证码 <span style="color:#ff8a8a;">*</span></label>
+            <div class="verification-code-row">
+                <input type="text" id="forgotEmailCode" maxlength="6" inputmode="numeric" placeholder="请输入6位验证码">
+                <button type="button" class="code-btn" id="sendRecoveryCodeBtn">发送验证码</button>
+            </div>
+        </div>
+        <div class="input-group">
+            <label><i class="fa-solid fa-lock" style="margin-right: 6px;"></i>新密码 <span style="color:#ff8a8a;">*</span></label>
+            <input type="password" id="forgotNewPassword" maxlength="16" autocomplete="new-password" placeholder="6-16位字母或数字">
+        </div>
+        <div class="input-group">
+            <label><i class="fa-solid fa-check-circle" style="margin-right: 6px;"></i>确认新密码 <span style="color:#ff8a8a;">*</span></label>
+            <input type="password" id="forgotConfirmPassword" maxlength="16" autocomplete="new-password" placeholder="请再次输入新密码">
+        </div>
         <div class="email-warning-box">
             <i class="fa-solid fa-exclamation-circle"></i>
-            <span>找回期间请保持该邮箱处于登录在线状态</span>
+            <span>验证码5分钟内有效，请勿泄露给他人</span>
         </div>
-        <button class="login-btn" id="startRecoveryBtn"><i class="fa-solid fa-rocket"></i> 启动密码找回程序</button>
+        <button class="login-btn" id="startRecoveryBtn"><i class="fa-solid fa-key"></i> 重置密码</button>
         <div class="switch-link" style="margin-top: 16px;">
             <span id="backToForgotChoice">返回选择方式</span>
         </div>
@@ -5968,6 +6008,7 @@
 
     // 忘记密码 - 通过邮箱找回点击
     document.getElementById('forgotByEmail').addEventListener('click', function() {
+        resetForgotPasswordPanel();
         document.getElementById('forgotPasswordWrapper1').style.display = 'none';
         document.getElementById('forgotPasswordWrapper2').style.display = 'flex';
     });
@@ -5983,6 +6024,10 @@
         document.getElementById('forgotPasswordWrapper2').style.display = 'none';
         document.getElementById('forgotAccount').value = '';
         document.getElementById('forgotEmail').value = '';
+        document.getElementById('forgotEmailCode').value = '';
+        document.getElementById('forgotNewPassword').value = '';
+        document.getElementById('forgotConfirmPassword').value = '';
+        resetRecoveryCodeState();
         document.getElementById('forgotPasswordWrapper1').style.display = 'flex';
     });
 
@@ -5992,21 +6037,77 @@
         document.getElementById('forgotPasswordWrapper1').style.display = 'flex';
     });
 
+    const sendRecoveryCodeBtn = document.getElementById('sendRecoveryCodeBtn');
+    let recoveryCodeTimer = null;
+
+    function startRecoveryCodeCooldown(seconds) {
+        let remaining = seconds;
+        sendRecoveryCodeBtn.disabled = true;
+        sendRecoveryCodeBtn.innerText = `${remaining}秒后重发`;
+        recoveryCodeTimer = setInterval(() => {
+            remaining -= 1;
+            if (remaining <= 0) {
+                clearInterval(recoveryCodeTimer);
+                recoveryCodeTimer = null;
+                sendRecoveryCodeBtn.disabled = false;
+                sendRecoveryCodeBtn.innerText = '发送验证码';
+                return;
+            }
+            sendRecoveryCodeBtn.innerText = `${remaining}秒后重发`;
+        }, 1000);
+    }
+
+    function resetRecoveryCodeState() {
+        if (recoveryCodeTimer) {
+            clearInterval(recoveryCodeTimer);
+            recoveryCodeTimer = null;
+        }
+        sendRecoveryCodeBtn.disabled = false;
+        sendRecoveryCodeBtn.innerText = '发送验证码';
+    }
+
+    sendRecoveryCodeBtn.addEventListener('click', async function() {
+        const email = document.getElementById('forgotEmail').value.trim();
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if (!emailRegex.test(email)) {
+            alert('请输入有效的绑定邮箱地址');
+            return;
+        }
+
+        let success = false;
+        sendRecoveryCodeBtn.disabled = true;
+        sendRecoveryCodeBtn.innerText = '发送中...';
+        try {
+            const response = await fetch('/api/login/recover/sendCode', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams({ email })
+            });
+            const result = await response.json();
+            if (Number(result.status) === 1) {
+                success = true;
+                alert(result.message || '验证码已发送，请查收邮箱');
+                startRecoveryCodeCooldown(60);
+            } else {
+                alert(result.message || '验证码发送失败');
+            }
+        } catch (error) {
+            alert('网络错误，请稍后重试');
+        } finally {
+            if (!success) {
+                sendRecoveryCodeBtn.disabled = false;
+                sendRecoveryCodeBtn.innerText = '发送验证码';
+            }
+        }
+    });
+
     // 忘记密码 - 启动密码找回程序
     document.getElementById('startRecoveryBtn').addEventListener('click', async function() {
-        const account = document.getElementById('forgotAccount').value.trim();
         const email = document.getElementById('forgotEmail').value.trim();
-
-        if (!account) {
-            alert('请输入要找回的账号');
-            return;
-        }
-
-        const accountRegex = /^[A-Za-z0-9]{6,9}$/;
-        if (!accountRegex.test(account)) {
-            alert('账号格式不正确，请输入6-9位字母或数字');
-            return;
-        }
+        const code = document.getElementById('forgotEmailCode').value.trim();
+        const newPassword = document.getElementById('forgotNewPassword').value.trim();
+        const confirmPassword = document.getElementById('forgotConfirmPassword').value.trim();
 
         if (!email) {
             alert('请输入绑定的邮箱地址');
@@ -6016,6 +6117,18 @@
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
             alert('邮箱格式不正确');
+            return;
+        }
+        if (!/^\d{6}$/.test(code)) {
+            alert('请输入6位数字邮箱验证码');
+            return;
+        }
+        if (!/^[A-Za-z0-9]{6,16}$/.test(newPassword)) {
+            alert('新密码只能包含字母和数字，长度为6-16位');
+            return;
+        }
+        if (newPassword !== confirmPassword) {
+            alert('两次输入的新密码不一致');
             return;
         }
 
@@ -6037,7 +6150,7 @@
         setTimeout(() => {
             document.getElementById('step1').classList.add('completed');
             document.getElementById('step1').querySelector('.step-dot').innerHTML = '<i class="fa-solid fa-check"></i>';
-            document.getElementById('loaderText').innerText = '正在校验邮箱状态...';
+            document.getElementById('loaderText').innerText = '正在校验邮箱验证码...';
             document.getElementById('step2').classList.add('active');
             document.getElementById('loaderProgressBar').style.width = '40%';
 
@@ -6045,14 +6158,14 @@
                 document.getElementById('step2').classList.add('active');
                 document.getElementById('loaderProgressBar').style.width = '60%';
 
-                fetch(`/api/login/recover`, {
+                fetch(`/api/login/recover/resetPassword`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: new URLSearchParams({ account: account, email: email })
+                    body: new URLSearchParams({ email, code, newPassword })
                 })
                 .then(response => response.json())
                 .then(result => {
-                    if (result.status !== 1) {
+                    if (Number(result.status) !== 1) {
                         document.querySelector('.loader-ring').style.animation = 'none';
                         document.getElementById('step2').classList.add('error');
                         document.getElementById('step2').classList.remove('active');
@@ -6064,12 +6177,12 @@
                         setTimeout(() => {
                             document.getElementById('recoveryLoadingSection').style.display = 'none';
                             document.getElementById('recoveryErrorSection').style.display = 'flex';
-                            document.getElementById('errorMessage').innerText = result.message || '邮箱云端校验不通过，请保持绑定邮箱处于在线状态';
+                            document.getElementById('errorMessage').innerText = result.message || '验证码校验不通过，请重新获取验证码';
                         }, 800);
                     } else {
                         document.getElementById('step2').classList.add('completed');
                         document.getElementById('step2').querySelector('.step-dot').innerHTML = '<i class="fa-solid fa-check"></i>';
-                        document.getElementById('loaderText').innerText = '正在验证账号邮箱绑定...';
+                        document.getElementById('loaderText').innerText = '正在重置账号密码...';
                         document.getElementById('step3').classList.add('active');
                         document.getElementById('loaderProgressBar').style.width = '80%';
 
@@ -6084,10 +6197,12 @@
                                 document.getElementById('forgotPasswordWrapper4').style.display = 'flex';
                                 document.getElementById('resultIconSuccess').style.display = 'block';
                                 document.getElementById('resultIconError').style.display = 'none';
-                                document.getElementById('resultTitle').innerText = '密码找回成功！';
-                                document.getElementById('resultPasswordSection').style.display = 'block';
-                                document.getElementById('passwordDisplay').innerText = result.password || '******';
-                                document.getElementById('resultMessage').style.display = 'none';
+                                document.getElementById('resultTitle').innerText = '密码重置成功！';
+                                document.getElementById('resultPasswordSection').style.display = 'none';
+                                document.getElementById('passwordDisplay').innerText = '';
+                                document.getElementById('resultMessage').innerText = result.message || '请使用新密码登录';
+                                document.getElementById('resultMessage').style.display = 'block';
+                                resetRecoveryCodeState();
                             }, 600);
                         }, 2000);
                     }
@@ -6114,6 +6229,7 @@
     // 忘记密码 - 从结果返回登录
     document.getElementById('backToLoginFromResult').addEventListener('click', function() {
         document.getElementById('forgotPasswordWrapper4').style.display = 'none';
+        resetForgotPasswordPanel();
         document.getElementById('loginWrapper').style.display = 'flex';
     });
 
@@ -6128,6 +6244,9 @@
     function resetForgotPasswordPanel() {
         document.getElementById('forgotAccount').value = '';
         document.getElementById('forgotEmail').value = '';
+        document.getElementById('forgotEmailCode').value = '';
+        document.getElementById('forgotNewPassword').value = '';
+        document.getElementById('forgotConfirmPassword').value = '';
         document.getElementById('resultIconSuccess').style.display = 'none';
         document.getElementById('resultIconError').style.display = 'none';
         document.getElementById('resultPasswordSection').style.display = 'none';
@@ -6135,6 +6254,7 @@
         document.getElementById('resultTitle').innerText = '';
         document.getElementById('passwordDisplay').innerText = '';
         document.getElementById('resultMessage').innerText = '';
+        resetRecoveryCodeState();
         resetRecoveryAnimation();
     }
 

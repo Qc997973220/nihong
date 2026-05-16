@@ -34,6 +34,7 @@ D:\bangong\nihong\src\main\java\com\neon\pojo\Comment.java
 D:\bangong\nihong\src\main\java\com\neon\config\AsyncConfig.java
 D:\bangong\nihong\src\main\java\com\neon\service\ViewCountScheduler.java
 D:\bangong\nihong\src\main\java\com\neon\controller\ResourceController.java
+D:\bangong\nihong\src\main\java\com\neon\service\EmailVerificationService.java
 D:\bangong\nihong\src\main\java\com\neon\pojo\SiteStats.java
 D:\bangong\nihong\src\main\java\com\neon\service\CacheService.java
 D:\bangong\nihong\src\main\java\com\neon\dao\ResourceDao.java
