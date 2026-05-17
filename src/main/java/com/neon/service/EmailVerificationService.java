@@ -115,7 +115,7 @@ public class EmailVerificationService {
 
     private void sendMail(String to, String subject, String description, String code) throws Exception {
         MimeMessage message = mailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message, false, "UTF-8");
+        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
         if (StringUtils.hasText(from)) {
             if (StringUtils.hasText(fromName)) {
                 helper.setFrom(from, fromName);
