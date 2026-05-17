@@ -159,6 +159,21 @@ public class ResourceService {
                 .collect(Collectors.toList());
     }
 
+    public List<Resource> getRandomRecommendedResources(Long excludeId, int limit) {
+        int safeLimit = Math.max(1, Math.min(limit, 12));
+        List<Resource> resources = resourceRepository.findByStatusInOrderByTopDescCreatedAtDesc(Arrays.asList(1, 2));
+        List<Resource> candidates = resources.stream()
+                .filter(resource -> resource.getId() != null && !resource.getId().equals(excludeId))
+                .collect(Collectors.toList());
+
+        candidates.forEach(resource -> resource.setViewCount(getViewCount(resource.getId())));
+        Collections.shuffle(candidates);
+
+        return candidates.stream()
+                .limit(safeLimit)
+                .collect(Collectors.toList());
+    }
+
     private String normalizeCategory(String category) {
         if (category == null || category.trim().isEmpty() || "全部".equals(category.trim())) {
             return null;

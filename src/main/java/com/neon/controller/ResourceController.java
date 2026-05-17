@@ -226,6 +226,30 @@ public class ResourceController {
         return resourceService.searchResources(keyword.trim());
     }
 
+    // 资源详情页右侧推荐：随机返回其他可见资源，仅包含卡片展示需要的字段
+    @GetMapping("/recommendations")
+    @ResponseBody
+    public Map<String, Object> recommendations(
+            @RequestParam(required = false) Long excludeId,
+            @RequestParam(defaultValue = "4") int limit) {
+        Map<String, Object> result = new HashMap<>();
+        try {
+            List<Resource> resources = resourceService.getRandomRecommendedResources(excludeId, limit);
+            List<Map<String, Object>> cards = new ArrayList<>();
+            for (Resource resource : resources) {
+                cards.add(toRecommendationCard(resource));
+            }
+
+            result.put("success", true);
+            result.put("resources", cards);
+        } catch (Exception e) {
+            result.put("success", false);
+            result.put("message", "获取推荐资源失败: " + e.getMessage());
+            result.put("resources", new ArrayList<>());
+        }
+        return result;
+    }
+
     // 获取资源详情（包含评论）
     @GetMapping("/{id}")
     @ResponseBody
@@ -491,6 +515,19 @@ public class ResourceController {
         Resource responseResource = new Resource();
         BeanUtils.copyProperties(resource, responseResource);
         return responseResource;
+    }
+
+    private Map<String, Object> toRecommendationCard(Resource resource) {
+        Map<String, Object> card = new HashMap<>();
+        card.put("id", resource.getId());
+        card.put("title", resource.getTitle());
+        card.put("summary", resource.getSummary());
+        card.put("category", resource.getCategory());
+        card.put("image", resource.getImage());
+        card.put("createdAt", resource.getCreatedAt());
+        card.put("viewCount", resource.getViewCount());
+        card.put("freeResource", isFreeResource(resource));
+        return card;
     }
 
     // 发布资源

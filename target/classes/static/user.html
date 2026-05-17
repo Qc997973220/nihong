@@ -2845,6 +2845,7 @@
 <script>
     const sendEmailCodeBtn = document.getElementById('sendEmailCodeBtn');
     let bindEmailCodeTimer = null;
+    let bindEmailCodeEmail = '';
 
     function setEditMessage(type, text) {
         const messageDiv = document.getElementById('editMessage');
@@ -2855,6 +2856,7 @@
 
     function resetBindEmailCodeState() {
         document.getElementById('editEmailCode').value = '';
+        bindEmailCodeEmail = '';
         if (bindEmailCodeTimer) {
             clearInterval(bindEmailCodeTimer);
             bindEmailCodeTimer = null;
@@ -2909,6 +2911,7 @@
             const result = await response.json();
             if (Number(result.status) === 1) {
                 success = true;
+                bindEmailCodeEmail = email.toLowerCase();
                 setEditMessage('success', result.message || '验证码已发送，请查收邮箱');
                 startBindEmailCodeCooldown(60);
             } else {
@@ -3085,7 +3088,11 @@
         const messageDiv = document.getElementById('editMessage');
         const btn = this;
         const currentEmail = (userData.email || '').trim().toLowerCase();
-        const emailChanged = email.toLowerCase() !== currentEmail;
+        const normalizedEmail = email.toLowerCase();
+        const emailChanged = normalizedEmail !== currentEmail;
+        const emailCodeEntered = emailCode.length > 0;
+        const emailCodeRequested = !!bindEmailCodeEmail && bindEmailCodeEmail === normalizedEmail;
+        const shouldVerifyEmail = emailChanged || emailCodeEntered || emailCodeRequested;
 
         if (userName) {
             const userNameRegex = /^[\u4e00-\u9fa5A-Za-z0-9]{1,10}$/;
@@ -3107,10 +3114,16 @@
             }
         }
 
-        if (emailChanged) {
+        if (shouldVerifyEmail) {
             if (!email) {
                 messageDiv.className = 'edit-message error';
                 messageDiv.innerText = '绑定邮箱不能为空';
+                messageDiv.style.display = 'block';
+                return;
+            }
+            if (bindEmailCodeEmail && bindEmailCodeEmail !== normalizedEmail) {
+                messageDiv.className = 'edit-message error';
+                messageDiv.innerText = '邮箱已变更，请重新获取当前邮箱的验证码';
                 messageDiv.style.display = 'block';
                 return;
             }
@@ -3132,6 +3145,25 @@
         if (phone) formData.append('phone', phone);
 
         try {
+            if (shouldVerifyEmail) {
+                const bindResponse = await fetch('/api/login/bindEmail', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`
+                    },
+                    body: new URLSearchParams({ email, code: emailCode })
+                });
+                const bindResult = await bindResponse.json();
+                if (Number(bindResult.status) !== 1) {
+                    messageDiv.className = 'edit-message error';
+                    messageDiv.innerText = bindResult.message || '邮箱绑定失败';
+                    messageDiv.style.display = 'block';
+                    return;
+                }
+                userData.email = bindResult.email || email;
+            }
+
             // 先保存基本信息
             const response = await fetch('/api/login/updateUserInfo', {
                 method: 'POST',
@@ -3153,25 +3185,6 @@
             if (userName) userData.username = userName;
             if (gender) userData.gender = gender;
             if (phone) userData.phone = phone;
-
-            if (emailChanged) {
-                const bindResponse = await fetch('/api/login/bindEmail', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                        'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`
-                    },
-                    body: new URLSearchParams({ email, code: emailCode })
-                });
-                const bindResult = await bindResponse.json();
-                if (Number(bindResult.status) !== 1) {
-                    messageDiv.className = 'edit-message error';
-                    messageDiv.innerText = bindResult.message || '邮箱绑定失败';
-                    messageDiv.style.display = 'block';
-                    return;
-                }
-                userData.email = bindResult.email || email;
-            }
 
             // 再保存个人简介
             const introResponse = await fetch('/api/user/introduction', {

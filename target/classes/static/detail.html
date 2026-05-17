@@ -2407,7 +2407,8 @@
         .disclaimer-container,
         .download-section,
         .download-warning,
-        .detail-service-card {
+        .detail-service-card,
+        .detail-recommend-card {
             border-radius: 8px;
             border: 1px solid rgba(137, 203, 255, 0.16);
             background:
@@ -2480,7 +2481,11 @@
         .detail-service-card {
             padding: 18px;
         }
-        .detail-service-card h3 {
+        .detail-recommend-card {
+            padding: 18px;
+        }
+        .detail-service-card h3,
+        .detail-recommend-card h3 {
             display: flex;
             align-items: center;
             gap: 8px;
@@ -2504,6 +2509,101 @@
         }
         .detail-service-card li i {
             color: #70efff;
+        }
+        .detail-recommend-list {
+            display: grid;
+            gap: 10px;
+        }
+        .detail-recommend-item {
+            display: grid;
+            grid-template-columns: 74px minmax(0, 1fr);
+            gap: 10px;
+            align-items: center;
+            min-height: 74px;
+            padding: 9px;
+            border: 1px solid rgba(137, 203, 255, 0.12);
+            border-radius: 8px;
+            background: rgba(4, 12, 24, 0.52);
+            text-decoration: none;
+            color: inherit;
+            transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+        }
+        .detail-recommend-item:hover {
+            transform: translateY(-1px);
+            border-color: rgba(112, 239, 255, 0.34);
+            background: rgba(8, 22, 40, 0.74);
+        }
+        .detail-recommend-thumb {
+            width: 74px;
+            aspect-ratio: 4 / 3;
+            overflow: hidden;
+            border-radius: 6px;
+            border: 1px solid rgba(137, 203, 255, 0.12);
+            background: rgba(8, 22, 40, 0.7);
+        }
+        .detail-recommend-thumb img,
+        .detail-recommend-placeholder {
+            width: 100%;
+            height: 100%;
+        }
+        .detail-recommend-thumb img {
+            display: block;
+            object-fit: cover;
+        }
+        .detail-recommend-placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(112, 239, 255, 0.58);
+            font-size: 1.1rem;
+        }
+        .detail-recommend-info {
+            min-width: 0;
+        }
+        .detail-recommend-title {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            color: #e4f4ff;
+            font-size: 0.9rem;
+            font-weight: 750;
+            line-height: 1.42;
+        }
+        .detail-recommend-meta {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 7px;
+            margin-top: 8px;
+            color: #8faeca;
+            font-size: 0.76rem;
+        }
+        .detail-recommend-badge {
+            max-width: 96px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            padding: 3px 7px;
+            border-radius: 6px;
+            border: 1px solid rgba(137, 203, 255, 0.16);
+            color: #aeeeff;
+            background: rgba(112, 239, 255, 0.07);
+        }
+        .detail-recommend-views {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .detail-recommend-loading,
+        .detail-recommend-empty {
+            padding: 16px 10px;
+            border: 1px dashed rgba(137, 203, 255, 0.16);
+            border-radius: 8px;
+            color: #8faeca;
+            font-size: 0.85rem;
+            text-align: center;
+            background: rgba(4, 12, 24, 0.38);
         }
         .comment-section h3 {
             color: #edf8ff;
@@ -2570,7 +2670,8 @@
                 order: 0;
             }
             .download-warning,
-            .detail-service-card {
+            .detail-service-card,
+            .detail-recommend-card {
                 order: 1;
             }
         }
@@ -2760,7 +2861,8 @@
             .disclaimer-container,
             .download-section,
             .download-warning,
-            .detail-service-card {
+            .detail-service-card,
+            .detail-recommend-card {
                 max-width: 100%;
                 min-width: 0;
                 box-sizing: border-box;
@@ -2779,7 +2881,8 @@
             }
             .download-section,
             .download-warning,
-            .detail-service-card {
+            .detail-service-card,
+            .detail-recommend-card {
                 padding: 14px;
             }
             .download-label,
@@ -4212,11 +4315,12 @@
             `;
         document.getElementById('detailContent').innerHTML = html;
         enhanceDetailPremiumLayout({
+            resourceId,
             author,
             category,
             createdDate,
             viewCount: viewCount || 0,
-            isFreeResource: data.freeResource === true || isFreeCategory(category) || String(category || '').includes('鍏嶈垂')
+            isFreeResource: data.freeResource === true || isFreeCategory(category) || String(category || '').includes('免费')
         });
         console.log('渲染完成');
 
@@ -4331,9 +4435,79 @@
         `;
         sidebar.appendChild(serviceCard);
 
+        const recommendCard = document.createElement('section');
+        recommendCard.className = 'detail-recommend-card';
+        recommendCard.innerHTML = `
+            <h3><i class="fas fa-fire"></i> 推荐资源</h3>
+            <div class="detail-recommend-list" id="detailRecommendList">
+                <div class="detail-recommend-loading">正在加载推荐资源...</div>
+            </div>
+        `;
+        sidebar.appendChild(recommendCard);
+
         layout.append(main, sidebar);
         root.replaceChildren(hero, layout);
         root.dataset.premiumLayout = 'true';
+        fetchRecommendedResources(meta.resourceId);
+    }
+
+    async function fetchRecommendedResources(currentResourceId) {
+        const listEl = document.getElementById('detailRecommendList');
+        if (!listEl) return;
+
+        const params = new URLSearchParams({
+            excludeId: String(currentResourceId || id || ''),
+            limit: '4'
+        });
+
+        try {
+            const response = await fetch(`/api/resources/recommendations?${params.toString()}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error ${response.status}`);
+            }
+
+            const data = await response.json();
+            const resources = Array.isArray(data.resources) ? data.resources : [];
+            renderRecommendedResources(resources);
+        } catch (error) {
+            console.error('获取详情页推荐资源失败:', error);
+            listEl.innerHTML = '<div class="detail-recommend-empty">推荐资源暂时无法加载</div>';
+        }
+    }
+
+    function renderRecommendedResources(resources) {
+        const listEl = document.getElementById('detailRecommendList');
+        if (!listEl) return;
+
+        if (!resources || resources.length === 0) {
+            listEl.innerHTML = '<div class="detail-recommend-empty">暂无可推荐资源</div>';
+            return;
+        }
+
+        listEl.innerHTML = resources.slice(0, 4).map(resource => {
+            const resourceId = Number(resource.id) || 0;
+            const title = escapeHtml(resource.title || '未命名资源');
+            const image = resource.image ? escapeHtml(resource.image) : '';
+            const categoryName = displayCategoryName(resource.category || (resource.freeResource ? '免费资源' : 'VIP项目')) || '未分类';
+            const badgeText = escapeHtml(categoryName);
+            const views = Number(resource.viewCount) || 0;
+            const thumbHtml = image
+                ? `<img src="${image}" alt="${title}" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"><div class="detail-recommend-placeholder" style="display:none;"><i class="fas fa-image"></i></div>`
+                : '<div class="detail-recommend-placeholder"><i class="fas fa-image"></i></div>';
+
+            return `
+                <a class="detail-recommend-item" href="detail.html?id=${encodeURIComponent(resourceId)}">
+                    <div class="detail-recommend-thumb">${thumbHtml}</div>
+                    <div class="detail-recommend-info">
+                        <div class="detail-recommend-title" title="${title}">${title}</div>
+                        <div class="detail-recommend-meta">
+                            <span class="detail-recommend-badge">${badgeText}</span>
+                            <span class="detail-recommend-views"><i class="fa-regular fa-eye"></i>${views}</span>
+                        </div>
+                    </div>
+                </a>
+            `;
+        }).join('');
     }
 
     // 更新评论分页按钮状态
