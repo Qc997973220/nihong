@@ -753,6 +753,90 @@
             background: rgba(0, 200, 100, 0.3);
             transform: scale(1.05);
         }
+        .agent-tools {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .agent-tools input {
+            padding: 8px 12px;
+            border: 1px solid #3d5a80;
+            border-radius: 4px;
+            background: #1a1a2e;
+            color: #e8e8e8;
+        }
+        .agent-form {
+            background: rgba(15, 25, 45, 0.6);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 18px;
+            border: 1px solid rgba(90, 160, 255, 0.3);
+        }
+        .agent-form .form-row {
+            align-items: center;
+        }
+        .agent-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+        }
+        .agent-card {
+            background: rgba(15, 25, 45, 0.6);
+            border: 1px solid rgba(90, 160, 255, 0.25);
+            border-radius: 12px;
+            padding: 16px;
+            transition: all 0.2s;
+        }
+        .agent-card:hover {
+            border-color: rgba(90, 160, 255, 0.5);
+            box-shadow: 0 0 15px rgba(91, 165, 255, 0.15);
+        }
+        .agent-wechat {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.02rem;
+            color: #70efff;
+            font-weight: 700;
+            margin-bottom: 8px;
+            word-break: break-all;
+        }
+        .agent-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            color: #90b0d1;
+            font-size: 0.82rem;
+            line-height: 1.45;
+        }
+        .agent-status {
+            padding: 2px 10px;
+            border-radius: 60px;
+            font-size: 0.78rem;
+            font-weight: 600;
+        }
+        .agent-status.active {
+            background: rgba(0, 200, 100, 0.2);
+            color: #70ffb0;
+        }
+        .agent-status.disabled {
+            background: rgba(255, 80, 80, 0.18);
+            color: #ff9a9a;
+        }
+        .agent-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 14px;
+        }
+        .agent-actions .btn {
+            padding: 8px 12px;
+            border-radius: 8px;
+        }
+        .agent-note {
+            font-size: 0.8rem;
+            color: #90b0d1;
+            margin-top: 6px;
+        }
         @media (max-width: 768px) {
             .cardkey-stats {
                 flex-wrap: wrap;
@@ -779,6 +863,17 @@
                 flex-wrap: wrap;
             }
             .tab-btn {
+                flex: 1;
+                justify-content: center;
+            }
+            .agent-tools {
+                width: 100%;
+            }
+            .agent-tools input {
+                flex: 1;
+                min-width: 0;
+            }
+            .agent-actions .btn {
                 flex: 1;
                 justify-content: center;
             }
@@ -824,6 +919,9 @@
             </button>
             <button class="tab-btn" id="tabWithdrawal" onclick="switchTab('withdrawal')">
                 <i class="fas fa-wallet"></i> 提现管理 <span id="withdrawBadge">0</span>
+            </button>
+            <button class="tab-btn" id="tabAgent" onclick="switchTab('agent')">
+                <i class="fas fa-shield-halved"></i> 代理防伪
             </button>
         </div>
 
@@ -1048,6 +1146,54 @@
             </div>
         </div>
 
+        <div id="agentArea" style="display: none;">
+            <div class="cardkey-panel">
+                <div class="cardkey-header">
+                    <div class="cardkey-stats">
+                        <div class="stat-item">
+                            <span class="stat-label">代理总数</span>
+                            <span class="stat-value" id="agentTotalCount">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">启用中</span>
+                            <span class="stat-value" id="agentActiveCount">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">禁用中</span>
+                            <span class="stat-value" id="agentDisabledCount">0</span>
+                        </div>
+                    </div>
+                    <div class="agent-tools">
+                        <input type="text" id="agentSearchInput" placeholder="搜索微信号/备注">
+                        <button class="btn btn-refresh" id="refreshAgentBtn">
+                            <i class="fas fa-sync-alt"></i> 刷新列表
+                        </button>
+                    </div>
+                </div>
+
+                <div class="agent-form">
+                    <div class="form-row">
+                        <label>代理商微信号：</label>
+                        <input type="text" id="agentWechatInputAdmin" placeholder="请输入代理商微信号" style="flex: 1;">
+                    </div>
+                    <div class="form-row">
+                        <label>备注：</label>
+                        <input type="text" id="agentRemarkInput" placeholder="可选备注" style="flex: 1;">
+                        <button class="btn btn-confirm" id="saveAgentBtn">
+                            <i class="fas fa-plus"></i> 保存代理
+                        </button>
+                    </div>
+                </div>
+
+                <div id="agentListArea">
+                    <div class="loading">
+                        <i class="fas fa-spinner"></i>
+                        <p style="margin-top: 12px; color: #90b0d1;">加载中...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div id="resourceEditModal" class="modal" style="display: none;">
             <div class="modal-content" style="max-width: 700px;">
                 <div class="modal-header">
@@ -1181,6 +1327,13 @@
             }
         }
 
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
         function loadPendingResources() {
             const contentArea = document.getElementById('contentArea');
             contentArea.innerHTML = `
@@ -1252,13 +1405,6 @@
             contentArea.innerHTML = html;
         }
 
-        function escapeHtml(text) {
-            if (!text) return '';
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
         function approveResource(id) {
             const card = document.getElementById(`resource-${id}`);
             const btns = card.querySelectorAll('.btn');
@@ -1327,6 +1473,7 @@
 
             loadPendingResources();
             loadAdminWithdrawals(1, true);
+            loadAgentList(true);
 
             document.getElementById('refreshBtn').addEventListener('click', loadPendingResources);
 
@@ -1350,6 +1497,14 @@
             document.getElementById('grantMemberBtn').addEventListener('click', grantMemberPermission);
             document.getElementById('refreshWithdrawalBtn').addEventListener('click', () => loadAdminWithdrawals(1));
             document.getElementById('withdrawStatusFilter').addEventListener('change', () => loadAdminWithdrawals(1));
+            document.getElementById('refreshAgentBtn').addEventListener('click', () => loadAgentList());
+            document.getElementById('saveAgentBtn').addEventListener('click', saveAgentWechat);
+            document.getElementById('agentSearchInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') loadAgentList();
+            });
+            document.getElementById('agentWechatInputAdmin').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') saveAgentWechat();
+            });
         });
 
         function deleteCardKey(id) {
@@ -1389,6 +1544,7 @@
                 document.getElementById('memberArea').style.display = 'none';
                 document.getElementById('resourceArea').style.display = 'none';
                 document.getElementById('withdrawalArea').style.display = 'none';
+                document.getElementById('agentArea').style.display = 'none';
             } else if (tab === 'cardkey') {
                 document.getElementById('tabCardKey').classList.add('active');
                 document.getElementById('contentArea').style.display = 'none';
@@ -1396,6 +1552,7 @@
                 document.getElementById('memberArea').style.display = 'none';
                 document.getElementById('resourceArea').style.display = 'none';
                 document.getElementById('withdrawalArea').style.display = 'none';
+                document.getElementById('agentArea').style.display = 'none';
                 loadCardKeyList();
             } else if (tab === 'member') {
                 document.getElementById('tabMember').classList.add('active');
@@ -1404,6 +1561,7 @@
                 document.getElementById('memberArea').style.display = 'block';
                 document.getElementById('resourceArea').style.display = 'none';
                 document.getElementById('withdrawalArea').style.display = 'none';
+                document.getElementById('agentArea').style.display = 'none';
             } else if (tab === 'resource') {
                 document.getElementById('tabResource').classList.add('active');
                 document.getElementById('contentArea').style.display = 'none';
@@ -1411,6 +1569,7 @@
                 document.getElementById('memberArea').style.display = 'none';
                 document.getElementById('resourceArea').style.display = 'block';
                 document.getElementById('withdrawalArea').style.display = 'none';
+                document.getElementById('agentArea').style.display = 'none';
                 loadResourceList();
             } else if (tab === 'withdrawal') {
                 document.getElementById('tabWithdrawal').classList.add('active');
@@ -1419,7 +1578,17 @@
                 document.getElementById('memberArea').style.display = 'none';
                 document.getElementById('resourceArea').style.display = 'none';
                 document.getElementById('withdrawalArea').style.display = 'block';
+                document.getElementById('agentArea').style.display = 'none';
                 loadAdminWithdrawals(1);
+            } else if (tab === 'agent') {
+                document.getElementById('tabAgent').classList.add('active');
+                document.getElementById('contentArea').style.display = 'none';
+                document.getElementById('cardKeyArea').style.display = 'none';
+                document.getElementById('memberArea').style.display = 'none';
+                document.getElementById('resourceArea').style.display = 'none';
+                document.getElementById('withdrawalArea').style.display = 'none';
+                document.getElementById('agentArea').style.display = 'block';
+                loadAgentList();
             }
         }
 
@@ -1917,6 +2086,168 @@
                     showToast('网络错误', true);
                     listArea.innerHTML = '<div class="cardkey-empty"><i class="fas fa-wallet" style="font-size: 2rem; margin-bottom: 12px;"></i><p>网络错误</p></div>';
                 }
+            });
+        }
+
+        function loadAgentList(silent = false) {
+            const listArea = document.getElementById('agentListArea');
+            if (!silent && listArea) {
+                listArea.innerHTML = '<div class="loading"><i class="fas fa-spinner"></i><p style="margin-top: 12px; color: #90b0d1;">加载中...</p></div>';
+            }
+
+            const keyword = document.getElementById('agentSearchInput').value.trim();
+            const url = `/api/agent/wechat/admin/list${keyword ? `?keyword=${encodeURIComponent(keyword)}` : ''}`;
+            fetch(url, {
+                headers: authHeaders()
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateAgentStats(data.agents || []);
+                    if (!silent) {
+                        renderAgentList(data.agents || []);
+                    }
+                } else if (!silent) {
+                    showToast(data.message || '加载代理列表失败', true);
+                    listArea.innerHTML = '<div class="cardkey-empty"><i class="fas fa-shield-halved" style="font-size: 2rem; margin-bottom: 12px;"></i><p>加载失败</p></div>';
+                }
+            })
+            .catch(error => {
+                console.error('加载代理列表失败:', error);
+                if (!silent) {
+                    showToast('网络错误', true);
+                    listArea.innerHTML = '<div class="cardkey-empty"><i class="fas fa-shield-halved" style="font-size: 2rem; margin-bottom: 12px;"></i><p>网络错误</p></div>';
+                }
+            });
+        }
+
+        function updateAgentStats(agents) {
+            const totalCountEl = document.getElementById('agentTotalCount');
+            const activeCountEl = document.getElementById('agentActiveCount');
+            const disabledCountEl = document.getElementById('agentDisabledCount');
+            const total = agents.length;
+            const active = agents.filter(item => Number(item.status) === 1).length;
+            const disabled = agents.filter(item => Number(item.status) === 0).length;
+            if (totalCountEl) totalCountEl.textContent = total;
+            if (activeCountEl) activeCountEl.textContent = active;
+            if (disabledCountEl) disabledCountEl.textContent = disabled;
+        }
+
+        function renderAgentList(agents) {
+            const listArea = document.getElementById('agentListArea');
+            if (!agents || agents.length === 0) {
+                listArea.innerHTML = '<div class="cardkey-empty"><i class="fas fa-shield-halved" style="font-size: 2rem; margin-bottom: 12px;"></i><p>暂无代理商微信号记录</p></div>';
+                return;
+            }
+
+            let html = '<div class="agent-list">';
+            agents.forEach(agent => {
+                const isActive = Number(agent.status) === 1;
+                html += `
+                    <div class="agent-card" id="agent-${agent.id}">
+                        <div class="agent-wechat">${escapeHtml(agent.wechatId || '--')}</div>
+                        <div class="agent-meta">
+                            <span class="agent-status ${isActive ? 'active' : 'disabled'}">${isActive ? '启用中' : '已禁用'}</span>
+                            <span>备注：${escapeHtml(agent.remark || '无')}</span>
+                            <span>创建人：${escapeHtml(agent.createdBy || '--')}</span>
+                            <span>更新时间：${formatDate(agent.updatedAt || agent.createdAt)}</span>
+                        </div>
+                        <div class="agent-note">保存后可在首页“代理商防伪”入口直接校验。</div>
+                        <div class="agent-actions">
+                            <button class="btn btn-confirm" onclick="toggleAgentStatus(${agent.id}, ${isActive ? 0 : 1})">
+                                <i class="fas fa-${isActive ? 'ban' : 'check'}"></i> ${isActive ? '禁用' : '启用'}
+                            </button>
+                            <button class="btn btn-cancel" onclick="deleteAgent(${agent.id})">
+                                <i class="fas fa-trash"></i> 删除
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            listArea.innerHTML = html;
+        }
+
+        function saveAgentWechat() {
+            const wechatId = document.getElementById('agentWechatInputAdmin').value.trim();
+            const remark = document.getElementById('agentRemarkInput').value.trim();
+            if (!wechatId) {
+                showToast('请输入代理商微信号', true);
+                return;
+            }
+
+            const saveBtn = document.getElementById('saveAgentBtn');
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 保存中...';
+
+            fetch('/api/agent/wechat/admin/save', {
+                method: 'POST',
+                headers: authHeaders({ 'Content-Type': 'application/json' }),
+                body: JSON.stringify({ wechatId, remark })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast(data.message || '代理商微信号已保存');
+                    document.getElementById('agentWechatInputAdmin').value = '';
+                    document.getElementById('agentRemarkInput').value = '';
+                    loadAgentList();
+                } else {
+                    showToast(data.message || '保存失败', true);
+                }
+            })
+            .catch(error => {
+                console.error('保存代理商微信号失败:', error);
+                showToast('网络错误', true);
+            })
+            .finally(() => {
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = '<i class="fas fa-plus"></i> 保存代理';
+            });
+        }
+
+        function toggleAgentStatus(id, status) {
+            fetch(`/api/agent/wechat/admin/${id}/status`, {
+                method: 'POST',
+                headers: authHeaders({ 'Content-Type': 'application/json' }),
+                body: JSON.stringify({ status })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast(data.message || '状态已更新');
+                    loadAgentList();
+                } else {
+                    showToast(data.message || '状态更新失败', true);
+                }
+            })
+            .catch(error => {
+                console.error('代理状态更新失败:', error);
+                showToast('网络错误', true);
+            });
+        }
+
+        function deleteAgent(id) {
+            if (!confirm('确定要删除这条代理商微信号记录吗？')) {
+                return;
+            }
+
+            fetch(`/api/agent/wechat/admin/${id}`, {
+                method: 'DELETE',
+                headers: authHeaders()
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast(data.message || '删除成功');
+                    loadAgentList();
+                } else {
+                    showToast(data.message || '删除失败', true);
+                }
+            })
+            .catch(error => {
+                console.error('删除代理记录失败:', error);
+                showToast('网络错误', true);
             });
         }
 

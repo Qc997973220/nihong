@@ -2029,6 +2029,21 @@
         .vip-toolbox-btn.locked .toolbox-text {
             color: #b0bac8;
         }
+        .agent-verify-btn {
+            color: #70efff !important;
+            border-color: rgba(112, 239, 255, 0.52);
+            box-shadow: 0 0 24px rgba(112, 239, 255, 0.22), 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+        .agent-verify-btn:hover {
+            border-color: #70efff;
+            box-shadow: 0 0 34px rgba(112, 239, 255, 0.36), 0 6px 15px rgba(0, 0, 0, 0.5);
+        }
+        .contact-popup .agent-verify-text {
+            color: #d9f8ff;
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-top: 0;
+        }
 
         /* 模态框 */
         .modal-overlay {
@@ -2087,6 +2102,105 @@
         .news-close-btn:hover {
             background: rgba(255, 100, 100, 0.4);
             color: #ff6666;
+        }
+        .agent-modal-card {
+            max-width: 390px;
+            border-radius: 18px;
+            padding: 26px;
+        }
+        .agent-modal-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+        .agent-modal-icon {
+            width: 42px;
+            height: 42px;
+            flex: 0 0 42px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            background: rgba(112, 239, 255, 0.13);
+            border: 1px solid rgba(112, 239, 255, 0.32);
+            color: #70efff;
+        }
+        .agent-modal-title h3 {
+            margin: 0;
+            color: #f3fbff;
+            font-size: 1.12rem;
+        }
+        .agent-modal-title p {
+            margin: 2px 0 0;
+            color: #9db7d3;
+            font-size: 0.84rem;
+        }
+        .agent-verify-input {
+            width: 100%;
+            height: 44px;
+            padding: 0 14px;
+            border: 1px solid rgba(137, 203, 255, 0.28);
+            border-radius: 10px;
+            background: rgba(8, 18, 32, 0.72);
+            color: #e7f7ff;
+            outline: none;
+            font-size: 0.95rem;
+        }
+        .agent-verify-input:focus {
+            border-color: rgba(112, 239, 255, 0.58);
+            box-shadow: 0 0 0 3px rgba(112, 239, 255, 0.08);
+        }
+        .agent-verify-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 14px;
+        }
+        .agent-verify-actions button {
+            flex: 1;
+            min-height: 42px;
+            border: 0;
+            border-radius: 10px;
+            cursor: pointer;
+            color: #fff;
+            font-weight: 700;
+            transition: transform 0.18s ease, opacity 0.18s ease, background 0.18s ease;
+        }
+        .agent-verify-submit {
+            background: linear-gradient(135deg, #1d91ff, #29d6d6);
+        }
+        .agent-verify-cancel {
+            background: rgba(120, 140, 170, 0.24);
+            border: 1px solid rgba(150, 170, 200, 0.34) !important;
+            color: #bfd2e8 !important;
+        }
+        .agent-verify-actions button:hover {
+            transform: translateY(-1px);
+        }
+        .agent-verify-actions button:disabled {
+            cursor: wait;
+            opacity: 0.68;
+            transform: none;
+        }
+        .agent-verify-result {
+            display: none;
+            margin-top: 14px;
+            padding: 12px 14px;
+            border-radius: 10px;
+            font-weight: 800;
+            line-height: 1.45;
+        }
+        .agent-verify-result.success {
+            display: block;
+            background: rgba(0, 200, 130, 0.13);
+            border: 1px solid rgba(0, 220, 160, 0.36);
+            color: #b8ffe6;
+        }
+        .agent-verify-result.error {
+            display: block;
+            background: rgba(255, 80, 90, 0.13);
+            border: 1px solid rgba(255, 100, 120, 0.44);
+            color: #ffc5cd;
         }
         .news-header {
             display: flex;
@@ -3188,7 +3302,7 @@
             position: relative;
             margin: 4px 0 24px;
             padding: 12px 14px;
-            overflow: hidden;
+            overflow: visible;
             border: 1px solid rgba(137, 203, 255, 0.16);
             border-radius: 8px;
             background:
@@ -3255,36 +3369,130 @@
             align-items: center;
             gap: 10px;
         }
-        .weather-location-select {
-            height: 30px;
-            min-width: 98px;
+        .weather-city-search {
+            position: relative;
+            display: flex;
+            align-items: center;
+            min-width: 170px;
+            height: 32px;
             border: 1px solid rgba(137, 203, 255, 0.18);
             border-radius: 8px;
             background: rgba(8, 22, 40, 0.76);
             color: #ccecff;
-            padding: 0 8px;
+            padding: 0 10px;
+            transition: border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+        }
+        .weather-city-search:focus-within {
+            border-color: rgba(112, 239, 255, 0.42);
+            background: rgba(10, 28, 49, 0.9);
+            box-shadow: 0 0 0 3px rgba(112, 239, 255, 0.08);
+        }
+        .weather-city-search > i {
+            flex: 0 0 auto;
+            margin-right: 7px;
+            color: #78dff0;
+            font-size: 0.75rem;
+        }
+        .weather-city-input {
+            width: 100%;
+            min-width: 0;
+            height: 100%;
+            border: 0;
+            background: transparent;
+            color: #d9f4ff;
             outline: none;
             font-weight: 800;
             font-size: 0.75rem;
         }
+        .weather-city-input::placeholder {
+            color: rgba(204, 236, 255, 0.52);
+        }
+        .weather-city-input::-webkit-search-decoration,
+        .weather-city-input::-webkit-search-cancel-button,
+        .weather-city-input::-webkit-search-results-button,
+        .weather-city-input::-webkit-search-results-decoration {
+            display: none;
+        }
+        .weather-city-suggestions {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            right: 0;
+            z-index: 20;
+            display: none;
+            max-height: 260px;
+            overflow-y: auto;
+            padding: 6px;
+            border: 1px solid rgba(137, 203, 255, 0.22);
+            border-radius: 8px;
+            background: rgba(6, 15, 29, 0.98);
+            box-shadow: 0 18px 36px rgba(0, 0, 0, 0.34);
+        }
+        .weather-city-suggestions.show {
+            display: block;
+        }
+        .weather-city-option {
+            width: 100%;
+            display: block;
+            border: 0;
+            border-radius: 7px;
+            background: transparent;
+            color: #e7f8ff;
+            padding: 8px 9px;
+            text-align: left;
+            cursor: pointer;
+        }
+        .weather-city-option:hover,
+        .weather-city-option:focus {
+            background: rgba(112, 239, 255, 0.1);
+            outline: none;
+        }
+        .weather-city-option strong {
+            display: block;
+            font-size: 0.78rem;
+            line-height: 1.2;
+        }
+        .weather-city-option span {
+            display: block;
+            margin-top: 3px;
+            color: #8ca8c5;
+            font-size: 0.66rem;
+            line-height: 1.2;
+        }
+        .weather-city-option.empty {
+            cursor: default;
+        }
+        .weather-city-option.empty:hover {
+            background: transparent;
+        }
         .weather-locate-btn {
-            width: 30px;
-            height: 30px;
+            width: 32px;
+            height: 32px;
+            flex: 0 0 32px;
             padding: 0;
             display: flex;
             align-items: center;
             justify-content: center;
             border: 1px solid rgba(137, 203, 255, 0.18);
             border-radius: 8px;
-            background: rgba(8, 22, 40, 0.76);
-            color: #ccecff;
+            background: linear-gradient(135deg, rgba(112, 239, 255, 0.16), rgba(255, 224, 153, 0.08));
+            color: #dff8ff;
             cursor: pointer;
             transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+        }
+        .weather-locate-btn i {
+            font-size: 0.82rem;
+            line-height: 1;
         }
         .weather-locate-btn:hover {
             transform: translateY(-1px);
             border-color: rgba(112, 239, 255, 0.38);
             background: rgba(13, 38, 64, 0.86);
+        }
+        .weather-locate-btn:disabled {
+            cursor: wait;
+            opacity: 0.68;
+            transform: none;
         }
         .weather-panel-main {
             display: grid;
@@ -3702,7 +3910,7 @@
                 margin-bottom: 20px;
                 padding: 10px 11px;
             }
-            .weather-location-select {
+            .weather-city-search {
                 min-width: 0;
                 flex: 1;
             }
@@ -4053,13 +4261,17 @@
             .weather-panel-title span {
                 font-size: 0.68rem;
             }
-            .weather-location-select {
-                height: 28px;
+            .weather-city-search {
+                height: 30px;
+                font-size: 0.72rem;
+            }
+            .weather-city-input {
                 font-size: 0.72rem;
             }
             .weather-locate-btn {
-                width: 28px;
-                height: 28px;
+                width: 30px;
+                height: 30px;
+                flex-basis: 30px;
             }
             .weather-current {
                 padding: 8px 9px;
@@ -4889,14 +5101,11 @@
                     </div>
                 </div>
                 <div class="weather-panel-controls">
-                    <select class="weather-location-select" id="weatherLocationSelect" aria-label="选择天气城市">
-                        <option value="31.2304,121.4737,上海">上海</option>
-                        <option value="39.9042,116.4074,北京">北京</option>
-                        <option value="23.1291,113.2644,广州">广州</option>
-                        <option value="22.5431,114.0579,深圳">深圳</option>
-                        <option value="30.5728,104.0668,成都">成都</option>
-                        <option value="30.2741,120.1551,杭州">杭州</option>
-                    </select>
+                    <div class="weather-city-search">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="search" class="weather-city-input" id="weatherCityInput" placeholder="搜索城市" autocomplete="off" aria-label="搜索天气城市">
+                        <div class="weather-city-suggestions" id="weatherCitySuggestions"></div>
+                    </div>
                     <button type="button" class="weather-locate-btn" id="weatherLocateBtn" aria-label="定位当前城市">
                         <i class="fa-solid fa-location-crosshairs"></i>
                     </button>
@@ -4980,6 +5189,13 @@
         <div class="contact-popup douyin-popup">
             <img src="uploads/douyin_qr.png" alt="抖音二维码">
             <p>扫码关注抖音(商务合作)</p>
+        </div>
+    </div>
+    <div class="contact-btn agent-verify-btn" id="agentVerifyBtn" title="代理商防伪">
+        <i class="fa-solid fa-shield-halved"></i>
+        <div class="contact-popup agent-verify-popup">
+            <p class="agent-verify-text">代理商防伪</p>
+            <p style="margin-top: 6px; color: #8fb0cb;">点击校验代理商微信号</p>
         </div>
     </div>
     <div class="contact-btn vip-toolbox-btn" id="vipToolboxBtn" title="VIP专属网创工具箱" style="display: none;">
@@ -5069,6 +5285,7 @@
         dock.querySelectorAll('.contact-btn').forEach(btn => {
             btn.addEventListener('click', function(event) {
                 if (!mobileQuery.matches) return;
+                if (this.id === 'agentVerifyBtn') return;
                 if (event.target.closest('.contact-popup')) return;
                 const wasOpen = this.classList.contains('is-open');
                 closeDockPopups(this);
@@ -5092,7 +5309,8 @@
     }
 
     (function initHomeWeatherPanel() {
-        const weatherLocationSelect = document.getElementById('weatherLocationSelect');
+        const weatherCityInput = document.getElementById('weatherCityInput');
+        const weatherCitySuggestions = document.getElementById('weatherCitySuggestions');
         const weatherLocateBtn = document.getElementById('weatherLocateBtn');
         const weatherUpdatedAt = document.getElementById('weatherUpdatedAt');
         const weatherIcon = document.getElementById('weatherIcon');
@@ -5104,6 +5322,10 @@
 
         const pad = value => String(value).padStart(2, '0');
         const weekNames = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+        const defaultWeatherCity = { name: '上海', latitude: 31.2304, longitude: 121.4737, admin1: '上海市' };
+        const citySearchCache = new Map();
+        let citySearchTimer = null;
+        let activeCityRequestId = 0;
 
         const weatherCodeMap = {
             0: ['晴朗', 'fa-sun'],
@@ -5149,10 +5371,73 @@
         }
 
         function setWeatherError(message) {
-            if (weatherUpdatedAt) weatherUpdatedAt.textContent = '天气获取失败';
+            if (weatherUpdatedAt) weatherUpdatedAt.textContent = message || '天气获取失败';
             if (weatherStatus) weatherStatus.textContent = '暂无数据';
             if (weatherTemp) weatherTemp.textContent = '--°';
             if (weatherForecastList) weatherForecastList.innerHTML = '';
+        }
+
+        function setCitySuggestions(html) {
+            if (!weatherCitySuggestions) return;
+            weatherCitySuggestions.innerHTML = html || '';
+            weatherCitySuggestions.classList.toggle('show', Boolean(html));
+        }
+
+        function hideCitySuggestions() {
+            setCitySuggestions('');
+        }
+
+        function getCityLabel(city) {
+            return [city.name, city.admin2, city.admin1].filter(Boolean).join(' · ');
+        }
+
+        function escapeHtml(value) {
+            return String(value || '').replace(/[&<>"']/g, char => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            })[char]);
+        }
+
+        async function searchWeatherCities(keyword) {
+            const value = keyword.trim();
+            if (!value) return [];
+            if (citySearchCache.has(value)) return citySearchCache.get(value);
+
+            const params = new URLSearchParams({
+                name: value,
+                count: '8',
+                language: 'zh',
+                format: 'json',
+                countryCode: 'CN'
+            });
+            const response = await fetch(`https://geocoding-api.open-meteo.com/v1/search?${params.toString()}`);
+            if (!response.ok) throw new Error('city search failed');
+            const data = await response.json();
+            const cities = (data.results || []).filter(city => city.latitude != null && city.longitude != null);
+            citySearchCache.set(value, cities);
+            return cities;
+        }
+
+        function renderCitySuggestions(cities) {
+            if (!cities.length) {
+                setCitySuggestions('<button type="button" class="weather-city-option empty" disabled>未找到城市</button>');
+                return;
+            }
+            setCitySuggestions(cities.map(city => `
+                <button type="button" class="weather-city-option" data-latitude="${city.latitude}" data-longitude="${city.longitude}" data-name="${escapeHtml(city.name)}">
+                    <strong>${escapeHtml(city.name)}</strong>
+                    <span>${escapeHtml(getCityLabel(city))}</span>
+                </button>
+            `).join(''));
+        }
+
+        function selectWeatherCity(city) {
+            if (weatherCityInput) weatherCityInput.value = city.name;
+            hideCitySuggestions();
+            fetchWeather(city.latitude, city.longitude, city.name || '当前城市');
         }
 
         async function fetchWeather(latitude, longitude, locationName) {
@@ -5202,14 +5487,76 @@
             }
         }
 
-        function loadSelectedWeather() {
-            if (!weatherLocationSelect) return;
-            const [latitude, longitude, name] = weatherLocationSelect.value.split(',');
-            fetchWeather(latitude, longitude, name || '当前城市');
+        async function handleCitySearch(keyword, autoSelectFirst = false) {
+            const value = keyword.trim();
+            if (!value) {
+                hideCitySuggestions();
+                return;
+            }
+
+            const requestId = ++activeCityRequestId;
+            setCitySuggestions('<button type="button" class="weather-city-option empty" disabled>搜索中...</button>');
+            try {
+                const cities = await searchWeatherCities(value);
+                if (requestId !== activeCityRequestId) return;
+                if (autoSelectFirst && cities.length) {
+                    selectWeatherCity(cities[0]);
+                    return;
+                }
+                renderCitySuggestions(cities);
+            } catch (error) {
+                console.error('城市搜索失败:', error);
+                if (requestId === activeCityRequestId) {
+                    setCitySuggestions('<button type="button" class="weather-city-option empty" disabled>城市搜索暂不可用</button>');
+                }
+            }
         }
 
-        if (weatherLocationSelect) {
-            weatherLocationSelect.addEventListener('change', loadSelectedWeather);
+        if (weatherCityInput) {
+            weatherCityInput.value = defaultWeatherCity.name;
+            weatherCityInput.addEventListener('input', () => {
+                window.clearTimeout(citySearchTimer);
+                citySearchTimer = window.setTimeout(() => handleCitySearch(weatherCityInput.value), 300);
+            });
+            weatherCityInput.addEventListener('keydown', event => {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    window.clearTimeout(citySearchTimer);
+                    handleCitySearch(weatherCityInput.value, true);
+                }
+                if (event.key === 'Escape') {
+                    hideCitySuggestions();
+                }
+            });
+            weatherCityInput.addEventListener('focus', () => {
+                if (weatherCityInput.value.trim() && weatherCitySuggestions && !weatherCitySuggestions.innerHTML) {
+                    handleCitySearch(weatherCityInput.value);
+                }
+            });
+        }
+        if (weatherCitySuggestions) {
+            weatherCitySuggestions.addEventListener('mousedown', event => {
+                const option = event.target.closest('.weather-city-option:not(.empty)');
+                if (!option) return;
+                event.preventDefault();
+                selectWeatherCity({
+                    name: option.dataset.name,
+                    latitude: option.dataset.latitude,
+                    longitude: option.dataset.longitude
+                });
+            });
+        }
+        document.addEventListener('click', event => {
+            if (!event.target.closest('.weather-city-search')) {
+                hideCitySuggestions();
+            }
+        });
+        function setLocateButtonLoading(isLoading) {
+            if (!weatherLocateBtn) return;
+            weatherLocateBtn.disabled = isLoading;
+            weatherLocateBtn.innerHTML = isLoading
+                ? '<i class="fa-solid fa-spinner fa-spin"></i>'
+                : '<i class="fa-solid fa-location-crosshairs"></i>';
         }
         if (weatherLocateBtn) {
             weatherLocateBtn.addEventListener('click', () => {
@@ -5217,18 +5564,17 @@
                     setWeatherError('当前浏览器不支持定位，已保留城市天气。');
                     return;
                 }
-                weatherLocateBtn.disabled = true;
-                weatherLocateBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>定位</span>';
+                hideCitySuggestions();
+                setLocateButtonLoading(true);
                 navigator.geolocation.getCurrentPosition(
                     position => {
+                        if (weatherCityInput) weatherCityInput.value = '当前位置';
                         fetchWeather(position.coords.latitude, position.coords.longitude, '当前位置');
-                        weatherLocateBtn.disabled = false;
-                        weatherLocateBtn.innerHTML = '<i class="fa-solid fa-location-crosshairs"></i><span>定位</span>';
+                        setLocateButtonLoading(false);
                     },
                     () => {
                         setWeatherError('定位失败，请允许浏览器定位或手动选择城市。');
-                        weatherLocateBtn.disabled = false;
-                        weatherLocateBtn.innerHTML = '<i class="fa-solid fa-location-crosshairs"></i><span>定位</span>';
+                        setLocateButtonLoading(false);
                     },
                     { timeout: 8000, maximumAge: 600000 }
                 );
@@ -5236,7 +5582,7 @@
         }
 
         setWeatherLoading();
-        loadSelectedWeather();
+        fetchWeather(defaultWeatherCity.latitude, defaultWeatherCity.longitude, defaultWeatherCity.name);
     })();
 
     function displayCategoryName(category) {
@@ -7731,6 +8077,27 @@
     </div>
 </div>
 
+<!-- 代理商防伪弹窗 -->
+<div class="modal-overlay" id="agentVerifyModal">
+    <div class="modal-card agent-modal-card">
+        <div class="agent-modal-header">
+            <div class="agent-modal-icon">
+                <i class="fa-solid fa-shield-halved"></i>
+            </div>
+            <div class="agent-modal-title">
+                <h3>代理商防伪系统</h3>
+                <p>请输入代理商微信号进行校验</p>
+            </div>
+        </div>
+        <input type="text" id="agentWechatInput" class="agent-verify-input" placeholder="请输入代理商微信号" autocomplete="off">
+        <div class="agent-verify-actions">
+            <button type="button" class="agent-verify-cancel" id="closeAgentVerifyModal">取消</button>
+            <button type="button" class="agent-verify-submit" id="submitAgentVerifyBtn">校验</button>
+        </div>
+        <div class="agent-verify-result" id="agentVerifyResult"></div>
+    </div>
+</div>
+
 <style>
     .vip-modal-overlay {
         display: none;
@@ -9184,6 +9551,93 @@
             }
         });
     });
+
+    (function initAgentVerifyModal() {
+        const openBtn = document.getElementById('agentVerifyBtn');
+        const modal = document.getElementById('agentVerifyModal');
+        const input = document.getElementById('agentWechatInput');
+        const result = document.getElementById('agentVerifyResult');
+        const submitBtn = document.getElementById('submitAgentVerifyBtn');
+        const closeBtn = document.getElementById('closeAgentVerifyModal');
+
+        if (!openBtn || !modal || !input || !result || !submitBtn || !closeBtn) {
+            return;
+        }
+
+        function setResult(message, type) {
+            result.className = `agent-verify-result ${type || ''}`.trim();
+            result.textContent = message || '';
+            result.style.display = message ? 'block' : 'none';
+        }
+
+        function openModal() {
+            setResult('');
+            input.value = '';
+            modal.classList.add('active');
+            window.setTimeout(() => input.focus(), 0);
+        }
+
+        function closeModal() {
+            modal.classList.remove('active');
+        }
+
+        async function submitVerification() {
+            const wechatId = input.value.trim();
+            if (!wechatId) {
+                setResult('请输入代理商微信号', 'error');
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 校验中...';
+            setResult('');
+
+            try {
+                const response = await fetch('/api/agent/wechat/verify', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ wechatId })
+                });
+                const data = await response.json();
+
+                if (data.success && data.verified) {
+                    setResult(data.message || '代理商认证成功，真实的', 'success');
+                } else if (data.success) {
+                    setResult(data.message || '假的，请谨慎交易', 'error');
+                } else {
+                    setResult(data.message || '校验失败，请稍后重试', 'error');
+                }
+            } catch (error) {
+                console.error('代理商校验失败:', error);
+                setResult('网络错误，请稍后重试', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '校验';
+            }
+        }
+
+        openBtn.addEventListener('click', function(event) {
+            event.preventDefault();
+            openModal();
+        });
+        closeBtn.addEventListener('click', closeModal);
+        submitBtn.addEventListener('click', submitVerification);
+        input.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                submitVerification();
+            } else if (event.key === 'Escape') {
+                closeModal();
+            }
+        });
+        modal.addEventListener('click', function(event) {
+            if (event.target === modal) {
+                closeModal();
+            }
+        });
+    })();
 
     document.getElementById('vipUpgradeBtn').addEventListener('click', function(e) {
         e.preventDefault();
