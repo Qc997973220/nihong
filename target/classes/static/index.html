@@ -1539,118 +1539,6 @@
             box-shadow: 0 0 14px rgba(242, 170, 40, 0.25);
         }
 
-        /* 外部链接模块（新增） */
-        .external-links {
-            width: 100%;
-            margin: 0 auto 40px;
-            background: rgba(10, 22, 38, 0.3);
-            backdrop-filter: blur(8px);
-            border-radius: 40px;
-            padding: 16px 20px;
-            border: 1px solid rgba(90, 170, 255, 0.3);
-            box-shadow: 0 10px 25px -10px #00000080;
-        }
-
-        .links-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 12px;
-            padding: 0 8px;
-        }
-        .links-header h3 {
-            font-size: 1.1rem;
-            font-weight: 500;
-            color: #b5e0ff;
-            text-shadow: 0 0 8px #2f9eff;
-            letter-spacing: 0.5px;
-        }
-        .link-nav-buttons {
-            display: flex;
-            gap: 8px;
-        }
-        .link-nav-btn {
-            background: rgba(20, 40, 70, 0.5);
-            border: 1px solid #3f7fff;
-            color: #c5dcff;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: 0.2s;
-            backdrop-filter: blur(5px);
-        }
-        .link-nav-btn:hover {
-            background: #1f4f9e;
-            color: white;
-            box-shadow: 0 0 20px #0077ff;
-            border-color: #8ac0ff;
-        }
-        .link-nav-btn i {
-            font-size: 1rem;
-        }
-
-        .links-scroll {
-            overflow-x: auto;
-            scroll-behavior: smooth;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: thin;
-            scrollbar-color: #3f7fff #1a2a40;
-            padding-bottom: 8px;
-        }
-        .links-scroll::-webkit-scrollbar {
-            height: 6px;
-        }
-        .links-scroll::-webkit-scrollbar-track {
-            background: #1a2a40;
-            border-radius: 10px;
-        }
-        .links-scroll::-webkit-scrollbar-thumb {
-            background: #3f7fff;
-            border-radius: 10px;
-            box-shadow: 0 0 10px #0077ff;
-        }
-
-        .links-container {
-            display: flex;
-            gap: 12px;
-            padding: 4px 4px 8px 4px;
-        }
-
-        .link-card {
-            flex: 0 0 auto;
-            width: 180px;
-            background: rgba(16, 28, 46, 0.7);
-            backdrop-filter: blur(8px);
-            border-radius: 30px;
-            padding: 16px;
-            border: 1px solid rgba(90, 170, 255, 0.4);
-            box-shadow: 0 8px 20px -8px #000000, 0 0 0 1px rgba(90, 170, 255, 0.2) inset;
-            transition: 0.2s;
-            text-align: center;
-        }
-        .link-card:hover {
-            transform: translateY(-2px);
-            border-color: #5a9eff;
-            box-shadow: 0 12px 28px -10px #002b66, 0 0 20px #1e88e5;
-        }
-        .link-card a {
-            text-decoration: none;
-            color: inherit;
-            display: block;
-        }
-        .link-name {
-            font-weight: 500;
-            color: #ecf5ff;
-            font-size: 1rem;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
         .links-scroll-msg {
             margin-top: 12px;
             padding: 10px 16px;
@@ -2786,9 +2674,6 @@
             .recommend-section { padding: 20px 24px; margin: 30px 0 24px; }
             .recommend-content { flex-direction: column; gap: 16px; }
             .recommend-item a { font-size: 0.85rem; }
-            .external-links { padding: 12px 16px; }
-            .link-card { width: 150px; padding: 12px; }
-            .link-name { font-size: 0.9rem; }
             .categories { gap: 8px; }
             .category-chip { padding: 6px 16px; font-size: 0.85rem; }
             .resource-grid { grid-template-columns: 1fr; gap: 20px; }
@@ -3593,8 +3478,7 @@
             border-color: rgba(112, 239, 255, 0.5);
             background: rgba(13, 36, 62, 0.82);
         }
-        .recommend-section,
-        .external-links {
+        .recommend-section {
             border-radius: 8px;
             background: rgba(7, 17, 31, 0.78);
             border: 1px solid rgba(137, 203, 255, 0.18);
@@ -3604,8 +3488,7 @@
             margin: 30px 0 22px;
             padding: 20px;
         }
-        .recommend-header h3,
-        .links-header h3 {
+        .recommend-header h3 {
             color: #edf8ff;
             text-shadow: none;
             font-weight: 800;
@@ -3624,10 +3507,6 @@
         .recommend-access-badge {
             border-radius: 6px;
             letter-spacing: 0;
-        }
-        .external-links {
-            margin-bottom: 30px;
-            padding: 18px;
         }
         .home-notice-bar {
             margin: -18px 0 26px;
@@ -3944,52 +3823,6 @@
         }
         .weather-error {
             color: #ffb1b1 !important;
-        }
-        .external-links-compact {
-            margin: 12px 0 34px;
-            padding: 12px;
-            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.04);
-        }
-        .external-links-compact .links-header {
-            margin-bottom: 8px;
-            padding: 0 2px;
-        }
-        .external-links-compact .links-header h3 {
-            font-size: 0.92rem;
-        }
-        .external-links-compact .link-nav-btn {
-            width: 26px;
-            height: 26px;
-        }
-        .external-links-compact .links-scroll {
-            padding-bottom: 2px;
-        }
-        .external-links-compact .links-container {
-            gap: 8px;
-            padding: 2px;
-        }
-        .external-links-compact .link-card {
-            width: 132px;
-            padding: 9px 10px;
-        }
-        .external-links-compact .link-name {
-            font-size: 0.82rem;
-        }
-        .link-nav-btn,
-        .link-card,
-        .links-scroll-msg {
-            border-radius: 8px;
-        }
-        .link-card {
-            width: 174px;
-            background: rgba(4, 13, 25, 0.68);
-            border-color: rgba(137, 203, 255, 0.16);
-            box-shadow: none;
-        }
-        .link-card:hover {
-            transform: translateY(-2px);
-            border-color: rgba(112, 239, 255, 0.38);
-            box-shadow: 0 16px 32px rgba(0, 0, 0, 0.22);
         }
         .resource-section-head {
             display: flex;
@@ -4725,24 +4558,6 @@
                 border-radius: 8px;
                 font-size: 0.82rem;
             }
-            .external-links-compact {
-                margin: 8px 0 22px;
-                padding: 10px;
-                border-radius: 8px;
-            }
-            .external-links-compact .links-header {
-                gap: 8px;
-            }
-            .external-links-compact .links-header h3 {
-                font-size: 0.84rem;
-            }
-            .external-links-compact .link-card {
-                width: 118px;
-                padding: 8px;
-            }
-            .external-links-compact .link-name {
-                font-size: 0.76rem;
-            }
             .footer {
                 padding: 18px 0 88px;
                 font-size: 0.78rem;
@@ -5238,7 +5053,7 @@
             <input type="email" id="forgotEmail" placeholder="请输入绑定的邮箱地址">
         </div>
         <div class="input-group">
-            <label><i class="fa-solid fa-shield-halved" style="margin-right: 6px;"></i>邮箱验证码 <span style="color:#ff8a8a;">*</span></label>
+            <label><i class="fa-solid fa-shield-alt" style="margin-right: 6px;"></i>邮箱验证码 <span style="color:#ff8a8a;">*</span></label>
             <div class="verification-code-row">
                 <input type="text" id="forgotEmailCode" maxlength="6" inputmode="numeric" placeholder="请输入6位验证码">
                 <button type="button" class="code-btn" id="sendRecoveryCodeBtn">发送验证码</button>
@@ -5354,7 +5169,7 @@
                     <i class="fas fa-crown"></i> 激活VIP
                 </a>
                 <button type="button" class="agent-verify-nav-btn" id="agentVerifyBtn" title="代理防伪">
-                    <i class="fa-solid fa-shield-halved"></i>
+                    <i class="fa-solid fa-shield-alt"></i>
                     <span>代理防伪</span>
                 </button>
                 <div class="notification-container" id="notificationContainer">
@@ -5519,8 +5334,6 @@
         <div class="resource-grid" id="resourceGrid"></div>
         <div class="pagination" id="pagination"></div>
 
-        <!-- 外部链接模块 -->
-        <div class="external-links external-links-compact" id="externalLinks"></div>
     </div>
 
     <footer class="footer">
@@ -5535,15 +5348,15 @@
     <div class="contact-btn" id="wechatBtn">
         <i class="fa-brands fa-weixin"></i>
         <div class="contact-popup wechat-popup">
-            <img src="uploads/wechat_qr.png" alt="微信二维码">
-            <p>扫码添加微信(商务合作)</p>
+            <img src="uploads/wechat_qr.png?v=20260524" alt="微信二维码">
+            <p>扫码添加微信客服</p>
         </div>
     </div>
     <div class="contact-btn" id="qqBtn">
         <i class="fa-brands fa-qq"></i>
         <div class="contact-popup qq-popup">
-            <img src="uploads/qq_qr.png" alt="QQ二维码">
-            <p>扫码添加QQ(商务合作)</p>
+            <img src="uploads/qq_qr.png?v=20260524" alt="QQ二维码">
+            <p>扫码添加QQ客服</p>
         </div>
     </div>
     <div class="contact-btn" id="emailBtn">
@@ -5556,14 +5369,14 @@
     <div class="contact-btn" id="officialAccountBtn">
         <i class="fa-solid fa-square-rss"></i>
         <div class="contact-popup official-popup">
-            <img src="uploads/official_qr.png" alt="公众号二维码">
+            <img src="uploads/official_qr.png?v=20260524" alt="公众号二维码">
             <p>扫码关注公众号(防迷路)</p>
         </div>
     </div>
     <div class="contact-btn" id="douyinBtn">
         <i class="fa-brands fa-tiktok"></i>
         <div class="contact-popup douyin-popup">
-            <img src="uploads/douyin_qr.png" alt="抖音二维码">
+            <img src="uploads/douyin_qr.png?v=20260524" alt="抖音二维码">
             <p>扫码关注抖音(商务合作)</p>
         </div>
     </div>
@@ -6612,79 +6425,19 @@
         window.open(`detail.html?id=${id}`, '_blank');
     }
 
-    // ========== 外部链接数据 ==========
-    const externalLinks = [
-        { name: '黑客社区', url: 'https://geekprank.com/hacker/simulador/' },
-        { name: '全网视频资源', url: 'https://cbh7.cc/index.html' },
-        { name: 'AI修图试衣', url: 'https://www.jiaotuai.cn/' },
-        { name: '伪造蓝屏', url: 'https://fakeupdate.net/win10/bsod.html' },
-        { name: '全球气象实时卫星', url: 'https://zoom.earth/' },
-        { name: '小红书引流', url: 'https://www.huglemon.com/tools/xhs' },
-        { name: 'AI变声器', url: 'https://rmsys.top/AI.html?ref=www.sbrdh.com' },
-        { name: '临时邮箱', url: 'https://temp.now/zh/' },
-        { name: '美国在线接码平台', url: 'https://yunduanxin.net/info/12403249145/' },
-        { name: '微信对话生成', url: 'https://vjietu.pro/wechat/chat' },
-        { name: 'AI文字转视频', url: 'https://www.mindvideo.ai/zh/text-to-video/?model=153' }
-    ];
-
-    // 渲染外部链接模块
-    function renderExternalLinks() {
-        const container = document.getElementById('externalLinks');
+    // ========== 首页公告条 ==========
+    function renderHomeNoticeBar() {
         const noticeBar = document.getElementById('homeNoticeBar');
-        if (!container) return;
+        if (!noticeBar) return;
 
         const scrollMsgText = '欢迎进入霓虹之都网创资源库,本站24小时实时更新，同步更新各大资源网站的付费可实操课程。网站会员免费查看，资源审核工作量大, 请勿轻信课程广告 , 具体内容需自行分辨 , 谨防上当受骗。';
-
-        if (noticeBar) {
-            noticeBar.innerHTML = `
-                <div class="links-scroll-msg home-scroll-msg">
-                    <div class="scroll-content-msg" id="scrollMessage">
-                        <span>${scrollMsgText}</span><span>${scrollMsgText}</span>
-                    </div>
+        noticeBar.innerHTML = `
+            <div class="links-scroll-msg home-scroll-msg">
+                <div class="scroll-content-msg" id="scrollMessage">
+                    <span>${scrollMsgText}</span><span>${scrollMsgText}</span>
                 </div>
-            `;
-        }
-
-        let html = `
-                <div class="links-header">
-                    <h3><i class="fa-regular fa-compass" style="margin-right: 8px;"></i>便捷链接</h3>
-                    <div class="link-nav-buttons">
-                        <div class="link-nav-btn" id="linkScrollLeft"><i class="fa-solid fa-chevron-left"></i></div>
-                        <div class="link-nav-btn" id="linkScrollRight"><i class="fa-solid fa-chevron-right"></i></div>
-                    </div>
-                </div>
-                <div class="links-scroll" id="linksScroll">
-                    <div class="links-container">
-            `;
-
-        externalLinks.forEach(link => {
-            html += `
-                    <div class="link-card">
-                        <a href="${link.url}" target="_blank" rel="noopener noreferrer">
-                            <div class="link-name">${link.name}</div>
-                        </a>
-                    </div>
-                `;
-        });
-
-        html += `
-                    </div>
-                </div>
-            `;
-        container.innerHTML = html;
-
-        const scrollContainer = document.getElementById('linksScroll');
-        const leftBtn = document.getElementById('linkScrollLeft');
-        const rightBtn = document.getElementById('linkScrollRight');
-
-        if (leftBtn && rightBtn && scrollContainer) {
-            leftBtn.addEventListener('click', () => {
-                scrollContainer.scrollBy({ left: -300, behavior: 'smooth' });
-            });
-            rightBtn.addEventListener('click', () => {
-                scrollContainer.scrollBy({ left: 300, behavior: 'smooth' });
-            });
-        }
+            </div>
+        `;
     }
 
     // 全局变量存储当前资源分页状态
@@ -8095,7 +7848,7 @@
         }
 
         // 渲染外部链接
-        renderExternalLinks();
+        renderHomeNoticeBar();
 
         // 获取运行天数
         fetchRunningDays();
@@ -8463,9 +8216,9 @@
             <i class="fa-solid fa-xmark"></i>
         </button>
         <div class="agent-modal-body">
-            <div class="agent-modal-header">
+                <div class="agent-modal-header">
                 <div class="agent-modal-icon">
-                    <i class="fa-solid fa-shield-halved"></i>
+                    <i class="fa-solid fa-shield-alt"></i>
                 </div>
                 <div class="agent-modal-title">
                     <h3>代理身份防伪终端</h3>
@@ -9623,8 +9376,7 @@
         .hero-shell,
         .hero-copy,
         .hero-command-panel,
-        .resource-card,
-        .external-links-compact {
+        .resource-card {
             min-width: 0;
         }
         .publish-btn,
@@ -9768,12 +9520,9 @@
             justify-content: center;
             border-radius: 8px;
         }
-        .external-links-compact {
-            margin-bottom: 14px;
-        }
-        .footer {
-            padding-bottom: 16px;
-        }
+            .footer {
+                padding-bottom: 16px;
+            }
         .float-contact {
             display: flex !important;
             position: fixed;
