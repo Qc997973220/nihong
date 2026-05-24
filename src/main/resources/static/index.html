@@ -2029,20 +2029,75 @@
         .vip-toolbox-btn.locked .toolbox-text {
             color: #b0bac8;
         }
-        .agent-verify-btn {
-            color: #70efff !important;
-            border-color: rgba(112, 239, 255, 0.52);
-            box-shadow: 0 0 24px rgba(112, 239, 255, 0.22), 0 4px 12px rgba(0, 0, 0, 0.4);
+        .agent-verify-nav-btn,
+        .admin-nav-btn {
+            min-height: 36px;
+            border-radius: 999px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-decoration: none;
+            color: #ecfbff;
+            font-weight: 800;
+            font-size: 0.88rem;
+            line-height: 1;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
         }
-        .agent-verify-btn:hover {
-            border-color: #70efff;
-            box-shadow: 0 0 34px rgba(112, 239, 255, 0.36), 0 6px 15px rgba(0, 0, 0, 0.5);
+        .agent-verify-nav-btn {
+            position: relative;
+            overflow: hidden;
+            padding: 0 16px;
+            border: 1px solid rgba(83, 242, 255, 0.55);
+            background:
+                linear-gradient(135deg, rgba(8, 24, 38, 0.96), rgba(12, 64, 72, 0.86)),
+                radial-gradient(circle at 20% 20%, rgba(98, 255, 221, 0.28), transparent 34%);
+            box-shadow: 0 0 22px rgba(83, 242, 255, 0.2), inset 0 0 0 1px rgba(255, 255, 255, 0.06);
         }
-        .contact-popup .agent-verify-text {
-            color: #d9f8ff;
-            font-size: 0.95rem;
-            font-weight: 700;
-            margin-top: 0;
+        .agent-verify-nav-btn::before {
+            content: '';
+            position: absolute;
+            inset: -1px;
+            background: linear-gradient(110deg, transparent 0%, rgba(255, 255, 255, 0.28) 42%, transparent 58%);
+            transform: translateX(-130%);
+            animation: agentNavSweep 3.8s ease-in-out infinite;
+            pointer-events: none;
+        }
+        @keyframes agentNavSweep {
+            0%, 48% { transform: translateX(-130%); }
+            66%, 100% { transform: translateX(130%); }
+        }
+        .agent-verify-nav-btn i,
+        .admin-nav-btn i {
+            color: #75f7ff;
+            filter: drop-shadow(0 0 8px rgba(117, 247, 255, 0.65));
+        }
+        .agent-verify-nav-btn:hover,
+        .admin-nav-btn:hover {
+            transform: translateY(-1px);
+        }
+        .agent-verify-nav-btn:hover {
+            border-color: rgba(126, 255, 239, 0.9);
+            box-shadow: 0 0 34px rgba(83, 242, 255, 0.34), 0 10px 22px rgba(0, 0, 0, 0.24);
+        }
+        .admin-link {
+            flex: 0 0 auto;
+        }
+        .admin-nav-btn {
+            padding: 0 14px;
+            border: 1px solid rgba(255, 100, 118, 0.52);
+            background: linear-gradient(135deg, rgba(76, 22, 35, 0.88), rgba(18, 42, 68, 0.76));
+            box-shadow: 0 0 20px rgba(255, 71, 87, 0.18), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+        }
+        .admin-nav-btn i {
+            color: #ff9bad;
+            filter: drop-shadow(0 0 8px rgba(255, 100, 118, 0.5));
+        }
+        .admin-nav-btn:hover {
+            border-color: rgba(255, 128, 146, 0.82);
+            box-shadow: 0 0 28px rgba(255, 71, 87, 0.28), 0 10px 22px rgba(0, 0, 0, 0.24);
         }
 
         /* 模态框 */
@@ -2104,103 +2159,346 @@
             color: #ff6666;
         }
         .agent-modal-card {
-            max-width: 390px;
-            border-radius: 18px;
+            position: relative;
+            max-width: 520px;
+            border-radius: 24px;
+            padding: 0;
+            overflow: hidden;
+            isolation: isolate;
+            background:
+                linear-gradient(155deg, rgba(8, 18, 34, 0.98), rgba(5, 11, 22, 0.98)),
+                radial-gradient(circle at 18% 8%, rgba(89, 255, 224, 0.24), transparent 32%),
+                radial-gradient(circle at 85% 18%, rgba(72, 138, 255, 0.22), transparent 36%);
+            border: 1px solid rgba(112, 239, 255, 0.35);
+            box-shadow:
+                0 34px 90px rgba(0, 0, 0, 0.62),
+                0 0 70px rgba(52, 214, 255, 0.18),
+                inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        }
+        .agent-modal-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(rgba(112, 239, 255, 0.055) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(112, 239, 255, 0.045) 1px, transparent 1px);
+            background-size: 28px 28px;
+            mask-image: linear-gradient(to bottom, #000, transparent 80%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        .agent-modal-card::after {
+            content: '';
+            position: absolute;
+            left: -40%;
+            top: 0;
+            width: 34%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(112, 239, 255, 0.18), transparent);
+            animation: agentModalScan 4.2s linear infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+        @keyframes agentModalScan {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(420%); }
+        }
+        .agent-modal-body {
+            position: relative;
+            z-index: 1;
             padding: 26px;
         }
-        .agent-modal-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 18px;
-        }
-        .agent-modal-icon {
-            width: 42px;
-            height: 42px;
-            flex: 0 0 42px;
+        .agent-modal-close {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            width: 34px;
+            height: 34px;
+            border: 1px solid rgba(155, 204, 235, 0.24);
+            border-radius: 50%;
+            background: rgba(5, 12, 24, 0.62);
+            color: #bcd7ee;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            border-radius: 12px;
-            background: rgba(112, 239, 255, 0.13);
-            border: 1px solid rgba(112, 239, 255, 0.32);
-            color: #70efff;
+            cursor: pointer;
+            transition: transform 0.18s ease, border-color 0.18s ease, color 0.18s ease, background 0.18s ease;
+            z-index: 2;
         }
-        .agent-modal-title h3 {
+        .agent-modal-close:hover {
+            transform: rotate(90deg);
+            color: #fff;
+            border-color: rgba(255, 110, 130, 0.58);
+            background: rgba(255, 80, 100, 0.16);
+        }
+        .agent-modal-header {
+            display: grid;
+            grid-template-columns: auto minmax(0, 1fr);
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 22px;
+            padding-right: 32px;
+        }
+        .agent-modal-icon {
+            position: relative;
+            width: 68px;
+            height: 68px;
+            flex: 0 0 68px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 18px;
+            background:
+                linear-gradient(145deg, rgba(21, 82, 104, 0.78), rgba(8, 27, 44, 0.88)),
+                radial-gradient(circle, rgba(117, 247, 255, 0.28), transparent 70%);
+            border: 1px solid rgba(117, 247, 255, 0.46);
+            color: #82fbff;
+            box-shadow: 0 0 26px rgba(117, 247, 255, 0.22), inset 0 0 20px rgba(117, 247, 255, 0.08);
+        }
+        .agent-modal-icon::before,
+        .agent-modal-icon::after {
+            content: '';
+            position: absolute;
+            inset: -7px;
+            border: 1px solid rgba(117, 247, 255, 0.24);
+            border-radius: 22px;
+            animation: agentPulseRing 2.4s ease-out infinite;
+        }
+        .agent-modal-icon::after {
+            animation-delay: 1.2s;
+        }
+        @keyframes agentPulseRing {
+            0% { opacity: 0.75; transform: scale(0.9); }
+            100% { opacity: 0; transform: scale(1.25); }
+        }
+        .agent-modal-icon i {
+            font-size: 1.65rem;
+            filter: drop-shadow(0 0 12px rgba(117, 247, 255, 0.72));
+        }
+        .agent-modal-card .agent-modal-title h3 {
             margin: 0;
-            color: #f3fbff;
-            font-size: 1.12rem;
+            color: #f4fdff;
+            font-size: 1.42rem;
+            line-height: 1.18;
+            letter-spacing: 0;
+            text-shadow: 0 0 18px rgba(112, 239, 255, 0.25);
+            text-align: left;
         }
-        .agent-modal-title p {
-            margin: 2px 0 0;
-            color: #9db7d3;
-            font-size: 0.84rem;
+        .agent-modal-card .agent-modal-title p {
+            margin: 7px 0 0;
+            color: #99bad4;
+            font-size: 0.9rem;
+            line-height: 1.45;
+        }
+        .agent-verify-panel {
+            position: relative;
+            display: grid;
+            gap: 16px;
+            padding: 18px;
+            border-radius: 18px;
+            background: rgba(3, 12, 24, 0.58);
+            border: 1px solid rgba(112, 239, 255, 0.16);
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+        }
+        .agent-input-shell {
+            position: relative;
+        }
+        .agent-input-shell i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #75f7ff;
+            font-size: 0.95rem;
+            pointer-events: none;
         }
         .agent-verify-input {
             width: 100%;
-            height: 44px;
-            padding: 0 14px;
-            border: 1px solid rgba(137, 203, 255, 0.28);
-            border-radius: 10px;
-            background: rgba(8, 18, 32, 0.72);
-            color: #e7f7ff;
+            height: 50px;
+            padding: 0 16px 0 42px;
+            border: 1px solid rgba(137, 203, 255, 0.26);
+            border-radius: 14px;
+            background: rgba(5, 14, 28, 0.82);
+            color: #ecfbff;
             outline: none;
-            font-size: 0.95rem;
+            font-size: 1rem;
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+        }
+        .agent-verify-input::placeholder {
+            color: #668aa8;
         }
         .agent-verify-input:focus {
-            border-color: rgba(112, 239, 255, 0.58);
-            box-shadow: 0 0 0 3px rgba(112, 239, 255, 0.08);
+            border-color: rgba(112, 239, 255, 0.72);
+            box-shadow: 0 0 0 4px rgba(112, 239, 255, 0.09), 0 0 24px rgba(112, 239, 255, 0.16);
         }
         .agent-verify-actions {
-            display: flex;
+            display: grid;
+            grid-template-columns: 0.82fr 1.18fr;
             gap: 10px;
-            margin-top: 14px;
         }
         .agent-verify-actions button {
-            flex: 1;
-            min-height: 42px;
-            border: 0;
-            border-radius: 10px;
+            min-height: 46px;
+            border-radius: 14px;
             cursor: pointer;
             color: #fff;
-            font-weight: 700;
-            transition: transform 0.18s ease, opacity 0.18s ease, background 0.18s ease;
+            font-weight: 850;
+            letter-spacing: 0;
+            transition: transform 0.18s ease, opacity 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
         }
         .agent-verify-submit {
-            background: linear-gradient(135deg, #1d91ff, #29d6d6);
+            border: 1px solid rgba(117, 247, 255, 0.58);
+            background: linear-gradient(135deg, #00a7ff, #10e0cf 56%, #5cffb8);
+            box-shadow: 0 0 26px rgba(16, 224, 207, 0.26), inset 0 1px 0 rgba(255, 255, 255, 0.24);
         }
         .agent-verify-cancel {
-            background: rgba(120, 140, 170, 0.24);
-            border: 1px solid rgba(150, 170, 200, 0.34) !important;
+            background: rgba(128, 150, 178, 0.12);
+            border: 1px solid rgba(150, 170, 200, 0.28) !important;
             color: #bfd2e8 !important;
         }
         .agent-verify-actions button:hover {
             transform: translateY(-1px);
         }
+        .agent-verify-submit:hover {
+            box-shadow: 0 0 36px rgba(16, 224, 207, 0.36), 0 12px 26px rgba(0, 0, 0, 0.22);
+        }
         .agent-verify-actions button:disabled {
             cursor: wait;
-            opacity: 0.68;
+            opacity: 0.76;
             transform: none;
+        }
+        .agent-verify-loader {
+            display: none;
+            position: relative;
+            min-height: 92px;
+            border-radius: 16px;
+            background: rgba(4, 16, 30, 0.62);
+            border: 1px solid rgba(112, 239, 255, 0.18);
+            overflow: hidden;
+        }
+        .agent-verify-loader.active {
+            display: grid;
+            place-items: center;
+        }
+        .agent-verify-loader::before {
+            content: '';
+            position: absolute;
+            width: 220px;
+            height: 220px;
+            border-radius: 50%;
+            border: 1px solid rgba(112, 239, 255, 0.22);
+            border-top-color: rgba(112, 239, 255, 0.95);
+            animation: agentLoaderSpin 1.1s linear infinite;
+        }
+        .agent-verify-loader::after {
+            content: '';
+            position: absolute;
+            inset: 12px;
+            border-radius: 14px;
+            background: linear-gradient(90deg, transparent, rgba(112, 239, 255, 0.12), transparent);
+            transform: translateX(-100%);
+            animation: agentLoaderSweep 1.4s ease-in-out infinite;
+        }
+        @keyframes agentLoaderSpin {
+            to { transform: rotate(360deg); }
+        }
+        @keyframes agentLoaderSweep {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        .agent-loader-core {
+            position: relative;
+            z-index: 1;
+            display: grid;
+            place-items: center;
+            gap: 8px;
+            color: #bffaff;
+            font-size: 0.86rem;
+            font-weight: 800;
+        }
+        .agent-loader-core i {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(112, 239, 255, 0.12);
+            border: 1px solid rgba(112, 239, 255, 0.36);
+            color: #75f7ff;
+            box-shadow: 0 0 22px rgba(112, 239, 255, 0.22);
         }
         .agent-verify-result {
             display: none;
-            margin-top: 14px;
-            padding: 12px 14px;
-            border-radius: 10px;
-            font-weight: 800;
+            margin: 0;
+            padding: 15px 15px 15px 52px;
+            border-radius: 16px;
+            font-weight: 850;
             line-height: 1.45;
+            position: relative;
+            overflow: hidden;
+        }
+        .agent-verify-result::before {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+        }
+        .agent-verify-result::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            transform: translateX(-120%);
+            animation: agentResultFlash 0.9s ease-out both;
+        }
+        @keyframes agentResultFlash {
+            0% { transform: translateX(-120%); }
+            100% { transform: translateX(120%); }
         }
         .agent-verify-result.success {
             display: block;
-            background: rgba(0, 200, 130, 0.13);
-            border: 1px solid rgba(0, 220, 160, 0.36);
-            color: #b8ffe6;
+            background: linear-gradient(135deg, rgba(0, 210, 150, 0.16), rgba(21, 76, 55, 0.26));
+            border: 1px solid rgba(54, 255, 178, 0.46);
+            color: #c5ffe9;
+            box-shadow: 0 0 24px rgba(54, 255, 178, 0.16);
+        }
+        .agent-verify-result.success::before {
+            content: '\f00c';
+            background: rgba(54, 255, 178, 0.16);
+            color: #62ffbd;
+            box-shadow: 0 0 18px rgba(54, 255, 178, 0.22);
+        }
+        .agent-verify-result.success::after {
+            background: linear-gradient(90deg, transparent, rgba(98, 255, 189, 0.26), transparent);
         }
         .agent-verify-result.error {
             display: block;
-            background: rgba(255, 80, 90, 0.13);
-            border: 1px solid rgba(255, 100, 120, 0.44);
-            color: #ffc5cd;
+            background: linear-gradient(135deg, rgba(255, 71, 87, 0.17), rgba(72, 20, 32, 0.32));
+            border: 1px solid rgba(255, 100, 120, 0.56);
+            color: #ffd0d7;
+            box-shadow: 0 0 24px rgba(255, 71, 87, 0.18);
+            animation: agentAlarmShake 0.34s ease-in-out 2;
+        }
+        .agent-verify-result.error::before {
+            content: '\f071';
+            background: rgba(255, 71, 87, 0.16);
+            color: #ff9cab;
+            box-shadow: 0 0 18px rgba(255, 71, 87, 0.22);
+        }
+        .agent-verify-result.error::after {
+            background: linear-gradient(90deg, transparent, rgba(255, 110, 130, 0.24), transparent);
+        }
+        @keyframes agentAlarmShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-4px); }
+            75% { transform: translateX(4px); }
         }
         .news-header {
             display: flex;
@@ -2504,6 +2802,28 @@
             .contact-popup img { width: 130px; height: 130px; }
             .modal-card { padding: 28px 24px; }
             .modal-card h3 { font-size: 1.8rem; }
+            .agent-modal-card {
+                max-width: min(520px, calc(100vw - 28px));
+                padding: 0;
+            }
+            .agent-modal-body {
+                padding: 22px;
+            }
+            .agent-modal-card .agent-modal-title h3 {
+                font-size: 1.24rem;
+            }
+            .agent-modal-card .agent-modal-title p {
+                font-size: 0.84rem;
+            }
+            .agent-modal-icon {
+                width: 58px;
+                height: 58px;
+                flex-basis: 58px;
+                border-radius: 16px;
+            }
+            .agent-verify-panel {
+                padding: 14px;
+            }
             .contact-item { padding: 12px 16px; }
             .contact-item i { font-size: 1.2rem; }
             .contact-item span { font-size: 0.95rem; }
@@ -2564,9 +2884,39 @@
                 min-width: 112px;
                 justify-content: center;
             }
+            .agent-verify-nav-btn {
+                min-width: 112px;
+                justify-content: center;
+            }
             .member-status-bar {
                 width: auto;
                 align-self: center;
+            }
+            .agent-modal-body {
+                padding: 18px;
+            }
+            .agent-modal-header {
+                gap: 12px;
+                margin-bottom: 16px;
+                padding-right: 30px;
+            }
+            .agent-modal-card .agent-modal-title h3 {
+                font-size: 1.12rem;
+            }
+            .agent-modal-card .agent-modal-title p {
+                font-size: 0.78rem;
+            }
+            .agent-modal-icon {
+                width: 50px;
+                height: 50px;
+                flex-basis: 50px;
+            }
+            .agent-verify-actions {
+                grid-template-columns: 1fr;
+            }
+            .agent-verify-input {
+                height: 48px;
+                font-size: 0.94rem;
             }
         }
 
@@ -4061,7 +4411,8 @@
                 max-height: min(320px, calc(100vh - 220px)) !important;
             }
             .publish-btn,
-            .vip-btn {
+            .vip-btn,
+            .agent-verify-nav-btn {
                 flex: 1 1 94px;
                 min-width: 0;
                 min-height: 34px;
@@ -4070,6 +4421,12 @@
                 border-radius: 8px;
                 font-size: 0.82rem;
                 white-space: nowrap;
+            }
+            .admin-nav-btn {
+                min-height: 34px;
+                padding: 0 10px;
+                border-radius: 8px;
+                font-size: 0.82rem;
             }
             .user-info {
                 flex: 1 1 148px;
@@ -4562,7 +4919,8 @@
                 justify-content: center;
             }
             .publish-btn,
-            .vip-btn {
+            .vip-btn,
+            .agent-verify-nav-btn {
                 flex: 1 1 0;
                 min-width: 0;
                 min-height: 38px;
@@ -4571,6 +4929,19 @@
                 border-radius: 8px;
                 font-size: 0.88rem;
                 white-space: nowrap;
+            }
+            .agent-verify-nav-btn span {
+                display: inline;
+            }
+            .admin-nav-btn {
+                width: 38px;
+                height: 38px;
+                min-height: 38px;
+                padding: 0;
+                border-radius: 8px;
+            }
+            .admin-nav-btn span {
+                display: none;
             }
             .user-info {
                 padding: 0;
@@ -4591,7 +4962,7 @@
                 display: none !important;
             }
             #adminLink {
-                display: none !important;
+                flex: 0 0 38px;
             }
             #notificationDropdown {
                 top: 68px !important;
@@ -4982,6 +5353,10 @@
                 <a href="#" id="vipUpgradeBtn" class="vip-btn" style="display: none;">
                     <i class="fas fa-crown"></i> 激活VIP
                 </a>
+                <button type="button" class="agent-verify-nav-btn" id="agentVerifyBtn" title="代理防伪">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <span>代理防伪</span>
+                </button>
                 <div class="notification-container" id="notificationContainer">
                     <div class="notification-icon" id="notificationIcon" style="position: relative; cursor: pointer;">
                         <i class="fa-solid fa-bell" style="font-size: 1.2rem; color: #c5dcff;"></i>
@@ -5005,9 +5380,10 @@
                     <span class="member-expire-text" id="memberExpireText"></span>
                 </div>
                 <span class="member-badge" id="memberBadge" style="display: none;"></span>
-                <div id="adminLink" style="display: none;">
-                    <a href="admin.html" class="back-link" style="background: rgba(255, 71, 87, 0.2); padding: 6px 16px; border-radius: 60px; border: 1px solid rgba(255, 71, 87, 0.5);">
+                <div id="adminLink" class="admin-link" style="display: none;">
+                    <a href="admin.html" class="admin-nav-btn" title="后台管理">
                         <i class="fas fa-shield-alt"></i>
+                        <span>后台</span>
                     </a>
                 </div>
             </div>
@@ -5189,13 +5565,6 @@
         <div class="contact-popup douyin-popup">
             <img src="uploads/douyin_qr.png" alt="抖音二维码">
             <p>扫码关注抖音(商务合作)</p>
-        </div>
-    </div>
-    <div class="contact-btn agent-verify-btn" id="agentVerifyBtn" title="代理商防伪">
-        <i class="fa-solid fa-shield-halved"></i>
-        <div class="contact-popup agent-verify-popup">
-            <p class="agent-verify-text">代理商防伪</p>
-            <p style="margin-top: 6px; color: #8fb0cb;">点击校验代理商微信号</p>
         </div>
     </div>
     <div class="contact-btn vip-toolbox-btn" id="vipToolboxBtn" title="VIP专属网创工具箱" style="display: none;">
@@ -5623,6 +5992,20 @@
             && (user.memberStatus === 'active' || user.memberStatus === 'permanent');
     }
 
+    function normalizeRole(role) {
+        return role === undefined || role === null || role === '' ? '0' : String(role);
+    }
+
+    function isAdminUser(user) {
+        return normalizeRole(user && user.role) === '1';
+    }
+
+    function updateAdminLinkVisibility(user) {
+        const adminLink = document.getElementById('adminLink');
+        if (!adminLink) return;
+        adminLink.style.display = isAdminUser(user) ? 'block' : 'none';
+    }
+
     function isLoggedToolboxUser(user) {
         const identity = user && (user.account || user.username || user.userName);
         return !!identity && identity !== '未登录' && identity !== '未登录用户';
@@ -5782,7 +6165,7 @@
                     currentUser = {
                         ...currentUser,
                         username: (userInfo.userName || userInfo.username) || currentUser.username,
-                        role: userInfo.role || currentUser.role,
+                        role: normalizeRole(userInfo.role || currentUser.role),
                         avatar: userInfo.avatar || currentUser.avatar,
                         account: userInfo.account || currentUser.account,
                         memberType: userInfo.memberType ?? currentUser.memberType,
@@ -5800,6 +6183,7 @@
                         // 确保关键字段不会被null或undefined覆盖
                         account: userInfo.account || existingInfo.account || currentUser.account,
                         username: (userInfo.userName || userInfo.username) || existingInfo.username || currentUser.username,
+                        role: normalizeRole(userInfo.role ?? existingInfo.role ?? currentUser.role),
                         memberType: userInfo.memberType ?? existingInfo.memberType ?? currentUser.memberType,
                         memberStatus: userInfo.memberStatus || existingInfo.memberStatus || currentUser.memberStatus,
                         memberExpireText: userInfo.memberExpireText || existingInfo.memberExpireText || currentUser.memberExpireText
@@ -5814,10 +6198,7 @@
                         document.getElementById('userAvatar').innerHTML = `<img src="${currentUser.avatar}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
                     }
                     updateMemberBadge(currentUser);
-
-                    if (currentUser.role === '1') {
-                        document.getElementById('adminLink').style.display = 'block';
-                    }
+                    updateAdminLinkVisibility(currentUser);
                 }
             } catch (error) {
                 // 网络错误或其他异常，不清除本地缓存，保留用户显示状态
@@ -5832,7 +6213,7 @@
             currentUser = { username: '未登录用户', role: '0' };
             document.getElementById('displayUsername').textContent = currentUser.username;
             document.getElementById('userAvatar').innerText = 'U';
-            document.getElementById('adminLink').style.display = 'none';
+            updateAdminLinkVisibility(currentUser);
             updateVipToolboxVisibility(null);
         }
 
@@ -5853,7 +6234,7 @@
                     currentUser = {
                         ...currentUser,
                         username: userInfo.username || userInfo.userName || userInfo.account || '用户',
-                        role: userInfo.role,
+                        role: normalizeRole(userInfo.role),
                         avatar: userInfo.avatar,
                         account: userInfo.account,
                         memberType: userInfo.memberType,
@@ -5934,11 +6315,7 @@
                 }
             }
             updateVipToolboxVisibility(currentUser);
-
-            // 检查是否为管理员
-            if (adminLink && currentUser.role === '1') {
-                adminLink.style.display = 'block';
-            }
+            updateAdminLinkVisibility(currentUser);
         }
 
         // 初始化用户会话
@@ -7219,7 +7596,7 @@
                 const userInfo = {
                     account: result.user.account,
                     username: displayName,
-                    role: result.user.role !== undefined && result.user.role !== null ? result.user.role : '0',
+                    role: normalizeRole(result.user.role),
                     avatar: result.user.avatar,
                     memberType: result.user.memberType,
                     memberStatus: result.user.memberStatus,
@@ -7237,7 +7614,7 @@
                     ...currentUser,
                     account: result.user.account,
                     username: displayName,
-                    role: result.user.role !== undefined && result.user.role !== null ? result.user.role : '0',
+                    role: normalizeRole(result.user.role),
                     avatar: result.user.avatar,
                     memberType: result.user.memberType,
                     memberStatus: result.user.memberStatus,
@@ -7251,6 +7628,7 @@
                     document.getElementById('userAvatar').innerText = displayName.charAt(0).toUpperCase();
                 }
                 updateMemberBadge(result.user);
+                updateAdminLinkVisibility(currentUser);
 
                 // 登录成功后立即更新VIP按钮状态
                 const vipBtn = document.getElementById('vipUpgradeBtn');
@@ -7436,7 +7814,7 @@
                     const userInfo = {
                         account: loginResult.user.account,
                         username: displayName,
-                        role: loginResult.user.role !== undefined && loginResult.user.role !== null ? loginResult.user.role : '0',
+                        role: normalizeRole(loginResult.user.role),
                         avatar: loginResult.user.avatar,
                         memberType: loginResult.user.memberType,
                         memberStatus: loginResult.user.memberStatus,
@@ -7453,7 +7831,7 @@
                         ...currentUser,
                         account: loginResult.user.account,
                         username: displayName,
-                        role: loginResult.user.role !== undefined && loginResult.user.role !== null ? loginResult.user.role : '0',
+                        role: normalizeRole(loginResult.user.role),
                         memberType: loginResult.user.memberType,
                         memberStatus: loginResult.user.memberStatus,
                         memberExpireText: loginResult.user.memberExpireText
@@ -7462,6 +7840,7 @@
                     document.getElementById('displayUsername').innerText = displayName;
                     document.getElementById('userAvatar').innerText = displayName.charAt(0).toUpperCase();
                     updateMemberBadge(loginResult.user);
+                    updateAdminLinkVisibility(currentUser);
 
                     // 注册成功后立即更新VIP按钮状态
                     const vipBtn = document.getElementById('vipUpgradeBtn');
@@ -8080,21 +8459,39 @@
 <!-- 代理商防伪弹窗 -->
 <div class="modal-overlay" id="agentVerifyModal">
     <div class="modal-card agent-modal-card">
-        <div class="agent-modal-header">
-            <div class="agent-modal-icon">
-                <i class="fa-solid fa-shield-halved"></i>
+        <button type="button" class="agent-modal-close" id="closeAgentVerifyModal" aria-label="关闭代理防伪弹窗">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+        <div class="agent-modal-body">
+            <div class="agent-modal-header">
+                <div class="agent-modal-icon">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+                <div class="agent-modal-title">
+                    <h3>代理身份防伪终端</h3>
+                    <p>输入代理微信号，连接官方授权库进行实时校验。</p>
+                </div>
             </div>
-            <div class="agent-modal-title">
-                <h3>代理商防伪系统</h3>
-                <p>请输入代理商微信号进行校验</p>
+            <div class="agent-verify-panel">
+                <div class="agent-input-shell">
+                    <i class="fa-brands fa-weixin"></i>
+                    <input type="text" id="agentWechatInput" class="agent-verify-input" placeholder="请输入代理微信号" autocomplete="off">
+                </div>
+                <div class="agent-verify-actions">
+                    <button type="button" class="agent-verify-cancel" id="cancelAgentVerifyModal">取消</button>
+                    <button type="button" class="agent-verify-submit" id="submitAgentVerifyBtn">
+                        <i class="fa-solid fa-fingerprint"></i> 立即校验
+                    </button>
+                </div>
+                <div class="agent-verify-loader" id="agentVerifyLoader">
+                    <div class="agent-loader-core">
+                        <i class="fa-solid fa-satellite-dish"></i>
+                        <span>正在接入官方授权数据库</span>
+                    </div>
+                </div>
+                <div class="agent-verify-result" id="agentVerifyResult"></div>
             </div>
         </div>
-        <input type="text" id="agentWechatInput" class="agent-verify-input" placeholder="请输入代理商微信号" autocomplete="off">
-        <div class="agent-verify-actions">
-            <button type="button" class="agent-verify-cancel" id="closeAgentVerifyModal">取消</button>
-            <button type="button" class="agent-verify-submit" id="submitAgentVerifyBtn">校验</button>
-        </div>
-        <div class="agent-verify-result" id="agentVerifyResult"></div>
     </div>
 </div>
 
@@ -9232,6 +9629,7 @@
         }
         .publish-btn,
         .vip-btn,
+        .agent-verify-nav-btn,
         .hero-action,
         .category-chip,
         .card-link {
@@ -9501,6 +9899,21 @@
             height: 36px;
             flex-basis: 36px;
         }
+        .agent-verify-nav-btn {
+            flex: 0 0 38px;
+            width: 38px;
+            height: 38px;
+            min-height: 38px;
+            padding: 0;
+        }
+        .agent-verify-nav-btn span,
+        .admin-nav-btn span {
+            display: none;
+        }
+        .admin-nav-btn {
+            width: 38px;
+            height: 38px;
+        }
         .contact-popup {
             bottom: 68px;
             width: min(238px, calc(100vw - 28px));
@@ -9559,8 +9972,10 @@
         const result = document.getElementById('agentVerifyResult');
         const submitBtn = document.getElementById('submitAgentVerifyBtn');
         const closeBtn = document.getElementById('closeAgentVerifyModal');
+        const cancelBtn = document.getElementById('cancelAgentVerifyModal');
+        const loader = document.getElementById('agentVerifyLoader');
 
-        if (!openBtn || !modal || !input || !result || !submitBtn || !closeBtn) {
+        if (!openBtn || !modal || !input || !result || !submitBtn || !closeBtn || !cancelBtn || !loader) {
             return;
         }
 
@@ -9572,6 +9987,7 @@
 
         function openModal() {
             setResult('');
+            loader.classList.remove('active');
             input.value = '';
             modal.classList.add('active');
             window.setTimeout(() => input.focus(), 0);
@@ -9584,13 +10000,14 @@
         async function submitVerification() {
             const wechatId = input.value.trim();
             if (!wechatId) {
-                setResult('请输入代理商微信号', 'error');
+                setResult('请输入代理微信号', 'error');
                 return;
             }
 
             submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 校验中...';
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 校验中';
             setResult('');
+            loader.classList.add('active');
 
             try {
                 const response = await fetch('/api/agent/wechat/verify', {
@@ -9603,9 +10020,9 @@
                 const data = await response.json();
 
                 if (data.success && data.verified) {
-                    setResult(data.message || '代理商认证成功，真实的', 'success');
+                    setResult('代理身份校验成功，可放心交易', 'success');
                 } else if (data.success) {
-                    setResult(data.message || '假的，请谨慎交易', 'error');
+                    setResult('代理身份校验失败，没有代理资格，请谨慎交易', 'error');
                 } else {
                     setResult(data.message || '校验失败，请稍后重试', 'error');
                 }
@@ -9613,8 +10030,9 @@
                 console.error('代理商校验失败:', error);
                 setResult('网络错误，请稍后重试', 'error');
             } finally {
+                loader.classList.remove('active');
                 submitBtn.disabled = false;
-                submitBtn.innerHTML = '校验';
+                submitBtn.innerHTML = '<i class="fa-solid fa-fingerprint"></i> 立即校验';
             }
         }
 
@@ -9623,6 +10041,7 @@
             openModal();
         });
         closeBtn.addEventListener('click', closeModal);
+        cancelBtn.addEventListener('click', closeModal);
         submitBtn.addEventListener('click', submitVerification);
         input.addEventListener('keydown', function(event) {
             if (event.key === 'Enter') {

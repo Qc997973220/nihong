@@ -52,7 +52,7 @@ public class AgentWechatController {
         boolean verified = agentWechatService.verify(input);
         result.put("success", true);
         result.put("verified", verified);
-        result.put("message", verified ? "代理商认证成功，真实的" : "假的，请谨慎交易");
+        result.put("message", verified ? "代理身份校验成功，可放心交易" : "代理身份校验失败，没有代理资格，请谨慎交易");
         return result;
     }
 
