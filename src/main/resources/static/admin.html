@@ -1037,6 +1037,34 @@
                     </div>
                 </div>
 
+                <div class="generate-form" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 18px;">
+                    <div class="form-row">
+                        <label>邀请人账号：</label>
+                        <input type="text" id="inviteDataAccountInput" placeholder="默认使用上方账号" style="width: 180px; padding: 8px 12px; border: 1px solid #3d5a80; border-radius: 4px; background: #1a1a2e; color: #e8e8e8;">
+                        <button class="btn btn-refresh" type="button" onclick="copyGrantAccountToInviteData()">
+                            <i class="fas fa-copy"></i> 使用授权账号
+                        </button>
+                    </div>
+                    <div class="form-row">
+                        <label>永久VIP：</label>
+                        <input type="number" id="invitePermanentCount" min="0" max="200" value="8">
+                        <label>年费VIP：</label>
+                        <input type="number" id="inviteYearlyCount" min="0" max="200" value="3">
+                        <label>未开通VIP：</label>
+                        <input type="number" id="inviteRegularCount" min="0" max="200" value="9">
+                    </div>
+                    <div class="form-row">
+                        <label>永久奖励N币：</label>
+                        <input type="number" id="invitePermanentReward" min="0" max="10000" value="100">
+                        <label>年费奖励N币：</label>
+                        <input type="number" id="inviteYearlyReward" min="0" max="10000" value="69">
+                        <button class="btn btn-confirm" id="createInviteDataBtn">
+                            <i class="fas fa-user-plus"></i> 生成邀请数据
+                        </button>
+                    </div>
+                    <div id="inviteDataResultArea"></div>
+                </div>
+
                 <div id="memberListArea">
                     <div class="cardkey-empty">
                         <i class="fas fa-user-shield" style="font-size: 2rem; margin-bottom: 12px;"></i>
@@ -1495,6 +1523,7 @@
                 if (e.key === 'Enter') searchAdminUsers();
             });
             document.getElementById('grantMemberBtn').addEventListener('click', grantMemberPermission);
+            document.getElementById('createInviteDataBtn').addEventListener('click', createInviteData);
             document.getElementById('refreshWithdrawalBtn').addEventListener('click', () => loadAdminWithdrawals(1));
             document.getElementById('withdrawStatusFilter').addEventListener('change', () => loadAdminWithdrawals(1));
             document.getElementById('refreshAgentBtn').addEventListener('click', () => loadAgentList());
@@ -1616,9 +1645,15 @@
 
         function fillGrantForm(account, memberType) {
             document.getElementById('grantAccountInput').value = account || '';
+            document.getElementById('inviteDataAccountInput').value = account || '';
             document.getElementById('grantMemberType').value = String(
                 [0, 3, 4, 5].includes(Number(memberType)) ? Number(memberType) : 3
             );
+        }
+
+        function copyGrantAccountToInviteData() {
+            document.getElementById('inviteDataAccountInput').value =
+                document.getElementById('grantAccountInput').value.trim();
         }
 
         function searchAdminUsers() {
@@ -1700,6 +1735,95 @@
                 console.error('权限更新失败:', error);
                 showToast('网络错误', true);
             });
+        }
+
+        function readNonNegativeInt(id, fallback = 0) {
+            const value = Number(document.getElementById(id).value);
+            if (!Number.isFinite(value) || value < 0) return fallback;
+            return Math.floor(value);
+        }
+
+        function createInviteData() {
+            const account = (
+                document.getElementById('inviteDataAccountInput').value.trim()
+                || document.getElementById('grantAccountInput').value.trim()
+            );
+            if (!account) {
+                showToast('请输入邀请人账号', true);
+                return;
+            }
+
+            const payload = {
+                account,
+                permanentCount: readNonNegativeInt('invitePermanentCount'),
+                yearlyCount: readNonNegativeInt('inviteYearlyCount'),
+                regularCount: readNonNegativeInt('inviteRegularCount'),
+                permanentRewardAmount: readNonNegativeInt('invitePermanentReward', 100),
+                yearlyRewardAmount: readNonNegativeInt('inviteYearlyReward', 69)
+            };
+
+            const totalCount = payload.permanentCount + payload.yearlyCount + payload.regularCount;
+            if (totalCount <= 0) {
+                showToast('至少生成1个邀请用户', true);
+                return;
+            }
+            if (!confirm(`确认给账号 ${account} 生成 ${totalCount} 个邀请用户，并增加 ${payload.permanentCount * payload.permanentRewardAmount + payload.yearlyCount * payload.yearlyRewardAmount} N币奖励吗？`)) {
+                return;
+            }
+
+            const btn = document.getElementById('createInviteDataBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 生成中...';
+
+            fetch('/api/admin/users/invite-data', {
+                method: 'POST',
+                headers: authHeaders({ 'Content-Type': 'application/json' }),
+                body: JSON.stringify(payload)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast(data.message || '邀请数据已生成');
+                    renderInviteDataResult(data);
+                    searchAdminUsers();
+                } else {
+                    showToast(data.message || '邀请数据生成失败', true);
+                }
+            })
+            .catch(error => {
+                console.error('邀请数据生成失败:', error);
+                showToast('网络错误', true);
+            })
+            .finally(() => {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-user-plus"></i> 生成邀请数据';
+            });
+        }
+
+        function renderInviteDataResult(data) {
+            const resultArea = document.getElementById('inviteDataResultArea');
+            const users = Array.isArray(data.generatedUsers) ? data.generatedUsers : [];
+            const preview = users.slice(0, 12).map(user => {
+                const reward = Number(user.rewardAmount || 0);
+                return `
+                    <div class="cardkey-card">
+                        <div class="cardkey-key" style="font-size: 0.95rem;">${escapeHtml(user.userName || user.account || '--')}</div>
+                        <div class="cardkey-meta">
+                            <span>${escapeHtml(user.account || '--')}</span>
+                            <span>${escapeHtml(user.memberTypeName || '普通用户')}</span>
+                            <span>${reward > 0 ? '+' + reward + ' N币' : '未奖励'}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            resultArea.innerHTML = `
+                <div class="cardkey-empty" style="text-align: left; padding: 16px;">
+                    <p>已给 ${escapeHtml(data.inviterAccount || '')} 生成 ${Number(data.createdCount || 0)} 个邀请用户，新增奖励 ${Number(data.addedRewardTotal || 0)} N币，当前余额 ${Number(data.nCoinBalance || 0)} N币。</p>
+                    ${users.length > 0 ? `<div class="cardkey-list" style="margin-top: 12px;">${preview}</div>` : ''}
+                    ${users.length > 12 ? `<p style="margin-top: 10px; color: #90b0d1;">仅展示前12条，完整数据已写入数据库。</p>` : ''}
+                </div>
+            `;
         }
 
         function loadResourceList(page = 1) {

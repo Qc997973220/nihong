@@ -16,12 +16,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,6 +32,11 @@ public class WalletService {
 
     private static final BigDecimal N_COIN_TO_CNY = new BigDecimal("0.9");
     private static final int MIN_WITHDRAW_NCOIN = 100;
+    private static final int MAX_ADMIN_INVITE_DATA_COUNT = 200;
+    private static final String RANDOM_ACCOUNT_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
+    private static final String RANDOM_INVITE_CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    private static final String RANDOM_USER_NAME_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    private static final SecureRandom RANDOM = new SecureRandom();
 
     @Autowired
     private UsersDao usersDao;
@@ -174,6 +182,109 @@ public class WalletService {
         result.put("pendingCount", withdrawalRequestDao.countByStatus(WithdrawalRequest.STATUS_PENDING));
         result.put("paidCount", withdrawalRequestDao.countByStatus(WithdrawalRequest.STATUS_PAID));
         result.put("rejectedCount", withdrawalRequestDao.countByStatus(WithdrawalRequest.STATUS_REJECTED));
+        return result;
+    }
+
+    @Transactional
+    public Map<String, Object> createAdminInviteData(String inviterAccount,
+                                                     int permanentCount,
+                                                     int yearlyCount,
+                                                     int regularCount,
+                                                     int permanentRewardAmount,
+                                                     int yearlyRewardAmount) {
+        Map<String, Object> result = new LinkedHashMap<>();
+        String normalizedAccount = inviterAccount == null ? "" : inviterAccount.trim();
+        if (normalizedAccount.isEmpty()) {
+            result.put("success", false);
+            result.put("message", "邀请人账号不能为空");
+            return result;
+        }
+
+        Users inviter = usersDao.findByAccount(normalizedAccount);
+        if (inviter == null) {
+            result.put("success", false);
+            result.put("message", "邀请人账号不存在");
+            return result;
+        }
+
+        if (permanentCount < 0 || yearlyCount < 0 || regularCount < 0) {
+            result.put("success", false);
+            result.put("message", "生成数量不能为负数");
+            return result;
+        }
+        if (permanentRewardAmount < 0 || yearlyRewardAmount < 0) {
+            result.put("success", false);
+            result.put("message", "奖励金额不能为负数");
+            return result;
+        }
+        if (permanentCount > 0 && permanentRewardAmount <= 0) {
+            result.put("success", false);
+            result.put("message", "永久VIP奖励金额必须大于0");
+            return result;
+        }
+        if (yearlyCount > 0 && yearlyRewardAmount <= 0) {
+            result.put("success", false);
+            result.put("message", "年费VIP奖励金额必须大于0");
+            return result;
+        }
+
+        int totalCount = permanentCount + yearlyCount + regularCount;
+        if (totalCount <= 0) {
+            result.put("success", false);
+            result.put("message", "至少需要生成1个邀请用户");
+            return result;
+        }
+        if (totalCount > MAX_ADMIN_INVITE_DATA_COUNT) {
+            result.put("success", false);
+            result.put("message", "单次最多生成" + MAX_ADMIN_INVITE_DATA_COUNT + "个邀请用户");
+            return result;
+        }
+
+        List<AdminInviteSpec> specs = new ArrayList<>();
+        for (int i = 0; i < permanentCount; i++) {
+            specs.add(new AdminInviteSpec(CardKey.TYPE_PERMANENT, "permanent", permanentRewardAmount));
+        }
+        for (int i = 0; i < yearlyCount; i++) {
+            specs.add(new AdminInviteSpec(CardKey.TYPE_YEARLY, "active", yearlyRewardAmount));
+        }
+        for (int i = 0; i < regularCount; i++) {
+            specs.add(new AdminInviteSpec(0, "none", 0));
+        }
+        Collections.shuffle(specs, RANDOM);
+
+        List<Map<String, Object>> generatedUsers = new ArrayList<>();
+        int rewardTotal = 0;
+
+        for (int i = 0; i < specs.size(); i++) {
+            AdminInviteSpec spec = specs.get(i);
+            LocalDateTime registeredAt = buildSyntheticRegisteredAt(i, specs.size());
+            Users invitee = createSyntheticInvitee(inviter, spec.memberType, spec.memberStatus, registeredAt);
+            if (spec.memberType == CardKey.TYPE_YEARLY) {
+                invitee.setMemberExpiredAt(registeredAt.plusDays(360));
+            }
+            usersDao.save(invitee);
+            if (spec.rewardAmount > 0) {
+                saveSyntheticReward(inviter, invitee, spec.memberType, spec.rewardAmount, spec.memberStatus, registeredAt);
+                rewardTotal += spec.rewardAmount;
+            }
+            generatedUsers.add(buildGeneratedInviteDataItem(invitee, spec.rewardAmount));
+        }
+
+        inviter.setNCoinBalance(getAvailableNCoin(inviter) + rewardTotal);
+        inviter.setOperatingTime(LocalDateTime.now());
+        usersDao.save(inviter);
+
+        result.put("success", true);
+        result.put("message", "邀请数据已生成");
+        result.put("inviterAccount", inviter.getAccount());
+        result.put("createdCount", totalCount);
+        result.put("permanentCount", permanentCount);
+        result.put("yearlyCount", yearlyCount);
+        result.put("regularCount", regularCount);
+        result.put("addedRewardTotal", rewardTotal);
+        result.put("nCoinBalance", getAvailableNCoin(inviter));
+        result.put("generatedUsers", generatedUsers);
+        result.put("wallet", buildWalletSummary(inviter));
         return result;
     }
 
@@ -377,6 +488,108 @@ public class WalletService {
             result.add(buildWithdrawalItem(request));
         }
         return result;
+    }
+
+    private Users createSyntheticInvitee(Users inviter, Integer memberType, String memberStatus, LocalDateTime registeredAt) {
+        Users invitee = new Users();
+        invitee.setId(UUID.randomUUID().toString());
+        invitee.setAccount(generateUniqueAccount());
+        invitee.setUserName(generateUniqueDisplayUserName());
+        invitee.setPassword(generateRandomString(RANDOM_ACCOUNT_CHARS, 12));
+        invitee.setRole("0");
+        invitee.setInviteCode(generateUniqueInviteCode());
+        invitee.setInvitedBy(inviter.getAccount());
+        invitee.setMemberType(memberType);
+        invitee.setMemberStatus(memberStatus);
+        invitee.setMemberExpiredAt(null);
+        invitee.setNCoinBalance(0);
+        invitee.setNCoinFrozen(0);
+        invitee.setCreateTime(registeredAt);
+        invitee.setRegisteredDate(registeredAt);
+        invitee.setOperatingTime(registeredAt);
+        return invitee;
+    }
+
+    private void saveSyntheticReward(Users inviter,
+                                     Users invitee,
+                                     Integer memberType,
+                                     Integer rewardAmount,
+                                     String memberStatus,
+                                     LocalDateTime rewardedAt) {
+        InviteRewardRecord record = new InviteRewardRecord();
+        record.setInviterAccount(inviter.getAccount());
+        record.setInviteeAccount(invitee.getAccount());
+        record.setMemberType(memberType);
+        record.setRewardAmount(rewardAmount);
+        record.setMemberStatus(memberStatus);
+        record.setRewardedAt(rewardedAt);
+        inviteRewardRecordDao.save(record);
+    }
+
+    private Map<String, Object> buildGeneratedInviteDataItem(Users invitee, int rewardAmount) {
+        Map<String, Object> item = new LinkedHashMap<>();
+        item.put("account", invitee.getAccount());
+        item.put("userName", invitee.getUserName());
+        item.put("memberType", normalizeMemberType(invitee.getMemberType()));
+        item.put("memberTypeName", getMemberTypeName(invitee.getMemberType()));
+        item.put("memberStatus", invitee.getMemberStatus());
+        item.put("registeredDate", invitee.getRegisteredDate());
+        item.put("rewardAmount", rewardAmount);
+        return item;
+    }
+
+    private LocalDateTime buildSyntheticRegisteredAt(int sequence, int totalCount) {
+        int daysBack = Math.max(1, totalCount - sequence);
+        return LocalDateTime.now()
+                .minusDays(daysBack)
+                .withHour(8 + RANDOM.nextInt(15))
+                .withMinute(RANDOM.nextInt(60))
+                .withSecond(RANDOM.nextInt(60))
+                .withNano(0);
+    }
+
+    private String generateUniqueAccount() {
+        String account = generateRandomString(RANDOM_ACCOUNT_CHARS, 9);
+        while (usersDao.existsByAccount(account)) {
+            account = generateRandomString(RANDOM_ACCOUNT_CHARS, 9);
+        }
+        return account;
+    }
+
+    private String generateUniqueDisplayUserName() {
+        String userName = "用户_" + generateRandomString(RANDOM_USER_NAME_CHARS, 6);
+        while (usersDao.existsByUserName(userName)) {
+            userName = "用户_" + generateRandomString(RANDOM_USER_NAME_CHARS, 6);
+        }
+        return userName;
+    }
+
+    private String generateUniqueInviteCode() {
+        String inviteCode = generateRandomString(RANDOM_INVITE_CODE_CHARS, 8);
+        while (usersDao.existsByInviteCode(inviteCode)) {
+            inviteCode = generateRandomString(RANDOM_INVITE_CODE_CHARS, 8);
+        }
+        return inviteCode;
+    }
+
+    private String generateRandomString(String chars, int length) {
+        StringBuilder value = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            value.append(chars.charAt(RANDOM.nextInt(chars.length())));
+        }
+        return value.toString();
+    }
+
+    private static class AdminInviteSpec {
+        private final Integer memberType;
+        private final String memberStatus;
+        private final int rewardAmount;
+
+        private AdminInviteSpec(Integer memberType, String memberStatus, int rewardAmount) {
+            this.memberType = memberType;
+            this.memberStatus = memberStatus;
+            this.rewardAmount = rewardAmount;
+        }
     }
 
     private Map<String, Object> buildInviteeItem(Users invitee, String inviterAccount) {

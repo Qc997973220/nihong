@@ -99,6 +99,44 @@ public class AdminUserController {
         return result;
     }
 
+    @PostMapping("/invite-data")
+    public Map<String, Object> createInviteData(
+            @RequestHeader(value = "Authorization", required = false) String token,
+            @RequestBody Map<String, Object> request) {
+        Map<String, Object> result = new HashMap<>();
+        if (!requireAdmin(token, result)) {
+            return result;
+        }
+
+        String account = request != null && request.get("account") != null
+                ? request.get("account").toString().trim()
+                : "";
+        int permanentCount = parseInt(request != null ? request.get("permanentCount") : null, 0);
+        int yearlyCount = parseInt(request != null ? request.get("yearlyCount") : null, 0);
+        int regularCount = parseInt(request != null ? request.get("regularCount") : null, 0);
+        int permanentRewardAmount = parseInt(request != null ? request.get("permanentRewardAmount") : null, 100);
+        int yearlyRewardAmount = parseInt(request != null ? request.get("yearlyRewardAmount") : null, 69);
+
+        return walletService.createAdminInviteData(
+                account,
+                permanentCount,
+                yearlyCount,
+                regularCount,
+                permanentRewardAmount,
+                yearlyRewardAmount);
+    }
+
+    private int parseInt(Object value, int defaultValue) {
+        if (value == null) {
+            return defaultValue;
+        }
+        try {
+            return Integer.parseInt(value.toString());
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
+    }
+
     private boolean requireAdmin(String token, Map<String, Object> result) {
         Users admin = authService.getAdminUser(token);
         if (admin == null) {
