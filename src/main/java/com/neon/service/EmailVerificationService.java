@@ -12,7 +12,11 @@ import jakarta.mail.internet.MimeMessage;
 import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
@@ -21,9 +25,12 @@ public class EmailVerificationService {
     private static final int CODE_TTL_MINUTES = 5;
     private static final int RESEND_INTERVAL_SECONDS = 60;
     private static final int MAX_VERIFY_ATTEMPTS = 5;
+    private static final int RESET_TOKEN_TTL_MINUTES = 10;
 
     private final SecureRandom secureRandom = new SecureRandom();
     private final Map<String, VerificationCodeRecord> codeStore = new ConcurrentHashMap<>();
+    private final Map<String, LocalDateTime> sendCooldownStore = new ConcurrentHashMap<>();
+    private final Map<String, PasswordResetTokenRecord> passwordResetTokenStore = new ConcurrentHashMap<>();
 
     @Autowired
     private JavaMailSender mailSender;
@@ -38,11 +45,17 @@ public class EmailVerificationService {
     private String logoUrl;
 
     public SendCodeResult sendBindEmailCode(String account, String email) {
+        String normalizedAccount = normalizeKeyPart(account);
+        String normalizedEmail = normalizeEmail(email);
         return sendCode(
-                "bind:" + normalizeKeyPart(account),
-                email,
+                "bind:" + normalizedAccount,
+                normalizedEmail,
                 "绑定邮箱验证码",
-                "您正在绑定账号邮箱，本次验证码用于确认邮箱归属。"
+                "您正在绑定账号邮箱，本次验证码用于确认邮箱归属。",
+                new String[]{
+                        "cooldown:bind:account:" + normalizedAccount,
+                        "cooldown:bind:email:" + normalizedEmail
+                }
         );
     }
 
@@ -51,11 +64,15 @@ public class EmailVerificationService {
     }
 
     public SendCodeResult sendPasswordResetCode(String email) {
+        String normalizedEmail = normalizeEmail(email);
         return sendCode(
                 "password-reset",
-                email,
+                normalizedEmail,
                 "重置密码验证码",
-                "您正在重置账号密码，本次验证码用于确认邮箱归属。"
+                "您正在重置账号密码，本次验证码用于确认邮箱归属。",
+                new String[]{
+                        "cooldown:password-reset:email:" + normalizedEmail
+                }
         );
     }
 
@@ -63,16 +80,54 @@ public class EmailVerificationService {
         return verifyCode("password-reset", email, code);
     }
 
-    private SendCodeResult sendCode(String purpose, String email, String subject, String description) {
+    public PasswordResetVerifyResult verifyPasswordResetCodeAndCreateToken(String email, String code) {
+        if (!verifyCode("password-reset", email, code)) {
+            return PasswordResetVerifyResult.fail("验证码错误或已过期，请重新获取");
+        }
+
+        String token = UUID.randomUUID().toString();
+        passwordResetTokenStore.put(
+                token,
+                new PasswordResetTokenRecord(normalizeEmail(email), LocalDateTime.now().plusMinutes(RESET_TOKEN_TTL_MINUTES))
+        );
+        return PasswordResetVerifyResult.success(token, RESET_TOKEN_TTL_MINUTES * 60);
+    }
+
+    public boolean consumePasswordResetToken(String email, String token) {
+        cleanupExpiredResetTokens();
+        if (!StringUtils.hasText(token)) {
+            return false;
+        }
+
+        PasswordResetTokenRecord record = passwordResetTokenStore.remove(token.trim());
+        if (record == null || record.getExpiredAt().isBefore(LocalDateTime.now())) {
+            return false;
+        }
+        return record.getEmail().equals(normalizeEmail(email));
+    }
+
+    private SendCodeResult sendCode(String purpose, String email, String subject, String description, String[] extraCooldownKeys) {
         cleanupExpiredCodes();
+        cleanupExpiredCooldowns();
+        cleanupExpiredResetTokens();
 
         String normalizedEmail = normalizeEmail(email);
         String key = buildKey(purpose, normalizedEmail);
         LocalDateTime now = LocalDateTime.now();
-        VerificationCodeRecord existing = codeStore.get(key);
-        if (existing != null && existing.getLastSentAt().plusSeconds(RESEND_INTERVAL_SECONDS).isAfter(now)) {
-            long waitSeconds = Duration.between(now, existing.getLastSentAt().plusSeconds(RESEND_INTERVAL_SECONDS)).getSeconds();
-            return SendCodeResult.fail("验证码发送过于频繁，请 " + Math.max(1, waitSeconds) + " 秒后再试");
+
+        Set<String> cooldownKeys = new LinkedHashSet<>();
+        cooldownKeys.add(key);
+        if (extraCooldownKeys != null) {
+            cooldownKeys.addAll(Arrays.asList(extraCooldownKeys));
+        }
+
+        for (String cooldownKey : cooldownKeys) {
+            LocalDateTime lastSentAt = sendCooldownStore.get(cooldownKey);
+            if (lastSentAt != null && lastSentAt.plusSeconds(RESEND_INTERVAL_SECONDS).isAfter(now)) {
+                long waitSeconds = Duration.between(now, lastSentAt.plusSeconds(RESEND_INTERVAL_SECONDS)).getSeconds();
+                long retryAfterSeconds = Math.max(1, waitSeconds);
+                return SendCodeResult.fail("验证码发送过于频繁，请 " + retryAfterSeconds + " 秒后再试", retryAfterSeconds);
+            }
         }
 
         String code = String.format("%06d", secureRandom.nextInt(1_000_000));
@@ -87,6 +142,9 @@ public class EmailVerificationService {
         }
 
         codeStore.put(key, new VerificationCodeRecord(code, now.plusMinutes(CODE_TTL_MINUTES), now));
+        for (String cooldownKey : cooldownKeys) {
+            sendCooldownStore.put(cooldownKey, now);
+        }
         return SendCodeResult.success("验证码已发送，请在5分钟内完成验证");
     }
 
@@ -191,6 +249,17 @@ public class EmailVerificationService {
         codeStore.entrySet().removeIf(entry -> entry.getValue().getExpiredAt().isBefore(now));
     }
 
+    private void cleanupExpiredCooldowns() {
+        LocalDateTime now = LocalDateTime.now();
+        sendCooldownStore.entrySet().removeIf(entry ->
+                entry.getValue().plusSeconds(RESEND_INTERVAL_SECONDS).isBefore(now));
+    }
+
+    private void cleanupExpiredResetTokens() {
+        LocalDateTime now = LocalDateTime.now();
+        passwordResetTokenStore.entrySet().removeIf(entry -> entry.getValue().getExpiredAt().isBefore(now));
+    }
+
     private String buildKey(String purpose, String email) {
         return purpose + ":" + normalizeEmail(email);
     }
@@ -233,21 +302,45 @@ public class EmailVerificationService {
         }
     }
 
+    private static class PasswordResetTokenRecord {
+        private final String email;
+        private final LocalDateTime expiredAt;
+
+        private PasswordResetTokenRecord(String email, LocalDateTime expiredAt) {
+            this.email = email;
+            this.expiredAt = expiredAt;
+        }
+
+        private String getEmail() {
+            return email;
+        }
+
+        private LocalDateTime getExpiredAt() {
+            return expiredAt;
+        }
+    }
+
     public static class SendCodeResult {
         private final boolean success;
         private final String message;
+        private final long retryAfterSeconds;
 
-        private SendCodeResult(boolean success, String message) {
+        private SendCodeResult(boolean success, String message, long retryAfterSeconds) {
             this.success = success;
             this.message = message;
+            this.retryAfterSeconds = retryAfterSeconds;
         }
 
         private static SendCodeResult success(String message) {
-            return new SendCodeResult(true, message);
+            return new SendCodeResult(true, message, 0);
         }
 
         private static SendCodeResult fail(String message) {
-            return new SendCodeResult(false, message);
+            return fail(message, 0);
+        }
+
+        private static SendCodeResult fail(String message, long retryAfterSeconds) {
+            return new SendCodeResult(false, message, retryAfterSeconds);
         }
 
         public boolean isSuccess() {
@@ -256,6 +349,48 @@ public class EmailVerificationService {
 
         public String getMessage() {
             return message;
+        }
+
+        public long getRetryAfterSeconds() {
+            return retryAfterSeconds;
+        }
+    }
+
+    public static class PasswordResetVerifyResult {
+        private final boolean success;
+        private final String message;
+        private final String resetToken;
+        private final long expiresInSeconds;
+
+        private PasswordResetVerifyResult(boolean success, String message, String resetToken, long expiresInSeconds) {
+            this.success = success;
+            this.message = message;
+            this.resetToken = resetToken;
+            this.expiresInSeconds = expiresInSeconds;
+        }
+
+        private static PasswordResetVerifyResult success(String resetToken, long expiresInSeconds) {
+            return new PasswordResetVerifyResult(true, "验证码验证成功，请设置新密码", resetToken, expiresInSeconds);
+        }
+
+        private static PasswordResetVerifyResult fail(String message) {
+            return new PasswordResetVerifyResult(false, message, null, 0);
+        }
+
+        public boolean isSuccess() {
+            return success;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+
+        public String getResetToken() {
+            return resetToken;
+        }
+
+        public long getExpiresInSeconds() {
+            return expiresInSeconds;
         }
     }
 }

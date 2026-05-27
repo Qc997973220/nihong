@@ -269,6 +269,7 @@ public class LoginController {
                 emailVerificationService.sendBindEmailCode(user.getAccount(), normalizedEmail);
         result.put("status", sendResult.isSuccess() ? 1 : 0);
         result.put("message", sendResult.getMessage());
+        result.put("retryAfterSeconds", sendResult.getRetryAfterSeconds());
         return result;
     }
 
@@ -438,14 +439,15 @@ public class LoginController {
                 emailVerificationService.sendPasswordResetCode(normalizedEmail);
         result.put("status", sendResult.isSuccess() ? 1 : 0);
         result.put("message", sendResult.getMessage());
+        result.put("retryAfterSeconds", sendResult.getRetryAfterSeconds());
         return result;
     }
 
-    @PostMapping("/recover/resetPassword")
+    @PostMapping("/recover/verifyCode")
     @ResponseBody
-    public Map<String, Object> resetPasswordByEmailCode(@RequestParam String email,
-                                                        @RequestParam String code,
-                                                        @RequestParam String newPassword) {
+    public Map<String, Object> verifyRecoverCode(@RequestParam String email,
+                                                 @RequestParam String code,
+                                                 @RequestParam(required = false) String account) {
         Map<String, Object> result = new HashMap<>();
         String normalizedEmail = normalizeEmail(email);
         if (!isValidEmail(normalizedEmail)) {
@@ -456,6 +458,42 @@ public class LoginController {
         if (!isValidCode(code)) {
             result.put("status", 0);
             result.put("message", "请输入6位数字验证码");
+            return result;
+        }
+
+        Users user = usersDao.findByEmailIgnoreCase(normalizedEmail);
+        if (user == null) {
+            result.put("status", 0);
+            result.put("message", "该邮箱未绑定账号");
+            return result;
+        }
+        if (account != null && !account.trim().isEmpty() && !account.trim().equalsIgnoreCase(user.getAccount())) {
+            result.put("status", 0);
+            result.put("message", "账号与绑定邮箱不匹配");
+            return result;
+        }
+
+        EmailVerificationService.PasswordResetVerifyResult verifyResult =
+                emailVerificationService.verifyPasswordResetCodeAndCreateToken(normalizedEmail, code);
+        result.put("status", verifyResult.isSuccess() ? 1 : 0);
+        result.put("message", verifyResult.getMessage());
+        if (verifyResult.isSuccess()) {
+            result.put("resetToken", verifyResult.getResetToken());
+            result.put("expiresInSeconds", verifyResult.getExpiresInSeconds());
+        }
+        return result;
+    }
+
+    @PostMapping("/recover/resetPassword")
+    @ResponseBody
+    public Map<String, Object> resetPasswordByEmailCode(@RequestParam String email,
+                                                        @RequestParam(required = false) String resetToken,
+                                                        @RequestParam String newPassword) {
+        Map<String, Object> result = new HashMap<>();
+        String normalizedEmail = normalizeEmail(email);
+        if (!isValidEmail(normalizedEmail)) {
+            result.put("status", 0);
+            result.put("message", "请输入有效的邮箱地址");
             return result;
         }
         if (newPassword == null || !newPassword.matches("^[A-Za-z0-9]{6,16}$")) {
@@ -470,14 +508,14 @@ public class LoginController {
             result.put("message", "该邮箱未绑定账号");
             return result;
         }
-        if (!emailVerificationService.verifyPasswordResetCode(normalizedEmail, code)) {
-            result.put("status", 0);
-            result.put("message", "验证码错误或已过期，请重新获取");
-            return result;
-        }
         if (newPassword.equals(user.getPassword())) {
             result.put("status", 0);
             result.put("message", "新密码不能和原密码相同");
+            return result;
+        }
+        if (!emailVerificationService.consumePasswordResetToken(normalizedEmail, resetToken)) {
+            result.put("status", 0);
+            result.put("message", "重置凭证无效或已过期，请重新验证邮箱验证码");
             return result;
         }
 

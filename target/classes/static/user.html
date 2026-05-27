@@ -2866,7 +2866,7 @@
     }
 
     function startBindEmailCodeCooldown(seconds) {
-        let remaining = seconds;
+        let remaining = Math.max(1, Number(seconds) || 60);
         sendEmailCodeBtn.disabled = true;
         sendEmailCodeBtn.innerText = `${remaining}秒后重发`;
         bindEmailCodeTimer = setInterval(() => {
@@ -2913,16 +2913,21 @@
                 success = true;
                 bindEmailCodeEmail = email.toLowerCase();
                 setEditMessage('success', result.message || '验证码已发送，请查收邮箱');
-                startBindEmailCodeCooldown(60);
+                startBindEmailCodeCooldown(result.retryAfterSeconds || 60);
             } else {
                 setEditMessage('error', result.message || '验证码发送失败');
+                if (Number(result.retryAfterSeconds) > 0) {
+                    startBindEmailCodeCooldown(result.retryAfterSeconds);
+                }
             }
         } catch (error) {
             setEditMessage('error', '网络错误，请稍后重试');
         } finally {
             if (!success) {
-                sendEmailCodeBtn.disabled = false;
-                sendEmailCodeBtn.innerText = '发送验证码';
+                if (!bindEmailCodeTimer) {
+                    sendEmailCodeBtn.disabled = false;
+                    sendEmailCodeBtn.innerText = '发送验证码';
+                }
             }
         }
     });

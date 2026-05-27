@@ -521,6 +521,21 @@
             border-color: #5ba5ff;
             box-shadow: 0 0 10px rgba(91, 165, 255, 0.3);
         }
+        .form-row select,
+        .form-row textarea {
+            padding: 8px 12px;
+            background: rgba(10, 18, 32, 0.8);
+            border: 1px solid rgba(90, 160, 255, 0.4);
+            border-radius: 8px;
+            color: #ffffff;
+            font-size: 1rem;
+        }
+        .form-row select:focus,
+        .form-row textarea:focus {
+            outline: none;
+            border-color: #5ba5ff;
+            box-shadow: 0 0 10px rgba(91, 165, 255, 0.3);
+        }
         .btn-confirm {
             background: linear-gradient(105deg, #1a8a4a, #25b85a);
             color: white;
@@ -1282,6 +1297,42 @@
                 </form>
             </div>
         </div>
+
+        <div id="adminCommentModal" class="modal" style="display: none;">
+            <div class="modal-content" style="max-width: 620px;">
+                <div class="modal-header">
+                    <h3><i class="fas fa-comments"></i> 添加资源评论</h3>
+                    <span class="modal-close" onclick="closeAdminCommentModal()">&times;</span>
+                </div>
+                <form id="adminCommentForm">
+                    <input type="hidden" id="commentResourceId">
+                    <div class="form-row">
+                        <label>资源：</label>
+                        <select id="commentResourceSelect" style="flex: 1;"></select>
+                    </div>
+                    <div class="form-row">
+                        <label>用户昵称：</label>
+                        <input type="text" id="commentAuthor" maxlength="30" style="flex: 1;" placeholder="请输入显示昵称" required>
+                    </div>
+                    <div class="form-row">
+                        <label>评论时间：</label>
+                        <input type="datetime-local" id="commentCreatedAt" style="flex: 1;" required>
+                    </div>
+                    <div class="form-row" style="flex-direction: column; align-items: stretch;">
+                        <label>评论内容：</label>
+                        <textarea id="commentContent" rows="5" maxlength="1000" style="width: 100%; resize: vertical;" placeholder="请输入评论内容" required></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-confirm" id="saveAdminCommentBtn" onclick="saveAdminComment()">
+                            <i class="fas fa-check"></i> 保存评论
+                        </button>
+                        <button type="button" class="btn btn-cancel" onclick="closeAdminCommentModal()">
+                            <i class="fas fa-times"></i> 取消
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 
     <div class="toast" id="toast"></div>
@@ -1303,6 +1354,8 @@
             }
             return headers;
         }
+
+        let currentAdminResourceOptions = [];
 
         function showToast(message, isError = false) {
             const toast = document.getElementById('toast');
@@ -1533,6 +1586,9 @@
             });
             document.getElementById('agentWechatInputAdmin').addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') saveAgentWechat();
+            });
+            document.getElementById('commentResourceSelect').addEventListener('change', (e) => {
+                document.getElementById('commentResourceId').value = e.target.value;
             });
         });
 
@@ -1845,6 +1901,7 @@
                 .then(data => {
                     if (data.success) {
                         let resources = data.resources || [];
+                        currentAdminResourceOptions = data.resources || [];
                         
                         if (statusFilter !== 'all') {
                             resources = resources.filter(r => r.status === parseInt(statusFilter));
@@ -1937,6 +1994,9 @@
                             <span>${formatDate(resource.createdAt)}</span>
                         </div>
                         ${resource.summary ? '<div style="color: #90b0d1; font-size: 0.8rem; margin-top: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">' + resource.summary + '</div>' : ''}
+                        <button class="cardkey-delete-btn" onclick="openAdminCommentModal(${resource.id})" title="添加评论" style="background: rgba(37, 184, 90, 0.15); color: #4ade80; right: 72px;">
+                            <i class="fas fa-comment-dots"></i>
+                        </button>
                         <button class="cardkey-delete-btn" onclick="openResourceEditModal(${resource.id})" title="编辑资源" style="background: rgba(100, 180, 255, 0.15); color: #64b5f6; right: 36px;">
                             <i class="fas fa-edit"></i>
                         </button>
@@ -1980,6 +2040,108 @@
 
         function closeResourceEditModal() {
             document.getElementById('resourceEditModal').style.display = 'none';
+        }
+
+        function formatDateTimeLocal(date = new Date()) {
+            const pad = value => String(value).padStart(2, '0');
+            return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+        }
+
+        function populateAdminCommentResourceSelect(selectedResourceId) {
+            const select = document.getElementById('commentResourceSelect');
+            const resources = currentAdminResourceOptions || [];
+            select.innerHTML = '';
+
+            if (resources.length === 0) {
+                const option = document.createElement('option');
+                option.value = selectedResourceId || '';
+                option.textContent = selectedResourceId ? `资源ID ${selectedResourceId}` : '请先加载资源列表';
+                select.appendChild(option);
+                return;
+            }
+
+            resources.forEach(resource => {
+                const option = document.createElement('option');
+                option.value = resource.id;
+                option.textContent = `#${resource.id} ${resource.title || '未命名资源'}`;
+                select.appendChild(option);
+            });
+
+            if (selectedResourceId) {
+                select.value = String(selectedResourceId);
+            }
+        }
+
+        function openAdminCommentModal(resourceId) {
+            populateAdminCommentResourceSelect(resourceId);
+            document.getElementById('commentResourceId').value = resourceId || '';
+            document.getElementById('commentResourceSelect').value = resourceId ? String(resourceId) : document.getElementById('commentResourceSelect').value;
+            document.getElementById('commentAuthor').value = '';
+            document.getElementById('commentContent').value = '';
+            document.getElementById('commentCreatedAt').value = formatDateTimeLocal();
+            document.getElementById('saveAdminCommentBtn').disabled = false;
+            document.getElementById('saveAdminCommentBtn').innerHTML = '<i class="fas fa-check"></i> 保存评论';
+            document.getElementById('adminCommentModal').style.display = 'flex';
+        }
+
+        function closeAdminCommentModal() {
+            document.getElementById('adminCommentModal').style.display = 'none';
+        }
+
+        function saveAdminComment() {
+            const resourceId = document.getElementById('commentResourceSelect').value || document.getElementById('commentResourceId').value;
+            const author = document.getElementById('commentAuthor').value.trim();
+            const content = document.getElementById('commentContent').value.trim();
+            const createdAt = document.getElementById('commentCreatedAt').value;
+            const btn = document.getElementById('saveAdminCommentBtn');
+
+            if (!resourceId) {
+                showToast('请选择资源', true);
+                return;
+            }
+            if (!author) {
+                showToast('请输入用户昵称', true);
+                return;
+            }
+            if (!content) {
+                showToast('请输入评论内容', true);
+                return;
+            }
+            if (!createdAt) {
+                showToast('请选择评论时间', true);
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 保存中...';
+
+            fetch('/api/resources/admin/comment', {
+                method: 'POST',
+                headers: authHeaders({ 'Content-Type': 'application/json' }),
+                body: JSON.stringify({
+                    resourceId: Number(resourceId),
+                    author,
+                    content,
+                    createdAt
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast(data.message || '评论添加成功');
+                    closeAdminCommentModal();
+                } else {
+                    showToast(data.message || '评论添加失败', true);
+                }
+            })
+            .catch(error => {
+                console.error('添加评论失败:', error);
+                showToast('网络错误', true);
+            })
+            .finally(() => {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-check"></i> 保存评论';
+            });
         }
 
         function saveResourceEdit() {

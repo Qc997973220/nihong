@@ -33,6 +33,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -649,6 +651,79 @@ public class ResourceController {
         return result;
     }
 
+    // 管理员自定义添加评论
+    @PostMapping("/admin/comment")
+    @ResponseBody
+    public Map<String, Object> addAdminComment(
+            @RequestHeader(value = "Authorization", required = false) String token,
+            @RequestBody Map<String, Object> request) {
+        Map<String, Object> result = new HashMap<>();
+        if (!requireAdmin(token, result)) {
+            return result;
+        }
+
+        try {
+            Long resourceId = parseLong(request.get("resourceId"));
+            String author = getTrimmedString(request, "author");
+            String content = getTrimmedString(request, "content");
+            String createdAtText = getTrimmedString(request, "createdAt");
+
+            if (resourceId == null || resourceId <= 0) {
+                result.put("success", false);
+                result.put("message", "请选择资源");
+                return result;
+            }
+            if (author == null || author.isEmpty()) {
+                result.put("success", false);
+                result.put("message", "用户昵称不能为空");
+                return result;
+            }
+            if (author.length() > 30) {
+                result.put("success", false);
+                result.put("message", "用户昵称不能超过30个字符");
+                return result;
+            }
+            if (content == null || content.isEmpty()) {
+                result.put("success", false);
+                result.put("message", "评论内容不能为空");
+                return result;
+            }
+            if (content.length() > 1000) {
+                result.put("success", false);
+                result.put("message", "评论内容不能超过1000个字符");
+                return result;
+            }
+
+            Resource targetResource = resourceService.getResourceById(resourceId);
+            if (targetResource == null) {
+                result.put("success", false);
+                result.put("message", "资源不存在");
+                return result;
+            }
+
+            Comment comment = new Comment();
+            comment.setResourceId(resourceId);
+            comment.setAuthor(author);
+            comment.setContent(content);
+            comment.setParentId(parseParentId(request.get("parentId")));
+            comment.setLikes(0);
+            comment.setDislikes(0);
+            comment.setCreatedAt(parseAdminCommentDateTime(createdAtText));
+
+            Comment savedComment = resourceService.saveComment(comment);
+            result.put("success", true);
+            result.put("message", "评论添加成功");
+            result.put("comment", savedComment);
+        } catch (IllegalArgumentException e) {
+            result.put("success", false);
+            result.put("message", e.getMessage());
+        } catch (Exception e) {
+            result.put("success", false);
+            result.put("message", "添加评论失败：" + e.getMessage());
+        }
+        return result;
+    }
+
     // 发表评论
     @PostMapping("/comment")
     @ResponseBody
@@ -1047,6 +1122,58 @@ public class ResourceController {
         return user.getUserName() != null && !user.getUserName().trim().isEmpty()
                 ? user.getUserName()
                 : user.getAccount();
+    }
+
+    private String getTrimmedString(Map<String, Object> request, String key) {
+        Object value = request.get(key);
+        return value == null ? null : value.toString().trim();
+    }
+
+    private Long parseLong(Object value) {
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof Number) {
+            return ((Number) value).longValue();
+        }
+        String text = value.toString().trim();
+        if (text.isEmpty()) {
+            return null;
+        }
+        try {
+            return Long.parseLong(text);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    private Long parseParentId(Object value) {
+        Long parentId = parseLong(value);
+        return parentId != null && parentId > 0 ? parentId : 0L;
+    }
+
+    private LocalDateTime parseAdminCommentDateTime(String value) {
+        if (value == null || value.trim().isEmpty()) {
+            return LocalDateTime.now();
+        }
+
+        String text = value.trim();
+        try {
+            return LocalDateTime.parse(text);
+        } catch (DateTimeParseException ignored) {
+        }
+
+        DateTimeFormatter[] formatters = new DateTimeFormatter[] {
+                DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"),
+                DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+        };
+        for (DateTimeFormatter formatter : formatters) {
+            try {
+                return LocalDateTime.parse(text, formatter);
+            } catch (DateTimeParseException ignored) {
+            }
+        }
+        throw new IllegalArgumentException("评论时间格式不正确");
     }
     
     /**
