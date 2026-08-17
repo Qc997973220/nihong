@@ -1,0 +1,912 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AGV-中控-工控机-PLC 程序运行控制流程说明</title>
+  <style>
+    :root {
+      --bg: #f5f7fa;
+      --panel: #ffffff;
+      --text: #1f2937;
+      --muted: #667085;
+      --border: #d8dee8;
+      --accent: #1769aa;
+      --accent-soft: #e8f3ff;
+      --code-bg: #0f172a;
+      --code-text: #e5edf8;
+      --table-head: #f0f4f8;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Microsoft YaHei", "Segoe UI", Arial, sans-serif;
+      line-height: 1.72;
+    }
+
+    .page-header {
+      background: linear-gradient(180deg, #ffffff 0%, #f7f9fc 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 28px 32px 24px;
+    }
+
+    .page-header h1 {
+      max-width: 1180px;
+      margin: 0 auto 10px;
+      font-size: 28px;
+      line-height: 1.3;
+      font-weight: 750;
+      letter-spacing: 0;
+    }
+
+    .page-header p {
+      max-width: 1180px;
+      margin: 0 auto;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 280px minmax(0, 1fr);
+      gap: 24px;
+      max-width: 1480px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .toc {
+      position: sticky;
+      top: 16px;
+      align-self: start;
+      max-height: calc(100vh - 32px);
+      overflow: auto;
+      padding: 16px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    .toc-title {
+      margin: 0 0 10px;
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .toc a {
+      display: block;
+      color: #334155;
+      text-decoration: none;
+      border-radius: 6px;
+      padding: 6px 8px;
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .toc a:hover {
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+
+    .toc-level-3 { padding-left: 22px !important; color: #576579 !important; }
+
+    .content {
+      min-width: 0;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 28px 34px 40px;
+      box-shadow: 0 10px 28px rgba(15, 23, 42, 0.05);
+    }
+
+    .content h1 { display: none; }
+
+    .content h2 {
+      margin: 34px 0 14px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+      font-size: 22px;
+      line-height: 1.35;
+    }
+
+    .content h2:first-of-type {
+      margin-top: 0;
+      border-top: 0;
+      padding-top: 0;
+    }
+
+    .content h3 {
+      margin: 26px 0 12px;
+      font-size: 18px;
+      line-height: 1.35;
+    }
+
+    .content p { margin: 10px 0; }
+
+    .content ul, .content ol {
+      margin: 10px 0 14px 0;
+      padding-left: 24px;
+    }
+
+    .content li { margin: 4px 0; }
+
+    code {
+      padding: 2px 5px;
+      border-radius: 5px;
+      background: #eef2f7;
+      color: #172033;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 0.92em;
+    }
+
+    .code-block {
+      overflow: auto;
+      margin: 14px 0;
+      padding: 14px 16px;
+      border-radius: 8px;
+      background: var(--code-bg);
+      color: var(--code-text);
+      line-height: 1.55;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+    }
+
+    .code-block code {
+      padding: 0;
+      background: transparent;
+      color: inherit;
+      font-size: 13px;
+    }
+
+    .table-wrap {
+      width: 100%;
+      overflow: auto;
+      margin: 14px 0 18px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    table {
+      width: 100%;
+      min-width: 620px;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    th, td {
+      padding: 9px 11px;
+      border-bottom: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th:last-child, td:last-child { border-right: 0; }
+    tr:last-child td { border-bottom: 0; }
+
+    th {
+      background: var(--table-head);
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    hr {
+      border: 0;
+      border-top: 1px solid var(--border);
+      margin: 26px 0;
+    }
+
+    .diagram-card {
+      margin: 18px 0 24px;
+      padding: 14px;
+      background: #fbfcfe;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: auto;
+    }
+
+    .diagram-card figcaption {
+      margin-bottom: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .mermaid {
+      min-width: 900px;
+      padding: 8px;
+    }
+
+    .mermaid-fallback {
+      display: block;
+      overflow: auto;
+      margin: 10px 0 0;
+      padding: 12px;
+      border-radius: 6px;
+      background: var(--code-bg);
+      color: var(--code-text);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .mermaid-ready .mermaid-fallback { display: none; }
+
+    .doc-actions {
+      position: fixed;
+      right: 22px;
+      bottom: 22px;
+      z-index: 20;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .doc-actions a,
+    .doc-actions button {
+      appearance: none;
+      border: 1px solid rgba(23, 105, 170, 0.35);
+      border-radius: 8px;
+      padding: 10px 13px;
+      background: rgba(255, 255, 255, 0.92);
+      color: var(--accent);
+      box-shadow: 0 10px 26px rgba(15, 23, 42, 0.12);
+      cursor: pointer;
+      font: 700 13px "Microsoft YaHei", "Segoe UI", Arial, sans-serif;
+      text-decoration: none;
+    }
+
+    .doc-actions button {
+      background: var(--accent);
+      color: #ffffff;
+    }
+
+    @media (max-width: 980px) {
+      .layout { grid-template-columns: 1fr; padding: 16px; }
+      .toc { position: static; max-height: none; }
+      .content { padding: 22px 18px 30px; }
+      .page-header { padding: 22px 18px; }
+      .page-header h1 { font-size: 24px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="doc-actions" aria-label="文档操作">
+    <a href="projects.html">返回看板</a>
+    <button type="button" id="downloadOffline">离线版下载</button>
+  </div>
+  <header class="page-header">
+    <h1>AGV-中控-工控机-PLC 程序运行控制流程说明</h1>
+    <p>由 <code>docs/AGV-中控-工控机-PLC程序运行控制流程说明.md</code> 生成，内容与 Markdown 文档保持一致，方便浏览器直接查看和分享。</p>
+  </header>
+  <div class="layout">
+    <aside class="toc" aria-label="目录">
+      <div class="toc-title">目录</div>
+      <a class="toc-level-2" href="#section-2-一整体流程图">一、整体流程图</a>
+<a class="toc-level-2" href="#section-3-二产线和机台映射">二、产线和机台映射</a>
+<a class="toc-level-2" href="#section-4-三正常上料到生产的详细步骤">三、正常上料到生产的详细步骤</a>
+<a class="toc-level-3" href="#section-5-1-AGV-发送送料物料数据">1. AGV 发送送料物料数据</a>
+<a class="toc-level-3" href="#section-6-2-AGV-到达准备点">2. AGV 到达准备点</a>
+<a class="toc-level-3" href="#section-7-3-AGV-送料完成并离开">3. AGV 送料完成并离开</a>
+<a class="toc-level-3" href="#section-8-4-station-常规抓取前切换产线">4. station 常规抓取前切换产线</a>
+<a class="toc-level-3" href="#section-9-5-station-扫码循环">5. station 扫码循环</a>
+<a class="toc-level-3" href="#section-10-6-中控根据扫码结果查询-MT-并回发-station">6. 中控根据扫码结果查询 MT 并回发 station</a>
+<a class="toc-level-3" href="#section-11-7-station-进入-executionLogic-投料主循环">7. station 进入 executionLogic 投料主循环</a>
+<a class="toc-level-2" href="#section-12-四PLC-退料信号后的称重和批次判定">四、PLC 退料信号后的称重和批次判定</a>
+<a class="toc-level-2" href="#section-13-五批次判定后的两种主分支">五、批次判定后的两种主分支</a>
+<a class="toc-level-3" href="#section-14-1-批次未达标退料后继续补料">1. 批次未达标，退料后继续补料</a>
+<a class="toc-level-3" href="#section-15-2-批次达标请求人工介入">2. 批次达标，请求人工介入</a>
+<a class="toc-level-2" href="#section-16-六人工介入后的批次结算">六、人工介入后的批次结算</a>
+<a class="toc-level-2" href="#section-17-七人工介入后的同设备转线">七、人工介入后的同设备转线</a>
+<a class="toc-level-2" href="#section-18-八互斥控制逻辑">八、互斥控制逻辑</a>
+<a class="toc-level-2" href="#section-19-九运行状态号给前端展示">九、运行状态号给前端展示</a>
+<a class="toc-level-2" href="#section-20-十人工强制结束当前流程按钮">十、人工强制结束当前流程按钮</a>
+<a class="toc-level-2" href="#section-21-十一待补料汇总和今日批次">十一、待补料汇总和今日批次</a>
+<a class="toc-level-2" href="#section-22-十二关键-PLC-点位汇总">十二、关键 PLC 点位汇总</a>
+<a class="toc-level-3" href="#section-23-AGV-安全门到位">AGV 安全门/到位</a>
+<a class="toc-level-3" href="#section-24-常规抓取前切线">常规抓取前切线</a>
+<a class="toc-level-3" href="#section-25-同设备转线">同设备转线</a>
+<a class="toc-level-3" href="#section-26-扫码">扫码</a>
+<a class="toc-level-3" href="#section-27-投料和退料">投料和退料</a>
+<a class="toc-level-3" href="#section-28-地磅称重">地磅称重</a>
+<a class="toc-level-3" href="#section-29-批次结束">批次结束</a>
+<a class="toc-level-2" href="#section-30-十三排查流程卡住时的判断顺序">十三、排查流程卡住时的判断顺序</a>
+    </aside>
+    <main class="content">
+      <h1 id="section-1-AGV-中控-工控机-PLC-程序运行控制流程说明">AGV-中控-工控机-PLC 程序运行控制流程说明</h1>
+<p>更新时间：2026-07-29</p>
+<p>本文按当前项目代码整理，用于说明从 AGV 上报任务，到中控分发指令给工控机 station，再到 station 读取 PLC 信号并控制生产流程的完整运行逻辑。</p>
+<p>涉及项目：</p>
+<ul><li>中控服务：<code>split-glue</code></li><li>工控机服务：<code>station</code></li></ul>
+<p>核心代码位置：</p>
+<ul><li>AGV 接口入口：<code>split-glue/src/main/java/com/sage/controller/AmrController.java</code></li><li>AGV 业务处理：<code>split-glue/src/main/java/com/sage/service/impl/AmrServiceImpl.java</code></li><li>中控到 station WebSocket：<code>split-glue/src/main/java/com/sage/websocket/DeviceWebSocketHandler.java</code></li><li>中控互斥控制：<code>split-glue/src/main/java/com/sage/guard/MachineLineGuard.java</code></li><li>中控 AGV 互斥切面：<code>split-glue/src/main/java/com/sage/guard/MachineTaskGuardAspect.java</code></li><li>station 接收中控命令：<code>station/src/main/java/com/sage/websocket/CenterHandlerAdapter.java</code></li><li>station 扫码循环：<code>station/src/main/java/com/sage/service/impl/ScanCodeServiceImpl.java</code></li><li>station PLC/投料/称重/人工介入主逻辑：<code>station/src/main/java/com/sage/service/impl/MachinsServiceImpl.java</code></li></ul>
+<hr>
+<h2 id="section-2-一整体流程图">一、整体流程图</h2>
+<figure class="diagram-card"><figcaption>流程图</figcaption><div class="mermaid">sequenceDiagram
+    participant AGV
+    participant Center as 中控 split-glue
+    participant Guard as 机台产线互斥 Guard
+    participant Station as 工控机 station
+    participant PLC
+    participant MT
+    participant FE as 前端
+
+    AGV-&gt;&gt;Center: /amr/feedingInformation 发送送料物料数据
+    Center-&gt;&gt;Guard: 校验同机台是否已有其他产线占用
+    Guard--&gt;&gt;Center: 允许或拦截
+    Center-&gt;&gt;Center: 创建 DeliveryOrder，匹配机台
+    Center-&gt;&gt;Station: WebSocket command=agvData
+    Center-&gt;&gt;FE: 运行状态=1 AGV上料中
+
+    AGV-&gt;&gt;Center: /amr/preparationPoint 到达准备点
+    Center-&gt;&gt;Guard: 校验仍是同一产线回调
+    Center-&gt;&gt;Station: send_plc_bool DB32.0.0=true 开门/AGV到位
+    Center-&gt;&gt;FE: 运行状态=2 AGV到达准备点
+
+    AGV-&gt;&gt;Center: /amr/theFeedingIsComplete shipping=1 送料完成
+    Center-&gt;&gt;Station: send_plc_bool DB32.0.1=true 关门/AGV退出
+    Center-&gt;&gt;Station: command=scanTheCode
+    Center-&gt;&gt;FE: 运行状态=3 送料完成开始扫码
+
+    Station-&gt;&gt;PLC: 常规抓取前切线 DB32.10.5/DB32.10.6/DB32.11.1
+    Station-&gt;&gt;PLC: 等待扫码信号 DB34.6.3
+    PLC--&gt;&gt;Station: 二维码结果 DB100.1260.0
+    Station-&gt;&gt;PLC: D码确认 DB32.10.3=true
+    Station-&gt;&gt;Center: command=scanTheCode 返回扫码结果
+
+    Center-&gt;&gt;MT: 根据扫码结果查询物料明细
+    Center-&gt;&gt;Station: command=mtData 下发 MT 物料明细
+    Station-&gt;&gt;Station: dataContrast 校验物料
+    Station-&gt;&gt;PLC: 写批次总量/物料信息等生产参数
+    Station-&gt;&gt;FE: 运行状态=6 工控机投料中
+
+    loop station executionLogic
+        Station-&gt;&gt;PLC: 读取退料信号 DB34.0.3
+        Station-&gt;&gt;PLC: 读取自动模式 DB36.1.0
+        Station-&gt;&gt;PLC: 读取重量达标/人工介入信号
+    end
+
+    alt PLC退料信号到达
+        Station-&gt;&gt;PLC: 等待地磅称重信号 DB34.16.0
+        Station-&gt;&gt;PLC: 读取重量 DB34.18.0
+        Station-&gt;&gt;MT: 上报本批物料投入明细
+        Station-&gt;&gt;FE: 运行状态=7 工控机退料中
+        Station-&gt;&gt;Center: command=send_agv stripping 或 stripping_feeding
+    else PLC重量达标请求人工介入
+        Station-&gt;&gt;Center: command=manualChoose
+        Station-&gt;&gt;FE: 运行状态=8 请求人工介入
+    else PLC切手动
+        Station-&gt;&gt;FE: 运行状态=10 PLC当前是手动模式，流程结束
+    end
+
+    AGV-&gt;&gt;Center: /amr/theFeedingIsComplete shipping=2 退料完成
+    Center-&gt;&gt;Guard: 根据中控业务状态判断是否释放互斥或继续补料
+    Center-&gt;&gt;FE: 运行状态=4 退料完成 或 5 退料完成正在呼叫补料</div><pre class="mermaid-fallback"><code>sequenceDiagram
+    participant AGV
+    participant Center as 中控 split-glue
+    participant Guard as 机台产线互斥 Guard
+    participant Station as 工控机 station
+    participant PLC
+    participant MT
+    participant FE as 前端
+
+    AGV-&gt;&gt;Center: /amr/feedingInformation 发送送料物料数据
+    Center-&gt;&gt;Guard: 校验同机台是否已有其他产线占用
+    Guard--&gt;&gt;Center: 允许或拦截
+    Center-&gt;&gt;Center: 创建 DeliveryOrder，匹配机台
+    Center-&gt;&gt;Station: WebSocket command=agvData
+    Center-&gt;&gt;FE: 运行状态=1 AGV上料中
+
+    AGV-&gt;&gt;Center: /amr/preparationPoint 到达准备点
+    Center-&gt;&gt;Guard: 校验仍是同一产线回调
+    Center-&gt;&gt;Station: send_plc_bool DB32.0.0=true 开门/AGV到位
+    Center-&gt;&gt;FE: 运行状态=2 AGV到达准备点
+
+    AGV-&gt;&gt;Center: /amr/theFeedingIsComplete shipping=1 送料完成
+    Center-&gt;&gt;Station: send_plc_bool DB32.0.1=true 关门/AGV退出
+    Center-&gt;&gt;Station: command=scanTheCode
+    Center-&gt;&gt;FE: 运行状态=3 送料完成开始扫码
+
+    Station-&gt;&gt;PLC: 常规抓取前切线 DB32.10.5/DB32.10.6/DB32.11.1
+    Station-&gt;&gt;PLC: 等待扫码信号 DB34.6.3
+    PLC--&gt;&gt;Station: 二维码结果 DB100.1260.0
+    Station-&gt;&gt;PLC: D码确认 DB32.10.3=true
+    Station-&gt;&gt;Center: command=scanTheCode 返回扫码结果
+
+    Center-&gt;&gt;MT: 根据扫码结果查询物料明细
+    Center-&gt;&gt;Station: command=mtData 下发 MT 物料明细
+    Station-&gt;&gt;Station: dataContrast 校验物料
+    Station-&gt;&gt;PLC: 写批次总量/物料信息等生产参数
+    Station-&gt;&gt;FE: 运行状态=6 工控机投料中
+
+    loop station executionLogic
+        Station-&gt;&gt;PLC: 读取退料信号 DB34.0.3
+        Station-&gt;&gt;PLC: 读取自动模式 DB36.1.0
+        Station-&gt;&gt;PLC: 读取重量达标/人工介入信号
+    end
+
+    alt PLC退料信号到达
+        Station-&gt;&gt;PLC: 等待地磅称重信号 DB34.16.0
+        Station-&gt;&gt;PLC: 读取重量 DB34.18.0
+        Station-&gt;&gt;MT: 上报本批物料投入明细
+        Station-&gt;&gt;FE: 运行状态=7 工控机退料中
+        Station-&gt;&gt;Center: command=send_agv stripping 或 stripping_feeding
+    else PLC重量达标请求人工介入
+        Station-&gt;&gt;Center: command=manualChoose
+        Station-&gt;&gt;FE: 运行状态=8 请求人工介入
+    else PLC切手动
+        Station-&gt;&gt;FE: 运行状态=10 PLC当前是手动模式，流程结束
+    end
+
+    AGV-&gt;&gt;Center: /amr/theFeedingIsComplete shipping=2 退料完成
+    Center-&gt;&gt;Guard: 根据中控业务状态判断是否释放互斥或继续补料
+    Center-&gt;&gt;FE: 运行状态=4 退料完成 或 5 退料完成正在呼叫补料</code></pre></figure>
+<hr>
+<h2 id="section-3-二产线和机台映射">二、产线和机台映射</h2>
+<p>中控使用 <code>GenerationUtil.productionLineMatching(line)</code> 将产线映射到机台：</p>
+<div class="table-wrap"><table><thead><tr><th>产线</th><th>机台</th></tr></thead><tbody><tr><td>1、2</td><td>1号机台</td></tr>
+<tr><td>3、4</td><td>2号机台</td></tr>
+<tr><td>5、6</td><td>3号机台</td></tr>
+<tr><td>7、8</td><td>4号机台</td></tr>
+<tr><td>9、10</td><td>5号机台</td></tr>
+<tr><td>11、12</td><td>6号机台</td></tr>
+<tr><td>13、14、15</td><td>7号机台</td></tr></tbody></table></div>
+<p>station 内部再把全局产线转换成 PLC 本地产线：</p>
+<div class="table-wrap"><table><thead><tr><th>全局产线</th><th>station 本地产线</th></tr></thead><tbody><tr><td>奇数线 1/3/5/7/9/11/13</td><td>本地 1 线</td></tr>
+<tr><td>偶数线 2/4/6/8/10/12/14</td><td>本地 2 线</td></tr>
+<tr><td>15</td><td>本地 3 线</td></tr></tbody></table></div>
+<p>注意：15 号线目前现场未使用，业务上可以先不考虑，但代码里仍保留映射为本地 3 线。</p>
+<hr>
+<h2 id="section-4-三正常上料到生产的详细步骤">三、正常上料到生产的详细步骤</h2>
+<h3 id="section-5-1-AGV-发送送料物料数据">1. AGV 发送送料物料数据</h3>
+<p>AGV 调用：</p>
+<pre class="code-block"><code class="language-http">POST /amr/feedingInformation</code></pre>
+<p>典型参数：</p>
+<pre class="code-block"><code class="language-json">{
+  &quot;feedingLine&quot;: &quot;1&quot;,
+  &quot;agvNum&quot;: &quot;AGV001&quot;,
+  &quot;partNum&quot;: &quot;xxx&quot;
+}</code></pre>
+<p>中控执行逻辑：</p>
+<ol><li><code>MachineTaskGuardAspect.guardFeedingInformation()</code> 先做机台互斥判断。</li><li>根据 <code>feedingLine</code> 匹配机台号。</li><li>创建 <code>DeliveryOrder</code>，初始状态 <code>orderStatus=0</code>。</li><li>把生成的 <code>orderId</code> 写回 AGV 数据 map。</li><li>通过 WebSocket 发给对应 station：</li></ol>
+<pre class="code-block"><code class="language-json">{
+  &quot;type&quot;: &quot;cmd&quot;,
+  &quot;command&quot;: &quot;agvData&quot;,
+  &quot;line&quot;: 1,
+  &quot;parameter&quot;: {
+    &quot;feedingLine&quot;: &quot;1&quot;,
+    &quot;agvNum&quot;: &quot;AGV001&quot;,
+    &quot;orderId&quot;: &quot;123&quot;
+  }
+}</code></pre>
+<p>station 执行逻辑：</p>
+<ol><li><code>CenterHandlerAdapter.agvData()</code> 接收 <code>agvData</code>。</li><li>将 AGV 数据放入 <code>MachinsServiceImpl.ridgeMap</code> 缓存。</li><li>这个缓存后续用于新建批次、找 <code>orderId</code>、同设备转线复用物料基础数据。</li></ol>
+<p>前端运行状态：</p>
+<pre class="code-block"><code class="language-text">1：AGV上料中</code></pre>
+<hr>
+<h3 id="section-6-2-AGV-到达准备点">2. AGV 到达准备点</h3>
+<p>AGV 调用：</p>
+<pre class="code-block"><code class="language-http">POST /amr/preparationPoint</code></pre>
+<p>典型参数：</p>
+<pre class="code-block"><code class="language-json">{
+  &quot;agvNum&quot;: &quot;AGV001&quot;,
+  &quot;productionLine&quot;: 1
+}</code></pre>
+<p>中控执行逻辑：</p>
+<ol><li><code>MachineTaskGuardAspect.guardPreparationPoint()</code> 校验 AGV 回调产线仍是当前机台占用产线。</li><li>中控向 station 下发 PLC 指令：</li></ol>
+<pre class="code-block"><code class="language-json">{
+  &quot;command&quot;: &quot;send_plc_bool&quot;,
+  &quot;parameter&quot;: {
+    &quot;addressValue&quot;: &quot;DB32.0.0&quot;,
+    &quot;parameters&quot;: true
+  }
+}</code></pre>
+<p>station 执行逻辑：</p>
+<ol><li><code>CenterHandlerAdapter.sendPlc()</code> 收到 <code>send_plc_bool</code>。</li><li>station 调用 <code>plcClient.sendBool(&quot;DB32.0.0&quot;, plcIp, true)</code>。</li><li>该点位表示 AGV 到位/开门相关信号。</li></ol>
+<p>前端运行状态：</p>
+<pre class="code-block"><code class="language-text">2：AGV到达准备点</code></pre>
+<hr>
+<h3 id="section-7-3-AGV-送料完成并离开">3. AGV 送料完成并离开</h3>
+<p>AGV 调用：</p>
+<pre class="code-block"><code class="language-http">POST /amr/theFeedingIsComplete</code></pre>
+<p>送料完成参数：</p>
+<pre class="code-block"><code class="language-json">{
+  &quot;agvNum&quot;: &quot;AGV001&quot;,
+  &quot;productionLine&quot;: 1,
+  &quot;shipping&quot;: 1
+}</code></pre>
+<p>中控执行逻辑：</p>
+<ol><li><code>MachineTaskGuardAspect.guardFeedingComplete()</code> 校验回调产线是否允许。</li><li>中控先发 AGV 退出/关门信号：</li></ol>
+<pre class="code-block"><code class="language-text">DB32.0.1 = true</code></pre>
+<ol><li>因 <code>shipping=1</code>，调用 <code>theProcessBegins(machineNum, productionLine)</code>。</li><li>中控向 station 下发扫码命令：</li></ol>
+<pre class="code-block"><code class="language-json">{
+  &quot;command&quot;: &quot;scanTheCode&quot;,
+  &quot;line&quot;: 1,
+  &quot;parameter&quot;: 1
+}</code></pre>
+<ol><li>设置 <code>afitMap[line].line_state=1</code>，表示当前产线进入运行占用状态。</li></ol>
+<p>前端运行状态：</p>
+<pre class="code-block"><code class="language-text">3：送料完成开始扫码</code></pre>
+<hr>
+<h3 id="section-8-4-station-常规抓取前切换产线">4. station 常规抓取前切换产线</h3>
+<p>station 收到 <code>scanTheCode</code> 后先执行：</p>
+<pre class="code-block"><code class="language-java">machineService.determineProductionLine(cmd.getLine())</code></pre>
+<p>这一步是“常规抓取前切线”，和人工介入后的“同设备转线”完全不是一套逻辑。</p>
+<p>常规抓取前切线 PLC 点位：</p>
+<div class="table-wrap"><table><thead><tr><th>目标本地产线</th><th>PLC 点位</th></tr></thead><tbody><tr><td>本地 1 线</td><td><code>DB32.10.5 = true</code></td></tr>
+<tr><td>本地 2 线</td><td><code>DB32.10.6 = true</code></td></tr>
+<tr><td>本地 3 线</td><td><code>DB32.11.1 = true</code></td></tr></tbody></table></div>
+<p>随后进入扫码循环。</p>
+<hr>
+<h3 id="section-9-5-station-扫码循环">5. station 扫码循环</h3>
+<p>代码入口：</p>
+<pre class="code-block"><code class="language-text">station ScanCodeServiceImpl.scanTheCode()</code></pre>
+<p>循环读取逻辑：</p>
+<div class="table-wrap"><table><thead><tr><th>PLC 点位</th><th>作用</th></tr></thead><tbody><tr><td><code>DB34.34.7</code></td><td>当前代码作为是否跳过扫码循环的前置判断</td></tr>
+<tr><td><code>DB34.34.2</code></td><td>机械异常</td></tr>
+<tr><td><code>DB34.6.3</code></td><td>D 栋二维码读取完成信号</td></tr>
+<tr><td><code>DB100.1260.0</code></td><td>D 栋二维码字符串结果</td></tr>
+<tr><td><code>DB32.10.3</code></td><td>D 栋二维码确认信号</td></tr></tbody></table></div>
+<p>流程：</p>
+<ol><li>进入扫码，前端仍显示 <code>3：送料完成开始扫码</code>。</li><li>每秒检查一次 PLC 信号。</li><li>如果 <code>DB34.34.2=true</code>，认为机械异常，返回 <code>error=true</code>。</li><li>如果 <code>DB34.6.3=true</code>，读取 <code>DB100.1260.0</code> 的二维码结果。</li><li>读取成功后写 <code>DB32.10.3=true</code> 确认。</li><li>将扫码结果返回中控：</li></ol>
+<pre class="code-block"><code class="language-json">{
+  &quot;command&quot;: &quot;scanTheCode&quot;,
+  &quot;parameter&quot;: {
+    &quot;d&quot;: &quot;二维码&quot;,
+    &quot;error&quot;: false,
+    &quot;transfer&quot;: false,
+    &quot;feedingLine&quot;: 1
+  }
+}</code></pre>
+<ol><li>如果 5 分钟超时，返回 <code>transfer=true</code>，station 结束扫码流程。</li><li>如果人工点击“强制结束当前流程”，<code>scanStopRequested=true</code>，下一轮循环返回 <code>transfer=true</code> 并退出。</li></ol>
+<hr>
+<h3 id="section-10-6-中控根据扫码结果查询-MT-并回发-station">6. 中控根据扫码结果查询 MT 并回发 station</h3>
+<p>中控收到 station 的 <code>scanTheCode</code> 回传后：</p>
+<ol><li><code>DeviceWebSocketHandler.scanTheCode()</code> 解析扫码结果。</li><li>调用 <code>mtService.getTheDetails(qrCode)</code> 查询物料明细。</li><li>组装 <code>ridgepole_map</code>。</li><li>向同一 station 下发：</li></ol>
+<pre class="code-block"><code class="language-json">{
+  &quot;command&quot;: &quot;mtData&quot;,
+  &quot;line&quot;: 1,
+  &quot;parameter&quot;: {
+    &quot;d&quot;: [
+      {
+        &quot;barNo&quot;: &quot;...&quot;,
+        &quot;material&quot;: &quot;...&quot;,
+        &quot;materialDesc&quot;: &quot;...&quot;,
+        &quot;quaterQty&quot;: &quot;...&quot;,
+        &quot;line&quot;: &quot;S1&quot;
+      }
+    ]
+  }
+}</code></pre>
+<p>station 收到 <code>mtData</code> 后：</p>
+<ol><li><code>MtServiceImpl.dataContrast(map, line)</code> 做物料数据对比。</li><li>对比成功后进入 <code>MachinsServiceImpl.executionLogic(map, line)</code>。</li></ol>
+<hr>
+<h3 id="section-11-7-station-进入-executionLogic-投料主循环">7. station 进入 executionLogic 投料主循环</h3>
+<p>进入时 station 会上报：</p>
+<pre class="code-block"><code class="language-text">6：工控机投料中</code></pre>
+<p>核心动作：</p>
+<ol><li>将 <code>executionStopFlags[line]</code> 清空为 <code>false</code>。</li><li>将当前 MT 物料明细放入 <code>materialDataCache[line]</code>，供后续同设备转线复用。</li><li>根据产线算本地产线。</li><li>如果当前本地产线 <code>batchActualWeight=0</code>，创建新批次：</li></ol>
+<ul><li>生成唯一 <code>batchId</code></li><li>记录批次开始时间</li><li>根据 <code>ridgeMap[line].orderId</code> 找到订单</li><li>把 <code>DeliveryOrder.orderStatus</code> 改成 <code>1：执行中</code></li></ul>
+<ol><li>读取当前物料 GRD、BarNo。</li><li>进入 while 主循环，每 5 秒检查一次 PLC 状态。</li></ol>
+<p>executionLogic 主循环关键 PLC 点位：</p>
+<div class="table-wrap"><table><thead><tr><th>PLC 点位</th><th>作用</th></tr></thead><tbody><tr><td><code>DB34.0.3</code></td><td>PLC 退料信号</td></tr>
+<tr><td><code>DB36.1.0</code></td><td>PLC 自动模式，<code>false</code> 表示被切手动</td></tr>
+<tr><td><code>DB34.34.2</code></td><td>PLC 机械异常</td></tr>
+<tr><td>本地 1 线 <code>DB34.6.7</code></td><td>批次重量达标/请求人工介入</td></tr>
+<tr><td>本地 2 线 <code>DB34.7.1</code></td><td>批次重量达标/请求人工介入</td></tr>
+<tr><td>本地 3 线 <code>DB34.34.1</code></td><td>批次重量达标/请求人工介入</td></tr></tbody></table></div>
+<p>循环内分支：</p>
+<div class="table-wrap"><table><thead><tr><th>条件</th><th>station 处理</th></tr></thead><tbody><tr><td>人工强制结束标记为 true</td><td>退出循环，上报 <code>8 请求人工介入</code></td></tr>
+<tr><td><code>DB34.34.2=true</code></td><td>进入异常处理</td></tr>
+<tr><td>重量达标点位为 true</td><td>设置 <code>artificial=true</code>，跳出循环，后续请求人工介入</td></tr>
+<tr><td><code>DB34.0.3=true</code></td><td>PLC 请求退料，进入称重保存和 MT 上报</td></tr>
+<tr><td><code>DB36.1.0=false</code></td><td>PLC 当前是手动模式，流程结束，上报 <code>10</code></td></tr></tbody></table></div>
+<hr>
+<h2 id="section-12-四PLC-退料信号后的称重和批次判定">四、PLC 退料信号后的称重和批次判定</h2>
+<p>当 executionLogic 读到：</p>
+<pre class="code-block"><code class="language-text">DB34.0.3 = true</code></pre>
+<p>station 执行：</p>
+<pre class="code-block"><code class="language-text">processReturnMaterial()
+saveLabelRecordAndReportMt()</code></pre>
+<p>称重相关点位：</p>
+<div class="table-wrap"><table><thead><tr><th>PLC 点位</th><th>作用</th></tr></thead><tbody><tr><td><code>DB34.16.0</code></td><td>地磅称重结果可读取信号</td></tr>
+<tr><td><code>DB34.18.0</code></td><td>地磅重量 float</td></tr>
+<tr><td><code>DB34.16.1</code></td><td>是否空托判断</td></tr></tbody></table></div>
+<p>称重流程：</p>
+<ol><li>station 等待 <code>DB34.16.0=true</code>。</li><li>如果一直不来，会持续打印“PLC正在地磅称重,等待中...”。</li><li>如果人工点击“强制结束当前流程”，称重循环读取到退出标记后返回 <code>null</code> 并退出。</li><li>读取 <code>DB34.18.0</code> 重量。</li><li>根据当前批次 <code>batchId + barNo</code> 保存或累加 <code>LabelRecord.qty</code>。</li><li>累加本地 <code>LineData.batchActualWeight</code>。</li><li>根据 <code>DB34.16.1</code> 判断是否空托，写 <code>LabelRecord.isCompleted</code>。</li><li>保存 <code>LabelRecord</code>。</li><li>调用 <code>reportMt()</code>，把当前批次渐进式上报 MT。</li></ol>
+<p>称重完成后，station 上报：</p>
+<pre class="code-block"><code class="language-text">7：工控机退料中</code></pre>
+<p>然后进入 <code>lotDetermination()</code> 判断下一步。</p>
+<hr>
+<h2 id="section-13-五批次判定后的两种主分支">五、批次判定后的两种主分支</h2>
+<h3 id="section-14-1-批次未达标退料后继续补料">1. 批次未达标，退料后继续补料</h3>
+<p>当不是人工介入、不是异常、不是转件时，station 认为：</p>
+<pre class="code-block"><code class="language-text">未达到批次量，先退料，之后继续叫料</code></pre>
+<p>station 向中控发送：</p>
+<pre class="code-block"><code class="language-json">{
+  &quot;command&quot;: &quot;send_agv&quot;,
+  &quot;line&quot;: 1,
+  &quot;parameter&quot;: &quot;stripping_feeding&quot;
+}</code></pre>
+<p>中控收到后：</p>
+<pre class="code-block"><code class="language-text">theStatusOfTheMachine[line] = 3</code></pre>
+<p>含义是：</p>
+<pre class="code-block"><code class="language-text">请求退料，并且退料完成后还要继续叫料</code></pre>
+<p>之后 AGV 拉走当前托盘，完成后调用：</p>
+<pre class="code-block"><code class="language-http">POST /amr/theFeedingIsComplete</code></pre>
+<p>参数：</p>
+<pre class="code-block"><code class="language-json">{
+  &quot;agvNum&quot;: &quot;AGV001&quot;,
+  &quot;productionLine&quot;: 1,
+  &quot;shipping&quot;: 2
+}</code></pre>
+<p>中控收到 <code>shipping=2</code> 时会先读取退料前状态：</p>
+<pre class="code-block"><code class="language-text">beforeLineStatus = theStatusOfTheMachine[line]</code></pre>
+<p>如果 <code>beforeLineStatus=3</code>，说明是“退料后继续补料”，中控执行：</p>
+<pre class="code-block"><code class="language-text">theStatusOfTheMachine[line] = 1</code></pre>
+<p>前端运行状态：</p>
+<pre class="code-block"><code class="language-text">5：退料完成正在呼叫补料</code></pre>
+<p>这条线仍然没有完全结束，互斥不会释放。</p>
+<hr>
+<h3 id="section-15-2-批次达标请求人工介入">2. 批次达标，请求人工介入</h3>
+<p>当 station 在 executionLogic 中读到对应本地产线重量达标点位：</p>
+<div class="table-wrap"><table><thead><tr><th>本地产线</th><th>达标点位</th></tr></thead><tbody><tr><td>本地 1 线</td><td><code>DB34.6.7</code></td></tr>
+<tr><td>本地 2 线</td><td><code>DB34.7.1</code></td></tr>
+<tr><td>本地 3 线</td><td><code>DB34.34.1</code></td></tr></tbody></table></div>
+<p>station 设置 <code>artificial=true</code>，跳出主循环，执行：</p>
+<pre class="code-block"><code class="language-text">trigger_ait(line)</code></pre>
+<p>station 向中控发送：</p>
+<pre class="code-block"><code class="language-json">{
+  &quot;command&quot;: &quot;manualChoose&quot;,
+  &quot;line&quot;: 1,
+  &quot;parameter&quot;: &quot;manualChoose&quot;
+}</code></pre>
+<p>中控收到后把人工介入状态写入：</p>
+<pre class="code-block"><code class="language-text">afitMap[line].ait_state = 1</code></pre>
+<p>前端运行状态：</p>
+<pre class="code-block"><code class="language-text">8：请求人工介入</code></pre>
+<p>前端此时可以展示人工操作按钮，例如：</p>
+<ul><li>批次结算/退料</li><li>单次抓取</li><li>同设备转线</li><li>强制结束当前流程</li></ul>
+<hr>
+<h2 id="section-16-六人工介入后的批次结算">六、人工介入后的批次结算</h2>
+<p>前端调用：</p>
+<pre class="code-block"><code class="language-http">POST /ait/selectTheProcess?num=1&amp;line=1</code></pre>
+<p>中控执行：</p>
+<ol><li><code>DeviceWebSocketHandler.ait_stripping(line)</code>。</li><li>将 <code>afitMap[line].ait_state=0</code>。</li><li>向 station 下发：</li></ol>
+<pre class="code-block"><code class="language-json">{
+  &quot;command&quot;: &quot;ait_stripping&quot;,
+  &quot;line&quot;: 1
+}</code></pre>
+<p>station 执行：</p>
+<pre class="code-block"><code class="language-text">MachinsServiceImpl.finishes(localLine, line)</code></pre>
+<p>步骤：</p>
+<ol><li>上报 <code>9：人工选择批次结算</code>。</li><li>写 PLC 批次结束点位：</li></ol>
+<div class="table-wrap"><table><thead><tr><th>本地产线</th><th>批次结束点位</th></tr></thead><tbody><tr><td>本地 1 线</td><td><code>DB32.6.1=true</code></td></tr>
+<tr><td>本地 2 线</td><td><code>DB32.6.2=true</code></td></tr>
+<tr><td>本地 3 线</td><td><code>DB32.6.3=true</code></td></tr></tbody></table></div>
+<ol><li>上报 <code>11：地磅称重中</code>。</li><li>进入 <code>saveLabelRecordAndReportMt()</code> 等待地磅称重。</li><li>称重完成后保存 <code>LabelRecord</code> 并上报 MT。</li><li>向中控发送：</li></ol>
+<pre class="code-block"><code class="language-json">{
+  &quot;command&quot;: &quot;send_agv&quot;,
+  &quot;line&quot;: 1,
+  &quot;parameter&quot;: &quot;stripping&quot;
+}</code></pre>
+<ol><li>中控把：</li></ol>
+<pre class="code-block"><code class="language-text">theStatusOfTheMachine[line] = 2</code></pre>
+<p>含义：请求 AGV 退料。</p>
+<ol><li>station 清空当前本地产线重量缓存，上报：</li></ol>
+<pre class="code-block"><code class="language-text">7：工控机退料中</code></pre>
+<ol><li>AGV 退料完成后调用 <code>/amr/theFeedingIsComplete</code>，<code>shipping=2</code>。</li><li>如果中控判断退料前状态不是 <code>3</code>，则按普通退料完成处理：</li></ol>
+<pre class="code-block"><code class="language-text">theStatusOfTheMachine[line] = 0
+afitMap[line].line_state = 0</code></pre>
+<p>前端运行状态：</p>
+<pre class="code-block"><code class="language-text">4：退料完成</code></pre>
+<p>此时互斥具备释放条件。</p>
+<hr>
+<h2 id="section-17-七人工介入后的同设备转线">七、人工介入后的同设备转线</h2>
+<p>前端调用：</p>
+<pre class="code-block"><code class="language-http">POST /ait/sameMachineTransfer?sourceLine=1&amp;targetLine=2&amp;operator=admin&amp;reason=现场转线</code></pre>
+<p>中控校验：</p>
+<ol><li><code>sourceLine</code> 和 <code>targetLine</code> 必须存在。</li><li>只支持 1-14 线，暂不处理 15 线。</li><li>源产线和目标产线不能相同。</li><li>必须属于同一台机台，如 1&lt;-&gt;2、3&lt;-&gt;4。</li><li>只有源产线处于人工介入状态 <code>ait_state=1</code> 时才允许。</li></ol>
+<p>中控向 station 下发：</p>
+<pre class="code-block"><code class="language-json">{
+  &quot;command&quot;: &quot;sameMachineTransfer&quot;,
+  &quot;line&quot;: 1,
+  &quot;parameter&quot;: {
+    &quot;sourceLine&quot;: 1,
+    &quot;targetLine&quot;: 2,
+    &quot;operator&quot;: &quot;admin&quot;,
+    &quot;reason&quot;: &quot;现场转线&quot;
+  }
+}</code></pre>
+<p>station 执行：</p>
+<ol><li>再次校验同机台关系。</li><li>根据目标产线写 PLC 同设备转线点位：</li></ol>
+<div class="table-wrap"><table><thead><tr><th>目标产线</th><th>本地产线</th><th>PLC 点位</th></tr></thead><tbody><tr><td>奇数线 1/3/5/7/9/11/13</td><td>本地 1 线</td><td><code>DB32.11.4=true</code></td></tr>
+<tr><td>偶数线 2/4/6/8/10/12/14</td><td>本地 2 线</td><td><code>DB32.11.5=true</code></td></tr></tbody></table></div>
+<ol><li>上报源产线状态：</li></ol>
+<pre class="code-block"><code class="language-text">8：请求人工介入</code></pre>
+<ol><li>等待 PLC 整理物料并进入地磅称重。</li><li>读取称重结果，保存 <code>LabelRecord</code>，上报 MT。</li><li>完成源产线订单。</li><li>把源产线缓存物料数据复制给目标产线。</li><li>给目标产线创建新订单。</li><li>复制批次总量、存储斗重量等生产参数到目标本地产线。</li><li>复用缓存物料数据写入 PLC，省略常规扫码。</li><li>station 回传中控：</li></ol>
+<pre class="code-block"><code class="language-json">{
+  &quot;command&quot;: &quot;sameMachineTransferComplete&quot;,
+  &quot;line&quot;: 1,
+  &quot;parameter&quot;: {
+    &quot;sourceLine&quot;: 1,
+    &quot;targetLine&quot;: 2
+  }
+}</code></pre>
+<p>中控收到完成回执后：</p>
+<pre class="code-block"><code class="language-text">sourceLine:
+  theStatusOfTheMachine = 0
+  afitMap.ait_state = 0
+  afitMap.line_state = 0
+  lineRunStatus = 0
+
+targetLine:
+  theStatusOfTheMachine = 0
+  afitMap.ait_state = 0
+  afitMap.line_state = 1
+  lineRunStatus = 6</code></pre>
+<p>station 随后直接对目标产线执行：</p>
+<pre class="code-block"><code class="language-text">executionLogic(cachedMaterialData, targetLine)</code></pre>
+<p>注意：同设备转线不走常规扫码，也不写常规抓取前切线点位 <code>DB32.10.5/DB32.10.6/DB32.11.1</code>。</p>
+<hr>
+<h2 id="section-18-八互斥控制逻辑">八、互斥控制逻辑</h2>
+<p>互斥核心对象：</p>
+<pre class="code-block"><code class="language-text">MachineLineGuard</code></pre>
+<p>它维护三类状态：</p>
+<div class="table-wrap"><table><thead><tr><th>字段</th><th>含义</th></tr></thead><tbody><tr><td><code>lineStatuses</code></td><td>中控 <code>theStatusOfTheMachine[line]</code> 的镜像</td></tr>
+<tr><td><code>lineStates</code></td><td>中控 <code>afitMap[line].line_state</code> 的镜像</td></tr>
+<tr><td><code>occupancies</code></td><td>每台机台当前被哪条产线占用</td></tr></tbody></table></div>
+<p>互斥判断点：</p>
+<div class="table-wrap"><table><thead><tr><th>场景</th><th>方法</th><th>作用</th></tr></thead><tbody><tr><td>AGV 发送送料任务</td><td><code>tryAcceptAgvPush()</code></td><td>如果同机台已有其他 activeLine，拦截</td></tr>
+<tr><td>AGV 到准备点/离开回调</td><td><code>allowAgvCallback()</code></td><td>确保回调产线和当前占用产线一致</td></tr>
+<tr><td>业务状态变更</td><td><code>beforeStatusChange()/afterStatusChange()</code></td><td>非 0 状态会占用机台</td></tr>
+<tr><td>产线运行状态变更</td><td><code>beforeLineStateChange()/afterLineStateChange()</code></td><td><code>line_state=1</code> 会占用机台</td></tr></tbody></table></div>
+<p>互斥释放条件：</p>
+<pre class="code-block"><code class="language-text">theStatusOfTheMachine[line] == 0
+afitMap[line].line_state == 0
+deliveryAssigned == false</code></pre>
+<p>满足以上条件时，<code>releaseIfIdle()</code> 会释放该机台占用。</p>
+<p>常见释放场景：</p>
+<ol><li>AGV 普通退料完成，<code>shipping=2</code>，且退料前状态不是 <code>3</code>。</li><li>人工批次结算后 AGV 退料完成。</li><li>同设备转线完成后，源产线被中控清零，目标产线接管占用。</li><li>人工管理接口强制重置：</li></ol>
+<pre class="code-block"><code class="language-http">POST /admin/guard/reset-line?line=1&amp;operator=admin&amp;reason=manual_fix
+POST /admin/guard/reset-machine?machine=1&amp;operator=admin&amp;reason=manual_clear</code></pre>
+<p>不会释放互斥的场景：</p>
+<ol><li><code>theStatusOfTheMachine[line]=1</code> 请求上料。</li><li><code>theStatusOfTheMachine[line]=2</code> 请求退料。</li><li><code>theStatusOfTheMachine[line]=3</code> 请求退料且后续继续补料。</li><li><code>afitMap[line].line_state=1</code> 表示产线仍在运行占用。</li><li>批次未达标退料后继续叫料，状态会转为 <code>1</code>，不释放。</li></ol>
+<hr>
+<h2 id="section-19-九运行状态号给前端展示">九、运行状态号给前端展示</h2>
+<p>前端查询：</p>
+<pre class="code-block"><code class="language-http">GET /line-run-status/snapshot
+GET /line-run-status/stream</code></pre>
+<p>状态字典：</p>
+<div class="table-wrap"><table><thead><tr><th>状态号</th><th>含义</th><th>主要触发点</th></tr></thead><tbody><tr><td>0</td><td>无</td><td>初始化、重置、批次结束归零</td></tr>
+<tr><td>1</td><td>AGV上料中</td><td>AGV 调用 <code>/amr/feedingInformation</code></td></tr>
+<tr><td>2</td><td>AGV到达准备点</td><td>AGV 调用 <code>/amr/preparationPoint</code></td></tr>
+<tr><td>3</td><td>送料完成开始扫码</td><td>AGV 调用 <code>/amr/theFeedingIsComplete</code>，<code>shipping=1</code></td></tr>
+<tr><td>4</td><td>退料完成</td><td>AGV 调用 <code>/amr/theFeedingIsComplete</code>，<code>shipping=2</code>，且不是继续补料</td></tr>
+<tr><td>5</td><td>退料完成正在呼叫补料</td><td>AGV 调用 <code>/amr/theFeedingIsComplete</code>，<code>shipping=2</code>，且退料前状态为 <code>3</code></td></tr>
+<tr><td>6</td><td>工控机投料中</td><td>station 进入 <code>executionLogic</code></td></tr>
+<tr><td>7</td><td>工控机退料中</td><td>station 退出投料循环，或人工结算后呼叫 AGV 退料</td></tr>
+<tr><td>8</td><td>请求人工介入</td><td>PLC 达标、强制结束、同设备转线发起、人工介入</td></tr>
+<tr><td>9</td><td>人工选择批次结算</td><td>前端选择批次结算</td></tr>
+<tr><td>10</td><td>PLC当前是手动模式，流程结束</td><td>station 检测到 <code>DB36.1.0=false</code></td></tr>
+<tr><td>11</td><td>地磅称重中</td><td>人工批次结算后进入称重</td></tr></tbody></table></div>
+<p>三个容易卡住的循环及前端状态：</p>
+<div class="table-wrap"><table><thead><tr><th>卡住位置</th><th>前端状态号</th></tr></thead><tbody><tr><td>扫码循环</td><td>3</td></tr>
+<tr><td>投料等待 PLC 退料信号循环</td><td>6</td></tr>
+<tr><td>人工结算后的地磅称重循环</td><td>11</td></tr></tbody></table></div>
+<p>说明：正常 PLC 退料信号触发的称重等待目前公共称重方法主要打印日志，前端可能仍显示 <code>6</code> 或随后变成 <code>7</code>。如果要所有称重等待都统一显示 <code>11</code>，建议在 <code>saveLabelRecordAndReportMt()</code> 方法入口统一上报 <code>11</code>。</p>
+<hr>
+<h2 id="section-20-十人工强制结束当前流程按钮">十、人工强制结束当前流程按钮</h2>
+<p>推荐按钮名称：</p>
+<pre class="code-block"><code class="language-text">强制结束当前流程</code></pre>
+<p>接口：</p>
+<pre class="code-block"><code class="language-http">POST /admin/guard/stop-execution-loop?line=1&amp;operator=admin&amp;reason=流程卡住</code></pre>
+<p>如果现场已确认清场，希望同时释放中控互斥：</p>
+<pre class="code-block"><code class="language-http">POST /admin/guard/stop-execution-loop?line=1&amp;operator=admin&amp;reason=人工清场&amp;resetGuard=true</code></pre>
+<p>中控执行：</p>
+<ol><li>根据 line 找到机台。</li><li>向 station 下发：</li></ol>
+<pre class="code-block"><code class="language-json">{
+  &quot;command&quot;: &quot;stopExecutionLogic&quot;,
+  &quot;line&quot;: 1,
+  &quot;parameter&quot;: {
+    &quot;operator&quot;: &quot;admin&quot;,
+    &quot;reason&quot;: &quot;流程卡住&quot;
+  }
+}</code></pre>
+<ol><li>中控将运行状态改为 <code>8：请求人工介入</code>。</li><li>如果 <code>resetGuard=true</code>，中控同时重置业务状态并释放互斥。</li></ol>
+<p>station 执行：</p>
+<ol><li><code>machineService.requestStopExecutionLogic()</code> 设置投料/称重退出标记。</li><li><code>scanCodeService.requestStopScanCode()</code> 设置扫码退出标记。</li><li>如果当前卡在扫码循环，下一轮循环退出。</li><li>如果当前卡在等待 PLC 退料循环，下一轮 executionLogic 退出。</li><li>如果当前卡在称重循环，下一轮称重等待退出。</li></ol>
+<p>注意：不带 <code>resetGuard=true</code> 时，只退出 station 当前循环，不释放中控互斥。</p>
+<hr>
+<h2 id="section-21-十一待补料汇总和今日批次">十一、待补料汇总和今日批次</h2>
+<p>接口：</p>
+<pre class="code-block"><code class="language-http">GET /line-supply-summary/snapshot</code></pre>
+<p>返回字段：</p>
+<div class="table-wrap"><table><thead><tr><th>字段</th><th>含义</th></tr></thead><tbody><tr><td><code>pendingSupplyCount</code></td><td>当前待补料产线数量</td></tr>
+<tr><td><code>pendingSupplyLines</code></td><td>当前待补料产线列表</td></tr>
+<tr><td><code>todayFeedingBatchCount</code></td><td>今日累计投料批次</td></tr>
+<tr><td><code>lines</code></td><td>每条产线明细</td></tr></tbody></table></div>
+<p>待补料判断规则：</p>
+<pre class="code-block"><code class="language-text">theStatusOfTheMachine[line] == 1 请求上料
+或
+theStatusOfTheMachine[line] == 3 请求退料且退料后继续补料</code></pre>
+<p>今日批次统计：</p>
+<pre class="code-block"><code class="language-text">创建新 DeliveryOrder / 新批次时累计
+每日 24 点按日期切换重新统计</code></pre>
+<hr>
+<h2 id="section-22-十二关键-PLC-点位汇总">十二、关键 PLC 点位汇总</h2>
+<h3 id="section-23-AGV-安全门到位">AGV 安全门/到位</h3>
+<div class="table-wrap"><table><thead><tr><th>点位</th><th>方向</th><th>含义</th></tr></thead><tbody><tr><td><code>DB32.0.0</code></td><td>station 写 PLC</td><td>AGV 到准备点/开门</td></tr>
+<tr><td><code>DB32.0.1</code></td><td>station 写 PLC</td><td>AGV 离开/关门</td></tr></tbody></table></div>
+<h3 id="section-24-常规抓取前切线">常规抓取前切线</h3>
+<div class="table-wrap"><table><thead><tr><th>点位</th><th>含义</th></tr></thead><tbody><tr><td><code>DB32.10.5</code></td><td>开启 PLC 本地 1 线</td></tr>
+<tr><td><code>DB32.10.6</code></td><td>开启 PLC 本地 2 线</td></tr>
+<tr><td><code>DB32.11.1</code></td><td>开启 PLC 本地 3 线</td></tr></tbody></table></div>
+<h3 id="section-25-同设备转线">同设备转线</h3>
+<div class="table-wrap"><table><thead><tr><th>点位</th><th>含义</th></tr></thead><tbody><tr><td><code>DB32.11.4</code></td><td>同设备转线到本地 1 线</td></tr>
+<tr><td><code>DB32.11.5</code></td><td>同设备转线到本地 2 线</td></tr></tbody></table></div>
+<h3 id="section-26-扫码">扫码</h3>
+<div class="table-wrap"><table><thead><tr><th>点位</th><th>含义</th></tr></thead><tbody><tr><td><code>DB34.6.3</code></td><td>D 栋二维码读取完成</td></tr>
+<tr><td><code>DB100.1260.0</code></td><td>D 栋二维码字符串</td></tr>
+<tr><td><code>DB32.10.3</code></td><td>D 栋二维码确认</td></tr>
+<tr><td><code>DB34.34.2</code></td><td>机械异常</td></tr></tbody></table></div>
+<h3 id="section-27-投料和退料">投料和退料</h3>
+<div class="table-wrap"><table><thead><tr><th>点位</th><th>含义</th></tr></thead><tbody><tr><td><code>DB34.0.3</code></td><td>PLC 请求退料</td></tr>
+<tr><td><code>DB36.1.0</code></td><td>PLC 自动模式</td></tr>
+<tr><td><code>DB34.6.7</code></td><td>本地 1 线重量达标/请求人工介入</td></tr>
+<tr><td><code>DB34.7.1</code></td><td>本地 2 线重量达标/请求人工介入</td></tr>
+<tr><td><code>DB34.34.1</code></td><td>本地 3 线重量达标/请求人工介入</td></tr></tbody></table></div>
+<h3 id="section-28-地磅称重">地磅称重</h3>
+<div class="table-wrap"><table><thead><tr><th>点位</th><th>含义</th></tr></thead><tbody><tr><td><code>DB34.16.0</code></td><td>地磅称重结果可读取</td></tr>
+<tr><td><code>DB34.18.0</code></td><td>地磅重量</td></tr>
+<tr><td><code>DB34.16.1</code></td><td>是否空托</td></tr></tbody></table></div>
+<h3 id="section-29-批次结束">批次结束</h3>
+<div class="table-wrap"><table><thead><tr><th>点位</th><th>含义</th></tr></thead><tbody><tr><td><code>DB32.6.1</code></td><td>本地 1 线批次结束</td></tr>
+<tr><td><code>DB32.6.2</code></td><td>本地 2 线批次结束</td></tr>
+<tr><td><code>DB32.6.3</code></td><td>本地 3 线批次结束</td></tr></tbody></table></div>
+<hr>
+<h2 id="section-30-十三排查流程卡住时的判断顺序">十三、排查流程卡住时的判断顺序</h2>
+<ol><li>看前端运行状态号：</li></ol>
+<ul><li><code>3</code>：优先查扫码 PLC 信号 <code>DB34.6.3</code> 和二维码 <code>DB100.1260.0</code>。</li><li><code>6</code>：优先查 <code>DB34.0.3</code> 退料信号、<code>DB36.1.0</code> 自动模式、达标点位。</li><li><code>11</code>：优先查 <code>DB34.16.0</code> 称重完成信号和 <code>DB34.18.0</code> 重量。</li><li><code>8</code>：说明已进入人工介入或被强制结束，等待人工选择下一步。</li><li><code>10</code>：PLC 被切手动，station 已结束流程。</li></ul>
+<ol><li>看中控 <code>/admin/guard/snapshot</code>：</li></ol>
+<ul><li><code>guard.occupancies</code> 是否仍有 activeLine。</li><li><code>processLineStatuses</code> 是否为 1/2/3。</li><li><code>processAfitMap[line].line_state</code> 是否仍为 1。</li></ul>
+<ol><li>如果 station 只是卡住但现场没有清场：</li></ol>
+<ul><li>调 <code>/admin/guard/stop-execution-loop</code>，不带 <code>resetGuard</code>。</li></ul>
+<ol><li>如果现场已人工清场，要释放互斥：</li></ol>
+<ul><li>调 <code>/admin/guard/stop-execution-loop?...&amp;resetGuard=true</code>。</li><li>或调 <code>/admin/guard/reset-line</code>。</li><li>或按机台调 <code>/admin/guard/reset-machine</code>。</li></ul>
+    </main>
+  </div>
+  <script>
+    window.addEventListener('DOMContentLoaded', function () {
+      var downloadButton = document.getElementById('downloadOffline');
+      if (downloadButton) {
+        downloadButton.addEventListener('click', function () {
+          var html = '<!doctype html>\n' + document.documentElement.outerHTML;
+          var blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+          var url = URL.createObjectURL(blob);
+          var link = document.createElement('a');
+          link.href = url;
+          link.download = 'AGV-中控-工控机-PLC程序运行控制流程说明-离线版.html';
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          URL.revokeObjectURL(url);
+        });
+      }
+      var script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js';
+      script.onload = function () {
+        if (window.mermaid) {
+          window.mermaid.initialize({ startOnLoad: true, securityLevel: 'loose', theme: 'default' });
+          document.documentElement.classList.add('mermaid-ready');
+        }
+      };
+      document.head.appendChild(script);
+    });
+  </script>
+</body>
+</html>

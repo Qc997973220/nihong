@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="820" viewBox="0 0 1400 820">
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#071426"/><stop offset="1" stop-color="#030812"/></linearGradient>
+    <linearGradient id="line" x1="0" x2="1"><stop stop-color="#56e7ff"/><stop offset="1" stop-color="#ff56a6"/></linearGradient>
+    <filter id="glow"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect width="1400" height="820" fill="url(#bg)"/>
+  <g opacity=".14" stroke="#70ddff"><path d="M0 120h1400M0 240h1400M0 360h1400M0 480h1400M0 600h1400M0 720h1400M140 0v820M280 0v820M420 0v820M560 0v820M700 0v820M840 0v820M980 0v820M1120 0v820M1260 0v820"/></g>
+  <text x="70" y="76" fill="#eaf8ff" font-size="34" font-family="Microsoft YaHei, Arial" font-weight="700">网络架构设计</text>
+  <text x="70" y="112" fill="#88aabc" font-size="16" font-family="Microsoft YaHei, Arial">AGV / 中控 / 工控机 / PLC / MT / 前端看板链路示意</text>
+  <g stroke="url(#line)" stroke-width="3" fill="none" filter="url(#glow)">
+    <path d="M270 250H520M700 250h250M1110 250v180M950 430H700M520 430H270M610 320v80M1040 320v80"/>
+  </g>
+  <g font-family="Microsoft YaHei, Arial" text-anchor="middle">
+    <g fill="#0b2138" stroke="#56e7ff" stroke-width="2"><rect x="120" y="190" width="300" height="120" rx="10"/><text x="270" y="243" fill="#eaf8ff" font-size="26" font-weight="700">AGV 调度</text><text x="270" y="276" fill="#8fdcef" font-size="15">任务 / 到位 / 完成回调</text></g>
+    <g fill="#0b2138" stroke="#56e7ff" stroke-width="2"><rect x="520" y="170" width="260" height="160" rx="10"/><text x="650" y="243" fill="#eaf8ff" font-size="26" font-weight="700">中控服务</text><text x="650" y="276" fill="#8fdcef" font-size="15">split-glue / Guard / WebSocket</text></g>
+    <g fill="#0b2138" stroke="#ff56a6" stroke-width="2"><rect x="950" y="190" width="300" height="120" rx="10"/><text x="1100" y="243" fill="#eaf8ff" font-size="26" font-weight="700">工控机 station</text><text x="1100" y="276" fill="#f5a5cf" font-size="15">扫码 / 投料 / 称重主循环</text></g>
+    <g fill="#0b2138" stroke="#56e7ff" stroke-width="2"><rect x="120" y="370" width="300" height="120" rx="10"/><text x="270" y="423" fill="#eaf8ff" font-size="26" font-weight="700">前端看板</text><text x="270" y="456" fill="#8fdcef" font-size="15">运行状态 / 人工介入</text></g>
+    <g fill="#0b2138" stroke="#8b75ff" stroke-width="2"><rect x="520" y="370" width="260" height="120" rx="10"/><text x="650" y="423" fill="#eaf8ff" font-size="26" font-weight="700">MT 系统</text><text x="650" y="456" fill="#b9adff" font-size="15">物料明细 / 批次回传</text></g>
+    <g fill="#0b2138" stroke="#ff56a6" stroke-width="2"><rect x="950" y="370" width="300" height="120" rx="10"/><text x="1100" y="423" fill="#eaf8ff" font-size="26" font-weight="700">PLC 设备层</text><text x="1100" y="456" fill="#f5a5cf" font-size="15">点位读写 / 执行信号</text></g>
+  </g>
+  <g fill="#56e7ff" opacity=".9"><circle cx="520" cy="250" r="5"/><circle cx="950" cy="250" r="5"/><circle cx="1100" cy="430" r="5"/><circle cx="650" cy="430" r="5"/></g>
+</svg>

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="820" viewBox="0 0 1400 820">
+  <defs><linearGradient id="bg" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#071426"/><stop offset="1" stop-color="#030812"/></linearGradient><linearGradient id="g" x1="0" x2="1"><stop stop-color="#ff56a6"/><stop offset="1" stop-color="#56e7ff"/></linearGradient><filter id="glow"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+  <rect width="1400" height="820" fill="url(#bg)"/>
+  <text x="70" y="78" fill="#eaf8ff" font-size="34" font-family="Microsoft YaHei, Arial" font-weight="700">MOM 流程图</text>
+  <text x="70" y="114" fill="#88aabc" font-size="16" font-family="Microsoft YaHei, Arial">生产任务、设备状态、人工介入和批次闭环流程</text>
+  <g fill="none" stroke="url(#g)" stroke-width="4" filter="url(#glow)">
+    <path d="M230 250h250M620 250h250M1010 250v180M1010 430H760M620 430H370M230 430v-180"/>
+  </g>
+  <g font-family="Microsoft YaHei, Arial" text-anchor="middle">
+    <g fill="#0b2138" stroke="#ff56a6" stroke-width="2"><rect x="100" y="190" width="260" height="120" rx="10"/><text x="230" y="243" fill="#eaf8ff" font-size="24" font-weight="700">生产任务</text><text x="230" y="276" fill="#f5a5cf" font-size="15">MOM 工单 / 批次</text></g>
+    <g fill="#0b2138" stroke="#56e7ff" stroke-width="2"><rect x="480" y="190" width="260" height="120" rx="10"/><text x="610" y="243" fill="#eaf8ff" font-size="24" font-weight="700">中控编排</text><text x="610" y="276" fill="#8fdcef" font-size="15">任务状态 / 互斥</text></g>
+    <g fill="#0b2138" stroke="#56e7ff" stroke-width="2"><rect x="870" y="190" width="280" height="120" rx="10"/><text x="1010" y="243" fill="#eaf8ff" font-size="24" font-weight="700">设备执行</text><text x="1010" y="276" fill="#8fdcef" font-size="15">AGV / station / PLC</text></g>
+    <g fill="#0b2138" stroke="#ff56a6" stroke-width="2"><rect x="870" y="370" width="280" height="120" rx="10"/><text x="1010" y="423" fill="#eaf8ff" font-size="24" font-weight="700">人工介入</text><text x="1010" y="456" fill="#f5a5cf" font-size="15">达标 / 异常 / 强制结束</text></g>
+    <g fill="#0b2138" stroke="#56e7ff" stroke-width="2"><rect x="480" y="370" width="260" height="120" rx="10"/><text x="610" y="423" fill="#eaf8ff" font-size="24" font-weight="700">批次结算</text><text x="610" y="456" fill="#8fdcef" font-size="15">投入量 / 退料 / 补料</text></g>
+    <g fill="#0b2138" stroke="#56e7ff" stroke-width="2"><rect x="100" y="370" width="260" height="120" rx="10"/><text x="230" y="423" fill="#eaf8ff" font-size="24" font-weight="700">状态回写</text><text x="230" y="456" fill="#8fdcef" font-size="15">MOM 闭环 / 看板展示</text></g>
+  </g>
+</svg>
