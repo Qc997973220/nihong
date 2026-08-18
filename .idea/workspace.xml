@@ -5,80 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="5034ad83-ba34-48a5-b9ba-6ca54aeb254e" name="更改" comment="内存优化">
-      <change afterPath="$PROJECT_DIR$/.idea/claudeCodeTabState.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/target/maven-archiver/pom.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/target/neon-0.0.1-SNAPSHOT.jar.original" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/neon/NeonApplication.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/neon/config/AsyncConfig.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/neon/config/MonitoringConfig.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/neon/config/RedisConfig.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/neon/config/WebConfig.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/neon/controller/AdminUserController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/neon/controller/AgentWechatController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/neon/controller/CardKeyController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/neon/controller/FileUploadController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/neon/controller/LoginController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/neon/controller/MessageController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/neon/controller/ResourceController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/neon/controller/UserProfileController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/neon/controller/VisitorController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/neon/controller/WalletController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/neon/dao/AgentWechatDao.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/neon/dao/CardKeyDao.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/neon/dao/CommentDao.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/neon/dao/DownloadRecordDao.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/neon/dao/InviteRewardRecordDao.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/neon/dao/LoginAttemptDao.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/neon/dao/MessageDao.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/neon/dao/ResourceDao.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/neon/dao/SiteStatsDao.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/neon/dao/UserActionDao.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/neon/dao/UsersDao.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/neon/dao/WithdrawalRequestDao.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/neon/pojo/AgentWechat.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/neon/pojo/CardKey.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/neon/pojo/Comment.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/neon/pojo/DownloadRecord.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/neon/pojo/InviteRewardRecord.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/neon/pojo/LoginAttempt.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/neon/pojo/Message.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/neon/pojo/Resource.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/neon/pojo/SiteStats.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/neon/pojo/UserAction.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/neon/pojo/Users.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/neon/pojo/WithdrawalRequest.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/neon/service/AgentWechatService.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/neon/service/AsyncService.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/neon/service/AuthService.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/neon/service/CacheService.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/neon/service/CardKeyService.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/neon/service/EmailVerificationService.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/neon/service/LegacyMemberMigrationService.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/neon/service/LoginService.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/neon/service/ResourceService.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/neon/service/SiteStatsService.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/neon/service/ViewCountScheduler.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/neon/service/WalletService.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/application.properties" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/banner.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/logback-spring.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/redis.conf" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/static/admin.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/static/assets/mom-flow.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/static/assets/mt-flow.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/static/assets/network-architecture.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/static/avatars/260e6b1d-b80c-4224-b506-524e5d7e2901.jpg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/static/avatars/2b2ac391-3ffd-4d6d-b29f-a05e85772d83.jpg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/static/avatars/36909688-0898-4285-94d6-7b7a9cd95fb6.jpg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/static/avatars/73c922dc-1ec6-4a0d-82fc-99efdbeb0c4d.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/static/detail.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/static/index.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/static/mars-auto-glue.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/static/neon-city.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/static/profile.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/static/projects.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/static/publish.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/static/user.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/static/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/static/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/static/projects.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/static/projects.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

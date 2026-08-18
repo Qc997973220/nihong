@@ -539,6 +539,66 @@
       border: 1px solid rgba(119, 228, 255, .16);
       background: rgba(0,0,0,.24);
     }
+    .access-panel {
+      width: min(440px, 100%);
+    }
+    .access-form {
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .access-label {
+      font-size: 12px;
+      letter-spacing: 1px;
+      color: #8facbd;
+    }
+    .access-input {
+      appearance: none;
+      width: 100%;
+      padding: 12px 14px;
+      font: inherit;
+      color: #eaf8ff;
+      letter-spacing: 4px;
+      background: rgba(0, 0, 0, .34);
+      border: 1px solid rgba(119, 228, 255, .28);
+      border-radius: 6px;
+      outline: none;
+      transition: border-color .2s ease, box-shadow .2s ease;
+    }
+    .access-input:focus {
+      border-color: rgba(106, 232, 255, .85);
+      box-shadow: 0 0 0 3px rgba(86, 231, 255, .18);
+    }
+    .access-input.error {
+      border-color: rgba(255, 86, 166, .85);
+      box-shadow: 0 0 0 3px rgba(255, 86, 166, .18);
+    }
+    .access-submit {
+      appearance: none;
+      cursor: pointer;
+      padding: 12px 14px;
+      font: inherit;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: #04121e;
+      background: linear-gradient(135deg, #8eeaff, #ff7bc1);
+      border: 0;
+      border-radius: 6px;
+      box-shadow: 0 8px 22px rgba(86, 231, 255, .22);
+      transition: transform .15s ease, box-shadow .15s ease;
+    }
+    .access-submit:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 26px rgba(255, 123, 193, .28);
+    }
+    .access-submit:active { transform: translateY(0); }
+    .access-hint {
+      margin: 0;
+      font-size: 12px;
+      color: #8facbd;
+    }
+    .access-hint.error { color: #ff7bc1; }
     .table-panel {
       width: min(1180px, 100%);
     }
@@ -697,6 +757,23 @@
   <i class="pet-ring" aria-hidden="true"></i>
   <button class="pet" type="button" aria-label="项目看板助手"></button>
   <div class="pet-bubble" id="petBubble">项目助手：当前统计会自动读取项目卡片数量。</div>
+  <div class="modal" id="accessModal" role="dialog" aria-modal="true" aria-labelledby="accessTitle">
+    <div class="modal-panel access-panel">
+      <div class="modal-head">
+        <div>
+          <h2 id="accessTitle">权限校验</h2>
+          <p>请输入玛氏自动裂胶资料库访问码。</p>
+        </div>
+        <button class="close" type="button" data-close="accessModal" aria-label="关闭">×</button>
+      </div>
+      <div class="access-form">
+        <label class="access-label" for="accessCode">访问校验码</label>
+        <input class="access-input" id="accessCode" type="password" inputmode="numeric" autocomplete="off" placeholder="请输入 6 位权限校验码" maxlength="12">
+        <button class="access-submit" type="button" id="accessSubmit">校验并进入</button>
+        <p class="access-hint" id="accessHint">提示：校验码仅供内部授权使用。</p>
+      </div>
+    </div>
+  </div>
   <div class="modal" id="resourceModal" role="dialog" aria-modal="true" aria-labelledby="resourceTitle">
     <div class="modal-panel">
       <div class="modal-head">
@@ -843,11 +920,55 @@
       if (modal) modal.classList.remove("show");
     }
     var marsProject = document.getElementById("marsProject");
+    var ACCESS_CODE = "666668";
+    function tryOpenResource() {
+      closeModal("accessModal");
+      openModal("resourceModal");
+    }
+    function openAccessModal() {
+      var input = document.getElementById("accessCode");
+      var hint = document.getElementById("accessHint");
+      if (input) { input.value = ""; input.classList.remove("error"); }
+      if (hint) { hint.classList.remove("error"); hint.textContent = "提示：校验码仅供内部授权使用。"; }
+      openModal("accessModal");
+      if (input) window.setTimeout(function () { input.focus(); }, 60);
+    }
+    function submitAccessCode() {
+      var input = document.getElementById("accessCode");
+      var hint = document.getElementById("accessHint");
+      if (!input || !hint) return;
+      var value = (input.value || "").trim();
+      if (value === ACCESS_CODE) {
+        input.classList.remove("error");
+        hint.classList.remove("error");
+        hint.textContent = "校验通过，正在进入资料库...";
+        window.setTimeout(tryOpenResource, 220);
+      } else {
+        input.classList.add("error");
+        hint.classList.add("error");
+        hint.textContent = "校验码错误，请联系站长获取访问码。";
+        input.focus();
+        input.select("input.value");
+      }
+    }
     if (marsProject) {
       marsProject.addEventListener("click", function (event) {
         event.preventDefault();
-        openModal("resourceModal");
+        openAccessModal();
       });
+    }
+    var accessInput = document.getElementById("accessCode");
+    var accessSubmit = document.getElementById("accessSubmit");
+    if (accessInput) {
+      accessInput.addEventListener("keydown", function (event) {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          submitAccessCode();
+        }
+      });
+    }
+    if (accessSubmit) {
+      accessSubmit.addEventListener("click", submitAccessCode);
     }
     document.querySelectorAll("[data-close]").forEach(function (button) {
       button.addEventListener("click", function () {
