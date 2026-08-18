@@ -46,8 +46,8 @@ public class Users {
     LocalDateTime memberExpiredAt;  //会员到期时间
     String memberStatus;     //会员状态: active, permanent, expired, none
 
-    @Column(columnDefinition = "LONGBLOB")
-    byte[] avatar;             //头像
+    // 头像功能已禁用（所有接口均返回 null），移除 avatar LONGBLOB 字段，
+    // 避免每次查询用户时都读取大字段。数据库中的旧 avatar 列已废弃，可后续手动 DROP。
     @ElementCollection
     List<String> roleIds;  //角色id列表
 

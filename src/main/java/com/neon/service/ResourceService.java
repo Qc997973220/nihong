@@ -29,6 +29,12 @@ public class ResourceService {
 
     private static final int DEFAULT_PAGE_SIZE = 12;
     private static final int MAX_PAGE_SIZE = 50;
+    // 全表查询的上限，避免一次性把整张资源表（含 content 大字段）加载进内存
+    private static final int MAX_ALL_LIST_SIZE = 100;
+    private static final int MAX_RECOMMEND_POOL = 200;
+    private static final int MAX_CAROUSEL_POOL = 50;
+    private static final int MAX_SEARCH_SIZE = 50;
+    private static final int MAX_STATUS_LIST = 100;
     private static final String VIP_CATEGORY = "VIP项目";
     private static final String FREE_CATEGORY = "免费项目";
     private static final String ENTERTAINMENT_CATEGORY = "免费资源";
@@ -44,7 +50,9 @@ public class ResourceService {
             return resources;
         }
 
-        resources = resourceRepository.findByStatusInOrderByTopDescCreatedAtDesc(Arrays.asList(1, 2));
+        // 只取最近的前 N 条，避免一次性加载整表（尤其是 content 大字段）
+        resources = resourceRepository.findByStatusInOrderByTopDescCreatedAtDesc(
+                Arrays.asList(1, 2), PageRequest.of(0, MAX_ALL_LIST_SIZE)).getContent();
         cacheService.set(cacheKey, resources, 180);
 
         return resources;
@@ -149,7 +157,8 @@ public class ResourceService {
 
     public List<Resource> getHomeCarouselResources() {
         LocalDateTime since = LocalDateTime.now().minusDays(2);
-        List<Resource> resources = resourceRepository.findByCreatedAtGreaterThanEqualAndStatusIn(since, Arrays.asList(1, 2));
+        List<Resource> resources = resourceRepository.findByCreatedAtGreaterThanEqualAndStatusInOrderByViewCountDescCreatedAtDesc(
+                since, Arrays.asList(1, 2), PageRequest.of(0, MAX_CAROUSEL_POOL));
         resources.forEach(resource -> resource.setViewCount(getViewCount(resource.getId())));
         return resources.stream()
                 .sorted(Comparator
@@ -161,7 +170,9 @@ public class ResourceService {
 
     public List<Resource> getRandomRecommendedResources(Long excludeId, int limit) {
         int safeLimit = Math.max(1, Math.min(limit, 12));
-        List<Resource> resources = resourceRepository.findByStatusInOrderByTopDescCreatedAtDesc(Arrays.asList(1, 2));
+        // 只取最近的前 N 条作为候选池，避免一次性加载全表
+        List<Resource> resources = resourceRepository.findByStatusInOrderByTopDescCreatedAtDesc(
+                Arrays.asList(1, 2), PageRequest.of(0, MAX_RECOMMEND_POOL)).getContent();
         List<Resource> candidates = resources.stream()
                 .filter(resource -> resource.getId() != null && !resource.getId().equals(excludeId))
                 .collect(Collectors.toList());
@@ -221,7 +232,8 @@ public class ResourceService {
     }
 
     public List<Resource> searchResources(String keyword) {
-        List<Resource> resources = resourceRepository.findByTitleContainingIgnoreCaseAndStatusInOrderByTopDescCreatedAtDesc(keyword, Arrays.asList(1, 2));
+        List<Resource> resources = resourceRepository.findByTitleContainingIgnoreCaseAndStatusInOrderByTopDescCreatedAtDesc(
+                keyword, Arrays.asList(1, 2), PageRequest.of(0, MAX_SEARCH_SIZE)).getContent();
         // 更新每个资源的访问量（包含Redis增量）
         resources.forEach(resource -> {
             resource.setViewCount(getViewCount(resource.getId()));
@@ -461,12 +473,12 @@ public class ResourceService {
 
     // 获取待审核资源列表
     public List<Resource> getPendingResources() {
-        return resourceRepository.findByStatusOrderByCreatedAtDesc(0);
+        return resourceRepository.findByStatusOrderByCreatedAtDesc(0, PageRequest.of(0, MAX_STATUS_LIST));
     }
 
     // 根据状态获取资源列表
     public List<Resource> getResourcesByStatus(Integer status) {
-        return resourceRepository.findByStatusOrderByCreatedAtDesc(status);
+        return resourceRepository.findByStatusOrderByCreatedAtDesc(status, PageRequest.of(0, MAX_STATUS_LIST));
     }
 
     // 更新资源审核状态

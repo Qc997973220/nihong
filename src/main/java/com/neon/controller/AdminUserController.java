@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.data.domain.PageRequest;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -47,9 +48,8 @@ public class AdminUserController {
         }
 
         String normalized = keyword == null ? "" : keyword.trim().toLowerCase();
-        List<Map<String, Object>> users = usersDao.findAll().stream()
-                .filter(user -> matchesKeyword(user, normalized))
-                .limit(30)
+        String pattern = "%" + normalized + "%";
+        List<Map<String, Object>> users = usersDao.searchTopN(pattern, PageRequest.of(0, 30)).stream()
                 .map(this::buildUserItem)
                 .collect(Collectors.toList());
 
@@ -145,21 +145,6 @@ public class AdminUserController {
             return false;
         }
         return true;
-    }
-
-    private boolean matchesKeyword(Users user, String keyword) {
-        if (keyword == null || keyword.isEmpty()) {
-            return true;
-        }
-        return contains(user.getAccount(), keyword)
-                || contains(user.getUserName(), keyword)
-                || contains(user.getNickname(), keyword)
-                || contains(user.getPhone(), keyword)
-                || contains(user.getEmail(), keyword);
-    }
-
-    private boolean contains(String value, String keyword) {
-        return value != null && value.toLowerCase().contains(keyword);
     }
 
     private Integer parseMemberType(Object value) {

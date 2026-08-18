@@ -22,13 +22,17 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
 import javax.imageio.ImageWriteParam;
 import javax.imageio.ImageWriter;
+import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.ImageOutputStream;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -48,6 +52,8 @@ import java.util.Map;
 public class ResourceController {
     private static final long MAX_UPLOAD_IMAGE_SIZE = 3L * 1024 * 1024;
     private static final int MAX_IMAGE_DIMENSION = 1600;
+    // 源图最大边长：解码前先校验尺寸，避免超大图在 ImageIO.read 时瞬间耗尽内存
+    private static final int MAX_SOURCE_DIMENSION = 3000;
     private static final float JPEG_QUALITY = 0.82f;
     private static final int FREE_DAILY_UNLOCK_LIMIT = 2;
     private static final String FREE_QUOTA_EXCEEDED_MESSAGE = "您今日免费额度已用完,请明天再来吧!";
@@ -147,10 +153,18 @@ public class ResourceController {
     }
 
     private boolean compressAndSaveImage(MultipartFile file, File destFile) throws IOException {
-        BufferedImage sourceImage;
-        try (InputStream input = file.getInputStream()) {
-            sourceImage = ImageIO.read(input);
+        // 先只读取尺寸（不完整解码），拦截超大图
+        byte[] bytes = file.getBytes();
+        Dimension dimension = readImageDimension(new ByteArrayInputStream(bytes));
+        if (dimension == null) {
+            return false;
         }
+        int maxSide = Math.max(dimension.width, dimension.height);
+        if (maxSide > MAX_SOURCE_DIMENSION) {
+            throw new IOException("图片尺寸过大（最长边不能超过 " + MAX_SOURCE_DIMENSION + "px），请压缩后重新上传");
+        }
+
+        BufferedImage sourceImage = ImageIO.read(new ByteArrayInputStream(bytes));
         if (sourceImage == null) {
             return false;
         }
@@ -179,6 +193,25 @@ public class ResourceController {
 
         writeJpeg(outputImage, destFile, JPEG_QUALITY);
         return true;
+    }
+
+    private Dimension readImageDimension(InputStream input) throws IOException {
+        try (ImageInputStream iis = ImageIO.createImageInputStream(input)) {
+            if (iis == null) {
+                return null;
+            }
+            Iterator<ImageReader> readers = ImageIO.getImageReaders(iis);
+            if (!readers.hasNext()) {
+                return null;
+            }
+            ImageReader reader = readers.next();
+            try {
+                reader.setInput(iis, true, true);
+                return new Dimension(reader.getWidth(0), reader.getHeight(0));
+            } finally {
+                reader.dispose();
+            }
+        }
     }
 
     private void writeJpeg(BufferedImage image, File destFile, float quality) throws IOException {

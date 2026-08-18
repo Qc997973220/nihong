@@ -28,4 +28,6 @@ public interface ResourceDao extends JpaRepository<Resource, Long> {
     
     // 保留旧方法用于兼容
     List<Resource> findByStatusOrderByCreatedAtDesc(Integer status);
+    // 分页版本，避免一次性加载全表
+    List<Resource> findByStatusOrderByCreatedAtDesc(Integer status, Pageable pageable);
 }

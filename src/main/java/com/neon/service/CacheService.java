@@ -1,9 +1,14 @@
 package com.neon.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.Cursor;
+import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.StandardCharsets;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -113,15 +118,24 @@ public class CacheService {
     }
 
     /**
-     * 获取所有匹配pattern的key
+     * 获取所有匹配pattern的key（使用 SCAN 游标遍历，避免 KEYS 命令阻塞 Redis）
      * @param pattern 匹配模式
      * @return key列表
      */
     public Set<String> keys(String pattern) {
         try {
-            return redisTemplate.keys(pattern);
+            return redisTemplate.execute((RedisCallback<Set<String>>) connection -> {
+                Set<String> result = new HashSet<>();
+                ScanOptions options = ScanOptions.scanOptions().match(pattern).count(200).build();
+                try (Cursor<byte[]> cursor = connection.scan(options)) {
+                    while (cursor.hasNext()) {
+                        result.add(new String(cursor.next(), StandardCharsets.UTF_8));
+                    }
+                }
+                return result;
+            });
         } catch (Exception e) {
-            System.out.println("Redis keys failed: " + e.getMessage());
+            System.out.println("Redis scan failed: " + e.getMessage());
             return null;
         }
     }
